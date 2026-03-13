@@ -113,6 +113,11 @@ function reset() {
   document.getElementById('score').textContent = '0';
 }
 
+// ── Stop clicks on links from bubbling to switchLane ─────────────────────────
+['dead-cta', 'dead-dl'].forEach(id => {
+  document.getElementById(id).addEventListener('click', e => e.stopPropagation());
+});
+
 // ── Volume toggle ─────────────────────────────────────────────────────────────
 const volBtn = document.getElementById('vol-btn');
 volBtn.addEventListener('click', e => {

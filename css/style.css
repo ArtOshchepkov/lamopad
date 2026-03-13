@@ -275,6 +275,37 @@ html, body {
   text-shadow: 0 0 10px rgba(255, 221, 0, 0.7);
 }
 
+#dead-cta {
+  display: inline-block;
+  font-family: var(--font);
+  font-size: clamp(7px, 1.5vw, 11px);
+  color: var(--bg);
+  background: var(--yellow);
+  text-decoration: none;
+  padding: 0.7em 1.2em;
+  letter-spacing: 0.06em;
+  box-shadow: 0 0 20px var(--yellow), 0 0 40px rgba(255, 221, 0, 0.4);
+  transition: box-shadow 0.15s;
+}
+
+#dead-cta:hover {
+  box-shadow: 0 0 30px var(--yellow), 0 0 60px rgba(255, 221, 0, 0.6);
+}
+
+#dead-dl {
+  font-family: var(--font);
+  font-size: clamp(5px, 1vw, 7px);
+  color: rgba(170, 68, 255, 0.55);
+  text-decoration: none;
+  letter-spacing: 0.04em;
+  border-bottom: 1px solid rgba(170, 68, 255, 0.25);
+}
+
+#dead-dl:hover {
+  color: var(--purple-light);
+  border-color: var(--purple-light);
+}
+
 #dead-restart {
   font-size: clamp(5px, 1.2vw, 8px);
   color: var(--purple-light);

@@ -343,3 +343,90 @@ html, body {
   color: var(--purple-light);
   animation: blink 1s step-end infinite;
 }
+
+/* ── Rotate prompt ─────────────────────────────────────────── */
+#rotate-prompt {
+  display: none;
+  position: fixed;
+  inset: 0;
+  background: var(--bg);
+  z-index: 9999;
+  flex-direction: column;
+  align-items: center;
+  justify-content: center;
+  gap: 28px;
+  text-align: center;
+  padding: env(safe-area-inset-top) env(safe-area-inset-right)
+           env(safe-area-inset-bottom) env(safe-area-inset-left);
+}
+
+#rotate-icon {
+  width: 48px;
+  height: 64px;
+  border: 3px solid var(--purple-light);
+  border-radius: 8px;
+  box-shadow: 0 0 20px var(--purple), 0 0 40px rgba(119,0,221,0.4);
+  position: relative;
+  animation: rotateHint 2s ease-in-out infinite;
+}
+
+#rotate-icon::after {
+  content: '';
+  position: absolute;
+  bottom: 6px;
+  left: 50%;
+  transform: translateX(-50%);
+  width: 8px;
+  height: 8px;
+  border-radius: 50%;
+  background: var(--purple-light);
+  box-shadow: 0 0 8px var(--purple);
+}
+
+@keyframes rotateHint {
+  0%   { transform: rotate(0deg); box-shadow: 0 0 20px var(--purple); }
+  40%  { transform: rotate(90deg); box-shadow: 0 0 30px var(--pink), 0 0 60px rgba(255,0,110,0.4); }
+  60%  { transform: rotate(90deg); }
+  100% { transform: rotate(0deg); box-shadow: 0 0 20px var(--purple); }
+}
+
+#rotate-text {
+  font-size: clamp(8px, 3vw, 13px);
+  color: var(--pink-light);
+  text-shadow: 0 0 12px var(--pink);
+  line-height: 2.2;
+  letter-spacing: 0.08em;
+}
+
+/* Show rotate prompt in portrait on mobile; hide in landscape */
+@media (max-width: 1024px) and (orientation: portrait) {
+  #rotate-prompt { display: flex; }
+}
+
+/* ── Mobile landscape tweaks ───────────────────────────────── */
+@media (orientation: landscape) and (max-height: 500px) {
+  #hud {
+    padding: 4px 12px;
+    font-size: clamp(5px, 1.4vh, 8px);
+  }
+
+  #vol-btn {
+    font-size: clamp(4px, 1.2vh, 6px);
+    padding: 0.3em 0.5em;
+  }
+
+  #canvas-wrap {
+    flex: 1;
+    min-height: 0;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+  }
+
+  #c {
+    width: auto;
+    height: 100%;
+    max-width: 100%;
+    max-height: calc(100vh - 36px);
+  }
+}

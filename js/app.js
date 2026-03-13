@@ -33,6 +33,10 @@ const OBS_LABELS = ['?', 'ДОКТОР', '!', 'МЕХ', 'ЭКЗ', 'НЕТ'];
 
 const LYRIC_COLORS = ['#f0e6ff', '#ff69b4', '#cc88ff', '#ffdd00', '#88ffdd'];
 
+// ── Assets ────────────────────────────────────────────────────────────────────
+const shmurdikImg = new Image();
+shmurdikImg.src = 'releases/samosval/shmurdik_40px.png';
+
 // ── Canvas ────────────────────────────────────────────────────────────────────
 const canvas = document.getElementById('c');
 const ctx    = canvas.getContext('2d');
@@ -45,6 +49,7 @@ let player, obstacles, floaties;
 let score, speed, frame, bgX, wheelAngle;
 let nextObs, nextLyric;
 let surrealTimer, paletteIdx;
+let exhaust;
 
 function reset() {
   player = {
@@ -65,6 +70,7 @@ function reset() {
   nextLyric    = 60;
   surrealTimer = 0;
   paletteIdx   = 0;
+  exhaust      = [];
   canvas.style.filter    = '';
   canvas.style.transform = '';
   document.getElementById('score').textContent = '0';
@@ -82,6 +88,7 @@ function switchLane() {
   // Surreal effect
   paletteIdx   = (paletteIdx + 1) % PALETTES.length;
   surrealTimer = 32;
+
 }
 
 document.addEventListener('keydown', e => {
@@ -127,6 +134,57 @@ function tickSurreal() {
 // ── Draw helpers ──────────────────────────────────────────────────────────────
 function glow(color, blur) { ctx.shadowColor = color; ctx.shadowBlur = blur; }
 function noGlow()           { ctx.shadowBlur = 0; }
+
+// ── Exhaust trail ─────────────────────────────────────────────────────────────
+// Pipe nozzle position (back of truck bed, bottom)
+function pipePos() {
+  return { x: player.x + 4, y: Math.round(player.y) + PH - 10 };
+}
+
+function spawnExhaust() {
+  const { x, y } = pipePos();
+  // More particles during lane switch
+  const count = player.switchFlash > 0.1 ? 4 : 1;
+  for (let i = 0; i < count; i++) {
+    exhaust.push({
+      x,
+      y:    y + (Math.random() - 0.5) * 5,
+      vx:   -(speed * 0.85 + Math.random() * 1.2),  // drifts back in world-space
+      vy:   (Math.random() - 0.5) * 1.4,
+      life: 1,
+      decay: 0.018 + Math.random() * 0.012,
+      size:  2.5 + Math.random() * 2.5,
+    });
+  }
+}
+
+function updateExhaust() {
+  spawnExhaust();
+  exhaust.forEach(p => {
+    p.x   += p.vx;
+    p.y   += p.vy;
+    p.vy  *= 0.92;
+    p.life -= p.decay;
+  });
+  exhaust = exhaust.filter(p => p.life > 0);
+}
+
+function drawExhaust() {
+  for (const p of exhaust) {
+    const r = Math.max(0.3, p.size * p.life);
+    ctx.save();
+    ctx.globalAlpha = p.life * 0.9;
+    // hot at birth → cool purple at end
+    const col = p.life > 0.6 ? '#ff88cc' : p.life > 0.3 ? '#cc44ff' : '#6600cc';
+    glow(col, 16 * p.life);
+    ctx.fillStyle = col;
+    ctx.beginPath();
+    ctx.arc(p.x, p.y, r, 0, Math.PI * 2);
+    ctx.fill();
+    noGlow();
+    ctx.restore();
+  }
+}
 
 // ── Background ────────────────────────────────────────────────────────────────
 function drawBg() {
@@ -220,6 +278,13 @@ function drawPlayer() {
     glow('#ffffff', 30 * player.switchFlash);
   }
 
+  // Exhaust pipe nozzle (back of bed, bottom)
+  glow('#ff44aa', 12);
+  ctx.fillStyle = '#330044';
+  ctx.fillRect(x + 1, y + PH - 13, 7, 8);
+  ctx.fillStyle = '#ff44aa';
+  ctx.fillRect(x + 1, y + PH - 14, 7, 3);
+
   // Truck bed (left)
   glow('#9900ff', 14);
   ctx.fillStyle = '#4d00aa';
@@ -238,8 +303,28 @@ function drawPlayer() {
   ctx.fillStyle   = 'rgba(0, 210, 255, 0.22)';
   ctx.strokeStyle = 'rgba(0, 210, 255, 0.45)';
   ctx.lineWidth   = 1;
-  ctx.fillRect(x + 54, y + 9, 27, PH * 0.44);
-  ctx.strokeRect(x + 54, y + 9, 27, PH * 0.44);
+  const wx = x + 54, wy = y + 9, ww = 27, wh = Math.floor(PH * 0.44);
+  ctx.fillRect(wx, wy, ww, wh);
+
+  // Shmurdik behind the wheel — blurred, barely visible
+  if (shmurdikImg.complete && shmurdikImg.naturalWidth > 0) {
+    ctx.save();
+    ctx.beginPath();
+    ctx.rect(wx, wy, ww, wh);
+    ctx.clip();
+    ctx.filter = 'blur(1px)';
+    ctx.globalAlpha = 0.75;
+    const scale = wh / shmurdikImg.naturalHeight;
+    const dw    = shmurdikImg.naturalWidth * scale;
+    ctx.drawImage(shmurdikImg, wx + (ww - dw) / 2, wy, dw, wh);
+    ctx.restore();
+  }
+
+  // Frosted glass tint over driver
+  ctx.fillStyle = 'rgba(0, 180, 255, 0.05)';
+  ctx.fillRect(wx, wy, ww, wh);
+
+  ctx.strokeRect(wx, wy, ww, wh);
 
   // Headlight
   glow('#ffdd00', 22);
@@ -400,7 +485,7 @@ function loop() {
 
   frame++;
   score      += 0.1;
-  speed       = INIT_SPD + frame * SPD_INC;
+  speed = INIT_SPD + frame * SPD_INC;
   bgX        += speed;
   wheelAngle += speed * 0.07;
 
@@ -444,9 +529,11 @@ function loop() {
 
   // Draw
   tickSurreal();
+  updateExhaust();
   drawBg();
   drawLaneHint();
   floaties.forEach(drawFloatie);
+  drawExhaust();          // trail behind player
   obstacles.forEach(drawObstacle);
   drawPlayer();
 

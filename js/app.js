@@ -75,7 +75,7 @@ let player, obstacles, floaties;
 let score, speed, frame, bgX, wheelAngle;
 let nextObs, nextLyric;
 let surrealTimer, paletteIdx;
-let exhaust;
+let exhaust, bgParticles;
 let pills, speedBoostTimer, psychoTimer, glitchTimer, mirrorTimer, nextPill;
 
 function reset() {
@@ -98,6 +98,7 @@ function reset() {
   surrealTimer   = 0;
   paletteIdx     = 0;
   exhaust        = [];
+  initBgParticles();
   pills          = [];
   speedBoostTimer = 0;
   psychoTimer    = 0;
@@ -260,6 +261,49 @@ function drawExhaust() {
     ctx.arc(p.x, p.y, r, 0, Math.PI * 2);
     ctx.fill();
     noGlow();
+    ctx.restore();
+  }
+}
+
+// ── Background particles ───────────────────────────────────────────────────────
+const BP_COLORS = ['#aa44ff', '#cc66ff', '#ff006e', '#ff69b4', '#ffffff', '#ffdd00'];
+
+function makeBgParticle(scatter) {
+  return {
+    x:     scatter ? Math.random() * GW : GW + Math.random() * 40,
+    y:     Math.random() * (LANE_Y[1] - 10),
+    vx:    -(0.15 + Math.random() * 0.55),
+    vy:    (Math.random() - 0.5) * 0.12,
+    size:  0.4 + Math.random() * 1.5,
+    alpha: 0.15 + Math.random() * 0.45,
+    color: BP_COLORS[Math.floor(Math.random() * BP_COLORS.length)],
+    phase: Math.random() * Math.PI * 2,
+  };
+}
+
+function initBgParticles() {
+  bgParticles = Array.from({ length: 38 }, () => makeBgParticle(true));
+}
+
+function updateBgParticles() {
+  for (const p of bgParticles) {
+    p.x    += p.vx;
+    p.y    += p.vy;
+    p.phase += 0.025;
+    if (p.x < -4) Object.assign(p, makeBgParticle(false));
+  }
+}
+
+function drawBgParticles() {
+  for (const p of bgParticles) {
+    ctx.save();
+    ctx.globalAlpha = p.alpha * (0.55 + 0.45 * Math.sin(p.phase));
+    ctx.fillStyle   = p.color;
+    ctx.shadowColor = p.color;
+    ctx.shadowBlur  = p.size * 5;
+    ctx.beginPath();
+    ctx.arc(p.x, p.y, p.size, 0, Math.PI * 2);
+    ctx.fill();
     ctx.restore();
   }
 }
@@ -856,7 +900,9 @@ function loop() {
   // Draw
   tickSurreal();
   updateExhaust();
+  updateBgParticles();
   drawBg();
+  drawBgParticles();
   drawLaneHint();
   floaties.forEach(drawFloatie);
   pills.forEach(drawPill);

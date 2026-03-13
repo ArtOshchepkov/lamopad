@@ -80,15 +80,28 @@
     </audio>
   </div>
   <script>
+    var isTouchDevice = ('ontouchstart' in window) || navigator.maxTouchPoints > 0;
+
     // Attempt to lock orientation to landscape on supported browsers (PWA/Android)
     if (screen.orientation && screen.orientation.lock) {
       screen.orientation.lock('landscape').catch(function() {});
     }
 
+    // Enter fullscreen on first user interaction (requires gesture on all browsers)
+    if (isTouchDevice) {
+      function enterFullscreen() {
+        var el = document.documentElement;
+        var req = el.requestFullscreen || el.webkitRequestFullscreen;
+        if (req) req.call(el).catch(function() {});
+      }
+      document.addEventListener('touchstart', enterFullscreen, { once: true, passive: true });
+      document.addEventListener('click',      enterFullscreen, { once: true });
+      document.addEventListener('keydown',    enterFullscreen, { once: true });
+    }
+
     // Rotate prompt — JS-driven so it works reliably on iOS Safari
     (function () {
       var prompt = document.getElementById('rotate-prompt');
-      var isTouchDevice = ('ontouchstart' in window) || navigator.maxTouchPoints > 0;
 
       function check() {
         if (!isTouchDevice) return;

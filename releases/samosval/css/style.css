@@ -400,8 +400,17 @@ html, body {
   letter-spacing: 0.08em;
 }
 
+/* ── Fullscreen ────────────────────────────────────────────── */
+:fullscreen            { width: 100%; height: 100%; background: var(--bg); }
+:-webkit-full-screen   { width: 100%; height: 100%; background: var(--bg); }
+
+:fullscreen #wrap,
+:-webkit-full-screen #wrap {
+  height: 100%;
+}
+
 /* ── Mobile landscape tweaks ───────────────────────────────── */
-@media (orientation: landscape) and (max-height: 500px) {
+@media (orientation: landscape) and (max-height: 600px) {
   #hud {
     padding: 4px 12px;
     font-size: clamp(5px, 1.4vh, 8px);
@@ -423,7 +432,8 @@ html, body {
   #c {
     width: auto;
     height: 100%;
-    max-width: 100%;
-    max-height: calc(100dvh - 36px);
+    max-width: 100vw;
+    /* leave room for HUD + safe-area (home bar on iPhone) */
+    max-height: calc(100dvh - env(safe-area-inset-bottom, 0px) - 32px);
   }
 }

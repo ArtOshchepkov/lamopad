@@ -1,0 +1,207 @@
+*, *::before, *::after { box-sizing: border-box; margin: 0; padding: 0; }
+
+:root {
+  --bg:           #080012;
+  --purple:       #7700dd;
+  --purple-light: #aa44ff;
+  --pink:         #ff006e;
+  --pink-light:   #ff69b4;
+  --yellow:       #ffdd00;
+  --text:         #f0e6ff;
+  --font:         'Press Start 2P', monospace;
+}
+
+html, body {
+  height: 100%;
+  background: var(--bg);
+  color: var(--text);
+  font-family: var(--font);
+  overflow: hidden;
+  user-select: none;
+  -webkit-user-select: none;
+}
+
+#wrap {
+  position: relative;
+  width: 100%;
+  height: 100vh;
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  justify-content: center;
+}
+
+/* ── Scanlines ─────────────────────────────────────────── */
+#scanlines {
+  position: fixed;
+  inset: 0;
+  background: repeating-linear-gradient(
+    to bottom,
+    transparent,
+    transparent 2px,
+    rgba(0, 0, 0, 0.12) 2px,
+    rgba(0, 0, 0, 0.12) 4px
+  );
+  pointer-events: none;
+  z-index: 100;
+}
+
+/* ── HUD ───────────────────────────────────────────────── */
+#hud {
+  width: 100%;
+  display: flex;
+  justify-content: space-between;
+  align-items: center;
+  padding: 10px 16px;
+  font-size: clamp(6px, 1.2vw, 10px);
+  letter-spacing: 0.04em;
+}
+
+#hud-title {
+  display: flex;
+  gap: 0.6em;
+  align-items: center;
+}
+
+.hud-artist {
+  color: var(--pink-light);
+  text-shadow: 0 0 10px var(--pink);
+}
+
+.hud-dash { color: var(--purple-light); }
+
+.hud-track {
+  color: var(--yellow);
+  text-shadow: 0 0 12px rgba(255, 221, 0, 0.6);
+}
+
+#hud-score {
+  display: flex;
+  gap: 0.5em;
+  color: var(--purple-light);
+  text-shadow: 0 0 8px var(--purple);
+}
+
+#score {
+  color: var(--text);
+  min-width: 4ch;
+  text-align: right;
+}
+
+/* ── Canvas ────────────────────────────────────────────── */
+#canvas-wrap {
+  position: relative;
+  width: 100%;
+}
+
+#c {
+  display: block;
+  width: 100%;
+  image-rendering: pixelated;
+  cursor: pointer;
+}
+
+/* ── Overlays common ───────────────────────────────────── */
+#overlay,
+#dead {
+  position: absolute;
+  inset: 0;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  z-index: 10;
+}
+
+#overlay { background: rgba(8, 0, 18, 0.88); }
+#dead    { background: rgba(8, 0, 18, 0.92); }
+
+.hidden { display: none !important; }
+
+/* ── Intro overlay ─────────────────────────────────────── */
+#overlay-inner {
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  gap: 20px;
+  text-align: center;
+  padding: 20px;
+}
+
+#cover {
+  width: clamp(110px, 28vw, 200px);
+  height: clamp(110px, 28vw, 200px);
+  object-fit: cover;
+  border: 2px solid var(--purple-light);
+  animation: coverPulse 2.5s ease-in-out infinite;
+}
+
+@keyframes coverPulse {
+  0%, 100% { box-shadow: 0 0 30px var(--purple), 0 0 60px rgba(119, 0, 221, 0.3); }
+  50%       { box-shadow: 0 0 50px var(--pink),   0 0 80px rgba(255, 0, 110, 0.3); }
+}
+
+#intro-title {
+  font-size: clamp(14px, 3.8vw, 28px);
+  color: var(--yellow);
+  text-shadow: 0 0 20px var(--yellow), 0 0 40px rgba(255, 221, 0, 0.5);
+  letter-spacing: 0.1em;
+  animation: flicker 4s ease-in-out infinite;
+}
+
+@keyframes flicker {
+  0%, 88%, 100% { opacity: 1; }
+  90% { opacity: 0.55; }
+  92% { opacity: 1; }
+  94% { opacity: 0.35; }
+  96% { opacity: 1; }
+}
+
+#intro-sub {
+  font-size: clamp(6px, 1.4vw, 9px);
+  color: var(--pink-light);
+  text-shadow: 0 0 10px var(--pink);
+  animation: blink 1s step-end infinite;
+}
+
+@keyframes blink {
+  0%, 100% { opacity: 1; }
+  50% { opacity: 0; }
+}
+
+/* ── Dead overlay ──────────────────────────────────────── */
+#dead-inner {
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  gap: 22px;
+  text-align: center;
+  padding: 20px;
+}
+
+#dead-title {
+  font-size: clamp(16px, 4.2vw, 32px);
+  line-height: 1.7;
+  color: var(--pink);
+  text-shadow: 0 0 20px var(--pink), 0 0 50px rgba(255, 0, 110, 0.5);
+  animation: shake 0.4s ease-in-out;
+}
+
+@keyframes shake {
+  0%, 100% { transform: translateX(0); }
+  20%       { transform: translateX(-8px) rotate(-1deg); }
+  40%       { transform: translateX(8px)  rotate(1deg); }
+  60%       { transform: translateX(-5px); }
+  80%       { transform: translateX(5px); }
+}
+
+#dead-score {
+  font-size: clamp(7px, 1.6vw, 12px);
+  color: var(--yellow);
+  text-shadow: 0 0 10px rgba(255, 221, 0, 0.7);
+}
+
+#dead-restart {
+  font-size: clamp(5px, 1.2vw, 8px);
+  color: var(--purple-light);
+  animation: blink 1s step-end infinite;
+}

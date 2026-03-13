@@ -1,0 +1,61 @@
+<!doctype html>
+<html lang="ru">
+<head>
+  <meta charset="utf-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1">
+  <title>Ламопад — Самосвал</title>
+  <link rel="preconnect" href="https://fonts.googleapis.com">
+  <link href="https://fonts.googleapis.com/css2?family=Press+Start+2P&display=swap" rel="stylesheet">
+  <link rel="stylesheet" href="css/style.css">
+  <meta name="description" content="Ламопад — Самосвал. Мини-игра.">
+  <meta property="og:title" content="Ламопад — Самосвал">
+  <meta property="og:type" content="music.song">
+  <meta property="og:image" content="releases/samosval/самосвал-бложка.jpg">
+  <link rel="icon" href="favicon.ico" sizes="any">
+  <link rel="icon" href="icon.svg" type="image/svg+xml">
+  <link rel="apple-touch-icon" href="icon.png">
+  <link rel="manifest" href="site.webmanifest">
+</head>
+<body>
+  <div id="wrap">
+    <div id="scanlines"></div>
+
+    <header id="hud">
+      <div id="hud-title">
+        <span class="hud-artist">ЛАМОПАД</span>
+        <span class="hud-dash">—</span>
+        <span class="hud-track">САМОСВАЛ</span>
+      </div>
+      <div id="hud-score">
+        <span>ЭКЗИСТЕНС:</span>
+        <span id="score">0</span>
+      </div>
+    </header>
+
+    <div id="canvas-wrap">
+      <canvas id="c"></canvas>
+    </div>
+
+    <div id="overlay">
+      <div id="overlay-inner">
+        <img src="releases/samosval/самосвал-бложка.jpg" id="cover" alt="Самосвал">
+        <h1 id="intro-title">Я САМОСВАЛ</h1>
+        <p id="intro-sub">НАЖМИ ПРОБЕЛ ИЛИ ТАПНИ</p>
+      </div>
+    </div>
+
+    <div id="dead" class="hidden">
+      <div id="dead-inner">
+        <p id="dead-title">МНЕ НУЖЕН<br>МЕХАНИК!</p>
+        <p id="dead-score">ЭКЗИСТЕНС: <span id="final-score">0</span></p>
+        <p id="dead-restart">ПРОБЕЛ / ТАП — СНОВА</p>
+      </div>
+    </div>
+
+    <audio id="audio" loop preload="auto">
+      <source src="releases/samosval/Самосвал.mp3" type="audio/mpeg">
+    </audio>
+  </div>
+  <script src="js/app.js"></script>
+</body>
+</html>

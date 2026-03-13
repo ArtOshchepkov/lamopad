@@ -36,6 +36,27 @@ const LYRIC_COLORS = ['#f0e6ff', '#ff69b4', '#cc88ff', '#ffdd00', '#88ffdd'];
 // ── Assets ────────────────────────────────────────────────────────────────────
 const shmurdikImg = new Image();
 shmurdikImg.src = 'releases/samosval/shmurdik_40px.png';
+const audioEl = document.getElementById('audio');
+
+// ── Web Audio (bass boost for psycho pill) ────────────────────────────────────
+let boostFilter = null;
+
+function initAudio() {
+  if (boostFilter) return;
+  try {
+    const actx = new AudioContext();
+    const src   = actx.createMediaElementSource(audioEl);
+    boostFilter = actx.createBiquadFilter();
+    boostFilter.type            = 'lowshelf';
+    boostFilter.frequency.value = 120;
+    boostFilter.gain.value      = 0;
+    src.connect(boostFilter);
+    boostFilter.connect(actx.destination);
+    if (actx.state === 'suspended') actx.resume();
+  } catch (e) {
+    boostFilter = null;  // Web Audio unavailable — play without effect
+  }
+}
 
 // ── Canvas ────────────────────────────────────────────────────────────────────
 const canvas = document.getElementById('c');
@@ -78,6 +99,8 @@ function reset() {
   nextPill       = 900;   // first pill possible at ~15 sec
   canvas.style.filter    = '';
   canvas.style.transform = '';
+  audioEl.playbackRate   = 1.0;
+  if (boostFilter) boostFilter.gain.value = 0;
   document.getElementById('score').textContent = '0';
 }
 
@@ -111,8 +134,8 @@ function startGame() {
   mode = 'play';
   document.getElementById('overlay').classList.add('hidden');
   document.getElementById('dead').classList.add('hidden');
-  const audio = document.getElementById('audio');
-  if (audio) audio.play().catch(() => {});
+  initAudio();
+  audioEl.play().catch(() => {});
   requestAnimationFrame(loop);
 }
 
@@ -126,6 +149,7 @@ function tickSurreal() {
     const shake = 14 * t;
     canvas.style.filter    = `hue-rotate(${hue}deg) brightness(1.5) saturate(3) contrast(1.2)`;
     canvas.style.transform = `translate(${(Math.random()-0.5)*shake}px,${(Math.random()-0.5)*shake}px)`;
+    if (psychoTimer === 1 && boostFilter) boostFilter.gain.value = 0;
     psychoTimer--;
     return;
   }
@@ -739,15 +763,19 @@ function loop() {
   pills = pills.filter(p => {
     if (p.lane !== player.lane) return true;
     if (faceX + 20 > p.x - 14 && faceX - 10 < p.x + 14) {
-      if (p.type === 0) speedBoostTimer = 240;
-      else psychoTimer = 300;
+      if (p.type === 0) { speedBoostTimer = 480; audioEl.playbackRate = 1.6; }
+      else { psychoTimer = 600; if (boostFilter) boostFilter.gain.value = 18; }
       return false;
     }
     return true;
   });
 
   // Speed boost
-  if (speedBoostTimer > 0) { speed += 2.5; speedBoostTimer--; }
+  if (speedBoostTimer > 0) {
+    speed += 5;
+    speedBoostTimer--;
+    if (speedBoostTimer === 0) audioEl.playbackRate = 1.0;
+  }
 
   // Collision (only when close enough to target lane — not mid-switch)
   const switchProgress = Math.abs(player.y - player.targetY) / Math.abs(LANE_Y[0] - LANE_Y[1]);

@@ -278,14 +278,192 @@ function drawPlayer() {
     glow('#ffffff', 30 * player.switchFlash);
   }
 
-  // Exhaust pipe nozzle (back of bed, bottom)
+  // ── 1. LLAMA — drawn first so truck body covers neck base ──
+  ctx.save();
+  ctx.translate(x + 22, y + 14);  // centered in truck bed
+
+  // Neck — short woolly trapezoid
+  glow('#cc8844', 8);
+  ctx.fillStyle = '#c49060';
+  ctx.beginPath();
+  ctx.moveTo(-7, 2);
+  ctx.lineTo(8, 2);
+  ctx.lineTo(5, -20);
+  ctx.lineTo(-3, -20);
+  ctx.closePath();
+  ctx.fill();
+
+  // Wool texture
+  noGlow();
+  ctx.strokeStyle = '#e8c080';
+  ctx.lineWidth = 1.5;
+  ctx.lineCap = 'round';
+  for (let fy = -3; fy > -17; fy -= 7) {
+    ctx.beginPath(); ctx.arc(1, fy, 4, Math.PI * 0.75, Math.PI * 0.15, true); ctx.stroke();
+  }
+
+  // Head pivot at top of neck
+  ctx.translate(1, -20);
+
+  // Head
+  glow('#dd9955', 6);
+  ctx.fillStyle = '#dbb882';
+  ctx.beginPath();
+  ctx.ellipse(0, -12, 12, 13, 0, 0, Math.PI * 2);
+  ctx.fill();
+
+  // Head highlight
+  ctx.fillStyle = 'rgba(255, 240, 190, 0.35)';
+  ctx.beginPath();
+  ctx.ellipse(-3, -17, 6, 5, -0.3, 0, Math.PI * 2);
+  ctx.fill();
+
+  // ── Fur — soft curly bumps around head and neck ──
+  // Small semicircle curls along the head outline
+  ctx.strokeStyle = '#f0d4a0';
+  ctx.lineWidth = 1.6;
+  ctx.lineCap = 'round';
+  // Each entry: [center x, center y, radius, start angle, end angle]
+  [
+    [-11, -19, 2.5, Math.PI * 0.9, Math.PI * 1.9],
+    [-8,  -23, 2.5, Math.PI * 1.1, Math.PI * 2.1],
+    [-4,  -25, 2.5, Math.PI * 1.3, Math.PI * 2.3],
+    [ 0,  -26, 2.5, Math.PI * 1.5, Math.PI * 2.5],
+    [ 4,  -25, 2.5, Math.PI * 1.7, Math.PI * 2.7],
+    [ 8,  -23, 2.5, Math.PI * 1.9, Math.PI * 2.9],
+    [11,  -19, 2.5, Math.PI * 0.1, Math.PI * 1.1],
+    [13,  -13, 2.5, Math.PI * 1.8, Math.PI * 2.8],
+  ].forEach(([cx, cy, r, s, e]) => {
+    ctx.beginPath(); ctx.arc(cx, cy, r, s, e); ctx.stroke();
+  });
+
+  // Neck sides — small filled wool puffs
+  ctx.fillStyle = '#e8c888';
+  [
+    [-10, 6], [-11, 0], [-10, -6], [-9, -12],
+    [ 9,  6], [ 10, 0], [  9, -6], [ 8, -12],
+  ].forEach(([bx, by]) => {
+    ctx.beginPath(); ctx.arc(bx, by + 20, 2.2, 0, Math.PI * 2); ctx.fill();
+  });
+
+  // Back ear — banana shape (bezier)
+  noGlow();
+  ctx.fillStyle = '#b08050';
+  ctx.beginPath();
+  ctx.moveTo(-8, -21);
+  ctx.bezierCurveTo(-16, -26, -16, -38, -10, -38);
+  ctx.bezierCurveTo(-6,  -38, -5,  -28, -5,  -22);
+  ctx.closePath();
+  ctx.fill();
+  ctx.fillStyle = '#e87090';
+  ctx.beginPath();
+  ctx.moveTo(-8, -23);
+  ctx.bezierCurveTo(-13, -27, -13, -35, -9, -35);
+  ctx.bezierCurveTo(-7,  -35, -6,  -28, -6, -23);
+  ctx.closePath();
+  ctx.fill();
+
+  // Front ear — banana shape (bezier)
+  ctx.fillStyle = '#b08050';
+  ctx.beginPath();
+  ctx.moveTo(7, -21);
+  ctx.bezierCurveTo(15, -26, 15, -38, 9,  -38);
+  ctx.bezierCurveTo(5,  -38, 4,  -28, 5,  -22);
+  ctx.closePath();
+  ctx.fill();
+  ctx.fillStyle = '#e87090';
+  ctx.beginPath();
+  ctx.moveTo(7, -23);
+  ctx.bezierCurveTo(12, -27, 12, -35, 8,  -35);
+  ctx.bezierCurveTo(6,  -35, 6,  -28, 6,  -23);
+  ctx.closePath();
+  ctx.fill();
+
+  // Snout — flat alpaca muzzle
+  ctx.fillStyle = '#d4a878';
+  ctx.beginPath();
+  ctx.ellipse(4, -5, 5, 3, 0, 0, Math.PI * 2);
+  ctx.fill();
+  // Soft muzzle pad (slightly darker, flat front)
+  ctx.fillStyle = '#c09060';
+  ctx.beginPath();
+  ctx.ellipse(4, -4, 3.5, 2, 0, 0, Math.PI * 2);
+  ctx.fill();
+
+  // Nostrils — small soft dots
+  ctx.fillStyle = '#7a5030';
+  ctx.beginPath(); ctx.arc(2.5, -4, 1, 0, Math.PI * 2); ctx.fill();
+  ctx.beginPath(); ctx.arc(5.5, -4, 1, 0, Math.PI * 2); ctx.fill();
+
+  // Cleft upper lip
+  ctx.strokeStyle = '#9a6840';
+  ctx.lineWidth = 1;
+  ctx.lineCap = 'round';
+  ctx.beginPath();
+  ctx.moveTo(4, -3);
+  ctx.lineTo(4, -1.5);
+  ctx.stroke();
+
+  // Smile
+  ctx.strokeStyle = '#996633';
+  ctx.lineWidth = 1.2;
+  ctx.beginPath();
+  ctx.arc(2.5, -1, 1.8, 0, Math.PI); ctx.stroke();
+  ctx.beginPath();
+  ctx.arc(5.5, -1, 1.8, 0, Math.PI); ctx.stroke();
+
+  // ── Sunglasses — two lenses, 3/4 view ──
+  glow('#ff006e', 12);
+
+  // Left lens
+  ctx.fillStyle = '#080018';
+  ctx.beginPath();
+  ctx.ellipse(-5, -15, 4, 3, 0, 0, Math.PI * 2);
+  ctx.fill();
+  ctx.strokeStyle = '#ff006e';
+  ctx.lineWidth = 1.6;
+  ctx.beginPath();
+  ctx.ellipse(-5, -15, 4, 3, 0, 0, Math.PI * 2);
+  ctx.stroke();
+
+  // Right lens
+  ctx.fillStyle = '#080018';
+  ctx.beginPath();
+  ctx.ellipse(4, -15, 4, 3, 0, 0, Math.PI * 2);
+  ctx.fill();
+  ctx.strokeStyle = '#ff006e';
+  ctx.beginPath();
+  ctx.ellipse(4, -15, 4, 3, 0, 0, Math.PI * 2);
+  ctx.stroke();
+
+  // Bridge
+  ctx.beginPath();
+  ctx.moveTo(-1, -15);
+  ctx.lineTo(0, -15);
+  ctx.stroke();
+
+  // Left temple arm (going back)
+  ctx.beginPath();
+  ctx.moveTo(-9, -15);
+  ctx.lineTo(-14, -13);
+  ctx.stroke();
+
+  // Lens shines
+  noGlow();
+  ctx.fillStyle = 'rgba(255,255,255,0.2)';
+  ctx.beginPath(); ctx.ellipse(-6, -16, 1.8, 1, -0.2, 0, Math.PI * 2); ctx.fill();
+  ctx.beginPath(); ctx.ellipse(3,  -16, 1.8, 1, -0.2, 0, Math.PI * 2); ctx.fill();
+
+  ctx.restore(); // llama
+
+  // ── 2. EXHAUST pipe nozzle ────────────────────────────
   glow('#ff44aa', 12);
   ctx.fillStyle = '#330044';
   ctx.fillRect(x + 1, y + PH - 13, 7, 8);
   ctx.fillStyle = '#ff44aa';
   ctx.fillRect(x + 1, y + PH - 14, 7, 3);
 
-  // Truck bed (left)
+  // ── 3. TRUCK BED — covers llama neck base ─────────────
   glow('#9900ff', 14);
   ctx.fillStyle = '#4d00aa';
   ctx.fillRect(x, y + 14, 54, PH - 14);
@@ -294,11 +472,11 @@ function drawPlayer() {
   ctx.fillStyle = '#36007a';
   ctx.fillRect(x, y + 14, 7, PH - 14);
 
-  // Cab (right)
+  // ── 4. CAB ────────────────────────────────────────────
   ctx.fillStyle = '#6611bb';
   ctx.fillRect(x + 50, y + 4, 42, PH - 4);
 
-  // Windshield
+  // ── 5. WINDSHIELD ─────────────────────────────────────
   glow('#00ddff', 8);
   ctx.fillStyle   = 'rgba(0, 210, 255, 0.22)';
   ctx.strokeStyle = 'rgba(0, 210, 255, 0.45)';
@@ -306,7 +484,6 @@ function drawPlayer() {
   const wx = x + 54, wy = y + 9, ww = 27, wh = Math.floor(PH * 0.44);
   ctx.fillRect(wx, wy, ww, wh);
 
-  // Shmurdik behind the wheel — blurred, barely visible
   if (shmurdikImg.complete && shmurdikImg.naturalWidth > 0) {
     ctx.save();
     ctx.beginPath();
@@ -320,63 +497,20 @@ function drawPlayer() {
     ctx.restore();
   }
 
-  // Frosted glass tint over driver
   ctx.fillStyle = 'rgba(0, 180, 255, 0.05)';
   ctx.fillRect(wx, wy, ww, wh);
-
   ctx.strokeRect(wx, wy, ww, wh);
 
-  // Headlight
+  // ── 6. HEADLIGHT ──────────────────────────────────────
   glow('#ffdd00', 22);
   ctx.fillStyle = '#ffdd00';
   ctx.fillRect(x + 90, y + PH - 20, 5, 9);
 
-  // Wheels (always sit on the lane's ground line)
+  // ── 7. WHEELS ─────────────────────────────────────────
   noGlow();
   drawWheel(x + 20,      WHEEL_Y);
   drawWheel(x + PW - 18, WHEEL_Y);
 
-  // ── Llama neck + head ──────────────────────────────────
-  ctx.save();
-  ctx.translate(x + 16, y + 14);
-
-  // Neck
-  glow('rgba(180, 140, 80, 0.3)', 6);
-  ctx.fillStyle = '#b8905a';
-  ctx.fillRect(-5, -42, 12, 36);
-
-  // Head pivot
-  ctx.translate(1, -42);
-
-  ctx.fillStyle = '#cfab78';
-  ctx.beginPath();
-  ctx.ellipse(0, -14, 12, 15, 0, 0, Math.PI * 2);
-  ctx.fill();
-
-  // Snout
-  ctx.fillStyle = '#b8905a';
-  ctx.beginPath();
-  ctx.ellipse(5, -7, 7, 5, 0.25, 0, Math.PI * 2);
-  ctx.fill();
-
-  // Nostrils
-  ctx.fillStyle = '#8a6030';
-  ctx.beginPath(); ctx.ellipse(3, -5, 1.5, 1, 0, 0, Math.PI * 2); ctx.fill();
-  ctx.beginPath(); ctx.ellipse(7, -5, 1.5, 1, 0, 0, Math.PI * 2); ctx.fill();
-
-  // Ears
-  ctx.fillStyle = '#a07040';
-  ctx.beginPath(); ctx.moveTo(-8, -24); ctx.lineTo(-13, -36); ctx.lineTo(-3, -26); ctx.closePath(); ctx.fill();
-  ctx.beginPath(); ctx.moveTo(7,  -24); ctx.lineTo(13,  -36); ctx.lineTo(4,  -26); ctx.closePath(); ctx.fill();
-
-  // Eye
-  noGlow();
-  ctx.fillStyle = '#1a0800';
-  ctx.beginPath(); ctx.arc(4, -16, 3, 0, Math.PI * 2); ctx.fill();
-  ctx.fillStyle = 'rgba(255,255,255,0.5)';
-  ctx.beginPath(); ctx.arc(5.2, -17, 1.2, 0, Math.PI * 2); ctx.fill();
-
-  ctx.restore(); // llama
   noGlow();
   ctx.restore(); // player
 }

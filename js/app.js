@@ -68,6 +68,11 @@ const ctx    = canvas.getContext('2d');
 canvas.width  = GW;
 canvas.height = GH;
 
+const offCanvas = document.createElement('canvas');
+offCanvas.width  = GW;
+offCanvas.height = GH;
+const offCtx = offCanvas.getContext('2d');
+
 // ── State ─────────────────────────────────────────────────────────────────────
 let mode; // 'warning' | 'intro' | 'play' | 'dead'
 let deadAt = 0; // timestamp of death, for restart grace period
@@ -75,8 +80,8 @@ let player, obstacles, floaties;
 let score, speed, frame, bgX, wheelAngle;
 let nextObs, nextLyric;
 let surrealTimer, paletteIdx;
-let exhaust, bgParticles;
-let pills, speedBoostTimer, psychoTimer, glitchTimer, mirrorTimer, nextPill;
+let exhaust, bgParticles, fallingLlamas;
+let pills, speedBoostTimer, psychoTimer, glitchTimer, mirrorTimer, kaleidoTimer, nextPill;
 
 function reset() {
   player = {
@@ -99,6 +104,7 @@ function reset() {
   paletteIdx     = 0;
   exhaust        = [];
   initBgParticles();
+  fallingLlamas = Array.from({ length: 6 }, () => makeFallingLlama(true));
   pills          = [];
   speedBoostTimer = 0;
   psychoTimer    = 0;
@@ -111,6 +117,7 @@ function reset() {
   if (pannerNode)  pannerNode.pan.value   = 0;
   glitchTimer  = 0;
   mirrorTimer  = 0;
+  kaleidoTimer = 0;
   document.getElementById('score').textContent = '0';
 }
 
@@ -154,6 +161,7 @@ document.addEventListener('keydown', e => {
     e.preventDefault();
     switchLane();
   }
+  if (e.code === 'KeyP' && mode === 'play') spawnPill();
 });
 document.addEventListener('touchstart', e => { e.preventDefault(); switchLane(); }, { passive: false });
 document.addEventListener('click', switchLane);
@@ -262,6 +270,69 @@ function drawExhaust() {
     ctx.fill();
     noGlow();
     ctx.restore();
+  }
+}
+
+// ── Falling background llamas ─────────────────────────────────────────────────
+function makeFallingLlama(scatter) {
+  const scale = 0.22 + Math.random() * 0.22;
+  return {
+    x:     Math.random() * GW,
+    y:     scatter ? Math.random() * GH : -(30 + Math.random() * 60),
+    vy:    0.45 + Math.random() * 0.7,
+    vx:    (Math.random() - 0.5) * 0.3,
+    scale,
+    angle: (Math.random() - 0.5) * 0.4,
+    spin:  (Math.random() - 0.5) * 0.012,
+    flip:  Math.random() < 0.5 ? 1 : -1,
+    alpha: 0.12 + Math.random() * 0.18,
+  };
+}
+
+function drawMiniLlama(l) {
+  ctx.save();
+  ctx.translate(l.x, l.y);
+  ctx.rotate(l.angle);
+  ctx.scale(l.flip * l.scale, l.scale);
+  ctx.globalAlpha = l.alpha;
+  ctx.fillStyle   = '#bb55ff';
+
+  // Body
+  ctx.beginPath();
+  ctx.ellipse(0, 0, 13, 8, 0, 0, Math.PI * 2);
+  ctx.fill();
+
+  // Neck
+  ctx.beginPath();
+  ctx.moveTo(-3, -7); ctx.lineTo(3, -7);
+  ctx.lineTo(2, -18); ctx.lineTo(-2, -18);
+  ctx.closePath(); ctx.fill();
+
+  // Head
+  ctx.beginPath();
+  ctx.ellipse(0, -22, 6, 5, 0, 0, Math.PI * 2);
+  ctx.fill();
+
+  // Ears
+  ctx.beginPath();
+  ctx.moveTo(-4, -26); ctx.lineTo(-6, -33); ctx.lineTo(-1, -27); ctx.closePath(); ctx.fill();
+  ctx.beginPath();
+  ctx.moveTo(4, -26);  ctx.lineTo(6,  -33); ctx.lineTo(1,  -27); ctx.closePath(); ctx.fill();
+
+  // Legs
+  [[-8, 8], [-3, 8], [2, 8], [7, 8]].forEach(([lx, ly]) => {
+    ctx.fillRect(lx, ly, 3, 10);
+  });
+
+  ctx.restore();
+}
+
+function updateFallingLlamas() {
+  for (const l of fallingLlamas) {
+    l.y     += l.vy;
+    l.x     += l.vx;
+    l.angle += l.spin;
+    if (l.y > GH + 50) Object.assign(l, makeFallingLlama(false));
   }
 }
 
@@ -680,7 +751,7 @@ function pillY(lane) { return LANE_Y[lane] - PH - 20; }
 
 function spawnPill() {
   const lane = Math.random() < 0.5 ? 0 : 1;
-  const type = Math.floor(Math.random() * 4);   // 0=speed 1=psycho 2=glitch 3=mirror
+  const type = Math.floor(Math.random() * 5);   // 0=speed 1=psycho 2=glitch 3=mirror 4=kaleido
   pills.push({ x: GW + 20, y: pillY(lane), lane, type, angle: 0 });
 }
 
@@ -690,9 +761,9 @@ function drawPill(p) {
   ctx.rotate(p.angle);
 
   const hw = 7, r = 4;
-  const c1  = ['#ffee00', '#ff22ff', '#00ff44', '#0088ff'][p.type];
-  const c2  = ['#ff8800', '#00ffee', '#ff0022', '#00ffcc'][p.type];
-  const gc  = ['#ffbb00', '#dd00ff', '#ffffff',  '#00ddff'][p.type];
+  const c1  = ['#ffee00', '#ff22ff', '#00ff44', '#0088ff', '#00ffcc'][p.type];
+  const c2  = ['#ff8800', '#00ffee', '#ff0022', '#00ffcc', '#aaff00'][p.type];
+  const gc  = ['#ffbb00', '#dd00ff', '#ffffff',  '#00ddff', '#00ffaa'][p.type];
 
   glow(gc, 18);
 
@@ -719,6 +790,36 @@ function drawPill(p) {
   ctx.fillStyle = 'rgba(255,255,255,0.22)';
   ctx.beginPath(); ctx.ellipse(-hw * 0.5, -r * 0.5, hw * 0.35, r * 0.3, -0.3, 0, Math.PI * 2); ctx.fill();
 
+  ctx.restore();
+}
+
+// ── Kaleidoscope ──────────────────────────────────────────────────────────────
+function applyKaleido() {
+  offCtx.clearRect(0, 0, GW, GH);
+  offCtx.drawImage(canvas, 0, 0);
+  ctx.clearRect(0, 0, GW, GH);
+
+  const hw = GW / 2, hh = GH / 2;
+
+  // top-left: normal
+  ctx.drawImage(offCanvas, 0, 0, GW, GH, 0, 0, hw, hh);
+
+  // top-right: H-flip
+  ctx.save();
+  ctx.translate(GW, 0); ctx.scale(-1, 1);
+  ctx.drawImage(offCanvas, 0, 0, GW, GH, 0, 0, hw, hh);
+  ctx.restore();
+
+  // bottom-left: V-flip
+  ctx.save();
+  ctx.translate(0, GH); ctx.scale(1, -1);
+  ctx.drawImage(offCanvas, 0, 0, GW, GH, 0, 0, hw, hh);
+  ctx.restore();
+
+  // bottom-right: both flipped
+  ctx.save();
+  ctx.translate(GW, GH); ctx.scale(-1, -1);
+  ctx.drawImage(offCanvas, 0, 0, GW, GH, 0, 0, hw, hh);
   ctx.restore();
 }
 
@@ -874,6 +975,7 @@ function loop() {
       else if (p.type === 1) { psychoTimer  = 600; if (boostFilter) boostFilter.gain.value = 18; }
       else if (p.type === 2) { glitchTimer  = 360; }
       else if (p.type === 3) { mirrorTimer  = 480; }
+      else if (p.type === 4) { kaleidoTimer = 420; }
       return false;
     }
     return true;
@@ -901,7 +1003,9 @@ function loop() {
   tickSurreal();
   updateExhaust();
   updateBgParticles();
+  updateFallingLlamas();
   drawBg();
+  fallingLlamas.forEach(drawMiniLlama);
   drawBgParticles();
   drawLaneHint();
   floaties.forEach(drawFloatie);
@@ -910,6 +1014,13 @@ function loop() {
   obstacles.forEach(drawObstacle);
   drawPlayer();
   drawGlitch();           // glitch overlay on top of everything
+
+  if (kaleidoTimer > 0) {
+    applyKaleido();
+    audioEl.playbackRate = 1 + Math.sin(frame * 0.07) * 0.09;
+    kaleidoTimer--;
+    if (kaleidoTimer === 0) audioEl.playbackRate = 1.0;
+  }
 
   requestAnimationFrame(loop);
 }

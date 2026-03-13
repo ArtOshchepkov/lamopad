@@ -100,7 +100,7 @@ function reset() {
   pills          = [];
   speedBoostTimer = 0;
   psychoTimer    = 0;
-  nextPill       = 900;   // first pill possible at ~15 sec
+  nextPill       = 500;   // first pill possible at ~8 sec
   canvas.style.filter    = '';
   canvas.style.transform = '';
   audioEl.playbackRate   = 1.0;
@@ -179,7 +179,7 @@ function tickSurreal() {
   }
 
   // Glitch: CSS skew jitter
-  if (glitchTimer > 0 && glitchTimer % 4 < 2) {
+  if (glitchTimer > 0 && glitchTimer % 8 < 2) {
     transform += ` skewX(${(Math.random()-0.5)*5}deg)`;
     filter    += ` contrast(1.5) brightness(1.2)`;
   }
@@ -659,7 +659,7 @@ function drawPill(p) {
 
 // ── Glitch overlay ────────────────────────────────────────────────────────────
 function drawGlitch() {
-  if (glitchTimer <= 0 || glitchTimer % 4 >= 2) return;
+  if (glitchTimer <= 0 || glitchTimer % 8 >= 2) return;
   ctx.save();
   // Horizontal scan bars
   const bars = 2 + Math.floor(Math.random() * 5);
@@ -794,8 +794,8 @@ function loop() {
 
   // Pills
   if (frame >= nextPill) {
-    if (Math.random() < 0.4) spawnPill();
-    nextPill = frame + 400 + Math.floor(Math.random() * 300);
+    for (let i = 0; i < 3; i++) { if (Math.random() < 0.28) spawnPill(); }
+    nextPill = frame + 400 + Math.floor(Math.random() * 360);
   }
   pills.forEach(p => { p.x -= speed; p.angle += 0.04; });
   pills = pills.filter(p => p.x + 14 > -20);

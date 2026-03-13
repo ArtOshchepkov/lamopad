@@ -2,6 +2,8 @@
 const GW = 800;
 const GH = 380;
 
+const LOW_GFX = ('ontouchstart' in window) || navigator.maxTouchPoints > 0;
+
 // Two lane ground Y positions: [bottom, top]
 const LANE_Y  = [320, 175];
 const PLAYER_X = 110;
@@ -252,8 +254,10 @@ function pipePos() {
 
 function spawnExhaust() {
   const { x, y } = pipePos();
-  // More particles during lane switch
-  const count = speedBoostTimer > 0 ? 8 : player.switchFlash > 0.1 ? 4 : 1;
+  // More particles during lane switch; fewer in low-graphics mode
+  const count = LOW_GFX
+    ? (speedBoostTimer > 0 ? 2 : 1)
+    : (speedBoostTimer > 0 ? 8 : player.switchFlash > 0.1 ? 4 : 1);
   for (let i = 0; i < count; i++) {
     exhaust.push({
       x,
@@ -808,7 +812,9 @@ function pillY(lane) { return LANE_Y[lane] - PH - 20; }
 
 function spawnPill() {
   const lane = Math.random() < 0.5 ? 0 : 1;
-  const type = Math.floor(Math.random() * 5);   // 0=speed 1=psycho 2=glitch 3=mirror 4=kaleido
+  // In low-graphics mode skip type 4 (kaleidoscope — splits screen into 4 quadrants)
+  const typeCount = LOW_GFX ? 4 : 5;
+  const type = Math.floor(Math.random() * typeCount);
   pills.push({ x: GW + 20, y: pillY(lane), lane, type, angle: 0 });
 }
 

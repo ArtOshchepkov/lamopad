@@ -38,8 +38,8 @@ const shmurdikImg = new Image();
 shmurdikImg.src = 'releases/samosval/shmurdik_40px.png';
 const audioEl = document.getElementById('audio');
 
-// ── Web Audio (bass boost for psycho pill) ────────────────────────────────────
-let boostFilter = null;
+// ── Web Audio ─────────────────────────────────────────────────────────────────
+let boostFilter = null, pannerNode = null;
 
 function initAudio() {
   if (boostFilter) return;
@@ -50,11 +50,15 @@ function initAudio() {
     boostFilter.type            = 'lowshelf';
     boostFilter.frequency.value = 120;
     boostFilter.gain.value      = 0;
+    pannerNode  = actx.createStereoPanner();
+    pannerNode.pan.value = 0;
     src.connect(boostFilter);
-    boostFilter.connect(actx.destination);
+    boostFilter.connect(pannerNode);
+    pannerNode.connect(actx.destination);
     if (actx.state === 'suspended') actx.resume();
   } catch (e) {
-    boostFilter = null;  // Web Audio unavailable — play without effect
+    boostFilter = null;
+    pannerNode  = null;
   }
 }
 
@@ -71,7 +75,7 @@ let score, speed, frame, bgX, wheelAngle;
 let nextObs, nextLyric;
 let surrealTimer, paletteIdx;
 let exhaust;
-let pills, speedBoostTimer, psychoTimer, nextPill;
+let pills, speedBoostTimer, psychoTimer, glitchTimer, mirrorTimer, nextPill;
 
 function reset() {
   player = {
@@ -100,7 +104,11 @@ function reset() {
   canvas.style.filter    = '';
   canvas.style.transform = '';
   audioEl.playbackRate   = 1.0;
+  audioEl.volume         = 1.0;
   if (boostFilter) boostFilter.gain.value = 0;
+  if (pannerNode)  pannerNode.pan.value   = 0;
+  glitchTimer  = 0;
+  mirrorTimer  = 0;
   document.getElementById('score').textContent = '0';
 }
 
@@ -141,31 +149,43 @@ function startGame() {
 
 // ── Surreal canvas effect ─────────────────────────────────────────────────────
 function tickSurreal() {
-  // Psycho pill overrides everything
-  if (psychoTimer > 0) {
-    if (frame % 6 === 0) paletteIdx = (paletteIdx + 1) % PALETTES.length;
-    const hue   = PALETTES[paletteIdx];
-    const t     = psychoTimer / 300;
-    const shake = 14 * t;
-    canvas.style.filter    = `hue-rotate(${hue}deg) brightness(1.5) saturate(3) contrast(1.2)`;
-    canvas.style.transform = `translate(${(Math.random()-0.5)*shake}px,${(Math.random()-0.5)*shake}px)`;
-    if (psychoTimer === 1 && boostFilter) boostFilter.gain.value = 0;
-    psychoTimer--;
-    return;
+  const hue = PALETTES[paletteIdx];
+  let filter    = `hue-rotate(${hue}deg)`;
+  let transform = '';
+
+  // Mirror: flip horizontally
+  if (mirrorTimer > 0) {
+    transform += ' scaleX(-1)';
+    if (pannerNode) pannerNode.pan.value = Math.sin(frame * 0.18) * 0.95;
+    mirrorTimer--;
+    if (mirrorTimer === 0 && pannerNode) pannerNode.pan.value = 0;
   }
 
-  const hue = PALETTES[paletteIdx];
-  if (surrealTimer > 0) {
-    const t          = surrealTimer / 32;
-    const shakeAmt   = 10 * t;
-    const brightness = surrealTimer > 26 ? 2.5 : 1;
-    canvas.style.filter    = `hue-rotate(${hue}deg) brightness(${brightness}) saturate(1.6)`;
-    canvas.style.transform = `translate(${(Math.random()-0.5)*shakeAmt}px,${(Math.random()-0.5)*shakeAmt}px)`;
+  // Psycho
+  if (psychoTimer > 0) {
+    if (frame % 6 === 0) paletteIdx = (paletteIdx + 1) % PALETTES.length;
+    const t = psychoTimer / 600;
+    transform += ` translate(${(Math.random()-0.5)*14*t}px,${(Math.random()-0.5)*14*t}px)`;
+    filter    += ` brightness(1.5) saturate(3) contrast(1.2)`;
+    if (psychoTimer === 1 && boostFilter) boostFilter.gain.value = 0;
+    psychoTimer--;
+  } else if (surrealTimer > 0) {
+    const t = surrealTimer / 32;
+    filter   += ` brightness(${surrealTimer > 26 ? 2.5 : 1}) saturate(1.6)`;
+    transform += ` translate(${(Math.random()-0.5)*10*t}px,${(Math.random()-0.5)*10*t}px)`;
     surrealTimer--;
   } else {
-    canvas.style.filter    = `hue-rotate(${hue}deg) saturate(1.3)`;
-    canvas.style.transform = '';
+    filter += ' saturate(1.3)';
   }
+
+  // Glitch: CSS skew jitter
+  if (glitchTimer > 0 && glitchTimer % 4 < 2) {
+    transform += ` skewX(${(Math.random()-0.5)*5}deg)`;
+    filter    += ` contrast(1.5) brightness(1.2)`;
+  }
+
+  canvas.style.filter    = filter;
+  canvas.style.transform = transform.trim() || 'none';
 }
 
 // ── Draw helpers ──────────────────────────────────────────────────────────────
@@ -595,7 +615,7 @@ function pillY(lane) { return LANE_Y[lane] - PH - 20; }
 
 function spawnPill() {
   const lane = Math.random() < 0.5 ? 0 : 1;
-  const type = Math.random() < 0.5 ? 0 : 1;   // 0 = speed, 1 = psycho
+  const type = Math.floor(Math.random() * 4);   // 0=speed 1=psycho 2=glitch 3=mirror
   pills.push({ x: GW + 20, y: pillY(lane), lane, type, angle: 0 });
 }
 
@@ -605,9 +625,9 @@ function drawPill(p) {
   ctx.rotate(p.angle);
 
   const hw = 7, r = 4;
-  const c1  = p.type === 0 ? '#ffee00' : '#ff22ff';
-  const c2  = p.type === 0 ? '#ff8800' : '#00ffee';
-  const gc  = p.type === 0 ? '#ffbb00' : '#dd00ff';
+  const c1  = ['#ffee00', '#ff22ff', '#00ff44', '#0088ff'][p.type];
+  const c2  = ['#ff8800', '#00ffee', '#ff0022', '#00ffcc'][p.type];
+  const gc  = ['#ffbb00', '#dd00ff', '#ffffff',  '#00ddff'][p.type];
 
   glow(gc, 18);
 
@@ -634,6 +654,28 @@ function drawPill(p) {
   ctx.fillStyle = 'rgba(255,255,255,0.22)';
   ctx.beginPath(); ctx.ellipse(-hw * 0.5, -r * 0.5, hw * 0.35, r * 0.3, -0.3, 0, Math.PI * 2); ctx.fill();
 
+  ctx.restore();
+}
+
+// ── Glitch overlay ────────────────────────────────────────────────────────────
+function drawGlitch() {
+  if (glitchTimer <= 0 || glitchTimer % 4 >= 2) return;
+  ctx.save();
+  // Horizontal scan bars
+  const bars = 2 + Math.floor(Math.random() * 5);
+  for (let i = 0; i < bars; i++) {
+    const y = Math.random() * GH;
+    const h = 1 + Math.random() * 10;
+    ctx.globalAlpha = 0.25 + Math.random() * 0.45;
+    ctx.fillStyle   = Math.random() < 0.5 ? '#ff0044' : '#00ffee';
+    ctx.fillRect(0, y, GW, h);
+  }
+  // White flash line
+  if (Math.random() < 0.35) {
+    ctx.globalAlpha = 0.6;
+    ctx.fillStyle   = '#ffffff';
+    ctx.fillRect(0, Math.random() * GH, GW, 1);
+  }
   ctx.restore();
 }
 
@@ -763,8 +805,10 @@ function loop() {
   pills = pills.filter(p => {
     if (p.lane !== player.lane) return true;
     if (faceX + 20 > p.x - 14 && faceX - 10 < p.x + 14) {
-      if (p.type === 0) { speedBoostTimer = 480; audioEl.playbackRate = 1.6; }
-      else { psychoTimer = 600; if (boostFilter) boostFilter.gain.value = 18; }
+      if      (p.type === 0) { speedBoostTimer = 480; audioEl.playbackRate = 1.6; }
+      else if (p.type === 1) { psychoTimer  = 600; if (boostFilter) boostFilter.gain.value = 18; }
+      else if (p.type === 2) { glitchTimer  = 360; }
+      else if (p.type === 3) { mirrorTimer  = 480; }
       return false;
     }
     return true;
@@ -775,6 +819,13 @@ function loop() {
     speed += 5;
     speedBoostTimer--;
     if (speedBoostTimer === 0) audioEl.playbackRate = 1.0;
+  }
+
+  // Glitch: audio stutter
+  if (glitchTimer > 0) {
+    audioEl.volume = glitchTimer % 5 < 2 ? 0.08 : 1.0;
+    glitchTimer--;
+    if (glitchTimer === 0) audioEl.volume = 1.0;
   }
 
   // Collision (only when close enough to target lane — not mid-switch)
@@ -791,6 +842,7 @@ function loop() {
   drawExhaust();          // trail behind player
   obstacles.forEach(drawObstacle);
   drawPlayer();
+  drawGlitch();           // glitch overlay on top of everything
 
   requestAnimationFrame(loop);
 }

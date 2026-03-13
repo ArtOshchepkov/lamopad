@@ -1011,7 +1011,7 @@ function loop() {
     if (faceX + 20 > p.x - 14 && faceX - 10 < p.x + 14) {
       if      (p.type === 0) { speedBoostTimer = 480; audioEl.playbackRate = 1.6; }
       else if (p.type === 1) { psychoTimer  = 600; if (boostFilter) boostFilter.gain.value = 18; }
-      else if (p.type === 2) { glitchTimer  = 360; }
+      else if (p.type === 2) { glitchTimer  = 200; }
       else if (p.type === 3) { mirrorTimer  = 480; }
       else if (p.type === 4) { kaleidoTimer = 420; }
       score += PILL_POINTS[p.type];

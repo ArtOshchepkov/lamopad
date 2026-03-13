@@ -265,9 +265,10 @@ function pipePos() {
 function spawnExhaust() {
   const { x, y } = pipePos();
   // More particles during lane switch; fewer in low-graphics mode
+  if (LOW_GFX && frame % 3 !== 0) return; // low-gfx: spawn every 3rd frame only
   const count = LOW_GFX
-    ? (speedBoostTimer > 0 ? 2 : 1)
-    : (speedBoostTimer > 0 ? 8 : player.switchFlash > 0.1 ? 4 : 1);
+    ? (speedBoostTimer > 0 ? 1 : 1)
+    : (speedBoostTimer > 0 ? 5 : player.switchFlash > 0.1 ? 2 : 1);
   for (let i = 0; i < count; i++) {
     exhaust.push({
       x,

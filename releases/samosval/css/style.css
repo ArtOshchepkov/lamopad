@@ -20,6 +20,7 @@ html, body {
   overflow: hidden;
   user-select: none;
   -webkit-user-select: none;
+  cursor: url('../../../img/lamopad_cursor_48px.png') 0 0, auto;
 }
 
 #wrap {
@@ -61,7 +62,6 @@ html, body {
   height: auto;
   aspect-ratio: 800 / 380;
   image-rendering: pixelated;
-  cursor: pointer;
 }
 
 /* ── Overlays common ───────────────────────────────────── */

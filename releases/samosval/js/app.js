@@ -37,7 +37,7 @@ const LYRIC_COLORS = ['#f0e6ff', '#ff69b4', '#cc88ff', '#ffdd00', '#88ffdd'];
 
 // ── Assets ────────────────────────────────────────────────────────────────────
 const shmurdikImg = new Image();
-shmurdikImg.src = 'releases/samosval/shmurdik_40px.png';
+shmurdikImg.src = 'shmurdik_40px.png';
 const audioEl = document.getElementById('audio');
 
 // ── Web Audio ─────────────────────────────────────────────────────────────────

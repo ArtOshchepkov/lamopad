@@ -184,6 +184,7 @@ document.addEventListener('keydown', e => {
   if (e.code === 'KeyP' && mode === 'play') spawnPill();
 });
 document.addEventListener('touchstart', e => {
+  if (e.target.closest('a')) return; // let link taps through natively
   e.preventDefault();
   const t = e.touches[0];
   handlePointer(t.clientX, t.clientY);

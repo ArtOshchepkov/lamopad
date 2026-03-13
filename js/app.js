@@ -50,6 +50,7 @@ let score, speed, frame, bgX, wheelAngle;
 let nextObs, nextLyric;
 let surrealTimer, paletteIdx;
 let exhaust;
+let pills, speedBoostTimer, psychoTimer, nextPill;
 
 function reset() {
   player = {
@@ -68,9 +69,13 @@ function reset() {
   wheelAngle = 0;
   nextObs      = 110;
   nextLyric    = 60;
-  surrealTimer = 0;
-  paletteIdx   = 0;
-  exhaust      = [];
+  surrealTimer   = 0;
+  paletteIdx     = 0;
+  exhaust        = [];
+  pills          = [];
+  speedBoostTimer = 0;
+  psychoTimer    = 0;
+  nextPill       = 900;   // first pill possible at ~15 sec
   canvas.style.filter    = '';
   canvas.style.transform = '';
   document.getElementById('score').textContent = '0';
@@ -113,17 +118,25 @@ function startGame() {
 
 // ── Surreal canvas effect ─────────────────────────────────────────────────────
 function tickSurreal() {
+  // Psycho pill overrides everything
+  if (psychoTimer > 0) {
+    if (frame % 6 === 0) paletteIdx = (paletteIdx + 1) % PALETTES.length;
+    const hue   = PALETTES[paletteIdx];
+    const t     = psychoTimer / 300;
+    const shake = 14 * t;
+    canvas.style.filter    = `hue-rotate(${hue}deg) brightness(1.5) saturate(3) contrast(1.2)`;
+    canvas.style.transform = `translate(${(Math.random()-0.5)*shake}px,${(Math.random()-0.5)*shake}px)`;
+    psychoTimer--;
+    return;
+  }
+
   const hue = PALETTES[paletteIdx];
-
   if (surrealTimer > 0) {
-    const t         = surrealTimer / 32;
-    const shakeAmt  = 10 * t;
-    const shakeX    = (Math.random() - 0.5) * shakeAmt;
-    const shakeY    = (Math.random() - 0.5) * shakeAmt;
-    const brightness = surrealTimer > 26 ? 2.5 : 1;   // flash on first 6 frames
-
+    const t          = surrealTimer / 32;
+    const shakeAmt   = 10 * t;
+    const brightness = surrealTimer > 26 ? 2.5 : 1;
     canvas.style.filter    = `hue-rotate(${hue}deg) brightness(${brightness}) saturate(1.6)`;
-    canvas.style.transform = `translate(${shakeX}px, ${shakeY}px)`;
+    canvas.style.transform = `translate(${(Math.random()-0.5)*shakeAmt}px,${(Math.random()-0.5)*shakeAmt}px)`;
     surrealTimer--;
   } else {
     canvas.style.filter    = `hue-rotate(${hue}deg) saturate(1.3)`;
@@ -144,7 +157,7 @@ function pipePos() {
 function spawnExhaust() {
   const { x, y } = pipePos();
   // More particles during lane switch
-  const count = player.switchFlash > 0.1 ? 4 : 1;
+  const count = speedBoostTimer > 0 ? 8 : player.switchFlash > 0.1 ? 4 : 1;
   for (let i = 0; i < count; i++) {
     exhaust.push({
       x,
@@ -552,6 +565,54 @@ function drawFloatie(f) {
   ctx.restore();
 }
 
+// ── Pills ─────────────────────────────────────────────────────────────────────
+// Pill y = llama face height for that lane
+function pillY(lane) { return LANE_Y[lane] - PH - 20; }
+
+function spawnPill() {
+  const lane = Math.random() < 0.5 ? 0 : 1;
+  const type = Math.random() < 0.5 ? 0 : 1;   // 0 = speed, 1 = psycho
+  pills.push({ x: GW + 20, y: pillY(lane), lane, type, angle: 0 });
+}
+
+function drawPill(p) {
+  ctx.save();
+  ctx.translate(p.x, p.y);
+  ctx.rotate(p.angle);
+
+  const hw = 7, r = 4;
+  const c1  = p.type === 0 ? '#ffee00' : '#ff22ff';
+  const c2  = p.type === 0 ? '#ff8800' : '#00ffee';
+  const gc  = p.type === 0 ? '#ffbb00' : '#dd00ff';
+
+  glow(gc, 18);
+
+  // Left half
+  ctx.fillStyle = c1;
+  ctx.beginPath();
+  ctx.arc(-hw, 0, r, Math.PI * 0.5, Math.PI * 1.5);
+  ctx.lineTo(0, -r); ctx.lineTo(0, r);
+  ctx.closePath(); ctx.fill();
+
+  // Right half
+  ctx.fillStyle = c2;
+  ctx.beginPath();
+  ctx.moveTo(0, -r); ctx.lineTo(hw, -r);
+  ctx.arc(hw, 0, r, Math.PI * 1.5, Math.PI * 0.5);
+  ctx.lineTo(0, r);
+  ctx.closePath(); ctx.fill();
+
+  // Divider + shine
+  noGlow();
+  ctx.strokeStyle = 'rgba(255,255,255,0.4)';
+  ctx.lineWidth = 0.8;
+  ctx.beginPath(); ctx.moveTo(0, -r); ctx.lineTo(0, r); ctx.stroke();
+  ctx.fillStyle = 'rgba(255,255,255,0.22)';
+  ctx.beginPath(); ctx.ellipse(-hw * 0.5, -r * 0.5, hw * 0.35, r * 0.3, -0.3, 0, Math.PI * 2); ctx.fill();
+
+  ctx.restore();
+}
+
 // ── Lane indicator (arrows) ───────────────────────────────────────────────────
 function drawLaneHint() {
   // Show small arrow pointing to the safe lane (where player isn't)
@@ -602,10 +663,18 @@ function spawnLyric() {
 
 // ── Collision ─────────────────────────────────────────────────────────────────
 function hitTest() {
-  // Only check obstacles in the current lane
-  // Player hitbox is slightly inset
   const px1 = player.x + 16,  px2 = player.x + PW - 10;
   const py1 = player.y + 6,   py2 = player.y + PH - 2;
+  if (speedBoostTimer > 0) {
+    // Smash through — remove colliding obstacles
+    obstacles = obstacles.filter(o => {
+      if (o.lane !== player.lane) return true;
+      const hit = px2 > o.x + 4 && px1 < o.x + o.w - 4 &&
+                  py2 > o.y + 4 && py1 < o.y + o.h;
+      return !hit;
+    });
+    return false;
+  }
   return obstacles.some(o => {
     if (o.lane !== player.lane) return false;
     return px2 > o.x + 4 && px1 < o.x + o.w - 4 &&
@@ -657,6 +726,29 @@ function loop() {
   });
   floaties = floaties.filter(f => f.life < 1);
 
+  // Pills
+  if (frame >= nextPill) {
+    if (Math.random() < 0.4) spawnPill();
+    nextPill = frame + 400 + Math.floor(Math.random() * 300);
+  }
+  pills.forEach(p => { p.x -= speed; p.angle += 0.04; });
+  pills = pills.filter(p => p.x + 14 > -20);
+
+  // Pill catch
+  const faceX = player.x + 22;
+  pills = pills.filter(p => {
+    if (p.lane !== player.lane) return true;
+    if (faceX + 20 > p.x - 14 && faceX - 10 < p.x + 14) {
+      if (p.type === 0) speedBoostTimer = 240;
+      else psychoTimer = 300;
+      return false;
+    }
+    return true;
+  });
+
+  // Speed boost
+  if (speedBoostTimer > 0) { speed += 2.5; speedBoostTimer--; }
+
   // Collision (only when close enough to target lane — not mid-switch)
   const switchProgress = Math.abs(player.y - player.targetY) / Math.abs(LANE_Y[0] - LANE_Y[1]);
   if (switchProgress < 0.4 && hitTest()) { die(); return; }
@@ -667,6 +759,7 @@ function loop() {
   drawBg();
   drawLaneHint();
   floaties.forEach(drawFloatie);
+  pills.forEach(drawPill);
   drawExhaust();          // trail behind player
   obstacles.forEach(drawObstacle);
   drawPlayer();

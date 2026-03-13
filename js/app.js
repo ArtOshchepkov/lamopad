@@ -10,7 +10,7 @@ const PH = 58;
 const WR = 13;
 
 const INIT_SPD = 3.2;
-const SPD_INC  = 0.0004;
+const SPD_INC  = 0.0015;
 const LERP_SPD = 0.14;   // lane switch smoothness (higher = snappier)
 
 const LYRICS = [
@@ -384,7 +384,7 @@ function loop() {
   // Obstacles
   if (frame >= nextObs) {
     spawnObs();
-    const gap = Math.max(70, 130 - Math.floor(frame / 400) * 8);
+    const gap = Math.max(45, 130 - Math.floor(frame / 200) * 8);
     nextObs   = frame + gap + Math.floor(Math.random() * 50);
   }
   obstacles.forEach(o => { o.x -= speed; });

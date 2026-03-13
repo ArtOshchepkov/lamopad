@@ -110,6 +110,17 @@ html, body {
   color: var(--text);
   min-width: 4ch;
   text-align: right;
+  transition: color 0.1s;
+}
+
+#hud-score.score-flash {
+  animation: scoreFlash 0.6s ease-out forwards;
+}
+
+@keyframes scoreFlash {
+  0%   { text-shadow: 0 0 18px #fff, 0 0 36px var(--yellow); color: var(--yellow); }
+  60%  { text-shadow: 0 0 10px var(--purple); color: var(--text); }
+  100% { text-shadow: 0 0 8px var(--purple); }
 }
 
 /* ── Canvas ────────────────────────────────────────────── */
@@ -192,6 +203,20 @@ html, body {
 @keyframes blink {
   0%, 100% { opacity: 1; }
   50% { opacity: 0; }
+}
+
+#intro-hints {
+  display: flex;
+  flex-direction: column;
+  gap: 8px;
+  margin-top: 4px;
+}
+
+.hint-line {
+  font-size: clamp(5px, 1.1vw, 8px);
+  color: var(--purple-light);
+  opacity: 0.75;
+  letter-spacing: 0.05em;
 }
 
 /* ── Warning overlay ───────────────────────────────────── */

@@ -82,6 +82,7 @@ let nextObs, nextLyric;
 let surrealTimer, paletteIdx;
 let exhaust, bgParticles, fallingLlamas;
 let pills, speedBoostTimer, psychoTimer, glitchTimer, mirrorTimer, kaleidoTimer, nextPill;
+let scorePopups;
 
 function reset() {
   player = {
@@ -118,6 +119,7 @@ function reset() {
   glitchTimer  = 0;
   mirrorTimer  = 0;
   kaleidoTimer = 0;
+  scorePopups  = [];
   document.getElementById('score').textContent = '0';
 }
 
@@ -745,6 +747,42 @@ function drawFloatie(f) {
   ctx.restore();
 }
 
+// ── Score popups ──────────────────────────────────────────────────────────────
+const PILL_POINTS  = [100, 150, 200, 100, 300];
+const PILL_PCOL    = ['#ffee00', '#ff22ff', '#00ff44', '#0088ff', '#00ffcc'];
+const hudScore     = document.getElementById('hud-score');
+
+function spawnScorePopup(x, y, type) {
+  scorePopups.push({
+    x, y,
+    text:  `+${PILL_POINTS[type]} ЭКЗИСТЕНС`,
+    color: PILL_PCOL[type],
+    life:  1,
+  });
+  hudScore.classList.remove('score-flash');
+  requestAnimationFrame(() => hudScore.classList.add('score-flash'));
+}
+
+function updateScorePopups() {
+  scorePopups.forEach(p => { p.y -= 1.1; p.life -= 0.022; });
+  scorePopups = scorePopups.filter(p => p.life > 0);
+}
+
+function drawScorePopups() {
+  for (const p of scorePopups) {
+    ctx.save();
+    ctx.globalAlpha = p.life > 0.3 ? p.life : p.life * 2;
+    glow(p.color, 16);
+    ctx.fillStyle    = p.color;
+    ctx.font         = `${Math.round(14 * Math.min(1, p.life * 3))}px 'Press Start 2P', monospace`;
+    ctx.textAlign    = 'center';
+    ctx.textBaseline = 'middle';
+    ctx.fillText(p.text, p.x, p.y);
+    noGlow();
+    ctx.restore();
+  }
+}
+
 // ── Pills ─────────────────────────────────────────────────────────────────────
 // Pill y = llama face height for that lane
 function pillY(lane) { return LANE_Y[lane] - PH - 20; }
@@ -976,6 +1014,8 @@ function loop() {
       else if (p.type === 2) { glitchTimer  = 360; }
       else if (p.type === 3) { mirrorTimer  = 480; }
       else if (p.type === 4) { kaleidoTimer = 420; }
+      score += PILL_POINTS[p.type];
+      spawnScorePopup(faceX, p.y, p.type);
       return false;
     }
     return true;
@@ -1012,7 +1052,9 @@ function loop() {
   pills.forEach(drawPill);
   drawExhaust();          // trail behind player
   obstacles.forEach(drawObstacle);
+  updateScorePopups();
   drawPlayer();
+  drawScorePopups();
   drawGlitch();           // glitch overlay on top of everything
 
   if (kaleidoTimer > 0) {

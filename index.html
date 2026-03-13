@@ -30,13 +30,24 @@
         <span>ЭКЗИСТЕНС:</span>
         <span id="score">0</span>
       </div>
+      <button id="vol-btn" aria-label="Громкость">ЗВУК: ВКЛ</button>
     </header>
 
     <div id="canvas-wrap">
       <canvas id="c"></canvas>
     </div>
 
-    <div id="overlay">
+    <div id="warning">
+      <div id="warning-inner">
+        <p id="warn-epilepsy">МУЗЫКА И ЭПИЛЕПСИЯ</p>
+        <p class="warn-text">Музыка включится автоматически.<br>Громкость — кнопка в углу.</p>
+        <div class="warn-rule"></div>
+        <p class="warn-text">Яркие вспышки.<br>Людям с эпилепсией рекомендуется воздержаться.</p>
+        <p id="warn-ok">ПРОБЕЛ / ТАП — ПОНЯЛ</p>
+      </div>
+    </div>
+
+    <div id="overlay" class="hidden">
       <div id="overlay-inner">
         <img src="releases/samosval/самосвал-бложка.jpg" id="cover" alt="Самосвал">
         <h1 id="intro-title">Я САМОСВАЛ</h1>

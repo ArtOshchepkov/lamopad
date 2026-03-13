@@ -82,6 +82,30 @@ html, body {
   text-shadow: 0 0 8px var(--purple);
 }
 
+#vol-btn {
+  background: none;
+  border: 1px solid var(--purple-light);
+  color: var(--purple-light);
+  font-family: var(--font);
+  font-size: clamp(5px, 1vw, 7px);
+  padding: 0.4em 0.7em;
+  cursor: pointer;
+  letter-spacing: 0.04em;
+  text-shadow: 0 0 8px var(--purple);
+  transition: border-color 0.15s, color 0.15s;
+}
+
+#vol-btn:hover {
+  border-color: var(--pink-light);
+  color: var(--pink-light);
+}
+
+#vol-btn.muted {
+  color: rgba(170, 68, 255, 0.4);
+  border-color: rgba(170, 68, 255, 0.3);
+  text-shadow: none;
+}
+
 #score {
   color: var(--text);
   min-width: 4ch;
@@ -168,6 +192,55 @@ html, body {
 @keyframes blink {
   0%, 100% { opacity: 1; }
   50% { opacity: 0; }
+}
+
+/* ── Warning overlay ───────────────────────────────────── */
+#warning {
+  position: absolute;
+  inset: 0;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  background: rgba(8, 0, 18, 0.96);
+  z-index: 20;
+}
+
+#warning-inner {
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  gap: 16px;
+  text-align: center;
+  padding: 24px;
+  max-width: 480px;
+  border: 1px solid rgba(255, 0, 110, 0.3);
+}
+
+#warn-epilepsy {
+  font-size: clamp(14px, 3.5vw, 24px);
+  color: var(--pink);
+  text-shadow: 0 0 20px var(--pink), 0 0 40px rgba(255, 0, 110, 0.4);
+  letter-spacing: 0.12em;
+}
+
+.warn-text {
+  font-size: clamp(7px, 1.5vw, 11px);
+  color: var(--text);
+  line-height: 2.2;
+  opacity: 0.85;
+}
+
+.warn-rule {
+  width: 60%;
+  height: 1px;
+  background: rgba(170, 68, 255, 0.3);
+}
+
+#warn-ok {
+  font-size: clamp(6px, 1.3vw, 9px);
+  color: var(--purple-light);
+  animation: blink 1s step-end infinite;
+  margin-top: 4px;
 }
 
 /* ── Dead overlay ──────────────────────────────────────── */

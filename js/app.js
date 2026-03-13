@@ -69,7 +69,8 @@ canvas.width  = GW;
 canvas.height = GH;
 
 // ── State ─────────────────────────────────────────────────────────────────────
-let mode; // 'intro' | 'play' | 'dead'
+let mode; // 'warning' | 'intro' | 'play' | 'dead'
+let deadAt = 0; // timestamp of death, for restart grace period
 let player, obstacles, floaties;
 let score, speed, frame, bgX, wheelAngle;
 let nextObs, nextLyric;
@@ -112,10 +113,25 @@ function reset() {
   document.getElementById('score').textContent = '0';
 }
 
+// ── Volume toggle ─────────────────────────────────────────────────────────────
+const volBtn = document.getElementById('vol-btn');
+volBtn.addEventListener('click', e => {
+  e.stopPropagation();
+  audioEl.muted = !audioEl.muted;
+  volBtn.textContent = audioEl.muted ? 'ЗВУК: ВЫКЛ' : 'ЗВУК: ВКЛ';
+  volBtn.classList.toggle('muted', audioEl.muted);
+});
+
 // ── Input ─────────────────────────────────────────────────────────────────────
 function switchLane() {
+  if (mode === 'warning') {
+    document.getElementById('warning').classList.add('hidden');
+    document.getElementById('overlay').classList.remove('hidden');
+    mode = 'intro';
+    return;
+  }
   if (mode === 'intro') { startGame(); return; }
-  if (mode === 'dead')  { startGame(); return; }
+  if (mode === 'dead')  { if (Date.now() - deadAt >= 1000) startGame(); return; }
 
   player.lane    = player.lane === 0 ? 1 : 0;
   player.targetY = LANE_Y[player.lane] - PH;
@@ -849,7 +865,8 @@ function loop() {
 
 // ── Death ─────────────────────────────────────────────────────────────────────
 function die() {
-  mode = 'dead';
+  mode   = 'dead';
+  deadAt = Date.now();
   const audio = document.getElementById('audio');
   if (audio) audio.pause();
   document.getElementById('final-score').textContent = Math.floor(score);
@@ -857,7 +874,7 @@ function die() {
 }
 
 // ── Boot ──────────────────────────────────────────────────────────────────────
-mode = 'intro';
+mode = 'warning';
 reset();
 drawBg();
 drawPlayer();

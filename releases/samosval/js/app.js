@@ -114,7 +114,7 @@ function reset() {
   paletteIdx     = 0;
   exhaust        = [];
   initBgParticles();
-  fallingLlamas = Array.from({ length: 6 }, () => makeFallingLlama(true));
+  fallingLlamas = Array.from({ length: LOW_GFX ? 3 : 6 }, () => makeFallingLlama(true));
   pills          = [];
   speedBoostTimer = 0;
   psychoTimer    = 0;
@@ -248,8 +248,10 @@ function tickSurreal() {
     filter    += ` contrast(1.5) brightness(1.2)`;
   }
 
-  canvas.style.filter    = filter;
-  canvas.style.transform = transform.trim() || 'none';
+  // Only touch DOM style when value actually changes (avoids layout recalc every frame)
+  const tf = transform.trim() || 'none';
+  if (canvas.style.filter    !== filter) canvas.style.filter    = filter;
+  if (canvas.style.transform !== tf)     canvas.style.transform = tf;
 }
 
 // ── Draw helpers ──────────────────────────────────────────────────────────────
@@ -294,20 +296,20 @@ function updateExhaust() {
 }
 
 function drawExhaust() {
+  if (!exhaust.length) return;
+  ctx.save();
   for (const p of exhaust) {
-    const r = Math.max(0.3, p.size * p.life);
-    ctx.save();
-    ctx.globalAlpha = p.life * 0.9;
-    // hot at birth → cool purple at end
+    const r   = Math.max(0.3, p.size * p.life);
     const col = p.life > 0.6 ? '#ff88cc' : p.life > 0.3 ? '#cc44ff' : '#6600cc';
-    glow(col, 16 * p.life);
-    ctx.fillStyle = col;
+    ctx.globalAlpha = p.life * 0.9;
+    ctx.fillStyle   = col;
+    if (!LOW_GFX) { ctx.shadowColor = col; ctx.shadowBlur = 16 * p.life; }
     ctx.beginPath();
     ctx.arc(p.x, p.y, r, 0, Math.PI * 2);
     ctx.fill();
-    noGlow();
-    ctx.restore();
   }
+  if (!LOW_GFX) ctx.shadowBlur = 0;
+  ctx.restore();
 }
 
 // ── Falling background llamas ─────────────────────────────────────────────────
@@ -390,7 +392,7 @@ function makeBgParticle(scatter) {
 }
 
 function initBgParticles() {
-  bgParticles = Array.from({ length: 38 }, () => makeBgParticle(true));
+  bgParticles = Array.from({ length: LOW_GFX ? 16 : 38 }, () => makeBgParticle(true));
 }
 
 function updateBgParticles() {
@@ -403,27 +405,31 @@ function updateBgParticles() {
 }
 
 function drawBgParticles() {
+  ctx.save();
   for (const p of bgParticles) {
-    ctx.save();
     ctx.globalAlpha = p.alpha * (0.55 + 0.45 * Math.sin(p.phase));
     ctx.fillStyle   = p.color;
-    ctx.shadowColor = p.color;
-    ctx.shadowBlur  = p.size * 5;
+    if (!LOW_GFX) { ctx.shadowColor = p.color; ctx.shadowBlur = p.size * 5; }
     ctx.beginPath();
     ctx.arc(p.x, p.y, p.size, 0, Math.PI * 2);
     ctx.fill();
-    ctx.restore();
   }
+  if (!LOW_GFX) ctx.shadowBlur = 0;
+  ctx.restore();
 }
 
 // ── Background ────────────────────────────────────────────────────────────────
+let skyGradient = null; // created once, reused every frame
+
 function drawBg() {
   // Full sky
-  const sky = ctx.createLinearGradient(0, 0, 0, GH);
-  sky.addColorStop(0,   '#04000c');
-  sky.addColorStop(0.5, '#0e0022');
-  sky.addColorStop(1,   '#06000f');
-  ctx.fillStyle = sky;
+  if (!skyGradient) {
+    skyGradient = ctx.createLinearGradient(0, 0, 0, GH);
+    skyGradient.addColorStop(0,   '#04000c');
+    skyGradient.addColorStop(0.5, '#0e0022');
+    skyGradient.addColorStop(1,   '#06000f');
+  }
+  ctx.fillStyle = skyGradient;
   ctx.fillRect(0, 0, GW, GH);
 
   // Road strip between the two lanes
@@ -920,24 +926,28 @@ function drawGlitch() {
 }
 
 // ── HUD overlay (drawn on canvas) ─────────────────────────────────────────────
+let hudW1 = null, hudW2 = null; // cached measureText widths
+
 function drawHUD() {
   ctx.save();
   ctx.textBaseline = 'middle';
 
   // Title: ЛАМОПАД — САМОСВАЛ
   ctx.font = '9px "Press Start 2P", monospace';
+  if (hudW1 === null) {
+    hudW1 = ctx.measureText('ЛАМОПАД').width;
+    hudW2 = ctx.measureText(' — ').width;
+  }
   ctx.textAlign = 'left';
   glow('#ff006e', 10);
   ctx.fillStyle = '#ff69b4';
   ctx.fillText('ЛАМОПАД', 12, 14);
-  const w1 = ctx.measureText('ЛАМОПАД').width;
   noGlow();
   ctx.fillStyle = '#aa44ff';
-  ctx.fillText(' — ', 12 + w1, 14);
-  const w2 = ctx.measureText(' — ').width;
+  ctx.fillText(' — ', 12 + hudW1, 14);
   glow('#ffdd00', 10);
   ctx.fillStyle = '#ffdd00';
-  ctx.fillText('САМОСВАЛ', 12 + w1 + w2, 14);
+  ctx.fillText('САМОСВАЛ', 12 + hudW1 + hudW2, 14);
 
   // Score
   noGlow();

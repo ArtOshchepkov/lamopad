@@ -11,8 +11,8 @@ const PW = 92;
 const PH = 58;
 const WR = 13;
 
-const INIT_SPD = 3.2;
-const SPD_INC  = 0.0015;
+const INIT_SPD = 4.0;
+const SPD_INC  = 0.001875;
 const LERP_SPD = 0.14;   // lane switch smoothness (higher = snappier)
 
 // Surreal effect — hue-rotate degrees cycled on each lane switch
@@ -92,6 +92,7 @@ let surrealTimer, paletteIdx;
 let exhaust, bgParticles, fallingLlamas;
 let pills, speedBoostTimer, psychoTimer, glitchTimer, mirrorTimer, kaleidoTimer, nextPill;
 let scorePopups;
+let lastTs = 0, dtScale = 1; // delta-time: lastTs = prev RAF timestamp, dtScale = dt/(1000/60)
 
 function reset() {
   player = {
@@ -130,6 +131,7 @@ function reset() {
   kaleidoTimer = 0;
   scorePopups  = [];
   hudFlashTimer = 0;
+  lastTs = 0;
 }
 
 // ── Stop clicks on links from bubbling to switchLane ─────────────────────────
@@ -221,27 +223,32 @@ function tickSurreal() {
   if (mirrorTimer > 0) {
     transform += ' scaleX(-1)';
     if (pannerNode) pannerNode.pan.value = Math.sin(frame * 0.18) * 0.95;
-    mirrorTimer--;
-    if (mirrorTimer === 0 && pannerNode) pannerNode.pan.value = 0;
+    mirrorTimer -= dtScale;
+    if (mirrorTimer <= 0) { mirrorTimer = 0; if (pannerNode) pannerNode.pan.value = 0; }
   }
 
   // Psycho
   if (psychoTimer > 0) {
-    if (frame % 6 === 0) paletteIdx = (paletteIdx + 1) % PALETTES.length;
+    // Cycle palette every 6 equivalent-60fps frames regardless of monitor Hz
+    if (Math.floor(frame) % 6 === 0 && Math.floor(frame) !== Math.floor(frame - dtScale)) {
+      paletteIdx = (paletteIdx + 1) % PALETTES.length;
+    }
     const t = psychoTimer / 600;
     transform += ` translate(${(Math.random()-0.5)*14*t}px,${(Math.random()-0.5)*14*t}px)`;
     filter    += ` brightness(1.5) saturate(3) contrast(1.2)`;
-    if (psychoTimer === 1 && boostFilter) boostFilter.gain.value = 0;
-    psychoTimer--;
+    psychoTimer -= dtScale;
+    if (psychoTimer <= 0) { psychoTimer = 0; if (boostFilter) boostFilter.gain.value = 0; }
   } else if (surrealTimer > 0) {
     const t = surrealTimer / 32;
     filter   += ` brightness(${surrealTimer > 26 ? 2.5 : 1}) saturate(1.6)`;
     transform += ` translate(${(Math.random()-0.5)*10*t}px,${(Math.random()-0.5)*10*t}px)`;
-    surrealTimer--;
+    surrealTimer -= dtScale;
+    if (surrealTimer < 0) surrealTimer = 0;
   }
 
-  // Glitch: CSS skew jitter
-  if (glitchTimer > 0 && glitchTimer % 8 < 2) {
+  // Glitch: CSS skew jitter (use floor so pattern is Hz-independent)
+  const glitchPhase = Math.floor(glitchTimer) % 8;
+  if (glitchTimer > 0 && glitchPhase < 2) {
     transform += ` skewX(${(Math.random()-0.5)*5}deg)`;
     filter    += ` contrast(1.5) brightness(1.2)`;
   }
@@ -249,7 +256,7 @@ function tickSurreal() {
   // Only apply CSS filter when an effect is actually active — even hue-rotate(0deg)
   // forces a GPU compositing pass every frame when it does nothing visible.
   const hasEffect = hue !== 0 || psychoTimer > 0 || surrealTimer > 0 ||
-                    (glitchTimer > 0 && glitchTimer % 8 < 2);
+                    (glitchTimer > 0 && glitchPhase < 2);
   const filterStr = hasEffect ? filter : '';
   const tf = transform.trim() || 'none';
   if (canvas.style.filter    !== filterStr) canvas.style.filter    = filterStr;
@@ -268,11 +275,11 @@ function pipePos() {
 
 function spawnExhaust() {
   const { x, y } = pipePos();
-  // More particles during lane switch; fewer in low-graphics mode
-  if (LOW_GFX && frame % 3 !== 0) return; // low-gfx: spawn every 3rd frame only
-  const count = LOW_GFX
-    ? (speedBoostTimer > 0 ? 1 : 1)
+  // Scale spawn count by dtScale so trail density stays consistent at any refresh rate
+  const baseCount = LOW_GFX
+    ? 1
     : (speedBoostTimer > 0 ? 5 : player.switchFlash > 0.1 ? 2 : 1);
+  const count = Math.max(1, Math.round(baseCount * dtScale));
   for (let i = 0; i < count; i++) {
     exhaust.push({
       x,
@@ -289,10 +296,10 @@ function spawnExhaust() {
 function updateExhaust() {
   spawnExhaust();
   exhaust.forEach(p => {
-    p.x   += p.vx;
-    p.y   += p.vy;
-    p.vy  *= 0.92;
-    p.life -= p.decay;
+    p.x   += p.vx * dtScale;
+    p.y   += p.vy * dtScale;
+    p.vy  *= Math.pow(0.92, dtScale); // frame-rate independent drag
+    p.life -= p.decay * dtScale;
   });
   exhaust = exhaust.filter(p => p.life > 0);
 }
@@ -374,9 +381,9 @@ function drawMiniLlama(l) {
 
 function updateFallingLlamas() {
   for (const l of fallingLlamas) {
-    l.y     += l.vy;
-    l.x     += l.vx;
-    l.angle += l.spin;
+    l.y     += l.vy * dtScale;
+    l.x     += l.vx * dtScale;
+    l.angle += l.spin * dtScale;
     if (l.y > GH + 50) Object.assign(l, makeFallingLlama(false));
   }
 }
@@ -403,9 +410,9 @@ function initBgParticles() {
 
 function updateBgParticles() {
   for (const p of bgParticles) {
-    p.x    += p.vx;
-    p.y    += p.vy;
-    p.phase += 0.025;
+    p.x    += p.vx * dtScale;
+    p.y    += p.vy * dtScale;
+    p.phase += 0.025 * dtScale;
     if (p.x < -4) Object.assign(p, makeBgParticle(false));
   }
 }
@@ -814,7 +821,7 @@ function spawnScorePopup(x, y, type) {
 }
 
 function updateScorePopups() {
-  scorePopups.forEach(p => { p.y -= 1.1; p.life -= 0.022; });
+  scorePopups.forEach(p => { p.y -= 1.1 * dtScale; p.life -= 0.022 * dtScale; });
   scorePopups = scorePopups.filter(p => p.life > 0);
 }
 
@@ -915,7 +922,7 @@ function applyKaleido() {
 
 // ── Glitch overlay ────────────────────────────────────────────────────────────
 function drawGlitch() {
-  if (glitchTimer <= 0 || glitchTimer % 8 >= 2) return;
+  if (glitchTimer <= 0 || Math.floor(glitchTimer) % 8 >= 2) return;
   ctx.save();
   // Horizontal scan bars
   const bars = 2 + Math.floor(Math.random() * 5);
@@ -961,7 +968,7 @@ function drawHUD() {
   if (hudFlashTimer > 0) {
     const t = hudFlashTimer / 36;
     ctx.fillStyle = t > 0.5 ? '#ffdd00' : '#aa44ff';
-    hudFlashTimer--;
+    // decremented in loop()
   } else {
     ctx.fillStyle = '#aa44ff';
   }
@@ -1050,18 +1057,24 @@ function hitTest() {
 }
 
 // ── Game loop ─────────────────────────────────────────────────────────────────
-function loop() {
+function loop(ts) {
   if (mode !== 'play') return;
 
-  frame++;
-  score      += 0.1;
-  speed = INIT_SPD + frame * SPD_INC;
-  bgX        += speed;
-  wheelAngle += speed * 0.07;
+  // Delta time: cap at 50 ms to avoid giant jumps after tab switching
+  if (!lastTs) lastTs = ts;
+  const dt = Math.min(ts - lastTs, 50);
+  lastTs = ts;
+  dtScale = dt / (1000 / 60); // 1.0 at 60 Hz, 0.5 at 120 Hz, etc.
 
-  // Smooth lane switch (lerp)
-  player.y += (player.targetY - player.y) * LERP_SPD;
-  if (player.switchFlash > 0) player.switchFlash = Math.max(0, player.switchFlash - 0.06);
+  frame += dtScale;
+  score      += 0.1 * dtScale;
+  speed = INIT_SPD + frame * SPD_INC;
+  bgX        += speed * dtScale;
+  wheelAngle += speed * 0.07 * dtScale;
+
+  // Smooth lane switch — frame-rate independent exponential lerp
+  player.y += (player.targetY - player.y) * (1 - Math.pow(1 - LERP_SPD, dtScale));
+  if (player.switchFlash > 0) player.switchFlash = Math.max(0, player.switchFlash - 0.06 * dtScale);
 
   // Obstacles
   if (frame >= nextObs) {
@@ -1069,7 +1082,7 @@ function loop() {
     const gap = Math.max(45, 130 - Math.floor(frame / 200) * 8);
     nextObs   = frame + gap + Math.floor(Math.random() * 50);
   }
-  obstacles.forEach(o => { o.x -= speed; });
+  obstacles.forEach(o => { o.x -= speed * dtScale; });
   obstacles = obstacles.filter(o => o.x + o.w > -20);
 
   // Lyrics
@@ -1078,8 +1091,8 @@ function loop() {
     nextLyric = frame + 85 + Math.floor(Math.random() * 75);
   }
   floaties.forEach(f => {
-    f.life  += 0.013;
-    f.y     += f.vy;
+    f.life  += 0.013 * dtScale;
+    f.y     += f.vy * dtScale;
     f.alpha  = f.life < 0.15
       ? f.life / 0.15
       : f.life > 0.75
@@ -1093,7 +1106,7 @@ function loop() {
     for (let i = 0; i < 3; i++) { if (Math.random() < 0.28) spawnPill(); }
     nextPill = frame + 400 + Math.floor(Math.random() * 360);
   }
-  pills.forEach(p => { p.x -= speed; p.angle += 0.04; });
+  pills.forEach(p => { p.x -= speed * dtScale; p.angle += 0.04 * dtScale; });
   pills = pills.filter(p => p.x + 14 > -20);
 
   // Pill catch
@@ -1116,16 +1129,18 @@ function loop() {
   // Speed boost
   if (speedBoostTimer > 0) {
     speed += 5;
-    speedBoostTimer--;
-    if (speedBoostTimer === 0) audioEl.playbackRate = 1.0;
+    speedBoostTimer -= dtScale;
+    if (speedBoostTimer <= 0) { speedBoostTimer = 0; audioEl.playbackRate = 1.0; }
   }
 
-  // Glitch: audio stutter
+  // Glitch: audio stutter (use floor so pattern period is Hz-independent)
   if (glitchTimer > 0) {
-    audioEl.volume = glitchTimer % 5 < 2 ? 0.08 : 1.0;
-    glitchTimer--;
-    if (glitchTimer === 0) audioEl.volume = 1.0;
+    audioEl.volume = Math.floor(glitchTimer) % 5 < 2 ? 0.08 : 1.0;
+    glitchTimer -= dtScale;
+    if (glitchTimer <= 0) { glitchTimer = 0; audioEl.volume = 1.0; }
   }
+
+  if (hudFlashTimer > 0) hudFlashTimer -= dtScale;
 
   // Collision (only when close enough to target lane — not mid-switch)
   const switchProgress = Math.abs(player.y - player.targetY) / Math.abs(LANE_Y[0] - LANE_Y[1]);
@@ -1152,8 +1167,8 @@ function loop() {
   if (kaleidoTimer > 0) {
     applyKaleido();
     audioEl.playbackRate = 1 + Math.sin(frame * 0.07) * 0.09;
-    kaleidoTimer--;
-    if (kaleidoTimer === 0) audioEl.playbackRate = 1.0;
+    kaleidoTimer -= dtScale;
+    if (kaleidoTimer <= 0) { kaleidoTimer = 0; audioEl.playbackRate = 1.0; }
   }
 
   drawHUD();

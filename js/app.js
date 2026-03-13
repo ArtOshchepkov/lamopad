@@ -405,7 +405,6 @@ function drawBg() {
     ctx.fillRect(x, midY - dashH / 2, dashW, dashH);
   }
 
-  // Perspective grid lines (vanishing to center of road)
   const vpX    = GW * 0.5;
   const step   = 80;
   const gridOff = bgX % step;

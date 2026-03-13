@@ -120,7 +120,7 @@ function reset() {
   mirrorTimer  = 0;
   kaleidoTimer = 0;
   scorePopups  = [];
-  document.getElementById('score').textContent = '0';
+  hudFlashTimer = 0;
 }
 
 // ── Stop clicks on links from bubbling to switchLane ─────────────────────────
@@ -128,14 +128,8 @@ function reset() {
   document.getElementById(id).addEventListener('click', e => e.stopPropagation());
 });
 
-// ── Volume toggle ─────────────────────────────────────────────────────────────
-const volBtn = document.getElementById('vol-btn');
-volBtn.addEventListener('click', e => {
-  e.stopPropagation();
-  audioEl.muted = !audioEl.muted;
-  volBtn.textContent = audioEl.muted ? 'ЗВУК: ВЫКЛ' : 'ЗВУК: ВКЛ';
-  volBtn.classList.toggle('muted', audioEl.muted);
-});
+// ── Volume state (drawn on canvas) ────────────────────────────────────────────
+let muted = false;
 
 // ── Input ─────────────────────────────────────────────────────────────────────
 function switchLane() {
@@ -158,6 +152,28 @@ function switchLane() {
 
 }
 
+// ── Canvas-coordinate hit test for vol button ─────────────────────────────────
+const VOL_BTN = { x: GW - 98, y: 5, w: 90, h: 18 };
+
+function canvasCoords(clientX, clientY) {
+  const r = canvas.getBoundingClientRect();
+  return {
+    x: (clientX - r.left) / r.width  * GW,
+    y: (clientY - r.top)  / r.height * GH,
+  };
+}
+
+function handlePointer(clientX, clientY) {
+  const { x, y } = canvasCoords(clientX, clientY);
+  if (x >= VOL_BTN.x && x <= VOL_BTN.x + VOL_BTN.w &&
+      y >= VOL_BTN.y && y <= VOL_BTN.y + VOL_BTN.h) {
+    muted = !muted;
+    audioEl.muted = muted;
+    return; // don't switch lane
+  }
+  switchLane();
+}
+
 document.addEventListener('keydown', e => {
   if (['Space', 'ArrowUp', 'ArrowDown', 'KeyW', 'KeyS'].includes(e.code)) {
     e.preventDefault();
@@ -165,8 +181,12 @@ document.addEventListener('keydown', e => {
   }
   if (e.code === 'KeyP' && mode === 'play') spawnPill();
 });
-document.addEventListener('touchstart', e => { e.preventDefault(); switchLane(); }, { passive: false });
-document.addEventListener('click', switchLane);
+document.addEventListener('touchstart', e => {
+  e.preventDefault();
+  const t = e.touches[0];
+  handlePointer(t.clientX, t.clientY);
+}, { passive: false });
+document.addEventListener('click', e => handlePointer(e.clientX, e.clientY));
 
 // ── Start ─────────────────────────────────────────────────────────────────────
 function startGame() {
@@ -750,7 +770,7 @@ function drawFloatie(f) {
 // ── Score popups ──────────────────────────────────────────────────────────────
 const PILL_POINTS  = [100, 150, 200, 100, 300];
 const PILL_PCOL    = ['#ffee00', '#ff22ff', '#00ff44', '#0088ff', '#00ffcc'];
-const hudScore     = document.getElementById('hud-score');
+let hudFlashTimer  = 0;
 
 function spawnScorePopup(x, y, type) {
   scorePopups.push({
@@ -759,8 +779,7 @@ function spawnScorePopup(x, y, type) {
     color: PILL_PCOL[type],
     life:  1,
   });
-  hudScore.classList.remove('score-flash');
-  requestAnimationFrame(() => hudScore.classList.add('score-flash'));
+  hudFlashTimer = 36;
 }
 
 function updateScorePopups() {
@@ -883,6 +902,57 @@ function drawGlitch() {
   ctx.restore();
 }
 
+// ── HUD overlay (drawn on canvas) ─────────────────────────────────────────────
+function drawHUD() {
+  ctx.save();
+  ctx.textBaseline = 'middle';
+
+  // Title: ЛАМОПАД — САМОСВАЛ
+  ctx.font = '9px "Press Start 2P", monospace';
+  ctx.textAlign = 'left';
+  glow('#ff006e', 10);
+  ctx.fillStyle = '#ff69b4';
+  ctx.fillText('ЛАМОПАД', 12, 14);
+  const w1 = ctx.measureText('ЛАМОПАД').width;
+  noGlow();
+  ctx.fillStyle = '#aa44ff';
+  ctx.fillText(' — ', 12 + w1, 14);
+  const w2 = ctx.measureText(' — ').width;
+  glow('#ffdd00', 10);
+  ctx.fillStyle = '#ffdd00';
+  ctx.fillText('САМОСВАЛ', 12 + w1 + w2, 14);
+
+  // Score
+  noGlow();
+  const scoreStr = 'ЭКЗИСТЕНС: ' + Math.floor(score);
+  if (hudFlashTimer > 0) {
+    const t = hudFlashTimer / 36;
+    glow(t > 0.5 ? '#ffffff' : '#ffdd00', 20 * t);
+    ctx.fillStyle = t > 0.5 ? '#ffdd00' : '#aa44ff';
+    hudFlashTimer--;
+  } else {
+    glow('#7700dd', 8);
+    ctx.fillStyle = '#aa44ff';
+  }
+  ctx.textAlign = 'right';
+  ctx.fillText(scoreStr, VOL_BTN.x - 10, 14);
+
+  // Volume button
+  noGlow();
+  ctx.font = '6px "Press Start 2P", monospace';
+  const volAlpha = muted ? 0.4 : 1;
+  ctx.globalAlpha = volAlpha;
+  glow(muted ? 'transparent' : '#aa44ff', 6);
+  ctx.strokeStyle = muted ? 'rgba(170,68,255,0.35)' : '#aa44ff';
+  ctx.lineWidth = 1;
+  ctx.strokeRect(VOL_BTN.x, VOL_BTN.y, VOL_BTN.w, VOL_BTN.h);
+  ctx.fillStyle = muted ? '#aa44ff' : '#aa44ff';
+  ctx.textAlign = 'center';
+  ctx.fillText(muted ? 'ЗВУК: ВЫКЛ' : 'ЗВУК: ВКЛ', VOL_BTN.x + VOL_BTN.w / 2, VOL_BTN.y + VOL_BTN.h / 2);
+
+  ctx.restore();
+}
+
 // ── Lane indicator (arrows) ───────────────────────────────────────────────────
 function drawLaneHint() {
   // Show small arrow pointing to the safe lane (where player isn't)
@@ -965,11 +1035,6 @@ function loop() {
   // Smooth lane switch (lerp)
   player.y += (player.targetY - player.y) * LERP_SPD;
   if (player.switchFlash > 0) player.switchFlash = Math.max(0, player.switchFlash - 0.06);
-
-  // Score
-  if (frame % 6 === 0) {
-    document.getElementById('score').textContent = Math.floor(score);
-  }
 
   // Obstacles
   if (frame >= nextObs) {
@@ -1064,6 +1129,8 @@ function loop() {
     if (kaleidoTimer === 0) audioEl.playbackRate = 1.0;
   }
 
+  drawHUD();
+
   requestAnimationFrame(loop);
 }
 
@@ -1086,3 +1153,4 @@ mode = 'warning';
 reset();
 drawBg();
 drawPlayer();
+drawHUD();

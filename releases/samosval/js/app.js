@@ -238,8 +238,6 @@ function tickSurreal() {
     filter   += ` brightness(${surrealTimer > 26 ? 2.5 : 1}) saturate(1.6)`;
     transform += ` translate(${(Math.random()-0.5)*10*t}px,${(Math.random()-0.5)*10*t}px)`;
     surrealTimer--;
-  } else {
-    filter += ' saturate(1.3)';
   }
 
   // Glitch: CSS skew jitter
@@ -248,10 +246,14 @@ function tickSurreal() {
     filter    += ` contrast(1.5) brightness(1.2)`;
   }
 
-  // Only touch DOM style when value actually changes (avoids layout recalc every frame)
+  // Only apply CSS filter when an effect is actually active — even hue-rotate(0deg)
+  // forces a GPU compositing pass every frame when it does nothing visible.
+  const hasEffect = hue !== 0 || psychoTimer > 0 || surrealTimer > 0 ||
+                    (glitchTimer > 0 && glitchTimer % 8 < 2);
+  const filterStr = hasEffect ? filter : '';
   const tf = transform.trim() || 'none';
-  if (canvas.style.filter    !== filter) canvas.style.filter    = filter;
-  if (canvas.style.transform !== tf)     canvas.style.transform = tf;
+  if (canvas.style.filter    !== filterStr) canvas.style.filter    = filterStr;
+  if (canvas.style.transform !== tf)        canvas.style.transform = tf;
 }
 
 // ── Draw helpers ──────────────────────────────────────────────────────────────
@@ -301,14 +303,18 @@ function drawExhaust() {
   for (const p of exhaust) {
     const r   = Math.max(0.3, p.size * p.life);
     const col = p.life > 0.6 ? '#ff88cc' : p.life > 0.3 ? '#cc44ff' : '#6600cc';
-    ctx.globalAlpha = p.life * 0.9;
-    ctx.fillStyle   = col;
-    if (!LOW_GFX) { ctx.shadowColor = col; ctx.shadowBlur = 16 * p.life; }
-    ctx.beginPath();
-    ctx.arc(p.x, p.y, r, 0, Math.PI * 2);
-    ctx.fill();
+    const a   = p.life * 0.9;
+    ctx.fillStyle = col;
+    if (!LOW_GFX) {
+      // fake glow: concentric transparent circles instead of shadowBlur
+      ctx.globalAlpha = a * 0.1;
+      ctx.beginPath(); ctx.arc(p.x, p.y, r * 4.5, 0, Math.PI * 2); ctx.fill();
+      ctx.globalAlpha = a * 0.2;
+      ctx.beginPath(); ctx.arc(p.x, p.y, r * 2.5, 0, Math.PI * 2); ctx.fill();
+    }
+    ctx.globalAlpha = a;
+    ctx.beginPath(); ctx.arc(p.x, p.y, r, 0, Math.PI * 2); ctx.fill();
   }
-  if (!LOW_GFX) ctx.shadowBlur = 0;
   ctx.restore();
 }
 
@@ -407,14 +413,18 @@ function updateBgParticles() {
 function drawBgParticles() {
   ctx.save();
   for (const p of bgParticles) {
-    ctx.globalAlpha = p.alpha * (0.55 + 0.45 * Math.sin(p.phase));
-    ctx.fillStyle   = p.color;
-    if (!LOW_GFX) { ctx.shadowColor = p.color; ctx.shadowBlur = p.size * 5; }
-    ctx.beginPath();
-    ctx.arc(p.x, p.y, p.size, 0, Math.PI * 2);
-    ctx.fill();
+    const a = p.alpha * (0.55 + 0.45 * Math.sin(p.phase));
+    ctx.fillStyle = p.color;
+    if (!LOW_GFX) {
+      // fake glow: concentric transparent circles instead of shadowBlur
+      ctx.globalAlpha = a * 0.08;
+      ctx.beginPath(); ctx.arc(p.x, p.y, p.size * 5, 0, Math.PI * 2); ctx.fill();
+      ctx.globalAlpha = a * 0.18;
+      ctx.beginPath(); ctx.arc(p.x, p.y, p.size * 2.8, 0, Math.PI * 2); ctx.fill();
+    }
+    ctx.globalAlpha = a;
+    ctx.beginPath(); ctx.arc(p.x, p.y, p.size, 0, Math.PI * 2); ctx.fill();
   }
-  if (!LOW_GFX) ctx.shadowBlur = 0;
   ctx.restore();
 }
 
@@ -464,24 +474,31 @@ function drawBg() {
   }
   ctx.restore();
 
-  // Lane ground lines
+  // Lane ground lines (fake glow via layered strokes — no shadowBlur)
   ctx.save();
   for (let i = 0; i < 2; i++) {
-    glow(i === 0 ? '#ff006e' : '#aa44ff', 18);
-    ctx.strokeStyle = i === 0 ? '#ff006e' : '#bb55ff';
-    ctx.lineWidth   = 2;
-    ctx.beginPath();
-    ctx.moveTo(0, LANE_Y[i]); ctx.lineTo(GW, LANE_Y[i]);
-    ctx.stroke();
+    const col = i === 0 ? '#ff006e' : '#bb55ff';
+    ctx.strokeStyle = col;
+    ctx.lineWidth = 12; ctx.globalAlpha = 0.06;
+    ctx.beginPath(); ctx.moveTo(0, LANE_Y[i]); ctx.lineTo(GW, LANE_Y[i]); ctx.stroke();
+    ctx.lineWidth = 6;  ctx.globalAlpha = 0.14;
+    ctx.beginPath(); ctx.moveTo(0, LANE_Y[i]); ctx.lineTo(GW, LANE_Y[i]); ctx.stroke();
+    ctx.lineWidth = 2;  ctx.globalAlpha = 1;
+    ctx.beginPath(); ctx.moveTo(0, LANE_Y[i]); ctx.lineTo(GW, LANE_Y[i]); ctx.stroke();
   }
-  noGlow();
   ctx.restore();
 }
 
 // ── Wheel ─────────────────────────────────────────────────────────────────────
 function drawWheel(cx, cy) {
   ctx.save();
-  glow('#ff006e', 10);
+  // fake glow ring (no shadowBlur)
+  ctx.strokeStyle = '#ff006e';
+  ctx.lineWidth = 10; ctx.globalAlpha = 0.1;
+  ctx.beginPath(); ctx.arc(cx, cy, WR, 0, Math.PI * 2); ctx.stroke();
+  ctx.lineWidth = 6;  ctx.globalAlpha = 0.18;
+  ctx.beginPath(); ctx.arc(cx, cy, WR, 0, Math.PI * 2); ctx.stroke();
+  ctx.globalAlpha = 1;
   ctx.fillStyle = '#1c1c28';
   ctx.beginPath(); ctx.arc(cx, cy, WR, 0, Math.PI * 2); ctx.fill();
   ctx.strokeStyle = '#ff006e';
@@ -509,9 +526,13 @@ function drawPlayer() {
 
   ctx.save();
 
-  // Lane-switch flash (outer glow burst)
+  // Lane-switch flash (white overlay — no shadowBlur)
   if (player.switchFlash > 0) {
-    glow('#ffffff', 30 * player.switchFlash);
+    ctx.save();
+    ctx.globalAlpha = player.switchFlash * 0.28;
+    ctx.fillStyle = '#ffffff';
+    ctx.fillRect(x - 8, y - 18, PW + 16, PH + 24);
+    ctx.restore();
   }
 
   // ── 1. LLAMA — drawn first so truck body covers neck base ──
@@ -519,7 +540,6 @@ function drawPlayer() {
   ctx.translate(x + 22, y + 14);  // centered in truck bed
 
   // Neck — short woolly trapezoid
-  glow('#cc8844', 8);
   ctx.fillStyle = '#c49060';
   ctx.beginPath();
   ctx.moveTo(-7, 2);
@@ -530,7 +550,6 @@ function drawPlayer() {
   ctx.fill();
 
   // Wool texture
-  noGlow();
   ctx.strokeStyle = '#e8c080';
   ctx.lineWidth = 1.5;
   ctx.lineCap = 'round';
@@ -542,7 +561,6 @@ function drawPlayer() {
   ctx.translate(1, -20);
 
   // Head
-  glow('#dd9955', 6);
   ctx.fillStyle = '#dbb882';
   ctx.beginPath();
   ctx.ellipse(0, -12, 12, 13, 0, 0, Math.PI * 2);
@@ -583,7 +601,6 @@ function drawPlayer() {
   });
 
   // Back ear — banana shape (bezier)
-  noGlow();
   ctx.fillStyle = '#b08050';
   ctx.beginPath();
   ctx.moveTo(-8, -21);
@@ -648,29 +665,24 @@ function drawPlayer() {
   ctx.beginPath();
   ctx.arc(5.5, -1, 1.8, 0, Math.PI); ctx.stroke();
 
-  // ── Sunglasses — two lenses, 3/4 view ──
-  glow('#ff006e', 12);
-
+  // ── Sunglasses — two lenses, 3/4 view (fake glow via wider strokes) ──
   // Left lens
   ctx.fillStyle = '#080018';
-  ctx.beginPath();
-  ctx.ellipse(-5, -15, 4, 3, 0, 0, Math.PI * 2);
-  ctx.fill();
+  ctx.beginPath(); ctx.ellipse(-5, -15, 4, 3, 0, 0, Math.PI * 2); ctx.fill();
   ctx.strokeStyle = '#ff006e';
-  ctx.lineWidth = 1.6;
-  ctx.beginPath();
-  ctx.ellipse(-5, -15, 4, 3, 0, 0, Math.PI * 2);
-  ctx.stroke();
+  ctx.lineWidth = 5; ctx.globalAlpha = 0.15;
+  ctx.beginPath(); ctx.ellipse(-5, -15, 4, 3, 0, 0, Math.PI * 2); ctx.stroke();
+  ctx.lineWidth = 1.6; ctx.globalAlpha = 1;
+  ctx.beginPath(); ctx.ellipse(-5, -15, 4, 3, 0, 0, Math.PI * 2); ctx.stroke();
 
   // Right lens
   ctx.fillStyle = '#080018';
-  ctx.beginPath();
-  ctx.ellipse(4, -15, 4, 3, 0, 0, Math.PI * 2);
-  ctx.fill();
+  ctx.beginPath(); ctx.ellipse(4, -15, 4, 3, 0, 0, Math.PI * 2); ctx.fill();
   ctx.strokeStyle = '#ff006e';
-  ctx.beginPath();
-  ctx.ellipse(4, -15, 4, 3, 0, 0, Math.PI * 2);
-  ctx.stroke();
+  ctx.lineWidth = 5; ctx.globalAlpha = 0.15;
+  ctx.beginPath(); ctx.ellipse(4, -15, 4, 3, 0, 0, Math.PI * 2); ctx.stroke();
+  ctx.lineWidth = 1.6; ctx.globalAlpha = 1;
+  ctx.beginPath(); ctx.ellipse(4, -15, 4, 3, 0, 0, Math.PI * 2); ctx.stroke();
 
   // Bridge
   ctx.beginPath();
@@ -685,7 +697,6 @@ function drawPlayer() {
   ctx.stroke();
 
   // Lens shines
-  noGlow();
   ctx.fillStyle = 'rgba(255,255,255,0.2)';
   ctx.beginPath(); ctx.ellipse(-6, -16, 1.8, 1, -0.2, 0, Math.PI * 2); ctx.fill();
   ctx.beginPath(); ctx.ellipse(3,  -16, 1.8, 1, -0.2, 0, Math.PI * 2); ctx.fill();
@@ -693,14 +704,16 @@ function drawPlayer() {
   ctx.restore(); // llama
 
   // ── 2. EXHAUST pipe nozzle ────────────────────────────
-  glow('#ff44aa', 12);
   ctx.fillStyle = '#330044';
   ctx.fillRect(x + 1, y + PH - 13, 7, 8);
   ctx.fillStyle = '#ff44aa';
   ctx.fillRect(x + 1, y + PH - 14, 7, 3);
 
-  // ── 3. TRUCK BED — covers llama neck base ─────────────
-  glow('#9900ff', 14);
+  // ── 3. TRUCK BED — covers llama neck base (fake glow) ─
+  ctx.fillStyle = '#9900ff';
+  ctx.globalAlpha = 0.1;  ctx.fillRect(x - 8, y + 6,  70, PH + 4);
+  ctx.globalAlpha = 0.18; ctx.fillRect(x - 4, y + 10, 62, PH);
+  ctx.globalAlpha = 1;
   ctx.fillStyle = '#4d00aa';
   ctx.fillRect(x, y + 14, 54, PH - 14);
 
@@ -713,7 +726,6 @@ function drawPlayer() {
   ctx.fillRect(x + 50, y + 4, 42, PH - 4);
 
   // ── 5. WINDSHIELD ─────────────────────────────────────
-  glow('#00ddff', 8);
   ctx.fillStyle   = 'rgba(0, 210, 255, 0.22)';
   ctx.strokeStyle = 'rgba(0, 210, 255, 0.45)';
   ctx.lineWidth   = 1;
@@ -725,7 +737,6 @@ function drawPlayer() {
     ctx.beginPath();
     ctx.rect(wx, wy, ww, wh);
     ctx.clip();
-    ctx.filter = 'blur(1px)';
     ctx.globalAlpha = 0.75;
     const scale = wh / shmurdikImg.naturalHeight;
     const dw    = shmurdikImg.naturalWidth * scale;
@@ -737,24 +748,28 @@ function drawPlayer() {
   ctx.fillRect(wx, wy, ww, wh);
   ctx.strokeRect(wx, wy, ww, wh);
 
-  // ── 6. HEADLIGHT ──────────────────────────────────────
-  glow('#ffdd00', 22);
+  // ── 6. HEADLIGHT (fake glow) ──────────────────────────
   ctx.fillStyle = '#ffdd00';
+  ctx.globalAlpha = 0.07; ctx.fillRect(x + 79, y + PH - 30, 28, 28);
+  ctx.globalAlpha = 0.16; ctx.fillRect(x + 84, y + PH - 25, 18, 18);
+  ctx.globalAlpha = 1;
   ctx.fillRect(x + 90, y + PH - 20, 5, 9);
 
   // ── 7. WHEELS ─────────────────────────────────────────
-  noGlow();
   drawWheel(x + 20,      WHEEL_Y);
   drawWheel(x + PW - 18, WHEEL_Y);
 
-  noGlow();
   ctx.restore(); // player
 }
 
 // ── Obstacle ──────────────────────────────────────────────────────────────────
 function drawObstacle(o) {
   ctx.save();
-  glow('#ff0044', 14);
+  // fake glow for box body
+  ctx.fillStyle = '#ff0044';
+  ctx.globalAlpha = 0.1; ctx.fillRect(o.x - 8, o.y - 8, o.w + 16, o.h + 16);
+  ctx.globalAlpha = 0.18; ctx.fillRect(o.x - 4, o.y - 4, o.w + 8,  o.h + 8);
+  ctx.globalAlpha = 1;
   ctx.fillStyle = '#770022';
   ctx.fillRect(o.x, o.y, o.w, o.h);
 
@@ -763,14 +778,11 @@ function drawObstacle(o) {
     ctx.fillRect(o.x + 4, ry, o.w - 8, 5);
   }
 
-  noGlow();
-  glow('#ff88bb', 6);
   ctx.fillStyle    = '#ffaad0';
   ctx.font         = `${Math.max(7, Math.min(10, o.w * 0.22))}px 'Press Start 2P', monospace`;
   ctx.textAlign    = 'center';
   ctx.textBaseline = 'middle';
   ctx.fillText(o.label, o.x + o.w / 2, o.y + o.h / 2);
-  noGlow();
   ctx.restore();
 }
 
@@ -778,13 +790,11 @@ function drawObstacle(o) {
 function drawFloatie(f) {
   ctx.save();
   ctx.globalAlpha = f.alpha;
-  glow('#bb33ff', 14);
   ctx.fillStyle    = f.color;
   ctx.font         = `${f.size}px 'Press Start 2P', monospace`;
   ctx.textAlign    = 'left';
   ctx.textBaseline = 'top';
   ctx.fillText(f.text, f.x, f.y);
-  noGlow();
   ctx.restore();
 }
 
@@ -939,37 +949,29 @@ function drawHUD() {
     hudW2 = ctx.measureText(' — ').width;
   }
   ctx.textAlign = 'left';
-  glow('#ff006e', 10);
   ctx.fillStyle = '#ff69b4';
   ctx.fillText('ЛАМОПАД', 12, 14);
-  noGlow();
   ctx.fillStyle = '#aa44ff';
   ctx.fillText(' — ', 12 + hudW1, 14);
-  glow('#ffdd00', 10);
   ctx.fillStyle = '#ffdd00';
   ctx.fillText('САМОСВАЛ', 12 + hudW1 + hudW2, 14);
 
   // Score
-  noGlow();
   const scoreStr = 'ЭКЗИСТЕНС: ' + Math.floor(score);
   if (hudFlashTimer > 0) {
     const t = hudFlashTimer / 36;
-    glow(t > 0.5 ? '#ffffff' : '#ffdd00', 20 * t);
     ctx.fillStyle = t > 0.5 ? '#ffdd00' : '#aa44ff';
     hudFlashTimer--;
   } else {
-    glow('#7700dd', 8);
     ctx.fillStyle = '#aa44ff';
   }
   ctx.textAlign = 'right';
   ctx.fillText(scoreStr, VOL_BTN.x - 10, 14);
 
   // Volume button
-  noGlow();
   ctx.font = '6px "Press Start 2P", monospace';
   const volAlpha = muted ? 0.4 : 1;
   ctx.globalAlpha = volAlpha;
-  glow(muted ? 'transparent' : '#aa44ff', 6);
   ctx.strokeStyle = muted ? 'rgba(170,68,255,0.35)' : '#aa44ff';
   ctx.lineWidth = 1;
   ctx.strokeRect(VOL_BTN.x, VOL_BTN.y, VOL_BTN.w, VOL_BTN.h);
@@ -990,13 +992,11 @@ function drawLaneHint() {
   const ay = LANE_Y[arrowLane] - PH / 2;
   ctx.save();
   ctx.globalAlpha = alpha * 0.7;
-  glow('#ffdd00', 10);
   ctx.fillStyle = '#ffdd00';
   ctx.font = '11px Press Start 2P, monospace';
   ctx.textAlign = 'right';
   ctx.textBaseline = 'middle';
   ctx.fillText('↕ ПЕРЕКЛЮЧИТЬ', GW - 20, LANE_Y[0] - (LANE_Y[0] - LANE_Y[1]) / 2);
-  noGlow();
   ctx.restore();
 }
 

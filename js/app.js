@@ -13,6 +13,9 @@ const INIT_SPD = 3.2;
 const SPD_INC  = 0.0015;
 const LERP_SPD = 0.14;   // lane switch smoothness (higher = snappier)
 
+// Surreal effect — hue-rotate degrees cycled on each lane switch
+const PALETTES = [0, 90, 180, 270];
+
 const LYRICS = [
   'Я САМОСВАЛ',
   'ЭКЗИСТЕНС ИЗ ПЕЙН',
@@ -41,6 +44,7 @@ let mode; // 'intro' | 'play' | 'dead'
 let player, obstacles, floaties;
 let score, speed, frame, bgX, wheelAngle;
 let nextObs, nextLyric;
+let surrealTimer, paletteIdx;
 
 function reset() {
   player = {
@@ -57,8 +61,12 @@ function reset() {
   frame      = 0;
   bgX        = 0;
   wheelAngle = 0;
-  nextObs    = 110;
-  nextLyric  = 60;
+  nextObs      = 110;
+  nextLyric    = 60;
+  surrealTimer = 0;
+  paletteIdx   = 0;
+  canvas.style.filter    = '';
+  canvas.style.transform = '';
   document.getElementById('score').textContent = '0';
 }
 
@@ -70,6 +78,10 @@ function switchLane() {
   player.lane    = player.lane === 0 ? 1 : 0;
   player.targetY = LANE_Y[player.lane] - PH;
   player.switchFlash = 1;
+
+  // Surreal effect
+  paletteIdx   = (paletteIdx + 1) % PALETTES.length;
+  surrealTimer = 32;
 }
 
 document.addEventListener('keydown', e => {
@@ -90,6 +102,26 @@ function startGame() {
   const audio = document.getElementById('audio');
   if (audio) audio.play().catch(() => {});
   requestAnimationFrame(loop);
+}
+
+// ── Surreal canvas effect ─────────────────────────────────────────────────────
+function tickSurreal() {
+  const hue = PALETTES[paletteIdx];
+
+  if (surrealTimer > 0) {
+    const t         = surrealTimer / 32;
+    const shakeAmt  = 10 * t;
+    const shakeX    = (Math.random() - 0.5) * shakeAmt;
+    const shakeY    = (Math.random() - 0.5) * shakeAmt;
+    const brightness = surrealTimer > 26 ? 2.5 : 1;   // flash on first 6 frames
+
+    canvas.style.filter    = `hue-rotate(${hue}deg) brightness(${brightness}) saturate(1.6)`;
+    canvas.style.transform = `translate(${shakeX}px, ${shakeY}px)`;
+    surrealTimer--;
+  } else {
+    canvas.style.filter    = `hue-rotate(${hue}deg) saturate(1.3)`;
+    canvas.style.transform = '';
+  }
 }
 
 // ── Draw helpers ──────────────────────────────────────────────────────────────
@@ -411,6 +443,7 @@ function loop() {
   if (switchProgress < 0.4 && hitTest()) { die(); return; }
 
   // Draw
+  tickSurreal();
   drawBg();
   drawLaneHint();
   floaties.forEach(drawFloatie);

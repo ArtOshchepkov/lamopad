@@ -41,27 +41,34 @@ shmurdikImg.src = 'releases/samosval/shmurdik_40px.png';
 const audioEl = document.getElementById('audio');
 
 // ── Web Audio ─────────────────────────────────────────────────────────────────
-let boostFilter = null, pannerNode = null;
+let boostFilter = null, pannerNode = null, audioCtx = null;
 
 function initAudio() {
-  if (boostFilter) return;
+  if (audioCtx) return;
   try {
-    const actx = new AudioContext();
-    const src   = actx.createMediaElementSource(audioEl);
-    boostFilter = actx.createBiquadFilter();
+    audioCtx    = new AudioContext();
+    const src   = audioCtx.createMediaElementSource(audioEl);
+    boostFilter = audioCtx.createBiquadFilter();
     boostFilter.type            = 'lowshelf';
     boostFilter.frequency.value = 120;
     boostFilter.gain.value      = 0;
-    pannerNode  = actx.createStereoPanner();
+    pannerNode  = audioCtx.createStereoPanner();
     pannerNode.pan.value = 0;
     src.connect(boostFilter);
     boostFilter.connect(pannerNode);
-    pannerNode.connect(actx.destination);
-    if (actx.state === 'suspended') actx.resume();
+    pannerNode.connect(audioCtx.destination);
+    if (audioCtx.state === 'suspended') audioCtx.resume();
   } catch (e) {
+    audioCtx    = null;
     boostFilter = null;
     pannerNode  = null;
   }
+}
+
+// Resume AudioContext + restart playback if it was killed by the OS
+function resumeAudio() {
+  if (audioCtx && audioCtx.state === 'suspended') audioCtx.resume();
+  if (mode === 'play' && !muted && audioEl.paused) audioEl.play().catch(() => {});
 }
 
 // ── Canvas ────────────────────────────────────────────────────────────────────
@@ -184,12 +191,14 @@ document.addEventListener('keydown', e => {
   if (e.code === 'KeyP' && mode === 'play') spawnPill();
 });
 document.addEventListener('touchstart', e => {
+  resumeAudio();
   if (e.target.closest('a')) return; // let link taps through natively
   e.preventDefault();
   const t = e.touches[0];
   handlePointer(t.clientX, t.clientY);
 }, { passive: false });
-document.addEventListener('click', e => handlePointer(e.clientX, e.clientY));
+document.addEventListener('click', e => { resumeAudio(); handlePointer(e.clientX, e.clientY); });
+document.addEventListener('visibilitychange', () => { if (!document.hidden) resumeAudio(); });
 
 // ── Start ─────────────────────────────────────────────────────────────────────
 function startGame() {

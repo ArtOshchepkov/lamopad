@@ -99,6 +99,27 @@
       document.addEventListener('keydown',    enterFullscreen, { once: true });
     }
 
+    // Fake-scroll to collapse the browser address bar (Chrome Android + others)
+    if (isTouchDevice) {
+      function collapseChrome() {
+        // Temporarily allow scrolling and extend page height by 1px
+        document.documentElement.style.overflow = 'scroll';
+        document.body.style.overflow             = 'scroll';
+        document.body.style.minHeight            = (window.innerHeight + 1) + 'px';
+        window.scrollTo(0, 1);
+        // Restore overflow lock after browser chrome collapses (~300 ms)
+        setTimeout(function () {
+          window.scrollTo(0, 0);
+          document.documentElement.style.overflow = '';
+          document.body.style.overflow             = '';
+          document.body.style.minHeight            = '';
+        }, 350);
+      }
+      // Run on load and again after any orientation change (chrome may reappear)
+      window.addEventListener('load', collapseChrome);
+      window.addEventListener('orientationchange', function () { setTimeout(collapseChrome, 300); });
+    }
+
     // Rotate prompt — JS-driven so it works reliably on iOS Safari
     (function () {
       var prompt = document.getElementById('rotate-prompt');

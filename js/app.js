@@ -872,9 +872,13 @@ function loop() {
 function die() {
   mode   = 'dead';
   deadAt = Date.now();
-  const audio = document.getElementById('audio');
-  if (audio) audio.pause();
-  document.getElementById('final-score').textContent = Math.floor(score);
+  audioEl.pause();
+  const final = Math.floor(score);
+  document.getElementById('final-score').textContent = final;
+  const prev = parseInt(localStorage.getItem('samosval_best') || '0', 10);
+  const best = Math.max(final, prev);
+  if (best > prev) localStorage.setItem('samosval_best', best);
+  document.getElementById('best-score').textContent = best;
   document.getElementById('dead').classList.remove('hidden');
 }
 

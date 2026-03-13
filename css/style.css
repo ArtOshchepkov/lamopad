@@ -275,6 +275,12 @@ html, body {
   text-shadow: 0 0 10px rgba(255, 221, 0, 0.7);
 }
 
+#dead-best {
+  font-size: clamp(5px, 1.1vw, 8px);
+  color: var(--purple-light);
+  opacity: 0.7;
+}
+
 #dead-cta {
   display: inline-block;
   font-family: var(--font);

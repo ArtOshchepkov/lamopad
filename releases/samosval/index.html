@@ -84,6 +84,23 @@
     if (screen.orientation && screen.orientation.lock) {
       screen.orientation.lock('landscape').catch(function() {});
     }
+
+    // Rotate prompt — JS-driven so it works reliably on iOS Safari
+    (function () {
+      var prompt = document.getElementById('rotate-prompt');
+      var isTouchDevice = ('ontouchstart' in window) || navigator.maxTouchPoints > 0;
+
+      function check() {
+        if (!isTouchDevice) return;
+        var portrait = window.innerHeight > window.innerWidth;
+        prompt.style.display = portrait ? 'flex' : 'none';
+      }
+
+      // orientationchange fires before dimensions update on some browsers
+      window.addEventListener('orientationchange', function () { setTimeout(check, 150); });
+      window.addEventListener('resize', check);
+      check();
+    })();
   </script>
   <script src="js/app.js"></script>
 </body>

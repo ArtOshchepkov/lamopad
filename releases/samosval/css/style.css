@@ -13,6 +13,7 @@
 
 html, body {
   height: 100%;
+  height: 100dvh;
   background: var(--bg);
   color: var(--text);
   font-family: var(--font);
@@ -25,6 +26,7 @@ html, body {
   position: relative;
   width: 100%;
   height: 100vh;
+  height: 100dvh;
   display: flex;
   flex-direction: column;
   align-items: center;
@@ -398,11 +400,6 @@ html, body {
   letter-spacing: 0.08em;
 }
 
-/* Show rotate prompt in portrait on mobile; hide in landscape */
-@media (max-width: 1024px) and (orientation: portrait) {
-  #rotate-prompt { display: flex; }
-}
-
 /* ── Mobile landscape tweaks ───────────────────────────────── */
 @media (orientation: landscape) and (max-height: 500px) {
   #hud {
@@ -427,6 +424,6 @@ html, body {
     width: auto;
     height: 100%;
     max-width: 100%;
-    max-height: calc(100vh - 36px);
+    max-height: calc(100dvh - 36px);
   }
 }

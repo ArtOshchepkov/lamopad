@@ -1180,7 +1180,6 @@ function loop(ts) {
 function die() {
   mode   = 'dead';
   deadAt = Date.now();
-  audioEl.pause();
   const final = Math.floor(score);
   document.getElementById('final-score').textContent = final;
   const prev = parseInt(localStorage.getItem('samosval_best') || '0', 10);

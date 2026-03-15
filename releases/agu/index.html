@@ -358,7 +358,7 @@ class GameScene extends Phaser.Scene {
     };
 
     // ── Лама-бурлак ───────────────────────────────────────────────────────────
-    const LX   = 160;                   // x ламы (фиксирован, мир скроллится)
+    const LX   = 195;                   // x ламы (фиксирован, мир скроллится)
     const GY   = H - h1 - h2;          // y поверхности дороги (верхний край layer2)
 
     const WOOL  = 0xf0e8d0;  // кремовая шерсть
@@ -412,23 +412,106 @@ class GameScene extends Phaser.Scene {
       y: -5, duration: 260, yoyo: true, repeat: -1, delay: 260, ease: 'Sine.InOut',
     });
 
-    // ── Кораблик (треугольник в реке, screen-fixed) ───────────────────────────
-    const BX = LX + 178;
-    const BY = H - h1 + Math.floor(h1 * 0.42);
+    // ── Корабль из купюр 50 рублей — СЛЕВА от ламы, лама его тянет ──────────
+    // Огромный океанский лайнер сложен из пятидесятирублёвых купюр.
+    // Нос корабля смотрит вправо — в сторону движения.
+    const BX      = LX - 150;          // центр корабля (далеко слева)
+    const waterY  = H - h1;            // ватерлиния = верх реки
 
-    this.boatGfx = this.add.graphics().setDepth(10);
-    // корпус — трапеция из двух треугольников
-    this.boatGfx.fillStyle(0x7a4e22, 1);
-    this.boatGfx.fillTriangle(BX - 16, BY + 7,  BX + 16, BY + 7, BX + 10, BY - 2);
-    this.boatGfx.fillTriangle(BX - 16, BY + 7,  BX + 10, BY - 2, BX -  8, BY - 2);
-    // парус
-    this.boatGfx.fillStyle(0xcfc090, 1);
-    this.boatGfx.fillTriangle(BX - 4, BY - 2,  BX - 4, BY - 18,  BX + 12, BY - 2);
+    // Цвета купюры 50 рублей (Банк России): доминирует сине-зелёный
+    const C_HULL   = 0x165868;   // тёмный корпус (мокрая бумага)
+    const C_MID    = 0x2a7888;   // основной тил (тело купюры)
+    const C_UPPER  = 0x3a90a2;   // надстройки
+    const C_BRIDGE = 0x52a8ba;   // рубка / мостик
+    const C_LINE   = 0x0b3040;   // линии печати / сгибы
+    const C_WIN    = 0x88d0e2;   // иллюминаторы
+    const C_SAIL   = 0x7ec8d8;   // парус (светлый тил)
+
+    this.boatGfx = this.add.graphics().setDepth(8);
+    const bg = this.boatGfx;
+
+    // ─ Подводная часть корпуса (тёмная трапеция) ─
+    bg.fillStyle(C_HULL, 1);
+    bg.fillTriangle(BX - 62, waterY,   BX + 65, waterY,   BX + 56, waterY + 20);
+    bg.fillTriangle(BX - 62, waterY,   BX + 56, waterY + 20, BX - 55, waterY + 20);
+    // киль под носом
+    bg.fillTriangle(BX + 65, waterY,   BX + 80, waterY + 8,  BX + 56, waterY + 20);
+
+    // ─ Главный корпус над ватерлинией ─
+    bg.fillStyle(C_MID, 1);
+    bg.fillRect(BX - 62, waterY - 22, 127, 22);
+    // Нос — острый выступ вправо
+    bg.fillTriangle(BX + 65, waterY - 22,  BX + 65, waterY,  BX + 82, waterY - 11);
+
+    // ─ Нижняя надстройка ─
+    bg.fillStyle(C_UPPER, 1);
+    bg.fillRect(BX - 48, waterY - 42, 100, 20);
+
+    // ─ Средняя надстройка ─
+    bg.fillStyle(C_UPPER, 1);
+    bg.fillRect(BX - 30, waterY - 58, 65, 16);
+
+    // ─ Рубка / мостик ─
+    bg.fillStyle(C_BRIDGE, 1);
+    bg.fillRect(BX - 14, waterY - 72, 36, 14);
+
+    // ─ Труба (фunnель) ─
+    bg.fillStyle(C_HULL, 1);
+    bg.fillRect(BX - 4, waterY - 86, 18, 14);
+    bg.fillStyle(0x091e28, 1);
+    bg.fillRect(BX - 7, waterY - 89, 24, 5);   // козырёк трубы
+
+    // ─ Мачта и рей ─
+    bg.lineStyle(2, C_LINE, 1);
+    bg.lineBetween(BX + 30, waterY - 42, BX + 30, waterY - 100);  // мачта
+    bg.lineStyle(1, C_LINE, 1);
+    bg.lineBetween(BX + 15, waterY - 88, BX + 50, waterY - 88);   // рей
+
+    // ─ Парус (купюра, раздутая ветром) ─
+    bg.fillStyle(C_SAIL, 1);
+    bg.fillTriangle(BX + 30, waterY - 100, BX + 30, waterY - 42, BX + 58, waterY - 42);
+    bg.fillTriangle(BX + 30, waterY - 100, BX + 58, waterY - 42, BX + 62, waterY - 70);
+
+    // ─ Линии сгибов купюры (горизонтальные полосы печати) ─
+    bg.lineStyle(1, C_LINE, 1);
+    bg.lineBetween(BX - 62, waterY - 11, BX + 82, waterY - 11);   // ватерлинейный пояс
+    bg.lineBetween(BX - 62, waterY - 22, BX + 65, waterY - 22);   // верх корпуса
+    bg.lineBetween(BX - 48, waterY - 42, BX + 52, waterY - 42);   // верх надстройки
+    bg.lineBetween(BX - 30, waterY - 58, BX + 35, waterY - 58);   // верх средней
+    bg.lineBetween(BX - 14, waterY - 72, BX + 22, waterY - 72);   // верх рубки
+    // Вертикальный сгиб по центру корпуса (главный сгиб купюры)
+    bg.lineBetween(BX, waterY - 22, BX, waterY + 20);
+
+    // ─ Иллюминаторы ─
+    bg.fillStyle(C_WIN, 1);
+    bg.fillCircle(BX - 42, waterY - 11, 3);
+    bg.fillCircle(BX - 22, waterY - 11, 3);
+    bg.fillCircle(BX -  2, waterY - 11, 3);
+    bg.fillCircle(BX + 18, waterY - 11, 3);
+    bg.fillCircle(BX + 38, waterY - 11, 3);
+    // Окна рубки
+    bg.fillRect(BX - 10, waterY - 68, 8, 6);
+    bg.fillRect(BX +  2, waterY - 68, 8, 6);
+    bg.fillRect(BX + 14, waterY - 68, 8, 6);
+    // Флаг корпорации (золотой)
+    bg.fillStyle(0xc89820, 1);
+    bg.fillTriangle(BX + 30, waterY - 100, BX + 44, waterY - 94, BX + 30, waterY - 88);
 
     // ── Верёвка (перерисовывается каждый кадр) ────────────────────────────────
     this.ropeGfx  = this.add.graphics().setDepth(11);
-    this.ropeNeck = { x: LX + 15,  y: GY - 46 };   // точка крепления на шее ламы
-    this.ropeBoat = { x: BX -  4,  y: BY -  2 };   // нос кораблика
+    this.ropeNeck = { x: LX - 20, y: GY - 22 };           // упряжь на боку ламы
+    this.ropeBoat = { x: BX + 82, y: waterY - 11 };       // нос корабля
+
+    // Анимация натяжения: tween провисает между 12 (натянута) и 36 (ослаблена)
+    this.ropeSag = { v: 24 };
+    this.tweens.add({
+      targets: this.ropeSag,
+      v: 10,
+      duration: 420,
+      yoyo: true,
+      repeat: -1,
+      ease: 'Sine.InOut',
+    });
 
     // ── Таймеры состояния ─────────────────────────────────────────────────────
     // Здоровье убывает: -2/сек
@@ -462,26 +545,37 @@ class GameScene extends Phaser.Scene {
     this.walkTween1.timeScale = spd;
     this.walkTween2.timeScale = spd;
 
-    // Верёвка: квадратичная кривая Безье с провисом
+    // Верёвка: квадратичная кривая с анимированным провисом
+    // Натяжение пульсирует через tween ropeSag.v — эффект живой тяги
     const { x: nx, y: ny } = this.ropeNeck;
     const { x: bx, y: by } = this.ropeBoat;
-    const cpx = (nx + bx) / 2;
-    const cpy = (ny + by) / 2 + 22;   // провис вниз
+    const cpx = nx + (bx - nx) * 0.42;
+    const cpy = (ny + by) / 2 + this.ropeSag.v;
+
+    const drawRopeCurve = (ox, oy) => {
+      this.ropeGfx.beginPath();
+      this.ropeGfx.moveTo(nx + ox, ny + oy);
+      const STEPS = 20;
+      for (let i = 1; i <= STEPS; i++) {
+        const t = i / STEPS, mt = 1 - t;
+        this.ropeGfx.lineTo(
+          mt * mt * (nx + ox) + 2 * mt * t * (cpx + ox) + t * t * (bx + ox),
+          mt * mt * (ny + oy) + 2 * mt * t * (cpy + oy) + t * t * (by + oy),
+        );
+      }
+      this.ropeGfx.strokePath();
+    };
 
     this.ropeGfx.clear();
-    this.ropeGfx.lineStyle(1, 0xa07848, 1);
-    this.ropeGfx.beginPath();
-    this.ropeGfx.moveTo(nx, ny);
-    const STEPS = 16;
-    for (let i = 1; i <= STEPS; i++) {
-      const t  = i / STEPS;
-      const mt = 1 - t;
-      this.ropeGfx.lineTo(
-        mt * mt * nx + 2 * mt * t * cpx + t * t * bx,
-        mt * mt * ny + 2 * mt * t * cpy + t * t * by,
-      );
-    }
-    this.ropeGfx.strokePath();
+    // Тень (имитирует толщину верёвки и ощущение веса)
+    this.ropeGfx.lineStyle(3, 0x3a1e08, 1);
+    drawRopeCurve(0, 1);
+    // Основная верёвка
+    this.ropeGfx.lineStyle(2, 0xb08030, 1);
+    drawRopeCurve(0, 0);
+    // Бликующий волосок (ощущение натяжения)
+    this.ropeGfx.lineStyle(1, 0xd8b060, 1);
+    drawRopeCurve(-0.5, -0.5);
   }
 }
 

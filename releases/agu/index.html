@@ -609,28 +609,15 @@ class GameScene extends Phaser.Scene {
       },
     });
 
-    // ── Физическое освещение (Phaser Light2D) ────────────────────────────────
-    // Тёмный ночной ambient — всё не освещённое остаётся тёмным
-    this.lights.enable().setAmbientColor(0x101828);
+    // ── Тёмный ночной оверлей ─────────────────────────────────────────────────
+    // Затемняет всю сцену — всё не попавшее в луч остаётся тёмным.
+    // beamGfx (ADD blend, depth 18) аддитивно подсвечивает только конус.
+    const darkOverlay = this.add.graphics().setDepth(17);
+    darkOverlay.fillStyle(0x000000, 0.72);
+    darkOverlay.fillRect(0, 0, W, H);
 
-    // Основной прожектор: холодный ксенон, широкий радиус (охватывает всю сцену)
-    this.spotLight = this.lights.addLight(
-      this.beamOBase.x, this.beamOBase.y,
-      480, 0xb0ccf8, 2.8,
-    );
-    // Маленький тёплый ореол самой лампы (жёлтый, близкий)
-    this.lampGlow = this.lights.addLight(
-      this.beamOBase.x, this.beamOBase.y,
-      80, 0xffe8a0, 1.4,
-    );
-
-    // Все видимые объекты → Light2D pipeline
-    [
-      this.tl4, this.tl3, this.tl2, this.tl1,
-      this.boatGfx, this.llamaBody, this.harnessGfx,
-      this.legBL, this.legBR, this.legFL, this.legFR,
-      this.ropeGfx, this.waveGfx,
-    ].forEach(obj => obj.setPipeline('Light2D'));
+    // Конус прожектора — аддитивный: добавляет свет поверх затемнения
+    this.beamGfx.setBlendMode(Phaser.BlendModes.ADD);
   }
 
   update(_time, delta) {
@@ -685,12 +672,13 @@ class GameScene extends Phaser.Scene {
       this.beamGfx.clear();
 
       // Четыре вложенных конуса: убывающий угол, нарастающая яркость
+      // ADD blend: альфы высокие — конус реально добавляет свет поверх оверлея
       //   [верх у W, низ у W, цвет, alpha]
       const layers = [
-        [CY - 115, CY + 115, 0x3a5890, 0.050],
-        [CY -  72, CY +  72, 0x5878b0, 0.090],
-        [CY -  40, CY +  40, 0x90b0d0, 0.140],
-        [CY -  16, CY +  16, 0xc4dcf0, 0.200],
+        [CY - 115, CY + 115, 0x3a5890, 0.22],
+        [CY -  72, CY +  72, 0x5878b0, 0.38],
+        [CY -  40, CY +  40, 0x90b0d0, 0.55],
+        [CY -  16, CY +  16, 0xc4dcf0, 0.72],
       ];
       for (const [t, b, c, a] of layers) {
         this.beamGfx.fillStyle(c, a);
@@ -698,7 +686,7 @@ class GameScene extends Phaser.Scene {
       }
 
       // Центральная ось — бликующий волосок
-      this.beamGfx.lineStyle(1, 0xddf0ff, 0.42);
+      this.beamGfx.lineStyle(1, 0xddf0ff, 0.80);
       this.beamGfx.lineBetween(ox, oy, W, CY);
 
       // Сама лампа: яркое пятно в точке источника
@@ -716,11 +704,6 @@ class GameScene extends Phaser.Scene {
     this.boatGfx.x = this.boatBob.x;
     this.boatGfx.y = this.boatBob.y;
 
-    // Источник света следует за носом корабля
-    const lx = this.beamOBase.x + this.boatBob.x;
-    const ly = this.beamOBase.y + this.boatBob.y;
-    this.spotLight.x = lx;  this.spotLight.y = ly;
-    this.lampGlow.x  = lx;  this.lampGlow.y  = ly;
     // Кнехт двигается вместе с корпусом — обновляем точку крепления верёвки
     this.ropeBoat.x = this.knechtBase.x + this.boatBob.x;
     this.ropeBoat.y = this.knechtBase.y + this.boatBob.y;

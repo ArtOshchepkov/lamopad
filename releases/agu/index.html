@@ -8,7 +8,7 @@
     *, *::before, *::after { margin: 0; padding: 0; box-sizing: border-box; }
     html, body {
       width: 100%; height: 100%;
-      background: #0a0a0a;
+      background: #060608;
       display: flex;
       justify-content: center;
       align-items: center;
@@ -24,21 +24,98 @@
 
 const BASE_SPEED = 100; // px/sec
 
-// ─── Texture helpers ──────────────────────────────────────────────────────────
+// ─── Helpers ──────────────────────────────────────────────────────────────────
 
-/**
- * Build a small repeating tile texture using a paint callback.
- * @param {Phaser.Scene} scene
- * @param {string}       key
- * @param {number}       w     tile width
- * @param {number}       h     tile height
- * @param {function}     paint (graphics, w, h) => void
- */
 function makeTile(scene, key, w, h, paint) {
   const g = scene.make.graphics({ add: false });
   paint(g, w, h);
   g.generateTexture(key, w, h);
   g.destroy();
+}
+
+/** Затемнить hex-цвет на `amt` по каждому каналу. */
+function darker(col, amt) {
+  const r = Math.max(0, ((col >> 16) & 0xff) - amt);
+  const g = Math.max(0, ((col >>  8) & 0xff) - amt);
+  const b = Math.max(0, ( col        & 0xff) - amt);
+  return (r << 16) | (g << 8) | b;
+}
+
+// ─── Думерская панелька ───────────────────────────────────────────────────────
+
+/**
+ * Рисует жилой дом (панель/монолит) в думерской эстетике.
+ * Грязный советский бетон, редкие тёплые окна, потёки.
+ *
+ * @param {Phaser.GameObjects.Graphics} g
+ * @param {number} x, groundY, w, h  — позиция и габариты
+ * @param {number} wallCol           — базовый цвет стены
+ * @param {number} floors, cols      — сетка окон
+ * @param {object} [opts]            — { stains: [{x,w,h}], roofColor }
+ */
+function drawPanelka(g, x, groundY, w, h, wallCol, floors, cols, opts) {
+  const o = opts || {};
+  const top    = groundY - h;
+  const PAD_X  = 7, PAD_TOP = 7, PAD_BOT = 14;
+  const GAP_X  = 3, GAP_Y   = 3;
+
+  // стена
+  g.fillStyle(wallCol, 1);
+  g.fillRect(x, top, w, h);
+
+  // горизонтальные швы между панелями (тёмные щели)
+  g.fillStyle(darker(wallCol, 18), 1);
+  for (let fl = 0; fl < floors; fl++) {
+    const sy = top + PAD_TOP + fl * Math.floor((h - PAD_TOP - PAD_BOT) / floors);
+    g.fillRect(x, sy - 1, w, 1);
+  }
+
+  // потёки/следы воды (вертикальные тёмные полосы)
+  const stains = o.stains || [
+    { dx: Math.floor(w * 0.18), sw: 2, sh: Math.floor(h * 0.55) },
+    { dx: Math.floor(w * 0.52), sw: 1, sh: Math.floor(h * 0.35) },
+    { dx: Math.floor(w * 0.73), sw: 2, sh: Math.floor(h * 0.70) },
+  ];
+  g.fillStyle(darker(wallCol, 22), 1);
+  for (const s of stains) g.fillRect(x + s.dx, top, s.sw, s.sh);
+
+  // парапет крыши
+  const roofCol = o.roofColor !== undefined ? o.roofColor : darker(wallCol, 28);
+  g.fillStyle(roofCol, 1);
+  g.fillRect(x, top, w, 3);
+
+  // лифтовой холл / технический объём на крыше
+  const shW = Math.floor(w * 0.17);
+  g.fillStyle(roofCol, 1);
+  g.fillRect(x + Math.floor((w - shW) / 2), top - 5, shW, 5);
+
+  // сетка окон
+  const availW = w - 2 * PAD_X;
+  const availH = h - PAD_TOP - PAD_BOT;
+  const winW = Math.max(4, Math.floor((availW - (cols - 1) * GAP_X) / cols));
+  const winH = Math.max(4, Math.floor((availH - (floors - 1) * GAP_Y) / floors));
+
+  for (let r = 0; r < floors; r++) {
+    for (let c = 0; c < cols; c++) {
+      const wx = x + PAD_X + c * (winW + GAP_X);
+      const wy = top + PAD_TOP + r * (winH + GAP_Y);
+      const seed = ((r * 17 + c * 11 + x) * 3) % 100;
+      // ~6% окон светятся тёплым янтарным — остальные мёртвые тёмно-синие
+      const lit  = seed < 6;
+      g.fillStyle(lit ? 0xd4900a : 0x111c24, 1);
+      g.fillRect(wx, wy, winW, winH);
+      // блик на стекле у погашенных окон
+      if (!lit) {
+        g.fillStyle(0x1e2e3a, 1);
+        g.fillRect(wx, wy, 1, 1);
+      }
+    }
+  }
+
+  // подъезд (тёмный проём)
+  const entW = Math.max(8, Math.floor(w * 0.22));
+  g.fillStyle(0x0c1018, 1);
+  g.fillRect(x + Math.floor((w - entW) / 2), groundY - PAD_BOT, entW, PAD_BOT);
 }
 
 // ─── GameScene ────────────────────────────────────────────────────────────────
@@ -50,111 +127,160 @@ class GameScene extends Phaser.Scene {
     const W = this.scale.width;   // 480
     const H = this.scale.height;  // 270
 
-    // ── layer4: дальний фон (небо) — скорость 0.1x ──────────────────────────
-    // Голубое небо с редкими светлыми полосами-облаками
-    makeTile(this, 'layer4', 320, H, (g, tw, th) => {
-      g.fillStyle(0x87bfdd, 1);
+    // ── layer4: свинцовое питерское небо + силуэты Кудрово — 0.1x ──────────
+    // Сумеречный тяжёлый ноябрь. Серость как внутренняя погода.
+    makeTile(this, 'layer4', 480, H, (g, tw, th) => {
+      // свинцово-серое небо
+      g.fillStyle(0x424e58, 1);
       g.fillRect(0, 0, tw, th);
-      // несколько горизонтальных «облачных» полос разной яркости
-      const stripes = [
-        { y: 30, h: 14, color: 0xaad4e8 },
-        { y: 80, h:  8, color: 0x9fcfe5 },
-        { y: 130, h: 18, color: 0xb2daea },
-        { y: 190, h: 10, color: 0x9ac8e0 },
-      ];
-      for (const s of stripes) {
-        g.fillStyle(s.color, 1);
-        g.fillRect(0, s.y, tw, s.h);
-      }
-    });
 
-    // ── layer3: ближний фон (холмы/деревья) — скорость 0.3x ─────────────────
-    // Тёмно-зелёные силуэты на нижней половине
-    makeTile(this, 'layer3', 160, Math.ceil(H * 0.55), (g, tw, th) => {
-      g.fillStyle(0x2e6b3e, 1);
-      g.fillRect(0, 0, tw, th);
-      // "зубцы" деревьев — прямоугольные блоки разной высоты
-      const trees = [
-        { x:  0, w: 20, h: 55, color: 0x255933 },
-        { x: 25, w: 14, h: 70, color: 0x1e4d2b },
-        { x: 44, w: 18, h: 48, color: 0x276038 },
-        { x: 68, w: 22, h: 65, color: 0x204e2f },
-        { x: 96, w: 16, h: 58, color: 0x255933 },
-        { x: 118, w: 20, h: 72, color: 0x1e4d2b },
-        { x: 142, w: 12, h: 44, color: 0x276038 },
-      ];
-      for (const t of trees) {
-        g.fillStyle(t.color, 1);
-        g.fillRect(t.x, th - t.h, t.w, t.h);
-      }
-    });
-
-    // ── layer2: земля — скорость 1x ──────────────────────────────────────────
-    // Коричнево-зелёная полоса с горизонтальными линиями текстуры
-    makeTile(this, 'layer2', 80, Math.ceil(H * 0.22), (g, tw, th) => {
-      g.fillStyle(0x5a4020, 1);
-      g.fillRect(0, 0, tw, th);
-      // полосы травы / грунта
+      // почти монотонная тяжёлая облачность
       const bands = [
-        { y: 0,  h: 7,  color: 0x3d7a3a },
-        { y: 7,  h: 4,  color: 0x4a8c46 },
-        { y: 11, h: 5,  color: 0x5a4020 },
-        { y: 16, h: 3,  color: 0x4e3318 },
-        { y: 19, h: tw, color: 0x5a4020 },
+        { y:  0, h: 30, c: 0x3e4a54 },
+        { y: 28, h: 20, c: 0x485460 },
+        { y: 55, h: 16, c: 0x404c56 },
+        { y: 78, h: 24, c: 0x3c4852 },
+        { y: 108, h: 12, c: 0x46525e },
       ];
-      for (const b of bands) {
-        if (b.y >= th) continue;
-        g.fillStyle(b.color, 1);
-        g.fillRect(0, b.y, tw, Math.min(b.h, th - b.y));
-      }
-      // прерывистые «кочки»
-      g.fillStyle(0x3d7a3a, 1);
-      for (let x = 0; x < tw; x += 18) {
-        g.fillRect(x, 1, 8, 4);
+      for (const b of bands) { g.fillStyle(b.c, 1); g.fillRect(0, b.y, tw, b.h); }
+
+      // полоса дымки у горизонта (смог)
+      g.fillStyle(0x5a6670, 1);
+      g.fillRect(0, 118, tw, 10);
+
+      // дальний урбанистический фон
+      g.fillStyle(0x323c44, 1);
+      g.fillRect(0, 128, tw, th - 128);
+
+      // бесконечный ряд одинаковых высоток — стена без просвета
+      const HY = 148;
+      const towers = [
+        { x:   0, w: 24, h: 70, c: 0x2c3840 }, { x:  26, w: 18, h: 88, c: 0x283440 },
+        { x:  47, w: 23, h: 56, c: 0x2c3840 }, { x:  72, w: 20, h: 98, c: 0x243040 },
+        { x:  95, w: 28, h: 72, c: 0x283840 }, { x: 126, w: 16, h: 84, c: 0x283440 },
+        { x: 145, w: 25, h: 60, c: 0x2c3840 }, { x: 173, w: 22, h: 94, c: 0x243040 },
+        { x: 198, w: 18, h: 76, c: 0x283440 }, { x: 219, w: 30, h: 58, c: 0x2c3840 },
+        { x: 252, w: 20, h: 90, c: 0x243040 }, { x: 275, w: 24, h: 68, c: 0x283840 },
+        { x: 302, w: 18, h: 96, c: 0x243040 }, { x: 323, w: 26, h: 74, c: 0x2c3840 },
+        { x: 352, w: 22, h: 62, c: 0x283440 }, { x: 377, w: 18, h: 86, c: 0x283440 },
+        { x: 398, w: 25, h: 70, c: 0x2c3840 }, { x: 426, w: 20, h: 92, c: 0x243040 },
+        { x: 449, w: 28, h: 78, c: 0x283840 },
+      ];
+      for (const t of towers) {
+        g.fillStyle(t.c, 1);
+        g.fillRect(t.x, HY - t.h, t.w, t.h + (th - HY));
+        // редкие жёлтые точки-окна вдалеке
+        const seed0 = t.x * 7 + t.h * 3;
+        for (let row = 0; row < Math.floor(t.h / 8); row++) {
+          for (let col = 0; col < Math.floor(t.w / 6); col++) {
+            if ((seed0 + row * 13 + col * 7) % 20 !== 0) continue;
+            g.fillStyle(0xc07808, 1);
+            g.fillRect(t.x + 3 + col * 5, HY - t.h + 5 + row * 7, 2, 2);
+          }
+        }
       }
     });
 
-    // ── layer1: река — скорость 1x, нижние 25% ───────────────────────────────
-    // Синяя полоса с горизонтальными бликами
-    makeTile(this, 'layer1', 96, Math.ceil(H * 0.25), (g, tw, th) => {
+    // ── layer3: панельки Кудрово — 0.3x ─────────────────────────────────────
+    // Тайл 320 × h3 (149). Прозрачный фон — небо из layer4 видно сквозь зазоры.
+    // A (9 эт.): x=0,  w=88,  h=120  | B (12 эт.): x=91, w=118, h=140
+    // C (10 эт.): x=212, w=105, h=130 | зазоры 3 px
+    const h3 = Math.ceil(H * 0.55); // 149
+    makeTile(this, 'layer3', 320, h3, (g, tw, th) => {
+      // A: серо-бежевый советский
+      drawPanelka(g,   0, th,  88, 120, 0x848078,  9, 4, {
+        stains: [{ dx: 12, sw: 2, sh: 70 }, { dx: 50, sw: 1, sh: 45 }, { dx: 72, sw: 2, sh: 80 }],
+      });
+      // B: тёмный брутальный монолит
+      drawPanelka(g,  91, th, 118, 140, 0x706a64, 12, 6, {
+        stains: [{ dx: 10, sw: 1, sh: 90 }, { dx: 38, sw: 2, sh: 60 }, { dx: 72, sw: 1, sh: 100 }, { dx: 98, sw: 2, sh: 55 }],
+      });
+      // C: выцветший бежево-серый
+      drawPanelka(g, 212, th, 105, 130, 0x7c7870, 10, 5, {
+        stains: [{ dx: 14, sw: 2, sh: 75 }, { dx: 55, sw: 1, sh: 50 }, { dx: 82, sw: 2, sh: 85 }],
+      });
+    });
+
+    // ── layer2: асфальт — 1x ─────────────────────────────────────────────────
+    // Городской тротуар + дорога. Серый, мокрый, немного трещин.
+    // Tile 112 × h2. Разметка: пунктирная осевая линия.
+    const h1 = Math.ceil(H * 0.12); // 33px — река (спереди, у самого низа)
+    const h2 = Math.ceil(H * 0.22); // 60px — дорога прямо над рекой
+    makeTile(this, 'layer2', 112, h2, (g, tw, th) => {
+      // тротуарная плитка / бордюрная зона (верхние ~30%)
+      const sidewalkH = Math.floor(th * 0.30); // 18px
+      g.fillStyle(0x4a4844, 1);
+      g.fillRect(0, 0, tw, sidewalkH);
+
+      // швы тротуарных плит
+      g.fillStyle(0x3a3836, 1);
+      for (let x = 0; x < tw; x += 28) g.fillRect(x, 0, 1, sidewalkH);
+      g.fillRect(0, Math.floor(sidewalkH / 2), tw, 1);
+
+      // бордюрный камень (поребрик)
+      g.fillStyle(0x606058, 1);
+      g.fillRect(0, sidewalkH, tw, 3);
+      // бликующая грань поребрика
+      g.fillStyle(0x787870, 1);
+      g.fillRect(0, sidewalkH + 1, tw, 1);
+
+      // асфальт
+      const roadY = sidewalkH + 3;
+      g.fillStyle(0x282826, 1);
+      g.fillRect(0, roadY, tw, th - roadY);
+
+      // лёгкая текстура асфальта — тёмные и светлые пятна
+      g.fillStyle(0x242422, 1);
+      for (let x = 8; x < tw; x += 22) g.fillRect(x, roadY + 4, 10, 5);
+      g.fillStyle(0x2e2e2c, 1);
+      for (let x = 0; x < tw; x += 18) g.fillRect(x, roadY + 13, 14, 3);
+
+      // осевая пунктирная линия (белая разметка)
+      const markY = roadY + Math.floor((th - roadY) * 0.45); // примерно середина дороги
+      g.fillStyle(0xd4d0c4, 1);
+      // 3 тире по 24px с отступом 12px → 3*24 + 2*12 = 96px, остаток 16px
+      const dashW = 24, dashGap = 16, dashH = 2;
+      for (let x = 0; x + dashW <= tw; x += dashW + dashGap) {
+        g.fillRect(x, markY, dashW, dashH);
+      }
+
+      // правая крайняя линия (жёлтая)
+      g.fillStyle(0xb89848, 1);
+      g.fillRect(0, roadY, tw, 2);
+    });
+
+    // ── layer1: река — 1x, нижние 12% (спереди всего) ───────────────────────
+    makeTile(this, 'layer1', 96, h1, (g, tw, th) => {
       g.fillStyle(0x1a5fa8, 1);
       g.fillRect(0, 0, tw, th);
-      // блики на воде
       const glints = [
-        { y:  5, h: 3, color: 0x2e7fc8 },
-        { y: 14, h: 2, color: 0x1e6bb5 },
-        { y: 22, h: 4, color: 0x3388d0 },
-        { y: 32, h: 2, color: 0x2275be },
-        { y: 40, h: 3, color: 0x2e7fc8 },
-        { y: 50, h: 2, color: 0x185296 },
+        { y:  5, h: 3, c: 0x2e7fc8 }, { y: 14, h: 2, c: 0x1e6bb5 },
+        { y: 22, h: 4, c: 0x3388d0 }, { y: 32, h: 2, c: 0x2275be },
+        { y: 40, h: 3, c: 0x2e7fc8 }, { y: 50, h: 2, c: 0x185296 },
       ];
       for (const gl of glints) {
         if (gl.y >= th) continue;
-        g.fillStyle(gl.color, 1);
+        g.fillStyle(gl.c, 1);
         g.fillRect(0, gl.y, tw, Math.min(gl.h, th - gl.y));
       }
     });
 
-    // ── TileSprites ───────────────────────────────────────────────────────────
-    // layer4: полный экран
+    // ── TileSprites (порядок = z-порядок: позже = выше) ──────────────────────
+    // Стек снизу вверх экрана:  река [h1=33px] | дорога [h2=60px] | панельки | небо
+    // Z-порядок (спереди): layer1 > layer2 > layer3 > layer4
     this.tl4 = this.add.tileSprite(0, 0, W, H, 'layer4').setOrigin(0, 0);
 
-    // layer3: нижние ~55% (холмы перекрывают нижнюю часть неба)
-    const h3 = Math.ceil(H * 0.55);
     this.tl3 = this.add.tileSprite(0, H - h3, W, h3, 'layer3').setOrigin(0, 0);
 
-    // layer2: земля — нижние ~22% поверх холмов
-    const h2 = Math.ceil(H * 0.22);
-    this.tl2 = this.add.tileSprite(0, H - h2, W, h2, 'layer2').setOrigin(0, 0);
+    // дорога: y = H - h1 - h2 (прямо над рекой)
+    this.tl2 = this.add.tileSprite(0, H - h1 - h2, W, h2, 'layer2').setOrigin(0, 0);
 
-    // layer1: река — нижние 25% поверх всего
-    const h1 = Math.ceil(H * 0.25);
+    // река: y = H - h1 (самый низ, спереди)
     this.tl1 = this.add.tileSprite(0, H - h1, W, h1, 'layer1').setOrigin(0, 0);
   }
 
   update(_time, delta) {
-    const dt = delta / 1000; // секунды
-
+    const dt = delta / 1000;
     this.tl4.tilePositionX += BASE_SPEED * 0.1 * dt;
     this.tl3.tilePositionX += BASE_SPEED * 0.3 * dt;
     this.tl2.tilePositionX += BASE_SPEED * 1.0 * dt;
@@ -168,7 +294,7 @@ const config = {
   type: Phaser.AUTO,
   width: 480,
   height: 270,
-  backgroundColor: '#0a0a0a',
+  backgroundColor: '#060608',
   scene: [GameScene],
   scale: {
     mode: Phaser.Scale.FIT,

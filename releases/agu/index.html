@@ -577,6 +577,163 @@ class GameScene extends Phaser.Scene {
     this.knechtBase  = { x: KNECHT_X, y: KNECHT_Y };       // базовые координаты без покачивания
     this.shipEdgeX   = BOW_DECK_X + FACE_W + 4;           // правый край корпуса + запас
 
+    // ── Гальюнная фигура змеи — depth 9, двигается с boatBob ────────────────
+    // Готика: тёмная резьба, приглушённая бронза — как русалка на носу корабля
+    {
+      const C_VOID   = 0x020504;  // бездна
+      const C_BODY   = 0x091408;  // тёмный камень — основное тело
+      const C_SCALE  = 0x102016;  // поверхность чешуи
+      const C_LIT    = 0x172c1c;  // кромка — свет падает сверху
+      const C_BRONZE = 0x7a5e08;  // тусклая бронза (корона)
+      const C_BRZ_S  = 0x4a3a04;  // тень бронзы
+      const C_BRZ_H  = 0x9a7a10;  // редкий блик бронзы
+      const C_AMBER  = 0x604c06;  // глаз — мёртвый янтарь
+
+      // Правый (выступающий) край носовой грани: от (164,0) до (108,waterY)
+      const fRX = (y) => (BOW_DECK_X + FACE_W) - (BOW_DECK_X + FACE_W - BOW_WL_X) * (y / waterY);
+
+      this.snakeGfx = this.add.graphics().setDepth(9);
+      const sg = this.snakeGfx;
+
+      // === Тело: плоские чешуи — как резьба по тёмному дубу ================
+      // Каждая чешуя — горизонтальная пластина, освещена только сверху
+      for (let ys = 155; ys >= 80; ys -= 8) {
+        const cx = fRX(ys);
+        sg.fillStyle(C_VOID, 1);
+        sg.fillRect(cx - 7, ys - 2, 14, 7);   // тень под чешуёй
+        sg.fillStyle(C_BODY, 1);
+        sg.fillRect(cx - 7, ys - 3, 13, 6);   // тело чешуи
+        sg.fillStyle(C_SCALE, 1);
+        sg.fillRect(cx - 6, ys - 3, 11, 2);   // верхняя поверхность
+        sg.fillStyle(C_LIT, 1);
+        sg.fillRect(cx - 5, ys - 3, 9, 1);    // верхний край (свет)
+        sg.fillStyle(C_VOID, 1);
+        sg.fillRect(cx - 7, ys + 2, 13, 1);   // разделительная бороздка
+      }
+
+      // === Шея — чуть шире, плавный переход к голове =======================
+      for (let yn = 78; yn >= 63; yn -= 8) {
+        const cx = fRX(yn);
+        sg.fillStyle(C_VOID, 1);
+        sg.fillRect(cx - 6, yn - 2, 14, 7);
+        sg.fillStyle(C_BODY, 1);
+        sg.fillRect(cx - 6, yn - 3, 13, 6);
+        sg.fillStyle(C_SCALE, 1);
+        sg.fillRect(cx - 5, yn - 3, 11, 2);
+        sg.fillStyle(C_LIT, 1);
+        sg.fillRect(cx - 4, yn - 3, 9, 1);
+        // Спинной гребень — маленький треугольный шип
+        sg.fillStyle(C_SCALE, 1);
+        sg.fillRect(cx + 5, yn - 6, 2, 4);
+        sg.fillStyle(C_LIT, 1);
+        sg.fillRect(cx + 5, yn - 6, 1, 4);
+      }
+
+      // === Голова — виперовидная: широкая сзади, острая спереди =============
+      const hX = fRX(46) + 1;   // ≈ 153
+      const hY = 46;
+
+      // Черепная коробка (широкая часть)
+      sg.fillStyle(C_VOID, 1);
+      sg.fillRect(hX - 8, hY - 6, 13, 15);   // тень
+      sg.fillStyle(C_BODY, 1);
+      sg.fillRect(hX - 8, hY - 7, 12, 14);   // череп
+      sg.fillStyle(C_SCALE, 1);
+      sg.fillRect(hX - 8, hY - 7, 12, 3);    // верхняя поверхность темени
+      sg.fillStyle(C_LIT, 1);
+      sg.fillRect(hX - 7, hY - 7, 10, 1);    // край темени
+
+      // Нависающий надбровный гребень — грозный, давящий
+      sg.fillStyle(C_VOID, 1);
+      sg.fillRect(hX - 9, hY - 5, 15, 2);    // тень гребня
+      sg.fillStyle(C_BODY, 1);
+      sg.fillRect(hX - 9, hY - 6, 15, 2);    // гребень
+
+      // Верхняя морда — выступает вправо
+      sg.fillStyle(C_VOID, 1);
+      sg.fillRect(hX + 3, hY - 4, 14, 11);   // тень
+      sg.fillStyle(C_BODY, 1);
+      sg.fillRect(hX + 3, hY - 5, 13, 9);    // верхняя морда
+      sg.fillStyle(C_SCALE, 1);
+      sg.fillRect(hX + 3, hY - 5, 13, 2);    // поверхность морды
+      sg.fillStyle(C_LIT, 1);
+      sg.fillRect(hX + 4, hY - 5, 11, 1);    // кромка морды
+
+      // Нижняя челюсть — слегка опущена (угрожающий оскал, не мультяшный)
+      sg.fillStyle(C_VOID, 1);
+      sg.fillRect(hX + 5, hY + 4, 12, 8);    // тень
+      sg.fillStyle(C_BODY, 1);
+      sg.fillRect(hX + 5, hY + 4, 11, 6);    // нижняя челюсть
+      sg.fillStyle(C_SCALE, 1);
+      sg.fillRect(hX + 5, hY + 9, 11, 1);    // нижний край нижней челюсти
+
+      // === Пасть — узкая тёмная щель, по углу носа (14° ниже горизонтали) ==
+      const mX = hX + 15;   // ≈ 168
+      const mY = hY + 2;    // ≈ 48
+      sg.fillStyle(C_VOID, 1);
+      sg.fillRect(mX - 7, mY + 1, 10, 3);    // тёмная щель
+      // Один стилетообразный клык — готика
+      sg.fillStyle(0xcac8b8, 1);
+      sg.fillTriangle(mX - 5, mY + 1, mX - 2, mY + 1, mX - 4, mY + 4);
+      // Нижний клык
+      sg.fillTriangle(mX - 4, mY + 4, mX - 1, mY + 4, mX - 3, mY + 1);
+
+      // === Глаз — миндалевидный, мёртвый янтарь, холодный взгляд ===========
+      const eX = hX - 1;
+      const eY = hY - 1;
+      sg.fillStyle(C_VOID, 1);
+      sg.fillRect(eX - 4, eY - 3, 9, 6);     // глазница — вдавленная впадина
+      sg.fillStyle(C_AMBER, 1);
+      sg.fillEllipse(eX, eY, 7, 4);           // янтарная радужка
+      sg.fillStyle(C_VOID, 1);
+      sg.fillRect(eX - 2, eY - 1, 5, 2);      // горизонтальный зрачок (не вертикальный — жутче)
+      // Ни одного яркого блика — только тёмное тление
+      sg.fillStyle(0x7a6008, 0.5);
+      sg.fillRect(eX + 1, eY - 1, 1, 1);
+
+      // === Корона — три готических шипа, железная бронза ====================
+      const crX = hX - 5;   // ≈ 148
+      const crY = hY - 16;  // ≈ 30
+
+      // Тяжёлое основание — железный обруч
+      sg.fillStyle(C_BRZ_S, 1);
+      sg.fillRect(crX - 1, crY + 1, 18, 7);   // тень
+      sg.fillStyle(C_BRONZE, 1);
+      sg.fillRect(crX, crY, 16, 6);             // обруч
+      sg.fillStyle(C_BRZ_H, 1);
+      sg.fillRect(crX, crY, 16, 1);             // тусклый верхний блик
+      sg.fillStyle(C_BRZ_S, 1);
+      sg.fillRect(crX, crY + 5, 16, 1);         // нижняя тень
+
+      // Три готических шипа: центральный выше — иерархия власти
+      const spikes = [
+        { dx: 1,  h: 12, gem: 0x500808 },   // рубин — почти чёрный
+        { dx: 6,  h: 17, gem: 0x06062c },   // сапфир — почти чёрный
+        { dx: 11, h: 12, gem: 0x063418 },   // изумруд — почти чёрный
+      ];
+      for (const s of spikes) {
+        sg.fillStyle(C_BRZ_S, 1);
+        sg.fillRect(crX + s.dx + 1, crY - s.h + 1, 3, s.h);  // тень шипа
+        sg.fillStyle(C_BRONZE, 1);
+        sg.fillRect(crX + s.dx, crY - s.h, 3, s.h);           // шип
+        sg.fillStyle(C_BRZ_H, 1);
+        sg.fillRect(crX + s.dx, crY - s.h, 1, s.h);           // левая грань (блик)
+        sg.fillStyle(s.gem, 1);
+        sg.fillRect(crX + s.dx, crY - s.h, 3, 4);             // самоцвет — тёмный камень
+      }
+
+      // Горизонтальная насечка-ободок, заклёпки
+      sg.fillStyle(C_BRZ_S, 1);
+      sg.fillRect(crX, crY + 3, 16, 1);
+      sg.fillStyle(C_BRZ_H, 1);
+      for (let px = crX + 2; px < crX + 15; px += 4) {
+        sg.fillRect(px, crY + 3, 1, 1);   // заклёпки
+      }
+
+      // === Мундштук: кончик пасти для спавна купюр =========================
+      this.cannonMuzzleBase = { x: mX + 3, y: mY + 2 };
+    }
+
     // Прожектор на носу корабля — лампа чуть ниже палубной кромки
     this.beamOBase = { x: BOW_DECK_X + FACE_W - 2, y: 30 };
     this.beamGfx   = this.add.graphics().setDepth(18);
@@ -626,13 +783,70 @@ class GameScene extends Phaser.Scene {
       this.lampLights.push(this.lights.addLight(i * 336, this.GY - 24, 105, 0xffcc60, 2.2));
     }
 
+    // ── Пул купюр (макс. 8) ──────────────────────────────────────────────────
+    this.banknotes    = [];
+    this.banknoteIdx  = 0;          // round-robin: следующий слот
+    this.bnTimer      = 0;
+    this.bnDelay      = Phaser.Math.Between(2000, 4000);
+
+    for (let i = 0; i < 8; i++) {
+      const gfx = this.add.graphics().setDepth(20).setVisible(false);
+      // Рисуем купюру один раз — перемещаем через gfx.x / gfx.y
+      gfx.fillStyle(0xc0392b, 1);
+      gfx.fillRect(-14, -7, 28, 14);
+      gfx.fillStyle(0xd4af37, 0.7);
+      gfx.fillRect(-14, -1, 28, 2);          // золотая полоса
+      gfx.lineStyle(1, 0xe85d4a, 1);
+      gfx.strokeRect(-13, -6, 26, 12);
+
+      const txt = this.add.text(0, 0, '5000', {
+        fontSize: '6px', fontFamily: 'monospace', color: '#ffffff',
+      }).setDepth(21).setOrigin(0.5, 0.5).setVisible(false);
+
+      this.banknotes.push({ gfx, txt, x: 0, y: 0, state: 'idle', chain: null });
+    }
+
     // Все видимые объекты → Light2D pipeline
     [
       this.tl4, this.tl3, this.tl2, this.tl1,
       this.boatGfx, this.llamaBody, this.harnessGfx,
       this.legBL, this.legBR, this.legFL, this.legFR,
-      this.ropeGfx, this.waveGfx, this.lampBodyGfx,
+      this.ropeGfx, this.waveGfx, this.lampBodyGfx, this.snakeGfx,
+      ...this.banknotes.map(b => b.gfx),
     ].forEach(obj => obj.setPipeline('Light2D'));
+  }
+
+  spawnBanknote() {
+    const slot = this.banknotes[this.banknoteIdx];
+    this.banknoteIdx = (this.banknoteIdx + 1) % this.banknotes.length;
+
+    if (slot.chain) slot.chain.stop();
+
+    const sx = this.cannonMuzzleBase.x + this.boatBob.x;
+    const sy = this.cannonMuzzleBase.y + this.boatBob.y;
+    slot.x = sx;  slot.y = sy;
+    slot.state = 'flying';
+    slot.gfx.setVisible(true);
+    slot.txt.setVisible(true);
+
+    const riverY = this.waterY + 8;
+    const W = this.scale.width;
+
+    slot.chain = this.tweens.chain({
+      tweens: [
+        {
+          // фаза 1: летит по углу носа корабля (~14° вниз от горизонтали)
+          targets: slot, x: sx + 110, y: sy + 28,
+          duration: 360, ease: 'Quad.Out',
+        },
+        {
+          // фаза 2: падает в воду у правого края экрана (чуть за экраном)
+          targets: slot, x: W + 18, y: riverY,
+          duration: 430, ease: 'Quad.In',
+          onComplete: () => { slot.state = 'floating'; },
+        },
+      ],
+    });
   }
 
   update(_time, delta) {
@@ -718,13 +932,39 @@ class GameScene extends Phaser.Scene {
     this.walkTween1.timeScale = spd;
     this.walkTween2.timeScale = spd;
 
-    // Корабль покачивается — смещаем весь Graphics-объект
-    this.boatGfx.x = this.boatBob.x;
-    this.boatGfx.y = this.boatBob.y;
+    // Корабль и пушка покачиваются вместе
+    this.boatGfx.x  = this.boatBob.x;
+    this.boatGfx.y  = this.boatBob.y;
+    this.snakeGfx.x = this.boatBob.x;
+    this.snakeGfx.y = this.boatBob.y;
 
     // Кнехт двигается вместе с корпусом — обновляем точку крепления верёвки
     this.ropeBoat.x = this.knechtBase.x + this.boatBob.x;
     this.ropeBoat.y = this.knechtBase.y + this.boatBob.y;
+
+    // ── Купюры ────────────────────────────────────────────────────────────────
+    this.bnTimer += delta;
+    if (this.bnTimer >= this.bnDelay) {
+      this.bnTimer = 0;
+      this.bnDelay = Phaser.Math.Between(2000, 4000);
+      this.spawnBanknote();
+    }
+    for (const bn of this.banknotes) {
+      if (bn.state === 'idle') continue;
+      if (bn.state === 'floating') {
+        bn.x -= BASE_SPEED * spd * dt;
+        if (bn.x < -40) {
+          bn.state = 'idle';
+          bn.gfx.setVisible(false);
+          bn.txt.setVisible(false);
+          continue;
+        }
+      }
+      bn.gfx.x = Math.round(bn.x);
+      bn.gfx.y = Math.round(bn.y);
+      bn.txt.x  = Math.round(bn.x);
+      bn.txt.y  = Math.round(bn.y);
+    }
 
     // Верёвка: квадратичная кривая с анимированным провисом
     // Натяжение пульсирует через tween ropeSag.v — эффект живой тяги

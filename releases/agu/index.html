@@ -1,0 +1,182 @@
+<!DOCTYPE html>
+<html lang="ru">
+<head>
+  <meta charset="utf-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1" />
+  <title>АГУ — Ламопад</title>
+  <style>
+    *, *::before, *::after { margin: 0; padding: 0; box-sizing: border-box; }
+    html, body {
+      width: 100%; height: 100%;
+      background: #0a0a0a;
+      display: flex;
+      justify-content: center;
+      align-items: center;
+      overflow: hidden;
+    }
+    canvas { display: block; }
+  </style>
+</head>
+<body>
+<script src="https://cdn.jsdelivr.net/npm/phaser@3.60.0/dist/phaser.min.js"></script>
+<script>
+'use strict';
+
+const BASE_SPEED = 100; // px/sec
+
+// ─── Texture helpers ──────────────────────────────────────────────────────────
+
+/**
+ * Build a small repeating tile texture using a paint callback.
+ * @param {Phaser.Scene} scene
+ * @param {string}       key
+ * @param {number}       w     tile width
+ * @param {number}       h     tile height
+ * @param {function}     paint (graphics, w, h) => void
+ */
+function makeTile(scene, key, w, h, paint) {
+  const g = scene.make.graphics({ add: false });
+  paint(g, w, h);
+  g.generateTexture(key, w, h);
+  g.destroy();
+}
+
+// ─── GameScene ────────────────────────────────────────────────────────────────
+
+class GameScene extends Phaser.Scene {
+  constructor() { super({ key: 'GameScene' }); }
+
+  create() {
+    const W = this.scale.width;   // 480
+    const H = this.scale.height;  // 270
+
+    // ── layer4: дальний фон (небо) — скорость 0.1x ──────────────────────────
+    // Голубое небо с редкими светлыми полосами-облаками
+    makeTile(this, 'layer4', 320, H, (g, tw, th) => {
+      g.fillStyle(0x87bfdd, 1);
+      g.fillRect(0, 0, tw, th);
+      // несколько горизонтальных «облачных» полос разной яркости
+      const stripes = [
+        { y: 30, h: 14, color: 0xaad4e8 },
+        { y: 80, h:  8, color: 0x9fcfe5 },
+        { y: 130, h: 18, color: 0xb2daea },
+        { y: 190, h: 10, color: 0x9ac8e0 },
+      ];
+      for (const s of stripes) {
+        g.fillStyle(s.color, 1);
+        g.fillRect(0, s.y, tw, s.h);
+      }
+    });
+
+    // ── layer3: ближний фон (холмы/деревья) — скорость 0.3x ─────────────────
+    // Тёмно-зелёные силуэты на нижней половине
+    makeTile(this, 'layer3', 160, Math.ceil(H * 0.55), (g, tw, th) => {
+      g.fillStyle(0x2e6b3e, 1);
+      g.fillRect(0, 0, tw, th);
+      // "зубцы" деревьев — прямоугольные блоки разной высоты
+      const trees = [
+        { x:  0, w: 20, h: 55, color: 0x255933 },
+        { x: 25, w: 14, h: 70, color: 0x1e4d2b },
+        { x: 44, w: 18, h: 48, color: 0x276038 },
+        { x: 68, w: 22, h: 65, color: 0x204e2f },
+        { x: 96, w: 16, h: 58, color: 0x255933 },
+        { x: 118, w: 20, h: 72, color: 0x1e4d2b },
+        { x: 142, w: 12, h: 44, color: 0x276038 },
+      ];
+      for (const t of trees) {
+        g.fillStyle(t.color, 1);
+        g.fillRect(t.x, th - t.h, t.w, t.h);
+      }
+    });
+
+    // ── layer2: земля — скорость 1x ──────────────────────────────────────────
+    // Коричнево-зелёная полоса с горизонтальными линиями текстуры
+    makeTile(this, 'layer2', 80, Math.ceil(H * 0.22), (g, tw, th) => {
+      g.fillStyle(0x5a4020, 1);
+      g.fillRect(0, 0, tw, th);
+      // полосы травы / грунта
+      const bands = [
+        { y: 0,  h: 7,  color: 0x3d7a3a },
+        { y: 7,  h: 4,  color: 0x4a8c46 },
+        { y: 11, h: 5,  color: 0x5a4020 },
+        { y: 16, h: 3,  color: 0x4e3318 },
+        { y: 19, h: tw, color: 0x5a4020 },
+      ];
+      for (const b of bands) {
+        if (b.y >= th) continue;
+        g.fillStyle(b.color, 1);
+        g.fillRect(0, b.y, tw, Math.min(b.h, th - b.y));
+      }
+      // прерывистые «кочки»
+      g.fillStyle(0x3d7a3a, 1);
+      for (let x = 0; x < tw; x += 18) {
+        g.fillRect(x, 1, 8, 4);
+      }
+    });
+
+    // ── layer1: река — скорость 1x, нижние 25% ───────────────────────────────
+    // Синяя полоса с горизонтальными бликами
+    makeTile(this, 'layer1', 96, Math.ceil(H * 0.25), (g, tw, th) => {
+      g.fillStyle(0x1a5fa8, 1);
+      g.fillRect(0, 0, tw, th);
+      // блики на воде
+      const glints = [
+        { y:  5, h: 3, color: 0x2e7fc8 },
+        { y: 14, h: 2, color: 0x1e6bb5 },
+        { y: 22, h: 4, color: 0x3388d0 },
+        { y: 32, h: 2, color: 0x2275be },
+        { y: 40, h: 3, color: 0x2e7fc8 },
+        { y: 50, h: 2, color: 0x185296 },
+      ];
+      for (const gl of glints) {
+        if (gl.y >= th) continue;
+        g.fillStyle(gl.color, 1);
+        g.fillRect(0, gl.y, tw, Math.min(gl.h, th - gl.y));
+      }
+    });
+
+    // ── TileSprites ───────────────────────────────────────────────────────────
+    // layer4: полный экран
+    this.tl4 = this.add.tileSprite(0, 0, W, H, 'layer4').setOrigin(0, 0);
+
+    // layer3: нижние ~55% (холмы перекрывают нижнюю часть неба)
+    const h3 = Math.ceil(H * 0.55);
+    this.tl3 = this.add.tileSprite(0, H - h3, W, h3, 'layer3').setOrigin(0, 0);
+
+    // layer2: земля — нижние ~22% поверх холмов
+    const h2 = Math.ceil(H * 0.22);
+    this.tl2 = this.add.tileSprite(0, H - h2, W, h2, 'layer2').setOrigin(0, 0);
+
+    // layer1: река — нижние 25% поверх всего
+    const h1 = Math.ceil(H * 0.25);
+    this.tl1 = this.add.tileSprite(0, H - h1, W, h1, 'layer1').setOrigin(0, 0);
+  }
+
+  update(_time, delta) {
+    const dt = delta / 1000; // секунды
+
+    this.tl4.tilePositionX += BASE_SPEED * 0.1 * dt;
+    this.tl3.tilePositionX += BASE_SPEED * 0.3 * dt;
+    this.tl2.tilePositionX += BASE_SPEED * 1.0 * dt;
+    this.tl1.tilePositionX += BASE_SPEED * 1.0 * dt;
+  }
+}
+
+// ─── Phaser config ────────────────────────────────────────────────────────────
+
+const config = {
+  type: Phaser.AUTO,
+  width: 480,
+  height: 270,
+  backgroundColor: '#0a0a0a',
+  scene: [GameScene],
+  scale: {
+    mode: Phaser.Scale.FIT,
+    autoCenter: Phaser.Scale.CENTER_BOTH,
+  },
+};
+
+new Phaser.Game(config);
+</script>
+</body>
+</html>

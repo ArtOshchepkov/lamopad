@@ -350,14 +350,138 @@ class GameScene extends Phaser.Scene {
 
     // река: y = H - h1 (самый низ, спереди)
     this.tl1 = this.add.tileSprite(0, H - h1, W, h1, 'layer1').setOrigin(0, 0);
+
+    // ── Состояние ламы ────────────────────────────────────────────────────────
+    this.state = {
+      health: 100, money: 0, age: 0, speed: 1.0,
+      isBowing: false, isSprinting: false, isCrying: false,
+    };
+
+    // ── Лама-бурлак ───────────────────────────────────────────────────────────
+    const LX   = 160;                   // x ламы (фиксирован, мир скроллится)
+    const GY   = H - h1 - h2;          // y поверхности дороги (верхний край layer2)
+
+    const WOOL  = 0xf0e8d0;  // кремовая шерсть
+    const WOOL2 = 0xd8c9a8;  // чуть темнее — ноги, уши
+    const HOOF  = 0x3e2c1a;  // копыта
+
+    // Статичные части: тело, шея, голова, ухо, морда, глаз, соска
+    this.llamaBody = this.add.graphics().setDepth(10);
+    const lb = this.llamaBody;
+
+    lb.fillStyle(WOOL, 1);
+    lb.fillRect(LX - 20, GY - 30, 40, 16);   // тело
+    lb.fillRect(LX + 13, GY - 47, 8,  17);   // шея
+    lb.fillRect(LX + 11, GY - 58, 20, 13);   // голова
+
+    lb.fillStyle(WOOL2, 1);
+    lb.fillRect(LX + 13, GY - 67,  5, 10);   // ухо
+
+    lb.fillStyle(WOOL, 1);
+    lb.fillRect(LX + 29, GY - 54, 11,  7);   // морда
+
+    lb.fillStyle(0x0e0808, 1);
+    lb.fillRect(LX + 22, GY - 56,  3,  3);   // глаз — смотрит вдаль
+
+    lb.fillStyle(0xee2850, 1);                // соска
+    lb.fillCircle(LX + 41, GY - 50, 3);
+
+    // Четыре ноги — отдельные Graphics-объекты, анимированы через tweens
+    const LEG_H = 14, LEG_W = 5;
+    const makeLeg = (lx) => {
+      const lg = this.add.graphics().setDepth(9);
+      lg.fillStyle(WOOL2, 1);
+      lg.fillRect(lx, GY - LEG_H, LEG_W, LEG_H);
+      lg.fillStyle(HOOF, 1);
+      lg.fillRect(lx - 1, GY - 3, LEG_W + 2, 3);
+      return lg;
+    };
+
+    this.legBL = makeLeg(LX - 18);   // задняя левая
+    this.legBR = makeLeg(LX - 10);   // задняя правая
+    this.legFL = makeLeg(LX +  9);   // передняя левая
+    this.legFR = makeLeg(LX + 17);   // передняя правая
+
+    // Диагональные пары: BL+FR и BR+FL шагают в противофазе
+    this.walkTween1 = this.tweens.add({
+      targets: [this.legBL, this.legFR],
+      y: -5, duration: 260, yoyo: true, repeat: -1, ease: 'Sine.InOut',
+    });
+    this.walkTween2 = this.tweens.add({
+      targets: [this.legBR, this.legFL],
+      y: -5, duration: 260, yoyo: true, repeat: -1, delay: 260, ease: 'Sine.InOut',
+    });
+
+    // ── Кораблик (треугольник в реке, screen-fixed) ───────────────────────────
+    const BX = LX + 178;
+    const BY = H - h1 + Math.floor(h1 * 0.42);
+
+    this.boatGfx = this.add.graphics().setDepth(10);
+    // корпус — трапеция из двух треугольников
+    this.boatGfx.fillStyle(0x7a4e22, 1);
+    this.boatGfx.fillTriangle(BX - 16, BY + 7,  BX + 16, BY + 7, BX + 10, BY - 2);
+    this.boatGfx.fillTriangle(BX - 16, BY + 7,  BX + 10, BY - 2, BX -  8, BY - 2);
+    // парус
+    this.boatGfx.fillStyle(0xcfc090, 1);
+    this.boatGfx.fillTriangle(BX - 4, BY - 2,  BX - 4, BY - 18,  BX + 12, BY - 2);
+
+    // ── Верёвка (перерисовывается каждый кадр) ────────────────────────────────
+    this.ropeGfx  = this.add.graphics().setDepth(11);
+    this.ropeNeck = { x: LX + 15,  y: GY - 46 };   // точка крепления на шее ламы
+    this.ropeBoat = { x: BX -  4,  y: BY -  2 };   // нос кораблика
+
+    // ── Таймеры состояния ─────────────────────────────────────────────────────
+    // Здоровье убывает: -2/сек
+    this.time.addEvent({
+      delay: 1000, loop: true,
+      callback: () => { this.state.health = Math.max(0, this.state.health - 2); },
+    });
+    // Каждые 20 сек: age++, speed -= 0.15 (лама стареет, замедляется)
+    this.time.addEvent({
+      delay: 20000, loop: true,
+      callback: () => {
+        if (this.state.age < 5) {
+          this.state.age  += 1;
+          this.state.speed = Math.max(0.1, this.state.speed - 0.15);
+        }
+      },
+    });
   }
 
   update(_time, delta) {
-    const dt = delta / 1000;
-    this.tl4.tilePositionX += BASE_SPEED * 0.1 * dt;
-    this.tl3.tilePositionX += BASE_SPEED * 0.3 * dt;
-    this.tl2.tilePositionX += BASE_SPEED * 1.0 * dt;
-    this.tl1.tilePositionX += BASE_SPEED * 1.0 * dt;
+    const dt  = delta / 1000;
+    const spd = this.state.speed;
+
+    // Все слои масштабируются на speed — мир замедляется вместе с ламой
+    this.tl4.tilePositionX += BASE_SPEED * 0.1 * spd * dt;
+    this.tl3.tilePositionX += BASE_SPEED * 0.3 * spd * dt;
+    this.tl2.tilePositionX += BASE_SPEED * 1.0 * spd * dt;
+    this.tl1.tilePositionX += BASE_SPEED * 1.0 * spd * dt;
+
+    // Скорость анимации ног = скорость движения
+    this.walkTween1.timeScale = spd;
+    this.walkTween2.timeScale = spd;
+
+    // Верёвка: квадратичная кривая Безье с провисом
+    const { x: nx, y: ny } = this.ropeNeck;
+    const { x: bx, y: by } = this.ropeBoat;
+    const cpx = (nx + bx) / 2;
+    const cpy = (ny + by) / 2 + 22;   // провис вниз
+
+    this.ropeGfx.clear();
+    this.ropeGfx.lineStyle(1, 0xa07848, 1);
+    this.ropeGfx.beginPath();
+    this.ropeGfx.moveTo(nx, ny);
+    const STEPS = 16;
+    for (let i = 1; i <= STEPS; i++) {
+      const t  = i / STEPS;
+      const mt = 1 - t;
+      this.ropeGfx.lineTo(
+        mt * mt * nx + 2 * mt * t * cpx + t * t * bx,
+        mt * mt * ny + 2 * mt * t * cpy + t * t * by,
+      );
+    }
+    this.ropeGfx.strokePath();
   }
 }
 

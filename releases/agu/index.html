@@ -386,6 +386,27 @@ class GameScene extends Phaser.Scene {
     lb.fillStyle(0xee2850, 1);                // соска
     lb.fillCircle(LX + 41, GY - 50, 3);
 
+    // ── Упряжь (лямки) — поверх тела ламы, depth 12 ─────────────────────────
+    // Лямка на груди + плечевой ремень + пряжка в точке крепления верёвки
+    const hp = this.add.graphics().setDepth(12);
+    const HC = 0x52301a;   // тёмная кожа
+    const HB = 0x8a5828;   // бронзовая пряжка
+
+    hp.fillStyle(HC, 1);
+    hp.fillRect(LX - 20, GY - 25, 33, 3);   // поперечная нагрудная лямка
+    hp.fillRect(LX - 19, GY - 30, 3, 18);   // вертикальная лямка (левый бок)
+
+    hp.lineStyle(2, HC, 1);
+    hp.lineBetween(LX + 13, GY - 36, LX - 18, GY - 24);  // плечевой ремень (шея→пряжка)
+
+    // Пряжка — точка крепления верёвки
+    hp.fillStyle(HC, 1);
+    hp.fillCircle(LX - 18, GY - 24, 5);
+    hp.fillStyle(HB, 1);
+    hp.fillCircle(LX - 18, GY - 24, 3);
+    hp.fillStyle(0x0c0808, 1);
+    hp.fillCircle(LX - 18, GY - 24, 1);   // отверстие пряжки
+
     // Четыре ноги — отдельные Graphics-объекты, анимированы через tweens
     const LEG_H = 14, LEG_W = 5;
     const makeLeg = (lx) => {
@@ -412,102 +433,93 @@ class GameScene extends Phaser.Scene {
       y: -5, duration: 260, yoyo: true, repeat: -1, delay: 260, ease: 'Sine.InOut',
     });
 
-    // ── Корабль из купюр 50 рублей — СЛЕВА от ламы, лама его тянет ──────────
-    // Огромный океанский лайнер сложен из пятидесятирублёвых купюр.
-    // Нос корабля смотрит вправо — в сторону движения.
-    const BX      = LX - 150;          // центр корабля (далеко слева)
-    const waterY  = H - h1;            // ватерлиния = верх реки
+    // ── Корпорация-корабль — НАСТОЛЬКО ОГРОМНАЯ, что нос не вмещается в экран ─
+    // Виден только нижний правый угол носа. Стена денег уходит вверх и влево.
+    const waterY     = H - h1;
+    // Прямой нос огромного судна: навис сверху вправо над ламой
+    // Нос нависает правее вверху и немного отступает внизу у ватерлинии
+    const BOW_DECK_X = 148; // x передней кромки палубы (y=0) — правее всего, нависает
+    const BOW_WL_X   = 108; // x носа у ватерлинии — чуть отступает назад (типичный форштевень)
+    // bowX(y): линия носовой грани идёт от (BOW_DECK_X,0) до (BOW_WL_X,waterY)
+    // т.е. нос УХОДИТ ВЛЕВО книзу — прямой нос как у большого судна
+    const bowX = (y) => BOW_DECK_X - (BOW_DECK_X - BOW_WL_X) * (y / waterY);
 
-    // Цвета купюры 50 рублей (Банк России): доминирует сине-зелёный
-    const C_HULL   = 0x165868;   // тёмный корпус (мокрая бумага)
-    const C_MID    = 0x2a7888;   // основной тил (тело купюры)
-    const C_UPPER  = 0x3a90a2;   // надстройки
-    const C_BRIDGE = 0x52a8ba;   // рубка / мостик
-    const C_LINE   = 0x0b3040;   // линии печати / сгибы
-    const C_WIN    = 0x88d0e2;   // иллюминаторы
-    const C_SAIL   = 0x7ec8d8;   // парус (светлый тил)
+    // Цвета купюры 50 рублей
+    const S_SIDE   = 0x1e6070;  // боковой борт (в тени, смотрит вбок)
+    const S_BOW    = 0x2e8898;  // поверхность носа (освещена, смотрит вперёд)
+    const S_KEEL   = 0x0d3040;  // подводная часть
+    const S_BELT   = 0x0b2c3c;  // ватерлинейный пояс
+    const S_LINE   = 0x0b2e3e;  // линии сгибов/плит
+    const S_PORT   = 0x78c8d8;  // иллюминаторы
+    const S_KNECHT = 0x4a8898;  // кнехт (bollard) для верёвки
 
     this.boatGfx = this.add.graphics().setDepth(8);
     const bg = this.boatGfx;
 
-    // ─ Подводная часть корпуса (тёмная трапеция) ─
-    bg.fillStyle(C_HULL, 1);
-    bg.fillTriangle(BX - 62, waterY,   BX + 65, waterY,   BX + 56, waterY + 20);
-    bg.fillTriangle(BX - 62, waterY,   BX + 56, waterY + 20, BX - 55, waterY + 20);
-    // киль под носом
-    bg.fillTriangle(BX + 65, waterY,   BX + 80, waterY + 8,  BX + 56, waterY + 20);
+    // ── Подводный форштевень (тёмный клин в воде) ─────────────────────────────
+    bg.fillStyle(S_KEEL, 1);
+    // Клин под носом у ватерлинии — уходит в воду вниз-вправо
+    bg.fillTriangle(0, waterY,  BOW_WL_X, waterY,  0, H);
+    bg.fillTriangle(BOW_WL_X, waterY,  BOW_WL_X + 14, waterY + 18,  0, H);
 
-    // ─ Главный корпус над ватерлинией ─
-    bg.fillStyle(C_MID, 1);
-    bg.fillRect(BX - 62, waterY - 22, 127, 22);
-    // Нос — острый выступ вправо
-    bg.fillTriangle(BX + 65, waterY - 22,  BX + 65, waterY,  BX + 82, waterY - 11);
+    // ── Главный борт (боковая грань корпуса) ──────────────────────────────────
+    // Заполняем всё пространство ЛЕВЕЕ носовой грани (прямой нос нависает сверху)
+    bg.fillStyle(S_SIDE, 1);
+    // Прямоугольник от левого края до BOW_WL_X по всей высоте
+    bg.fillRect(-10, -10, BOW_WL_X + 10, waterY + 10);
+    // Треугольник-нависание: носовая грань от (BOW_WL_X,waterY) до (BOW_DECK_X,0)
+    bg.fillTriangle(BOW_WL_X, 0,  BOW_DECK_X, 0,  BOW_WL_X, waterY);
 
-    // ─ Нижняя надстройка ─
-    bg.fillStyle(C_UPPER, 1);
-    bg.fillRect(BX - 48, waterY - 42, 100, 20);
+    // ── Носовая грань (наклонная поверхность носа, освещена) ─────────────────
+    // Полоса от нависающей кромки палубы (BOW_DECK_X,0) до ватерлинии (BOW_WL_X,waterY)
+    bg.fillStyle(S_BOW, 1);
+    const FACE_W = 16;  // ширина видимой плоскости носа
+    bg.fillTriangle(BOW_DECK_X,          0,
+                    BOW_DECK_X + FACE_W, 0,
+                    BOW_WL_X,            waterY);
 
-    // ─ Средняя надстройка ─
-    bg.fillStyle(C_UPPER, 1);
-    bg.fillRect(BX - 30, waterY - 58, 65, 16);
+    // ── Ватерлинейный пояс (тёмная полоса вдоль ватерлинии) ──────────────────
+    bg.fillStyle(S_BELT, 1);
+    bg.fillRect(-10, waterY - 7, BOW_WL_X + 10, 7);
 
-    // ─ Рубка / мостик ─
-    bg.fillStyle(C_BRIDGE, 1);
-    bg.fillRect(BX - 14, waterY - 72, 36, 14);
+    // ── Горизонтальные линии листов обшивки (складки купюры) ─────────────────
+    // Линии идут от левого края до носовой грани на каждом уровне
+    bg.lineStyle(1, S_LINE, 1);
+    for (let ly = 15; ly < waterY - 8; ly += 18) {
+      bg.lineBetween(-10, ly, bowX(ly), ly);
+    }
 
-    // ─ Труба (фunnель) ─
-    bg.fillStyle(C_HULL, 1);
-    bg.fillRect(BX - 4, waterY - 86, 18, 14);
-    bg.fillStyle(0x091e28, 1);
-    bg.fillRect(BX - 7, waterY - 89, 24, 5);   // козырёк трубы
+    // ── Иллюминаторы (ряд у ватерлинии) ──────────────────────────────────────
+    bg.fillStyle(S_PORT, 1);
+    for (let px = 10; px < BOW_WL_X - 18; px += 22) {
+      bg.fillCircle(px, waterY - 18, 3);
+    }
+    // Второй ряд, мельче
+    for (let px = 20; px < BOW_WL_X - 30; px += 28) {
+      bg.fillCircle(px, waterY - 34, 2);
+    }
 
-    // ─ Мачта и рей ─
-    bg.lineStyle(2, C_LINE, 1);
-    bg.lineBetween(BX + 30, waterY - 42, BX + 30, waterY - 100);  // мачта
-    bg.lineStyle(1, C_LINE, 1);
-    bg.lineBetween(BX + 15, waterY - 88, BX + 50, waterY - 88);   // рей
-
-    // ─ Парус (купюра, раздутая ветром) ─
-    bg.fillStyle(C_SAIL, 1);
-    bg.fillTriangle(BX + 30, waterY - 100, BX + 30, waterY - 42, BX + 58, waterY - 42);
-    bg.fillTriangle(BX + 30, waterY - 100, BX + 58, waterY - 42, BX + 62, waterY - 70);
-
-    // ─ Линии сгибов купюры (горизонтальные полосы печати) ─
-    bg.lineStyle(1, C_LINE, 1);
-    bg.lineBetween(BX - 62, waterY - 11, BX + 82, waterY - 11);   // ватерлинейный пояс
-    bg.lineBetween(BX - 62, waterY - 22, BX + 65, waterY - 22);   // верх корпуса
-    bg.lineBetween(BX - 48, waterY - 42, BX + 52, waterY - 42);   // верх надстройки
-    bg.lineBetween(BX - 30, waterY - 58, BX + 35, waterY - 58);   // верх средней
-    bg.lineBetween(BX - 14, waterY - 72, BX + 22, waterY - 72);   // верх рубки
-    // Вертикальный сгиб по центру корпуса (главный сгиб купюры)
-    bg.lineBetween(BX, waterY - 22, BX, waterY + 20);
-
-    // ─ Иллюминаторы ─
-    bg.fillStyle(C_WIN, 1);
-    bg.fillCircle(BX - 42, waterY - 11, 3);
-    bg.fillCircle(BX - 22, waterY - 11, 3);
-    bg.fillCircle(BX -  2, waterY - 11, 3);
-    bg.fillCircle(BX + 18, waterY - 11, 3);
-    bg.fillCircle(BX + 38, waterY - 11, 3);
-    // Окна рубки
-    bg.fillRect(BX - 10, waterY - 68, 8, 6);
-    bg.fillRect(BX +  2, waterY - 68, 8, 6);
-    bg.fillRect(BX + 14, waterY - 68, 8, 6);
-    // Флаг корпорации (золотой)
-    bg.fillStyle(0xc89820, 1);
-    bg.fillTriangle(BX + 30, waterY - 100, BX + 44, waterY - 94, BX + 30, waterY - 88);
+    // ── Кнехт — точка крепления верёвки (на носовой грани у ватерлинии) ──────
+    const KNECHT_X = BOW_WL_X + 2;
+    const KNECHT_Y = waterY - 14;
+    bg.fillStyle(S_LINE, 1);
+    bg.fillRect(KNECHT_X - 4, KNECHT_Y - 5, 9, 9);  // основание
+    bg.fillStyle(S_KNECHT, 1);
+    bg.fillRect(KNECHT_X - 3, KNECHT_Y - 4, 7, 7);  // верхняя часть
+    bg.fillStyle(S_LINE, 1);
+    bg.fillRect(KNECHT_X - 5, KNECHT_Y - 2, 11, 3); // перекладина кнехта
 
     // ── Верёвка (перерисовывается каждый кадр) ────────────────────────────────
     this.ropeGfx  = this.add.graphics().setDepth(11);
-    this.ropeNeck = { x: LX - 20, y: GY - 22 };           // упряжь на боку ламы
-    this.ropeBoat = { x: BX + 82, y: waterY - 11 };       // нос корабля
+    this.ropeNeck = { x: LX - 18, y: GY - 24 };          // пряжка упряжи ламы
+    this.ropeBoat = { x: KNECHT_X, y: KNECHT_Y };         // кнехт корабля
 
-    // Анимация натяжения: tween провисает между 12 (натянута) и 36 (ослаблена)
-    this.ropeSag = { v: 24 };
+    // Анимация натяжения: провис пульсирует 10↔34 — верёвка дышит под нагрузкой
+    this.ropeSag = { v: 22 };
     this.tweens.add({
       targets: this.ropeSag,
-      v: 10,
-      duration: 420,
+      v: 8,
+      duration: 380,
       yoyo: true,
       repeat: -1,
       ease: 'Sine.InOut',

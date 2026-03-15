@@ -322,19 +322,52 @@ class GameScene extends Phaser.Scene {
       g.fillRect(0, roadY, tw, 2);
     });
 
-    // ── layer1: река — 1x, нижние 12% (спереди всего) ───────────────────────
-    makeTile(this, 'layer1', 96, h1, (g, tw, th) => {
-      g.fillStyle(0x1a5fa8, 1);
+    // ── layer1: река — 1x ────────────────────────────────────────────────────
+    makeTile(this, 'layer1', 128, h1, (g, tw, th) => {
+      // Тёмная ночная вода
+      g.fillStyle(0x0c2a42, 1);
       g.fillRect(0, 0, tw, th);
-      const glints = [
-        { y:  5, h: 3, c: 0x2e7fc8 }, { y: 14, h: 2, c: 0x1e6bb5 },
-        { y: 22, h: 4, c: 0x3388d0 }, { y: 32, h: 2, c: 0x2275be },
-        { y: 40, h: 3, c: 0x2e7fc8 }, { y: 50, h: 2, c: 0x185296 },
+
+      // Градиент: у ватерлинии чуть светлее (отражение неба)
+      g.fillStyle(0x183f5c, 1); g.fillRect(0, 0, tw, 3);
+      g.fillStyle(0x112e46, 1); g.fillRect(0, 3, tw, 3);
+
+      // Горизонтальные волны — чередование светлых гребней и тёмных впадин
+      const waves = [
+        { y:  6, h: 2, c: 0x1a4e70 }, { y:  9, h: 1, c: 0x071520 },
+        { y: 12, h: 2, c: 0x154060 }, { y: 16, h: 1, c: 0x060f1c },
+        { y: 19, h: 2, c: 0x1c5272 }, { y: 23, h: 1, c: 0x071825 },
+        { y: 26, h: 2, c: 0x133858 }, { y: 30, h: 1, c: 0x050d18 },
       ];
-      for (const gl of glints) {
-        if (gl.y >= th) continue;
-        g.fillStyle(gl.c, 1);
-        g.fillRect(0, gl.y, tw, Math.min(gl.h, th - gl.y));
+      for (const w of waves) {
+        if (w.y >= th) continue;
+        g.fillStyle(w.c, 1);
+        g.fillRect(0, w.y, tw, Math.min(w.h, th - w.y));
+      }
+
+      // Рябь: короткие случайные штрихи (seeded)
+      let rng = 7919;
+      const rand = () => { rng = Math.imul(rng, 1664525) + 1013904223 | 0; return (rng >>> 0) / 4294967296; };
+      for (let i = 0; i < 55; i++) {
+        const rx = Math.floor(rand() * tw);
+        const ry = 2 + Math.floor(rand() * (th - 4));
+        const rw = 3 + Math.floor(rand() * 16);
+        const br = rand();
+        const col = br > 0.8 ? 0x2a6a90 : br > 0.5 ? 0x153c58 : 0x060e18;
+        g.fillStyle(col, 1);
+        g.fillRect(rx, ry, Math.min(rw, tw - rx), 1);
+      }
+
+      // Отражения фонарей: прерывистые вертикальные золотые колонки
+      const lamps = [22, 68, 108];
+      for (const lx of lamps) {
+        for (let dy = 0; dy < th; dy++) {
+          const gap = Math.floor(1 + dy * 0.2);
+          if ((dy + lx) % (gap + 2) < gap) continue;
+          const hw = Math.max(1, Math.ceil(2.5 - dy * 0.08));
+          g.fillStyle(dy < 5 ? 0xa07828 : 0x6a4c14, 1);
+          g.fillRect(lx - hw + 1, dy, hw * 2 - 1, 1);
+        }
       }
     });
 
@@ -348,8 +381,14 @@ class GameScene extends Phaser.Scene {
     // дорога: y = H - h1 - h2 (прямо над рекой)
     this.tl2 = this.add.tileSprite(0, H - h1 - h2, W, h2, 'layer2').setOrigin(0, 0);
 
-    // река: y = H - h1 (самый низ, спереди)
-    this.tl1 = this.add.tileSprite(0, H - h1, W, h1, 'layer1').setOrigin(0, 0);
+    // река: depth 15 > корабль (8) — при покачивании подводная часть уходит под воду
+    this.tl1 = this.add.tileSprite(0, H - h1, W, h1, 'layer1').setOrigin(0, 0).setDepth(15);
+
+    // Синусоидная граница воды — рисуется каждый кадр поверх всего, depth 16
+    // Заменяет прямую линию между дорогой и рекой живой волной
+    this.waveGfx  = this.add.graphics().setDepth(16);
+    this.waveTime = 0;
+    this.waterY   = H - h1;   // номинальная y ватерлинии
 
     // ── Состояние ламы ────────────────────────────────────────────────────────
     this.state = {
@@ -509,10 +548,33 @@ class GameScene extends Phaser.Scene {
     bg.fillStyle(S_LINE, 1);
     bg.fillRect(KNECHT_X - 5, KNECHT_Y - 2, 11, 3); // перекладина кнехта
 
+    // ── Покачивание корабля на воде ───────────────────────────────────────────
+    // Тяжёлое судно: медленный вертикальный дрейф ±5px (период ~2.8с)
+    // + лёгкий горизонтальный ±2px (другой период — создаёт ощущение объёма)
+    this.boatBob = { y: 0, x: 0 };
+    this.tweens.add({
+      targets: this.boatBob,
+      y: 5,
+      duration: 2800,
+      yoyo: true,
+      repeat: -1,
+      ease: 'Sine.InOut',
+    });
+    this.tweens.add({
+      targets: this.boatBob,
+      x: 2,
+      duration: 3700,
+      yoyo: true,
+      repeat: -1,
+      ease: 'Sine.InOut',
+    });
+
     // ── Верёвка (перерисовывается каждый кадр) ────────────────────────────────
     this.ropeGfx  = this.add.graphics().setDepth(11);
     this.ropeNeck = { x: LX - 18, y: GY - 24 };          // пряжка упряжи ламы
-    this.ropeBoat = { x: KNECHT_X, y: KNECHT_Y };         // кнехт корабля
+    this.ropeBoat = { x: KNECHT_X, y: KNECHT_Y };         // кнехт корабля (обновляется в update)
+    this.knechtBase  = { x: KNECHT_X, y: KNECHT_Y };       // базовые координаты без покачивания
+    this.shipEdgeX   = BOW_DECK_X + FACE_W + 4;           // правый край корпуса + запас
 
     // Анимация натяжения: провис пульсирует 10↔34 — верёвка дышит под нагрузкой
     this.ropeSag = { v: 22 };
@@ -553,9 +615,47 @@ class GameScene extends Phaser.Scene {
     this.tl2.tilePositionX += BASE_SPEED * 1.0 * spd * dt;
     this.tl1.tilePositionX += BASE_SPEED * 1.0 * spd * dt;
 
+    // Синусоидная граница воды
+    // Две наложенных волны с разными частотами → органичный, не механический рисунок
+    this.waveTime += dt;
+    const wt      = this.waveTime;
+    const baseY   = this.waterY;
+    const sceneW  = this.scale.width;
+    const AMP     = 3;    // амплитуда ±3px
+    const FREQ1   = 0.040, SPD1 = 1.1;   // основная волна
+    const FREQ2   = 0.071, SPD2 = 0.65;  // вторичная, сдвигает форму
+    // Цвет воды у ватерлинии (верхний градиент тайла) и асфальт у края дороги
+    const C_WATER = 0x183f5c;
+    const C_ROAD  = 0x282826;
+
+    this.waveGfx.clear();
+    for (let x = 0; x < sceneW; x++) {
+      const dy = Math.round(
+        AMP * Math.sin(x * FREQ1 + wt * SPD1) +
+        (AMP * 0.5) * Math.sin(x * FREQ2 - wt * SPD2),
+      );
+      const edgeY = baseY + dy;
+      if (dy < 0) {
+        // волна выше ватерлинии — заполняем водой
+        this.waveGfx.fillStyle(C_WATER, 1);
+        this.waveGfx.fillRect(x, edgeY, 1, -dy);
+      } else if (dy > 0 && x >= this.shipEdgeX) {
+        // волна ниже ватерлинии — заполняем дорогой (не в зоне корабля)
+        this.waveGfx.fillStyle(C_ROAD, 1);
+        this.waveGfx.fillRect(x, baseY, 1, dy);
+      }
+    }
+
     // Скорость анимации ног = скорость движения
     this.walkTween1.timeScale = spd;
     this.walkTween2.timeScale = spd;
+
+    // Корабль покачивается — смещаем весь Graphics-объект
+    this.boatGfx.x = this.boatBob.x;
+    this.boatGfx.y = this.boatBob.y;
+    // Кнехт двигается вместе с корпусом — обновляем точку крепления верёвки
+    this.ropeBoat.x = this.knechtBase.x + this.boatBob.x;
+    this.ropeBoat.y = this.knechtBase.y + this.boatBob.y;
 
     // Верёвка: квадратичная кривая с анимированным провисом
     // Натяжение пульсирует через tween ropeSag.v — эффект живой тяги

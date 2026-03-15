@@ -399,6 +399,7 @@ class GameScene extends Phaser.Scene {
     // ── Лама-бурлак ───────────────────────────────────────────────────────────
     const LX   = 195;                   // x ламы (фиксирован, мир скроллится)
     const GY   = H - h1 - h2;          // y поверхности дороги (верхний край layer2)
+    this.GY    = GY;                    // нужен в update для прожектора
 
     const WOOL  = 0xf0e8d0;  // кремовая шерсть
     const WOOL2 = 0xd8c9a8;  // чуть темнее — ноги, уши
@@ -576,6 +577,10 @@ class GameScene extends Phaser.Scene {
     this.knechtBase  = { x: KNECHT_X, y: KNECHT_Y };       // базовые координаты без покачивания
     this.shipEdgeX   = BOW_DECK_X + FACE_W + 4;           // правый край корпуса + запас
 
+    // Прожектор на носу корабля — лампа чуть ниже палубной кромки
+    this.beamOBase = { x: BOW_DECK_X + FACE_W - 2, y: 30 };
+    this.beamGfx   = this.add.graphics().setDepth(18);
+
     // Анимация натяжения: провис пульсирует 10↔34 — верёвка дышит под нагрузкой
     this.ropeSag = { v: 22 };
     this.tweens.add({
@@ -644,6 +649,40 @@ class GameScene extends Phaser.Scene {
         this.waveGfx.fillStyle(C_ROAD, 1);
         this.waveGfx.fillRect(x, baseY, 1, dy);
       }
+    }
+
+    // Прожектор: расширяющийся конус от носа корабля
+    // Источник следует за покачиванием. Дальний край фиксирован — при качке луч
+    // слегка «подметает» сцену, как настоящий прожектор на волне.
+    {
+      const ox  = this.beamOBase.x + this.boatBob.x;
+      const oy  = this.beamOBase.y + this.boatBob.y;
+      const W   = this.scale.width;
+      const CY  = this.GY + 12;   // центр луча — уровень дороги
+      this.beamGfx.clear();
+
+      // Четыре вложенных конуса: убывающий угол, нарастающая яркость
+      //   [верх у W, низ у W, цвет, alpha]
+      const layers = [
+        [CY - 115, CY + 115, 0x3a5890, 0.050],
+        [CY -  72, CY +  72, 0x5878b0, 0.090],
+        [CY -  40, CY +  40, 0x90b0d0, 0.140],
+        [CY -  16, CY +  16, 0xc4dcf0, 0.200],
+      ];
+      for (const [t, b, c, a] of layers) {
+        this.beamGfx.fillStyle(c, a);
+        this.beamGfx.fillTriangle(ox, oy, W, t, W, b);
+      }
+
+      // Центральная ось — бликующий волосок
+      this.beamGfx.lineStyle(1, 0xddf0ff, 0.42);
+      this.beamGfx.lineBetween(ox, oy, W, CY);
+
+      // Сама лампа: яркое пятно в точке источника
+      this.beamGfx.fillStyle(0xfff0c8, 0.85);
+      this.beamGfx.fillCircle(ox, oy, 2);
+      this.beamGfx.fillStyle(0xffe090, 0.40);
+      this.beamGfx.fillCircle(ox, oy, 5);
     }
 
     // Скорость анимации ног = скорость движения

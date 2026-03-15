@@ -581,6 +581,9 @@ class GameScene extends Phaser.Scene {
     this.beamOBase = { x: BOW_DECK_X + FACE_W - 2, y: 30 };
     this.beamGfx   = this.add.graphics().setDepth(18);
 
+    // Фонари на набережной
+    this.lampBodyGfx = this.add.graphics().setDepth(7);
+
     // Анимация натяжения: провис пульсирует 10↔34 — верёвка дышит под нагрузкой
     this.ropeSag = { v: 22 };
     this.tweens.add({
@@ -609,15 +612,27 @@ class GameScene extends Phaser.Scene {
       },
     });
 
-    // ── Тёмный ночной оверлей ─────────────────────────────────────────────────
-    // Затемняет всю сцену — всё не попавшее в луч остаётся тёмным.
-    // beamGfx (ADD blend, depth 18) аддитивно подсвечивает только конус.
-    const darkOverlay = this.add.graphics().setDepth(17);
-    darkOverlay.fillStyle(0x000000, 0.72);
-    darkOverlay.fillRect(0, 0, W, H);
+    // ── Физическое освещение (Phaser Light2D) ────────────────────────────────
+    this.lights.enable().setAmbientColor(0x0d1828);
 
-    // Конус прожектора — аддитивный: добавляет свет поверх затемнения
-    this.beamGfx.setBlendMode(Phaser.BlendModes.ADD);
+    // Прожектор корабля: холодный ксенон, большой радиус
+    this.spotLight = this.lights.addLight(
+      this.beamOBase.x, this.beamOBase.y, 460, 0xb0ccf8, 3.2,
+    );
+
+    // Уличные фонари: тёплый янтарь, 5 источников (позиции пересчитываются каждый кадр)
+    this.lampLights = [];
+    for (let i = 0; i < 5; i++) {
+      this.lampLights.push(this.lights.addLight(i * 336, this.GY - 24, 105, 0xffcc60, 2.2));
+    }
+
+    // Все видимые объекты → Light2D pipeline
+    [
+      this.tl4, this.tl3, this.tl2, this.tl1,
+      this.boatGfx, this.llamaBody, this.harnessGfx,
+      this.legBL, this.legBR, this.legFL, this.legFR,
+      this.ropeGfx, this.waveGfx, this.lampBodyGfx,
+    ].forEach(obj => obj.setPipeline('Light2D'));
   }
 
   update(_time, delta) {
@@ -661,40 +676,43 @@ class GameScene extends Phaser.Scene {
       }
     }
 
-    // Прожектор: расширяющийся конус от носа корабля
-    // Источник следует за покачиванием. Дальний край фиксирован — при качке луч
-    // слегка «подметает» сцену, как настоящий прожектор на волне.
+    // ── Фонари на набережной ──────────────────────────────────────────────────
     {
-      const ox  = this.beamOBase.x + this.boatBob.x;
-      const oy  = this.beamOBase.y + this.boatBob.y;
-      const W   = this.scale.width;
-      const CY  = this.GY + 12;   // центр луча — уровень дороги
-      this.beamGfx.clear();
+      const TILE_W  = 336;   // период расстановки фонарей (каждые 3 тайла дороги)
+      const LX_TILE = 112;   // смещение фонаря внутри периода
+      const baseY   = this.GY;
+      const headY   = baseY - 26;   // высота головки фонаря
+      const tilePos = this.tl2.tilePositionX;
+      const startX  = ((LX_TILE - tilePos % TILE_W) % TILE_W + TILE_W) % TILE_W;
 
-      // Пять вложенных конусов: снаружи → центр
-      //   [верх у W, низ у W, цвет, alpha]
-      const layers = [
-        [CY - 210, CY + 210, 0x1e3060, 0.07],   // внешний ореол — почти невидим
-        [CY - 155, CY + 155, 0x3a5890, 0.22],   // широкий рассеянный
-        [CY - 100, CY +  100, 0x5878b0, 0.38],  // средний
-        [CY -  58, CY +  58, 0x90b0d0, 0.28],   // внутренний
-        [CY -  26, CY +  26, 0xc4dcf0, 0.18],   // ядро
-      ];
-      for (const [t, b, c, a] of layers) {
-        this.beamGfx.fillStyle(c, a);
-        this.beamGfx.fillTriangle(ox, oy, W, t, W, b);
+      this.lampBodyGfx.clear();
+      // Начинаем на период раньше экрана — свет плавно уходит за край, не обрезается
+      for (let lx = startX - TILE_W; lx < sceneW + TILE_W; lx += TILE_W) {
+        // Столб
+        this.lampBodyGfx.fillStyle(0x242230, 1);
+        this.lampBodyGfx.fillRect(lx - 1, headY + 5, 2, baseY - headY - 5);
+        // Кронштейн
+        this.lampBodyGfx.fillStyle(0x1e1c28, 1);
+        this.lampBodyGfx.fillRect(lx - 1, headY + 4, 5, 1);
+        // Корпус фонаря
+        this.lampBodyGfx.fillStyle(0x2a2840, 1);
+        this.lampBodyGfx.fillRect(lx - 3, headY, 7, 5);
+        // Стекло — тёплое янтарное
+        this.lampBodyGfx.fillStyle(0xffd870, 1);
+        this.lampBodyGfx.fillRect(lx - 2, headY + 1, 5, 3);
       }
 
-      // Центральная ось — бликующий волосок
-      this.beamGfx.lineStyle(1, 0xddf0ff, 0.80);
-      this.beamGfx.lineBetween(ox, oy, W, CY);
-
-      // Сама лампа: яркое пятно в точке источника
-      this.beamGfx.fillStyle(0xfff0c8, 0.85);
-      this.beamGfx.fillCircle(ox, oy, 2);
-      this.beamGfx.fillStyle(0xffe090, 0.40);
-      this.beamGfx.fillCircle(ox, oy, 5);
+      // Обновляем позиции точечных источников (включая заэкранные)
+      for (let i = 0; i < this.lampLights.length; i++) {
+        this.lampLights[i].x = startX - TILE_W + i * TILE_W;
+        this.lampLights[i].y = headY;
+      }
     }
+
+    // Прожектор: обновляем позицию источника (следует за качанием корабля)
+    this.spotLight.x = this.beamOBase.x + this.boatBob.x;
+    this.spotLight.y = this.beamOBase.y + this.boatBob.y;
+    this.beamGfx.clear();
 
     // Скорость анимации ног = скорость движения
     this.walkTween1.timeScale = spd;
@@ -751,12 +769,11 @@ const config = {
   backgroundColor: '#060608',
   scene: [GameScene],
   scale: {
-    // EXPAND: сохраняет 480×270 как минимум, но расширяет viewport
-    // до реального размера экрана — без чёрных полос, без искажений.
-    // Все слои используют this.scale.width/height, поэтому адаптируются сами.
     mode: Phaser.Scale.EXPAND,
     autoCenter: Phaser.Scale.CENTER_BOTH,
   },
+  // Увеличиваем лимит источников: 1 прожектор + ~8 фонарей + запас
+  render: { maxLights: 16 },
 };
 
 new Phaser.Game(config);

@@ -428,7 +428,7 @@ class GameScene extends Phaser.Scene {
 
     // ── Упряжь (лямки) — поверх тела ламы, depth 12 ─────────────────────────
     // Лямка на груди + плечевой ремень + пряжка в точке крепления верёвки
-    const hp = this.add.graphics().setDepth(12);
+    const hp = this.harnessGfx = this.add.graphics().setDepth(12);
     const HC = 0x52301a;   // тёмная кожа
     const HB = 0x8a5828;   // бронзовая пряжка
 
@@ -608,6 +608,29 @@ class GameScene extends Phaser.Scene {
         }
       },
     });
+
+    // ── Физическое освещение (Phaser Light2D) ────────────────────────────────
+    // Тёмный ночной ambient — всё не освещённое остаётся тёмным
+    this.lights.enable().setAmbientColor(0x101828);
+
+    // Основной прожектор: холодный ксенон, широкий радиус (охватывает всю сцену)
+    this.spotLight = this.lights.addLight(
+      this.beamOBase.x, this.beamOBase.y,
+      480, 0xb0ccf8, 2.8,
+    );
+    // Маленький тёплый ореол самой лампы (жёлтый, близкий)
+    this.lampGlow = this.lights.addLight(
+      this.beamOBase.x, this.beamOBase.y,
+      80, 0xffe8a0, 1.4,
+    );
+
+    // Все видимые объекты → Light2D pipeline
+    [
+      this.tl4, this.tl3, this.tl2, this.tl1,
+      this.boatGfx, this.llamaBody, this.harnessGfx,
+      this.legBL, this.legBR, this.legFL, this.legFR,
+      this.ropeGfx, this.waveGfx,
+    ].forEach(obj => obj.setPipeline('Light2D'));
   }
 
   update(_time, delta) {
@@ -692,6 +715,12 @@ class GameScene extends Phaser.Scene {
     // Корабль покачивается — смещаем весь Graphics-объект
     this.boatGfx.x = this.boatBob.x;
     this.boatGfx.y = this.boatBob.y;
+
+    // Источник света следует за носом корабля
+    const lx = this.beamOBase.x + this.boatBob.x;
+    const ly = this.beamOBase.y + this.boatBob.y;
+    this.spotLight.x = lx;  this.spotLight.y = ly;
+    this.lampGlow.x  = lx;  this.lampGlow.y  = ly;
     // Кнехт двигается вместе с корпусом — обновляем точку крепления верёвки
     this.ropeBoat.x = this.knechtBase.x + this.boatBob.x;
     this.ropeBoat.y = this.knechtBase.y + this.boatBob.y;

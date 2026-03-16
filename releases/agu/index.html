@@ -138,6 +138,7 @@ class GameScene extends Phaser.Scene {
 
   preload() {
     this.load.image('snake_sprite', 'snake_sprite.png');
+    for (let i = 1; i <= 5; i++) this.load.image(`money${i}`, `money${i}.png`);
   }
 
   create() {
@@ -746,20 +747,12 @@ class GameScene extends Phaser.Scene {
     this._graffitiNext = Phaser.Math.Between(200, 4000);
 
     for (let i = 0; i < 8; i++) {
-      const gfx = this.add.graphics().setDepth(20).setVisible(false);
-      // Рисуем купюру один раз — перемещаем через gfx.x / gfx.y
-      gfx.fillStyle(0xc0392b, 1);
-      gfx.fillRect(-14, -7, 28, 14);
-      gfx.fillStyle(0xd4af37, 0.7);
-      gfx.fillRect(-14, -1, 28, 2);          // золотая полоса
-      gfx.lineStyle(1, 0xe85d4a, 1);
-      gfx.strokeRect(-13, -6, 26, 12);
+      const sprite = this.add.image(0, 0, 'money1')
+        .setOrigin(0.5, 0.5)
+        .setDepth(20)
+        .setVisible(false);
 
-      const txt = this.add.text(0, 0, '5000', {
-        fontSize: '6px', fontFamily: 'monospace', color: '#ffffff',
-      }).setDepth(21).setOrigin(0.5, 0.5).setVisible(false);
-
-      this.banknotes.push({ gfx, txt, x: 0, y: 0, vx: 0, vy: 0, grav: 0, floatPhase: 0, state: 'idle', denomination: 5000 });
+      this.banknotes.push({ sprite, x: 0, y: 0, vx: 0, vy: 0, grav: 0, floatPhase: 0, state: 'idle', denomination: 5000 });
     }
 
     // ── Частицы (пот, слёзы) ─────────────────────────────────────────────────
@@ -778,7 +771,7 @@ class GameScene extends Phaser.Scene {
       this.legBL, this.legBR, this.legFL, this.legFR,
       this.ropeGfx, this.waveGfx, this.lampBodyGfx, this.snakeImg,
       this.particleGfx, this.caneGfx,
-      ...this.banknotes.map(b => b.gfx),
+      ...this.banknotes.map(b => b.sprite),
     ].forEach(obj => obj.setPipeline('Light2D'));
   }
 
@@ -1285,14 +1278,8 @@ class GameScene extends Phaser.Scene {
     const denomination = 5000 + age * 3000;
     const bw = 28 + age * 3;
     slot.denomination = denomination;
-    slot.gfx.clear();
-    slot.gfx.fillStyle(0xc0392b, 1);
-    slot.gfx.fillRect(-bw / 2, -7, bw, 14);
-    slot.gfx.fillStyle(0xd4af37, 0.7);
-    slot.gfx.fillRect(-bw / 2, -1, bw, 2);
-    slot.gfx.lineStyle(1, 0xe85d4a, 1);
-    slot.gfx.strokeRect(-bw / 2 + 1, -6, bw - 2, 12);
-    slot.txt.setText(String(denomination));
+    slot.sprite.setTexture(`money${Phaser.Math.Between(1, 5)}`);
+    slot.sprite.setDisplaySize(bw * 2, bw);
 
     slot.x = this.cannonMuzzleBase.x + this.boatBob.x;
     slot.y = this.cannonMuzzleBase.y + this.boatBob.y;
@@ -1303,8 +1290,7 @@ class GameScene extends Phaser.Scene {
     slot.grav = 260;                                   // гравитация px/s²
     slot.floatPhase = slot.x * 0.04;                  // уникальная фаза волны
     slot.state = 'flying';
-    slot.gfx.setAngle(0).setVisible(true);
-    slot.txt.setAngle(0).setVisible(true);
+    slot.sprite.setAngle(0).setVisible(true);
   }
 
   update(_time, delta) {
@@ -1560,10 +1546,9 @@ class GameScene extends Phaser.Scene {
         if (dx * dx + dy * dy < 12 * 12) {
           bn.state = 'idle';
           this.tweens.add({
-            targets: [bn.gfx, bn.txt], scaleX: 0, scaleY: 0, duration: 150,
+            targets: [bn.sprite], scaleX: 0, scaleY: 0, duration: 150,
             onComplete: () => {
-              bn.gfx.setVisible(false).setScale(1);
-              bn.txt.setVisible(false).setScale(1);
+              bn.sprite.setVisible(false).setScale(1);
             },
           });
           this.state.money += bn.denomination;
@@ -1596,8 +1581,7 @@ class GameScene extends Phaser.Scene {
         bn.y  += bn.vy  * dt;
         // Угол купюры следует вектору скорости — кувыркается как настоящая
         const ang = Math.atan2(bn.vy, bn.vx) * (180 / Math.PI);
-        bn.gfx.setAngle(ang * 0.5);
-        bn.txt.setAngle(ang * 0.5);
+        bn.sprite.setAngle(ang * 0.5);
         // Приземление: чуть за правым краем экрана
         if (bn.y >= baseY + 4 && bn.x >= sceneW - 20) {
           bn.state = 'floating';
@@ -1608,8 +1592,7 @@ class GameScene extends Phaser.Scene {
         bn.x -= BASE_SPEED * effSpd * dt;
         if (bn.x < -40) {
           bn.state = 'idle';
-          bn.gfx.setAngle(0).setVisible(false);
-          bn.txt.setAngle(0).setVisible(false);
+          bn.sprite.setAngle(0).setVisible(false);
           // Купюра уплыла — начислить зарплату
           this.state.money += 5;
           continue;
@@ -1620,14 +1603,11 @@ class GameScene extends Phaser.Scene {
           (AMP * 0.5) * Math.sin(bn.x * FREQ2 - wt * SPD2);
         // Лёгкий крен — уникальная фаза у каждой купюры
         const rock = Math.sin(wt * 1.8 + bn.floatPhase) * 7;
-        bn.gfx.setAngle(rock);
-        bn.txt.setAngle(rock);
+        bn.sprite.setAngle(rock);
       }
 
-      bn.gfx.x = Math.round(bn.x);
-      bn.gfx.y = Math.round(bn.y);
-      bn.txt.x  = Math.round(bn.x);
-      bn.txt.y  = Math.round(bn.y);
+      bn.sprite.x = Math.round(bn.x);
+      bn.sprite.y = Math.round(bn.y);
     }
 
     // Верёвка: квадратичная кривая с анимированным провисом

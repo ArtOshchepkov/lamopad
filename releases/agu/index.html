@@ -678,7 +678,7 @@ class GameScene extends Phaser.Scene {
         fontSize: '6px', fontFamily: 'monospace', color: '#ffffff',
       }).setDepth(21).setOrigin(0.5, 0.5).setVisible(false);
 
-      this.banknotes.push({ gfx, txt, x: 0, y: 0, state: 'idle', chain: null });
+      this.banknotes.push({ gfx, txt, x: 0, y: 0, vx: 0, vy: 0, grav: 0, floatPhase: 0, state: 'idle' });
     }
 
     // Все видимые объекты → Light2D pipeline
@@ -695,33 +695,17 @@ class GameScene extends Phaser.Scene {
     const slot = this.banknotes[this.banknoteIdx];
     this.banknoteIdx = (this.banknoteIdx + 1) % this.banknotes.length;
 
-    if (slot.chain) slot.chain.stop();
+    slot.x = this.cannonMuzzleBase.x + this.boatBob.x;
+    slot.y = this.cannonMuzzleBase.y + this.boatBob.y;
 
-    const sx = this.cannonMuzzleBase.x + this.boatBob.x;
-    const sy = this.cannonMuzzleBase.y + this.boatBob.y;
-    slot.x = sx;  slot.y = sy;
+    // Физика: горизонтальный бросок с небольшим разбросом
+    slot.vx   = 180 + Phaser.Math.Between(-20, 40);  // px/s вправо
+    slot.vy   = Phaser.Math.Between(-40, 10);         // px/s (слегка вверх или вниз)
+    slot.grav = 260;                                   // гравитация px/s²
+    slot.floatPhase = slot.x * 0.04;                  // уникальная фаза волны
     slot.state = 'flying';
-    slot.gfx.setVisible(true);
-    slot.txt.setVisible(true);
-
-    const riverY = this.waterY + 8;
-    const W = this.scale.width;
-
-    slot.chain = this.tweens.chain({
-      tweens: [
-        {
-          // фаза 1: летит по углу носа корабля (~14° вниз от горизонтали)
-          targets: slot, x: sx + 110, y: sy + 28,
-          duration: 360, ease: 'Quad.Out',
-        },
-        {
-          // фаза 2: падает в воду у правого края экрана (чуть за экраном)
-          targets: slot, x: W + 18, y: riverY,
-          duration: 430, ease: 'Quad.In',
-          onComplete: () => { slot.state = 'floating'; },
-        },
-      ],
-    });
+    slot.gfx.setAngle(0).setVisible(true);
+    slot.txt.setAngle(0).setVisible(true);
   }
 
   update(_time, delta) {
@@ -828,15 +812,40 @@ class GameScene extends Phaser.Scene {
     }
     for (const bn of this.banknotes) {
       if (bn.state === 'idle') continue;
-      if (bn.state === 'floating') {
+
+      if (bn.state === 'flying') {
+        // Парабола: горизонталь равномерно, вертикаль с ускорением свободного падения
+        bn.vy += bn.grav * dt;
+        bn.x  += bn.vx  * dt;
+        bn.y  += bn.vy  * dt;
+        // Угол купюры следует вектору скорости — кувыркается как настоящая
+        const ang = Math.atan2(bn.vy, bn.vx) * (180 / Math.PI);
+        bn.gfx.setAngle(ang * 0.5);
+        bn.txt.setAngle(ang * 0.5);
+        // Приземление: чуть за правым краем экрана
+        if (bn.y >= baseY + 4 && bn.x >= sceneW - 20) {
+          bn.state = 'floating';
+          bn.floatPhase = bn.x * 0.04;
+        }
+      } else {
+        // Плывёт по течению влево
         bn.x -= BASE_SPEED * spd * dt;
         if (bn.x < -40) {
           bn.state = 'idle';
-          bn.gfx.setVisible(false);
-          bn.txt.setVisible(false);
+          bn.gfx.setAngle(0).setVisible(false);
+          bn.txt.setAngle(0).setVisible(false);
           continue;
         }
+        // Покачивается на волнах — та же формула, что и waveGfx
+        bn.y = baseY + 4 +
+          AMP * Math.sin(bn.x * FREQ1 + wt * SPD1) +
+          (AMP * 0.5) * Math.sin(bn.x * FREQ2 - wt * SPD2);
+        // Лёгкий крен — уникальная фаза у каждой купюры
+        const rock = Math.sin(wt * 1.8 + bn.floatPhase) * 7;
+        bn.gfx.setAngle(rock);
+        bn.txt.setAngle(rock);
       }
+
       bn.gfx.x = Math.round(bn.x);
       bn.gfx.y = Math.round(bn.y);
       bn.txt.x  = Math.round(bn.x);

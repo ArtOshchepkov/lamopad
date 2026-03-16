@@ -405,7 +405,7 @@ class GameScene extends Phaser.Scene {
 
     // ── Слой ближних зданий (между фоном и дорогой, 0.6x) ────────────────────
     this.fgBuildings      = [];
-    this.fgBuildingTimer  = Phaser.Math.Between(100, 2000);
+    this.fgBuildingTimer  = Phaser.Math.Between(8000, 15000);
 
     // Синусоидная граница воды — рисуется каждый кадр поверх всего, depth 16
     // Заменяет прямую линию между дорогой и рекой живой волной
@@ -1352,7 +1352,7 @@ class GameScene extends Phaser.Scene {
     // ── Ближние здания (foreground, 0.6x) ────────────────────────────────────
     this.fgBuildingTimer -= delta;
     if (this.fgBuildingTimer <= 0) {
-      this.fgBuildingTimer = Phaser.Math.Between(4000, 12000);
+      this.fgBuildingTimer = Phaser.Math.Between(6000, 14000);
       this._spawnFgBuilding();
     }
     for (let i = this.fgBuildings.length - 1; i >= 0; i--) {

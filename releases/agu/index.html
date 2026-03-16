@@ -746,7 +746,7 @@ class GameScene extends Phaser.Scene {
     this.banknotes    = [];
     this.banknoteIdx  = 0;          // round-robin: следующий слот
     this.bnTimer      = 0;
-    this.bnDelay      = Phaser.Math.Between(2000, 4000);
+    this.bnDelay      = Phaser.Math.Between(12000, 18000);
 
     // ── Граффити на стенах ────────────────────────────────────────────────────
     this.graffiti = [];
@@ -1294,7 +1294,7 @@ class GameScene extends Phaser.Scene {
 
     // Номинал и размер купюры растут со стадией старения
     const age = this.state.age;
-    const denomination = 5000 + age * 3000;
+    const denomination = Phaser.Math.Between(8000, 110000);
     const bw = 28 + age * 3;
     slot.denomination = denomination;
     slot.sprite.setTexture(`money${Phaser.Math.Between(1, 5)}`);
@@ -1602,7 +1602,7 @@ class GameScene extends Phaser.Scene {
     this.bnTimer += delta;
     if (this.bnTimer >= this.bnDelay) {
       this.bnTimer = 0;
-      this.bnDelay = Phaser.Math.Between(2000, 4000);
+      this.bnDelay = Phaser.Math.Between(12000, 18000);
       this.spawnBanknote();
     }
     for (const bn of this.banknotes) {

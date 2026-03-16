@@ -402,8 +402,10 @@ class GameScene extends Phaser.Scene {
 
     // ── Лама-бурлак ───────────────────────────────────────────────────────────
     const LX   = 195;                   // x ламы (фиксирован, мир скроллится)
-    const GY   = H - h1 - h2;          // y поверхности дороги (верхний край layer2)
-    this.GY    = GY;                    // нужен в update для прожектора
+    const GY   = H - h1 - h2 + 35;          // y поверхности дороги (верхний край layer2)
+    const UPPER_ROAD_LINE = H - h1 - h2;
+    this.UPPER_ROAD_LINE = UPPER_ROAD_LINE; // нужен в update для частиц и текста
+    this.GY    = GY;
     this.LX    = LX;                    // нужен в update для частиц и текста
 
     const WOOL  = 0xf0e8d0;  // кремовая шерсть
@@ -682,7 +684,7 @@ class GameScene extends Phaser.Scene {
     // Уличные фонари: тёплый янтарь, 5 источников (позиции пересчитываются каждый кадр)
     this.lampLights = [];
     for (let i = 0; i < 5; i++) {
-      this.lampLights.push(this.lights.addLight(i * 336, this.GY - 24, 105, 0xffcc60, 2.2));
+      this.lampLights.push(this.lights.addLight(i * 336, UPPER_ROAD_LINE, 105, 0xffcc60, 2.2));
     }
 
     // ── Пул купюр (макс. 8) ──────────────────────────────────────────────────
@@ -934,7 +936,7 @@ class GameScene extends Phaser.Scene {
     {
       const TILE_W  = 336;   // период расстановки фонарей (каждые 3 тайла дороги)
       const LX_TILE = 112;   // смещение фонаря внутри периода
-      const baseY   = this.GY;
+      const baseY   = this.UPPER_ROAD_LINE; // базовая линия дороги, по которой стоят фонари
       const headY   = baseY - 26;   // высота головки фонаря
       const tilePos = this.tl2.tilePositionX;
       const startX  = ((LX_TILE - tilePos % TILE_W) % TILE_W + TILE_W) % TILE_W;

@@ -1058,7 +1058,7 @@ class GameScene extends Phaser.Scene {
       this.barGfx.fillStyle(0x081108, 0.85); this.barGfx.fillRect(x, my, w, h);
       // заливка
       const hw = Math.round(w * Math.min(this.state.health, 100) / 100);
-      const mw = Math.round(w * Math.min(this.state.money,  200) / 200);
+      const mw = Math.round(w * Math.min(this.state.money, 1_000_000) / 1_000_000);
       if (hw > 0) { this.barGfx.fillStyle(0xdd2222, 1); this.barGfx.fillRect(x, hy, hw, h); }
       if (mw > 0) { this.barGfx.fillStyle(0x22dd55, 1); this.barGfx.fillRect(x, my, mw, h); }
       // рамка

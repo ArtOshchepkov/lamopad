@@ -676,6 +676,43 @@ class GameScene extends Phaser.Scene {
       },
     });
 
+    // ── Ежемесячные платежи (каждые 30 секунд) ───────────────────────────────
+    const MONTHLY = [
+      { label: 'ИНТЕРНЕТ ДОМАШНИЙ',   min: 999,  max: 1000  },
+      { label: 'МОБИЛЬНАЯ СВЯЗЬ',   min: 500,  max:  1500},
+      { label: 'КОММУНАЛКА', min: 8000,  max: 12000 },
+      { label: 'ТРАНСПОРТ',  min: 1500,  max: 3500  },
+    ];
+    this.time.addEvent({
+      delay: 30000, loop: true,
+      callback: () => {
+        for (const item of MONTHLY) {
+          this.time.delayedCall(Phaser.Math.Between(0, 5000), () => {
+            this.applyCharge(item.label, Phaser.Math.Between(item.min, item.max));
+          });
+        }
+      },
+    });
+
+    // ── Рандомные платежи ─────────────────────────────────────────────────────
+    const RANDOM_CHARGES = [
+      { label: 'ПРАЗДНИЧНАЯ ШАВУХА', min: 300,  max: 800   },
+      { label: 'ПРОДУКТЫ',           min: 3000, max: 8000  },
+      { label: 'ЛЕКАРСТВА',          min: 500,  max: 10000 },
+      { label: 'ОТДАЛ ДОЛГ',         min: 500,  max: 15000 },
+      { label: 'ШТРАФ',         min: 500,  max: 9000 },
+      { label: 'ПОДПИСКА НА МУЗЫКУ',         min: 200,  max: 400 },
+      { label: 'ОДЕЖДА',         min: 2000,  max: 12000 },
+    ];
+    const scheduleRandom = () => {
+      this.time.delayedCall(Phaser.Math.Between(2000, 10000), () => {
+        const item = Phaser.Math.RND.pick(RANDOM_CHARGES);
+        this.applyCharge(item.label, Phaser.Math.Between(item.min, item.max));
+        scheduleRandom();
+      });
+    };
+    scheduleRandom();
+
     // ── Физическое освещение (Phaser Light2D) ────────────────────────────────
     this.lights.enable().setAmbientColor(0x0d1828);
 
@@ -849,6 +886,21 @@ class GameScene extends Phaser.Scene {
     this._bowTweenLegs = this.tweens.add({
       targets: this.legFR, x: this.frontLegBaseX.FR, angle: 0, y: this.GY, duration: 250, ease: 'Cubic.In',
       onComplete: () => { this._bowTweenLegs = null; this._restartFrontWalkTweens(); },
+    });
+  }
+
+  applyCharge(label, amount) {
+    this.state.money -= amount;
+    const x = this.LX + Phaser.Math.Between(-30, 30);
+    const y = this.GY - 65 + Phaser.Math.Between(-10, 10);
+    const t = this.add.text(x, y, label + '\n-' + amount + '₽', {
+      fontSize: '11px', fontFamily: 'Arial, sans-serif', fontStyle: 'bold',
+      color: '#ff3333', stroke: '#000000', strokeThickness: 3,
+      align: 'center', lineSpacing: 2,
+    }).setOrigin(0.5, 1).setDepth(50).setResolution(8);
+    this.tweens.add({
+      targets: t, y: t.y - 30, alpha: 0, duration: 2000,
+      ease: 'Sine.Out', onComplete: () => t.destroy(),
     });
   }
 

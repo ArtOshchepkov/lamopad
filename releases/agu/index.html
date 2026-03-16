@@ -124,6 +124,10 @@ function drawPanelka(g, x, groundY, w, h, wallCol, floors, cols, opts) {
 class GameScene extends Phaser.Scene {
   constructor() { super({ key: 'GameScene' }); }
 
+  preload() {
+    this.load.image('snake_sprite', 'snake_sprite.png');
+  }
+
   create() {
     const W = this.scale.width;   // 480
     const H = this.scale.height;  // 270
@@ -493,6 +497,27 @@ class GameScene extends Phaser.Scene {
     const S_PORT   = 0x78c8d8;  // иллюминаторы
     const S_KNECHT = 0x4a8898;  // кнехт (bollard) для верёвки
 
+    // Спрайт 353×97 RGBA. Голова справа (смотрит влево→вправо).
+    // origin (1, 0.5): якорь у правого края, по центру высоты.
+    // scale 0.5 → рендер 176×48px.
+    // Змея сидит на палубе. Её видно только когда корабль покачивается
+    {
+      const SX = 190, SY = -18;
+      this.snakeBase = { x: SX, y: SY };
+
+      this.snakeImg = this.add.image(SX, SY, 'snake_sprite')
+        .setOrigin(1, 0.5)
+        .setScale(0.5)
+        .setDepth(1);
+
+      // Смещения от якоря origin(1,0.5) при scale 0.5:
+      //   dx = (spriteX - 353) * 0.5,  dy = (spriteY - 48.5) * 0.5
+      // Рот  ~(347, 52): dx = -3,  dy = +2
+      // Глаз ~(290, 35): dx = -32, dy = -7
+      this.cannonMuzzleBase = { x: SX - 3,  y: SY + 2 };
+      this.eyeBase          = { x: SX - 32, y: SY - 7 };
+    }
+
     this.boatGfx = this.add.graphics().setDepth(8);
     const bg = this.boatGfx;
 
@@ -506,7 +531,7 @@ class GameScene extends Phaser.Scene {
     // Заполняем всё пространство ЛЕВЕЕ носовой грани (прямой нос нависает сверху)
     bg.fillStyle(S_SIDE, 1);
     // Прямоугольник от левого края до BOW_WL_X по всей высоте
-    bg.fillRect(-10, -10, BOW_WL_X + 10, waterY + 10);
+    bg.fillRect(-10, 0, BOW_WL_X + 10, waterY + 10);
     // Треугольник-нависание: носовая грань от (BOW_WL_X,waterY) до (BOW_DECK_X,0)
     bg.fillTriangle(BOW_WL_X, 0,  BOW_DECK_X, 0,  BOW_WL_X, waterY);
 
@@ -555,8 +580,8 @@ class GameScene extends Phaser.Scene {
     this.boatBob = { y: 0, x: 0 };
     this.tweens.add({
       targets: this.boatBob,
-      y: 5,
-      duration: 2800,
+      y: 10,
+      duration: 4000,
       yoyo: true,
       repeat: -1,
       ease: 'Sine.InOut',
@@ -577,162 +602,7 @@ class GameScene extends Phaser.Scene {
     this.knechtBase  = { x: KNECHT_X, y: KNECHT_Y };       // базовые координаты без покачивания
     this.shipEdgeX   = BOW_DECK_X + FACE_W + 4;           // правый край корпуса + запас
 
-    // ── Гальюнная фигура змеи — depth 9, двигается с boatBob ────────────────
-    // Готика: тёмная резьба, приглушённая бронза — как русалка на носу корабля
-    {
-      const C_VOID   = 0x020504;  // бездна
-      const C_BODY   = 0x091408;  // тёмный камень — основное тело
-      const C_SCALE  = 0x102016;  // поверхность чешуи
-      const C_LIT    = 0x172c1c;  // кромка — свет падает сверху
-      const C_BRONZE = 0x7a5e08;  // тусклая бронза (корона)
-      const C_BRZ_S  = 0x4a3a04;  // тень бронзы
-      const C_BRZ_H  = 0x9a7a10;  // редкий блик бронзы
-      const C_AMBER  = 0x604c06;  // глаз — мёртвый янтарь
 
-      // Правый (выступающий) край носовой грани: от (164,0) до (108,waterY)
-      const fRX = (y) => (BOW_DECK_X + FACE_W) - (BOW_DECK_X + FACE_W - BOW_WL_X) * (y / waterY);
-
-      this.snakeGfx = this.add.graphics().setDepth(9);
-      const sg = this.snakeGfx;
-
-      // === Тело: плоские чешуи — как резьба по тёмному дубу ================
-      // Каждая чешуя — горизонтальная пластина, освещена только сверху
-      for (let ys = 155; ys >= 80; ys -= 8) {
-        const cx = fRX(ys);
-        sg.fillStyle(C_VOID, 1);
-        sg.fillRect(cx - 7, ys - 2, 14, 7);   // тень под чешуёй
-        sg.fillStyle(C_BODY, 1);
-        sg.fillRect(cx - 7, ys - 3, 13, 6);   // тело чешуи
-        sg.fillStyle(C_SCALE, 1);
-        sg.fillRect(cx - 6, ys - 3, 11, 2);   // верхняя поверхность
-        sg.fillStyle(C_LIT, 1);
-        sg.fillRect(cx - 5, ys - 3, 9, 1);    // верхний край (свет)
-        sg.fillStyle(C_VOID, 1);
-        sg.fillRect(cx - 7, ys + 2, 13, 1);   // разделительная бороздка
-      }
-
-      // === Шея — чуть шире, плавный переход к голове =======================
-      for (let yn = 78; yn >= 63; yn -= 8) {
-        const cx = fRX(yn);
-        sg.fillStyle(C_VOID, 1);
-        sg.fillRect(cx - 6, yn - 2, 14, 7);
-        sg.fillStyle(C_BODY, 1);
-        sg.fillRect(cx - 6, yn - 3, 13, 6);
-        sg.fillStyle(C_SCALE, 1);
-        sg.fillRect(cx - 5, yn - 3, 11, 2);
-        sg.fillStyle(C_LIT, 1);
-        sg.fillRect(cx - 4, yn - 3, 9, 1);
-        // Спинной гребень — маленький треугольный шип
-        sg.fillStyle(C_SCALE, 1);
-        sg.fillRect(cx + 5, yn - 6, 2, 4);
-        sg.fillStyle(C_LIT, 1);
-        sg.fillRect(cx + 5, yn - 6, 1, 4);
-      }
-
-      // === Голова — виперовидная: широкая сзади, острая спереди =============
-      const hX = fRX(46) + 1;   // ≈ 153
-      const hY = 46;
-
-      // Черепная коробка (широкая часть)
-      sg.fillStyle(C_VOID, 1);
-      sg.fillRect(hX - 8, hY - 6, 13, 15);   // тень
-      sg.fillStyle(C_BODY, 1);
-      sg.fillRect(hX - 8, hY - 7, 12, 14);   // череп
-      sg.fillStyle(C_SCALE, 1);
-      sg.fillRect(hX - 8, hY - 7, 12, 3);    // верхняя поверхность темени
-      sg.fillStyle(C_LIT, 1);
-      sg.fillRect(hX - 7, hY - 7, 10, 1);    // край темени
-
-      // Нависающий надбровный гребень — грозный, давящий
-      sg.fillStyle(C_VOID, 1);
-      sg.fillRect(hX - 9, hY - 5, 15, 2);    // тень гребня
-      sg.fillStyle(C_BODY, 1);
-      sg.fillRect(hX - 9, hY - 6, 15, 2);    // гребень
-
-      // Верхняя морда — выступает вправо
-      sg.fillStyle(C_VOID, 1);
-      sg.fillRect(hX + 3, hY - 4, 14, 11);   // тень
-      sg.fillStyle(C_BODY, 1);
-      sg.fillRect(hX + 3, hY - 5, 13, 9);    // верхняя морда
-      sg.fillStyle(C_SCALE, 1);
-      sg.fillRect(hX + 3, hY - 5, 13, 2);    // поверхность морды
-      sg.fillStyle(C_LIT, 1);
-      sg.fillRect(hX + 4, hY - 5, 11, 1);    // кромка морды
-
-      // Нижняя челюсть — слегка опущена (угрожающий оскал, не мультяшный)
-      sg.fillStyle(C_VOID, 1);
-      sg.fillRect(hX + 5, hY + 4, 12, 8);    // тень
-      sg.fillStyle(C_BODY, 1);
-      sg.fillRect(hX + 5, hY + 4, 11, 6);    // нижняя челюсть
-      sg.fillStyle(C_SCALE, 1);
-      sg.fillRect(hX + 5, hY + 9, 11, 1);    // нижний край нижней челюсти
-
-      // === Пасть — узкая тёмная щель, по углу носа (14° ниже горизонтали) ==
-      const mX = hX + 15;   // ≈ 168
-      const mY = hY + 2;    // ≈ 48
-      sg.fillStyle(C_VOID, 1);
-      sg.fillRect(mX - 7, mY + 1, 10, 3);    // тёмная щель
-      // Один стилетообразный клык — готика
-      sg.fillStyle(0xcac8b8, 1);
-      sg.fillTriangle(mX - 5, mY + 1, mX - 2, mY + 1, mX - 4, mY + 4);
-      // Нижний клык
-      sg.fillTriangle(mX - 4, mY + 4, mX - 1, mY + 4, mX - 3, mY + 1);
-
-      // === Глаз — миндалевидный, мёртвый янтарь, холодный взгляд ===========
-      const eX = hX - 1;
-      const eY = hY - 1;
-      sg.fillStyle(C_VOID, 1);
-      sg.fillRect(eX - 4, eY - 3, 9, 6);     // глазница — вдавленная впадина
-      sg.fillStyle(C_AMBER, 1);
-      sg.fillEllipse(eX, eY, 7, 4);           // янтарная радужка
-      sg.fillStyle(C_VOID, 1);
-      sg.fillRect(eX - 2, eY - 1, 5, 2);      // горизонтальный зрачок (не вертикальный — жутче)
-      // Ни одного яркого блика — только тёмное тление
-      sg.fillStyle(0x7a6008, 0.5);
-      sg.fillRect(eX + 1, eY - 1, 1, 1);
-
-      // === Корона — три готических шипа, железная бронза ====================
-      const crX = hX - 5;   // ≈ 148
-      const crY = hY - 16;  // ≈ 30
-
-      // Тяжёлое основание — железный обруч
-      sg.fillStyle(C_BRZ_S, 1);
-      sg.fillRect(crX - 1, crY + 1, 18, 7);   // тень
-      sg.fillStyle(C_BRONZE, 1);
-      sg.fillRect(crX, crY, 16, 6);             // обруч
-      sg.fillStyle(C_BRZ_H, 1);
-      sg.fillRect(crX, crY, 16, 1);             // тусклый верхний блик
-      sg.fillStyle(C_BRZ_S, 1);
-      sg.fillRect(crX, crY + 5, 16, 1);         // нижняя тень
-
-      // Три готических шипа: центральный выше — иерархия власти
-      const spikes = [
-        { dx: 1,  h: 12, gem: 0x500808 },   // рубин — почти чёрный
-        { dx: 6,  h: 17, gem: 0x06062c },   // сапфир — почти чёрный
-        { dx: 11, h: 12, gem: 0x063418 },   // изумруд — почти чёрный
-      ];
-      for (const s of spikes) {
-        sg.fillStyle(C_BRZ_S, 1);
-        sg.fillRect(crX + s.dx + 1, crY - s.h + 1, 3, s.h);  // тень шипа
-        sg.fillStyle(C_BRONZE, 1);
-        sg.fillRect(crX + s.dx, crY - s.h, 3, s.h);           // шип
-        sg.fillStyle(C_BRZ_H, 1);
-        sg.fillRect(crX + s.dx, crY - s.h, 1, s.h);           // левая грань (блик)
-        sg.fillStyle(s.gem, 1);
-        sg.fillRect(crX + s.dx, crY - s.h, 3, 4);             // самоцвет — тёмный камень
-      }
-
-      // Горизонтальная насечка-ободок, заклёпки
-      sg.fillStyle(C_BRZ_S, 1);
-      sg.fillRect(crX, crY + 3, 16, 1);
-      sg.fillStyle(C_BRZ_H, 1);
-      for (let px = crX + 2; px < crX + 15; px += 4) {
-        sg.fillRect(px, crY + 3, 1, 1);   // заклёпки
-      }
-
-      // === Мундштук: кончик пасти для спавна купюр =========================
-      this.cannonMuzzleBase = { x: mX + 3, y: mY + 2 };
-    }
 
     // Прожектор на носу корабля — лампа чуть ниже палубной кромки
     this.beamOBase = { x: BOW_DECK_X + FACE_W - 2, y: 30 };
@@ -771,6 +641,11 @@ class GameScene extends Phaser.Scene {
 
     // ── Физическое освещение (Phaser Light2D) ────────────────────────────────
     this.lights.enable().setAmbientColor(0x0d1828);
+
+    // Точечный свет глаза змеи — янтарное тление, двигается с корпусом
+    this.eyeLight = this.lights.addLight(
+      this.eyeBase.x, this.eyeBase.y, 55, 0xff9900, 2.0,
+    );
 
     // Прожектор корабля: холодный ксенон, большой радиус
     this.spotLight = this.lights.addLight(
@@ -811,7 +686,7 @@ class GameScene extends Phaser.Scene {
       this.tl4, this.tl3, this.tl2, this.tl1,
       this.boatGfx, this.llamaBody, this.harnessGfx,
       this.legBL, this.legBR, this.legFL, this.legFR,
-      this.ropeGfx, this.waveGfx, this.lampBodyGfx, this.snakeGfx,
+      this.ropeGfx, this.waveGfx, this.lampBodyGfx, this.snakeImg,
       ...this.banknotes.map(b => b.gfx),
     ].forEach(obj => obj.setPipeline('Light2D'));
   }
@@ -935,8 +810,10 @@ class GameScene extends Phaser.Scene {
     // Корабль и пушка покачиваются вместе
     this.boatGfx.x  = this.boatBob.x;
     this.boatGfx.y  = this.boatBob.y;
-    this.snakeGfx.x = this.boatBob.x;
-    this.snakeGfx.y = this.boatBob.y;
+    this.snakeImg.x = this.snakeBase.x + this.boatBob.x;
+    this.snakeImg.y = this.snakeBase.y + this.boatBob.y;
+    this.eyeLight.x = this.eyeBase.x + this.boatBob.x;
+    this.eyeLight.y = this.eyeBase.y + this.boatBob.y;
 
     // Кнехт двигается вместе с корпусом — обновляем точку крепления верёвки
     this.ropeBoat.x = this.knechtBase.x + this.boatBob.x;

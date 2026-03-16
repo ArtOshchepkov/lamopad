@@ -404,6 +404,7 @@ class GameScene extends Phaser.Scene {
     const LX   = 195;                   // x ламы (фиксирован, мир скроллится)
     const GY   = H - h1 - h2;          // y поверхности дороги (верхний край layer2)
     this.GY    = GY;                    // нужен в update для прожектора
+    this.LX    = LX;                    // нужен в update для частиц и текста
 
     const WOOL  = 0xf0e8d0;  // кремовая шерсть
     const WOOL2 = 0xd8c9a8;  // чуть темнее — ноги, уши
@@ -681,14 +682,119 @@ class GameScene extends Phaser.Scene {
       this.banknotes.push({ gfx, txt, x: 0, y: 0, vx: 0, vy: 0, grav: 0, floatPhase: 0, state: 'idle' });
     }
 
+    // ── Частицы (пот, слёзы) ─────────────────────────────────────────────────
+    this.particles   = [];
+    this.particleGfx = this.add.graphics().setDepth(14);
+
+    // ── Кнопки управления ─────────────────────────────────────────────────────
+    this.createButtons();
+
     // Все видимые объекты → Light2D pipeline
     [
       this.tl4, this.tl3, this.tl2, this.tl1,
       this.boatGfx, this.llamaBody, this.harnessGfx,
       this.legBL, this.legBR, this.legFL, this.legFR,
       this.ropeGfx, this.waveGfx, this.lampBodyGfx, this.snakeImg,
+      this.particleGfx,
       ...this.banknotes.map(b => b.gfx),
     ].forEach(obj => obj.setPipeline('Light2D'));
+  }
+
+  createButtons() {
+    const W = this.scale.width, H = this.scale.height;
+    const BW = 158, BH = 20, GAP = 5;
+    const totalH = 6 * BH + 5 * GAP;
+    const startY = Math.round((H - totalH) / 2);
+    const cx = W - Math.round(BW / 2) - 8;   // ≈ 393 при W=480
+    const PALETTE = [0x1e3a5c, 0x5c1c1c, 0x1c4c2c, 0x1c2c5c, 0x3c1c5c, 0x3c1c5c];
+    const LABELS  = [
+      'ПРОГНУТЬСЯ', 'ФИГАЧИТЬ', 'ВЗЯТЬ ОТГУЛ',
+      'ПОПЛАКАТЬ', 'ВСТРЕТИТЬСЯ\nС ДРУЗЬЯМИ', 'ВСТРЕТИТЬСЯ\nС РОДСТВЕННИКАМИ',
+    ];
+
+    const mkBtn = (i, onDown, onUp) => {
+      const by  = startY + i * (BH + GAP);
+      const col = PALETTE[i];
+      const gfx = this.add.graphics().setDepth(30);
+
+      const draw = (pressed) => {
+        gfx.clear();
+        gfx.fillStyle(col, pressed ? 0.95 : 0.70);
+        gfx.fillRoundedRect(cx - BW / 2, by, BW, BH, 4);
+        if (pressed) {
+          gfx.fillStyle(0x000000, 0.20);
+          gfx.fillRoundedRect(cx - BW / 2, by, BW, BH, 4);
+        }
+        gfx.lineStyle(1, 0xffffff, pressed ? 0.55 : 0.18);
+        gfx.strokeRoundedRect(cx - BW / 2, by, BW, BH, 4);
+      };
+
+      draw(false);
+
+      this.add.text(cx, by + BH / 2, LABELS[i], {
+        fontSize: '6px', fontFamily: 'monospace', color: '#dde8f0',
+        align: 'center', lineSpacing: 1,
+      }).setOrigin(0.5, 0.5).setDepth(31);
+
+      const zone = this.add.zone(cx - BW / 2, by, BW, BH)
+        .setOrigin(0, 0).setDepth(32).setInteractive();
+      zone.on('pointerdown', () => { draw(true);  onDown(); });
+      zone.on('pointerup',   () => { draw(false); onUp();   });
+      zone.on('pointerout',  () => { draw(false); onUp();   });
+    };
+
+    mkBtn(0, () => { this.state.isBowing    = true;  }, () => { this.state.isBowing    = false; });
+    mkBtn(1, () => { this.state.isSprinting = true;  }, () => { this.state.isSprinting = false; });
+    mkBtn(2, () => { this.requestDayOff();            }, () => {});
+    mkBtn(3, () => { this.startCrying();              }, () => {});
+    mkBtn(4, () => { this.showBusy();                 }, () => {});
+    mkBtn(5, () => { this.showBusy();                 }, () => {});
+  }
+
+  requestDayOff() {
+    if (this._dayOffCooldown) return;
+    this._dayOffCooldown = true;
+    this.time.delayedCall(600, () => { this._dayOffCooldown = false; });
+
+    if (Math.random() < 0.8) {
+      this.showFloatingText('ОТКАЗАНО', '#ff2244');
+    } else {
+      const saved = this.state.speed;
+      this.state.speed = 0;
+      let n = 3;
+      const tick = () => {
+        this.showFloatingText(String(n), '#44ff88');
+        n--;
+        if (n >= 0) {
+          this.time.delayedCall(1000, tick);
+        } else {
+          this.state.speed  = saved;
+          this.state.health = Math.min(100, this.state.health + 5);
+        }
+      };
+      tick();
+    }
+  }
+
+  startCrying() {
+    if (this.state.isCrying) return;
+    this.state.isCrying = true;
+    this.time.delayedCall(2000, () => { this.state.isCrying = false; });
+  }
+
+  showBusy() {
+    this.showFloatingText(Math.random() < 0.5 ? 'ВЫ ЗАНЯТЫ' : 'ВАМ НЕКОГДА', '#ff8800');
+  }
+
+  showFloatingText(msg, color) {
+    const t = this.add.text(this.LX, this.GY - 65, msg, {
+      fontSize: '9px', fontFamily: 'monospace', color,
+      stroke: '#000000', strokeThickness: 2, align: 'center',
+    }).setOrigin(0.5, 1).setDepth(50);
+    this.tweens.add({
+      targets: t, y: t.y - 22, alpha: 0, duration: 1200,
+      ease: 'Sine.Out', onComplete: () => t.destroy(),
+    });
   }
 
   spawnBanknote() {
@@ -709,14 +815,20 @@ class GameScene extends Phaser.Scene {
   }
 
   update(_time, delta) {
-    const dt  = delta / 1000;
-    const spd = this.state.speed;
+    const dt     = delta / 1000;
+    const spd    = this.state.speed;
+    const effSpd = this.state.isSprinting ? spd * 2 : spd;
 
-    // Все слои масштабируются на speed — мир замедляется вместе с ламой
-    this.tl4.tilePositionX += BASE_SPEED * 0.1 * spd * dt;
-    this.tl3.tilePositionX += BASE_SPEED * 0.3 * spd * dt;
-    this.tl2.tilePositionX += BASE_SPEED * 1.0 * spd * dt;
-    this.tl1.tilePositionX += BASE_SPEED * 1.0 * spd * dt;
+    // Спринт: дополнительный расход здоровья
+    if (this.state.isSprinting) {
+      this.state.health = Math.max(0, this.state.health - 5 * dt);
+    }
+
+    // Все слои масштабируются на effSpd — спринт ускоряет мир
+    this.tl4.tilePositionX += BASE_SPEED * 0.1 * effSpd * dt;
+    this.tl3.tilePositionX += BASE_SPEED * 0.3 * effSpd * dt;
+    this.tl2.tilePositionX += BASE_SPEED * 1.0 * effSpd * dt;
+    this.tl1.tilePositionX += BASE_SPEED * 1.0 * effSpd * dt;
 
     // Синусоидная граница воды
     // Две наложенных волны с разными частотами → органичный, не механический рисунок
@@ -787,9 +899,38 @@ class GameScene extends Phaser.Scene {
     this.spotLight.y = this.beamOBase.y + this.boatBob.y;
     this.beamGfx.clear();
 
-    // Скорость анимации ног = скорость движения
-    this.walkTween1.timeScale = spd;
-    this.walkTween2.timeScale = spd;
+    // ── Частицы (пот при спринте, слёзы при плаче) ───────────────────────────
+    if (this.state.isSprinting && Math.random() < 25 * dt) {
+      this.particles.push({
+        x: this.LX + Phaser.Math.Between(-15, 5),
+        y: this.GY - 52 + Phaser.Math.Between(-4, 4),
+        vx: Phaser.Math.FloatBetween(-30, 30),
+        vy: Phaser.Math.FloatBetween(-50, -15),
+        life: 1.0, col: 0xaaccff,
+      });
+    }
+    if (this.state.isCrying && Math.random() < 12 * dt) {
+      this.particles.push({
+        x: this.LX + 23, y: this.GY - 54,
+        vx: Phaser.Math.FloatBetween(-4, 4), vy: 10,
+        life: 1.0, col: 0x3366ff,
+      });
+    }
+    this.particleGfx.clear();
+    for (let i = this.particles.length - 1; i >= 0; i--) {
+      const p = this.particles[i];
+      p.vy   += 130 * dt;
+      p.x    += p.vx * dt;
+      p.y    += p.vy * dt;
+      p.life -= dt * 2.0;
+      if (p.life <= 0) { this.particles.splice(i, 1); continue; }
+      this.particleGfx.fillStyle(p.col, p.life);
+      this.particleGfx.fillRect(Math.round(p.x), Math.round(p.y), 2, 3);
+    }
+
+    // Скорость анимации ног = эффективная скорость
+    this.walkTween1.timeScale = effSpd;
+    this.walkTween2.timeScale = effSpd;
 
     // Корабль и пушка покачиваются вместе
     this.boatGfx.x  = this.boatBob.x;
@@ -829,7 +970,7 @@ class GameScene extends Phaser.Scene {
         }
       } else {
         // Плывёт по течению влево
-        bn.x -= BASE_SPEED * spd * dt;
+        bn.x -= BASE_SPEED * effSpd * dt;
         if (bn.x < -40) {
           bn.state = 'idle';
           bn.gfx.setAngle(0).setVisible(false);

@@ -15,7 +15,7 @@
       position: fixed;
       top: 0; left: 0;
     }
-    canvas { display: block; }
+    canvas { display: block; image-rendering: pixelated; image-rendering: crisp-edges; }
   </style>
 </head>
 <body>
@@ -623,6 +623,22 @@ class GameScene extends Phaser.Scene {
       ease: 'Sine.InOut',
     });
 
+    // ── HUD: полоски здоровья и денег (правый верхний угол) ──────────────────
+    const BAR_W = 72, BAR_H = 6, BAR_GAP = 5, BAR_Y = 8;
+    const BAR_RIGHT = W - 8;          // правый край полоски
+    const BAR_X     = BAR_RIGHT - BAR_W;
+    const LBL_X     = BAR_X - 18;    // x надписи HP / $
+    this.barGfx = this.add.graphics().setDepth(40);
+    this.add.text(LBL_X, BAR_Y - 1, 'HP', {
+      fontSize: '8px', fontFamily: 'Arial, sans-serif', fontStyle: 'bold', color: '#ff5555',
+      stroke: '#000000', strokeThickness: 2,
+    }).setDepth(41).setResolution(4);
+    this.add.text(LBL_X, BAR_Y + BAR_H + BAR_GAP - 1, '$', {
+      fontSize: '8px', fontFamily: 'Arial, sans-serif', fontStyle: 'bold', color: '#44ee66',
+      stroke: '#000000', strokeThickness: 2,
+    }).setDepth(41).setResolution(4);
+    this.BAR_CFG = { x: BAR_X, y: BAR_Y, w: BAR_W, h: BAR_H, gap: BAR_GAP };
+
     // ── Таймеры состояния ─────────────────────────────────────────────────────
     // Здоровье убывает: -2/сек
     this.time.addEvent({
@@ -702,14 +718,14 @@ class GameScene extends Phaser.Scene {
 
   createButtons() {
     const W = this.scale.width, H = this.scale.height;
-    const BW = 158, BH = 20, GAP = 5;
+    const BW = 160, BH = 26, GAP = 4;
     const totalH = 6 * BH + 5 * GAP;
     const startY = Math.round((H - totalH) / 2);
-    const cx = W - Math.round(BW / 2) - 8;   // ≈ 393 при W=480
+    const cx = W - Math.round(BW / 2) - 6;
     const PALETTE = [0x1e3a5c, 0x5c1c1c, 0x1c4c2c, 0x1c2c5c, 0x3c1c5c, 0x3c1c5c];
     const LABELS  = [
       'ПРОГНУТЬСЯ', 'ФИГАЧИТЬ', 'ВЗЯТЬ ОТГУЛ',
-      'ПОПЛАКАТЬ', 'ВСТРЕТИТЬСЯ\nС ДРУЗЬЯМИ', 'ВСТРЕТИТЬСЯ\nС РОДСТВЕННИКАМИ',
+      'ПОПЛАКАТЬ', 'С ДРУЗЬЯМИ', 'С РОДСТВЕННИКАМИ',
     ];
 
     const mkBtn = (i, onDown, onUp) => {
@@ -732,9 +748,13 @@ class GameScene extends Phaser.Scene {
       draw(false);
 
       this.add.text(cx, by + BH / 2, LABELS[i], {
-        fontSize: '6px', fontFamily: 'monospace', color: '#dde8f0',
-        align: 'center', lineSpacing: 1,
-      }).setOrigin(0.5, 0.5).setDepth(31);
+        fontSize: '14px',
+        fontFamily: 'Arial, sans-serif',
+        color: '#ffffff',
+        stroke: '#000000',
+        strokeThickness: 3,
+        align: 'center',
+      }).setOrigin(0.5, 0.5).setDepth(31).setResolution(4);
 
       const zone = this.add.zone(cx - BW / 2, by, BW, BH)
         .setOrigin(0, 0).setDepth(32).setInteractive();
@@ -788,9 +808,9 @@ class GameScene extends Phaser.Scene {
 
   showFloatingText(msg, color) {
     const t = this.add.text(this.LX, this.GY - 65, msg, {
-      fontSize: '9px', fontFamily: 'monospace', color,
-      stroke: '#000000', strokeThickness: 2, align: 'center',
-    }).setOrigin(0.5, 1).setDepth(50);
+      fontSize: '14px', fontFamily: 'Arial, sans-serif', fontStyle: 'bold', color,
+      stroke: '#000000', strokeThickness: 4, align: 'center',
+    }).setOrigin(0.5, 1).setDepth(50).setResolution(4);
     this.tweens.add({
       targets: t, y: t.y - 22, alpha: 0, duration: 1200,
       ease: 'Sine.Out', onComplete: () => t.destroy(),
@@ -894,18 +914,38 @@ class GameScene extends Phaser.Scene {
       }
     }
 
+    // ── HUD полоски ───────────────────────────────────────────────────────────
+    {
+      const { x, y, w, h, gap } = this.BAR_CFG;
+      const hy = y, my = y + h + gap;
+      this.barGfx.clear();
+      // фон
+      this.barGfx.fillStyle(0x110808, 0.85); this.barGfx.fillRect(x, hy, w, h);
+      this.barGfx.fillStyle(0x081108, 0.85); this.barGfx.fillRect(x, my, w, h);
+      // заливка
+      const hw = Math.round(w * Math.min(this.state.health, 100) / 100);
+      const mw = Math.round(w * Math.min(this.state.money,  200) / 200);
+      if (hw > 0) { this.barGfx.fillStyle(0xdd2222, 1); this.barGfx.fillRect(x, hy, hw, h); }
+      if (mw > 0) { this.barGfx.fillStyle(0x22dd55, 1); this.barGfx.fillRect(x, my, mw, h); }
+      // рамка
+      this.barGfx.lineStyle(1, 0x444444, 0.7);
+      this.barGfx.strokeRect(x, hy, w, h);
+      this.barGfx.strokeRect(x, my, w, h);
+    }
+
     // Прожектор: обновляем позицию источника (следует за качанием корабля)
     this.spotLight.x = this.beamOBase.x + this.boatBob.x;
     this.spotLight.y = this.beamOBase.y + this.boatBob.y;
     this.beamGfx.clear();
 
     // ── Частицы (пот при спринте, слёзы при плаче) ───────────────────────────
-    if (this.state.isSprinting && Math.random() < 25 * dt) {
+    if (this.state.isSprinting && Math.random() < 40 * dt) {
+      // Пот — по всей спине ламы (верхний край тела LX-20..LX+20)
       this.particles.push({
-        x: this.LX + Phaser.Math.Between(-15, 5),
-        y: this.GY - 52 + Phaser.Math.Between(-4, 4),
-        vx: Phaser.Math.FloatBetween(-30, 30),
-        vy: Phaser.Math.FloatBetween(-50, -15),
+        x: this.LX + Phaser.Math.Between(-20, 20),
+        y: this.GY - 30 + Phaser.Math.Between(-1, 1),
+        vx: Phaser.Math.FloatBetween(-10, 10),
+        vy: Phaser.Math.FloatBetween(-30, -8),
         life: 1.0, col: 0xaaccff,
       });
     }
@@ -975,6 +1015,8 @@ class GameScene extends Phaser.Scene {
           bn.state = 'idle';
           bn.gfx.setAngle(0).setVisible(false);
           bn.txt.setAngle(0).setVisible(false);
+          // Купюра уплыла — начислить зарплату
+          this.state.money = Math.min(200, this.state.money + 5);
           continue;
         }
         // Покачивается на волнах — та же формула, что и waveGfx
@@ -1040,7 +1082,7 @@ const config = {
     autoCenter: Phaser.Scale.CENTER_BOTH,
   },
   // Увеличиваем лимит источников: 1 прожектор + ~8 фонарей + запас
-  render: { maxLights: 16 },
+  render: { maxLights: 16, antialias: false, pixelArt: true },
 };
 
 new Phaser.Game(config);

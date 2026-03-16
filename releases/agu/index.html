@@ -25,6 +25,18 @@
 
 const BASE_SPEED = 100; // px/sec
 
+const AGE_TILT  = [0, 5, 5, 8, 10, 12];   // degrees of resting body tilt per stage
+const AGE_SPEED = [1.0, 0.85, 0.70, 0.55, 0.35, 0.15];
+
+function getAge(health) {
+  if (health > 83) return 0;
+  if (health > 66) return 1;
+  if (health > 50) return 2;
+  if (health > 33) return 3;
+  if (health > 16) return 4;
+  return 5;
+}
+
 // ─── Helpers ──────────────────────────────────────────────────────────────────
 
 function makeTile(scene, key, w, h, paint) {
@@ -665,16 +677,7 @@ class GameScene extends Phaser.Scene {
       delay: 1000, loop: true,
       callback: () => { this.state.health = Math.max(0, this.state.health - 2); },
     });
-    // Каждые 20 сек: age++, speed -= 0.15 (лама стареет, замедляется)
-    this.time.addEvent({
-      delay: 20000, loop: true,
-      callback: () => {
-        if (this.state.age < 5) {
-          this.state.age  += 1;
-          this.state.speed = Math.max(0.1, this.state.speed - 0.15);
-        }
-      },
-    });
+    // age и speed вычисляются каждый кадр из здоровья в update()
 
     // ── Ежемесячные платежи (каждые 30 секунд) ───────────────────────────────
     const MONTHLY = [
@@ -762,6 +765,8 @@ class GameScene extends Phaser.Scene {
     // ── Частицы (пот, слёзы) ─────────────────────────────────────────────────
     this.particles   = [];
     this.particleGfx = this.add.graphics().setDepth(14);
+    this.caneGfx     = this.add.graphics().setDepth(9);
+    this._prevAge    = -1;
 
     // ── Кнопки управления ─────────────────────────────────────────────────────
     this.createButtons();
@@ -772,7 +777,7 @@ class GameScene extends Phaser.Scene {
       this.boatGfx, this.llamaBody, this.neckGfx, this.llamaHead, this.harnessGfx,
       this.legBL, this.legBR, this.legFL, this.legFR,
       this.ropeGfx, this.waveGfx, this.lampBodyGfx, this.snakeImg,
-      this.particleGfx,
+      this.particleGfx, this.caneGfx,
       ...this.banknotes.map(b => b.gfx),
     ].forEach(obj => obj.setPipeline('Light2D'));
   }
@@ -833,6 +838,131 @@ class GameScene extends Phaser.Scene {
     mkBtn(5, () => { this.annoyingRelatives();        }, () => {});
   }
 
+  _redrawLlama(age) {
+    const WOOL  = 0xf0e8d0;
+    const WOOL2 = 0xd8c9a8;
+    const HOOF  = 0x3e2c1a;
+    const BONE  = 0xe8e8e8;
+
+    // ── Тело ───────────────────────────────────────────────────────────────────
+    const lb = this.llamaBody;
+    lb.clear();
+    lb.setAlpha(1);
+
+    if (age >= 5) {
+      // ── СКЕЛЕТ: только кости ─────────────────────────────────────────────────
+      lb.lineStyle(1, BONE, 1);
+      lb.lineBetween(4, -15, 4,  -1);          // позвоночник
+      lb.lineBetween(4, -14, 38, -12);          // верхнее ребро
+      lb.lineBetween(4,  -9, 38,  -7);          // среднее ребро
+      lb.lineBetween(4,  -4, 38,  -2);          // нижнее ребро
+      lb.lineBetween(38, -12, 38, -2);          // грудина (стернум)
+      lb.strokeCircle(3,  -7,  4);              // тазовая кость
+      lb.strokeCircle(37, -11, 3);              // плечевая кость
+    } else if (age >= 4) {
+      // ── ДРЯБЛАЯ: обвисшая шерсть и жир ──────────────────────────────────────
+      // Основное тело — немного шире и ниже
+      lb.fillStyle(WOOL, 1);
+      lb.fillRect(0, -15, 42, 17);
+      // Обвисший живот — тёмная складка снизу
+      lb.fillStyle(0xd8c090, 1);
+      lb.fillRect(6,   2,  28,  4);             // брюшная складка
+      lb.fillRect(3,   1,   8,  3);             // левый бок
+      lb.fillRect(32,  1,   8,  3);             // правый бок (у шеи)
+      // Подгрудок у шеи
+      lb.fillStyle(0xcab888, 1);
+      lb.fillRect(34, -18, 7,  6);
+    } else {
+      lb.fillStyle(WOOL, 1);
+      lb.fillRect(0, -16, 40, 16);
+    }
+
+    // ── Голова ─────────────────────────────────────────────────────────────────
+    const lh = this.llamaHead;
+    lh.clear();
+    lh.setAlpha(1);
+
+    if (age >= 5) {
+      // ── ЧЕРЕП ────────────────────────────────────────────────────────────────
+      lh.lineStyle(1, BONE, 1);
+      lh.strokeRect(-10, -7, 20, 12);           // черепная коробка
+      lh.strokeRect(-8,  -16,  5, 10);          // ушная кость
+      // Глазница — пустая дыра
+      lh.fillStyle(0x000000, 1);
+      lh.fillCircle(1, -2, 4);
+      lh.strokeCircle(1, -2, 4);
+      // Морда-череп
+      lh.lineStyle(1, BONE, 1);
+      lh.strokeRect(8, -3, 11, 8);              // носовая кость
+      // Зубы
+      lh.fillStyle(BONE, 1);
+      lh.fillRect( 9, 4, 2, 3);
+      lh.fillRect(12, 4, 2, 3);
+      lh.fillRect(15, 4, 2, 3);
+    } else if (age >= 4) {
+      // ── ДРЯБЛАЯ ГОЛОВА ───────────────────────────────────────────────────────
+      // Голова чуть больше, обвисшие щёки
+      lh.fillStyle(WOOL, 1);
+      lh.fillRect(-11, -7, 22, 14);
+      // Обвисшие щёки / брыли
+      lh.fillStyle(0xcab888, 1);
+      lh.fillRect(-11, 3,   7,  5);             // левая брыль
+      lh.fillRect(  5, 3,   6,  4);             // правая
+      // Ухо — серое, обвислое
+      lh.fillStyle(0x888888, 1);
+      lh.fillRect(-9, -16, 6, 12);              // длиннее и шире обычного
+      // Морда
+      lh.fillStyle(WOOL, 1);
+      lh.fillRect(8, -3, 12, 8);
+      // Глаз полуприкрыт — тяжёлое веко
+      lh.fillStyle(0x0e0808, 1);
+      lh.fillRect(1, -5, 3, 3);
+      lh.fillStyle(0x0e0808, 0.8);
+      lh.fillRect(1, -5, 3, 2);                 // веко закрывает половину
+      // Морщины (как age 3 + гуще)
+      lh.lineStyle(1, 0x9a7858, 1);
+      lh.lineBetween(-8, -4, -2, -4);
+      lh.lineBetween(-8, -2, -2, -2);
+      lh.lineBetween(-8,  0, -2,  0);
+      lh.lineBetween(-8,  2, -1,  2);
+    } else {
+      lh.fillStyle(WOOL, 1);
+      lh.fillRect(-10, -7, 20, 13);
+      lh.fillStyle(age >= 2 ? 0xaaaaaa : WOOL2, 1);
+      lh.fillRect(-8, -16, 5, 10);
+      lh.fillStyle(WOOL, 1);
+      lh.fillRect(8, -3, 11, 7);
+      lh.fillStyle(0x0e0808, 1);
+      lh.fillRect(1, -5, 3, 3);
+      lh.fillStyle(0xee2850, 1);
+      lh.fillCircle(20, 1, 3);
+      if (age >= 3) {
+        lh.lineStyle(1, 0x9a8868, 0.85);
+        lh.lineBetween(-7, -4, -2, -4);
+        lh.lineBetween(-7, -2, -2, -2);
+        lh.lineBetween(-7,  0, -2,  0);
+      }
+    }
+
+    // ── Трость (age >= 2) ──────────────────────────────────────────────────────
+    this.caneGfx.clear();
+    if (age >= 2) {
+      const cx = this.frontLegBaseX.FL - 1;
+      const cy = this.GY;
+      this.caneGfx.lineStyle(2, 0x6a4020, 1);
+      this.caneGfx.lineBetween(cx, cy - 10, cx, cy + 5);
+      this.caneGfx.lineBetween(cx - 3, cy - 10, cx + 3, cy - 10);
+    }
+  }
+
+  _flashAgeTrans() {
+    const g = this.add.graphics().setDepth(15);
+    g.fillStyle(0xffffff, 1);
+    g.fillRect(this.LX - 25, this.GY - 65, 65, 65);
+    g.setAlpha(0.8);
+    this.tweens.add({ targets: g, alpha: 0, duration: 400, ease: 'Sine.Out', onComplete: () => g.destroy() });
+  }
+
   _restartFrontWalkTweens() {
     if (this.walkTween1f) this.walkTween1f.stop();
     if (this.walkTween2f) this.walkTween2f.stop();
@@ -850,9 +980,10 @@ class GameScene extends Phaser.Scene {
     if (this.walkTween1f) { this.walkTween1f.stop(); this.walkTween1f = null; }
     if (this.walkTween2f) { this.walkTween2f.stop(); this.walkTween2f = null; }
 
+    const baseTilt = AGE_TILT[this.state.age] || 0;
     this._bowTweenBody = this.tweens.add({
       targets: [this.llamaBody, this.harnessGfx],
-      angle: 35, duration: 300, ease: 'Cubic.Out',
+      angle: baseTilt + 35, duration: 300, ease: 'Cubic.Out',
       onComplete: () => { this._bowTweenBody = null; },
     });
     this._bowTweenHead = this.tweens.add({
@@ -874,9 +1005,10 @@ class GameScene extends Phaser.Scene {
     if (this._bowTweenHead) { this._bowTweenHead.stop(); this._bowTweenHead = null; }
     if (this._bowTweenLegs) { this._bowTweenLegs.stop(); this._bowTweenLegs = null; }
 
+    const baseTilt = AGE_TILT[this.state.age] || 0;
     this._bowTweenBody = this.tweens.add({
       targets: [this.llamaBody, this.harnessGfx],
-      angle: 0, duration: 250, ease: 'Cubic.In',
+      angle: baseTilt, duration: 250, ease: 'Cubic.In',
       onComplete: () => { this._bowTweenBody = null; },
     });
     this._bowTweenHead = this.tweens.add({
@@ -1032,6 +1164,20 @@ class GameScene extends Phaser.Scene {
     const slot = this.banknotes[this.banknoteIdx];
     this.banknoteIdx = (this.banknoteIdx + 1) % this.banknotes.length;
 
+    // Номинал и размер купюры растут со стадией старения
+    const age = this.state.age;
+    const denomination = 5000 + age * 3000;
+    const bw = 28 + age * 3;
+    slot.denomination = denomination;
+    slot.gfx.clear();
+    slot.gfx.fillStyle(0xc0392b, 1);
+    slot.gfx.fillRect(-bw / 2, -7, bw, 14);
+    slot.gfx.fillStyle(0xd4af37, 0.7);
+    slot.gfx.fillRect(-bw / 2, -1, bw, 2);
+    slot.gfx.lineStyle(1, 0xe85d4a, 1);
+    slot.gfx.strokeRect(-bw / 2 + 1, -6, bw - 2, 12);
+    slot.txt.setText(String(denomination));
+
     slot.x = this.cannonMuzzleBase.x + this.boatBob.x;
     slot.y = this.cannonMuzzleBase.y + this.boatBob.y;
 
@@ -1050,7 +1196,23 @@ class GameScene extends Phaser.Scene {
 
     if (this.state.health <= 0) { this.triggerGameOver(); return; }
 
-    const dt        = delta / 1000;
+    const dt  = delta / 1000;
+    const age = getAge(this.state.health);
+    this.state.age   = age;
+    this.state.speed = AGE_SPEED[age];
+    if (age !== this._prevAge) {
+      this._redrawLlama(age);
+      if (this._prevAge >= 0) this._flashAgeTrans();
+      this._prevAge = age;
+    }
+
+    // Рестинг-наклон тела по стадии (не во время bow-tween)
+    if (!this.state.isBowing && !this._bowTweenBody) {
+      const tilt = AGE_TILT[age];
+      this.llamaBody.angle  = tilt;
+      this.harnessGfx.angle = tilt;
+    }
+
     const spd       = this.state.speed;
     const bowFactor = this.state.isBowing ? 0.4 : 1;
     const effSpd    = (this.state.isSprinting ? spd * 2 : spd) * bowFactor;
@@ -1253,16 +1415,24 @@ class GameScene extends Phaser.Scene {
 
       const dx = tip.x - base.x, dy = tip.y - base.y;
       const len = Math.sqrt(dx * dx + dy * dy) || 1;
-      const px = -dy / len * 4, py = dx / len * 4; // перпендикуляр (полуширина шеи 4px)
+      const neckHW = age >= 5 ? 2 : age >= 4 ? 6 : 4; // полуширина шеи по стадии
+      const px = -dy / len * neckHW, py = dx / len * neckHW;
 
       this.neckGfx.clear();
-      this.neckGfx.fillStyle(0xf0e8d0, 1);
-      this.neckGfx.fillPoints([
+      const neckPts = [
         { x: base.x - px, y: base.y - py },
         { x: base.x + px, y: base.y + py },
         { x: tip.x  + px, y: tip.y  + py },
         { x: tip.x  - px, y: tip.y  - py },
-      ], true);
+      ];
+      if (age >= 5) {
+        this.neckGfx.lineStyle(1, 0xe8e8e8, 1);
+        this.neckGfx.strokePoints(neckPts, true);
+      } else {
+        // Age 4: чуть темнее, дряблый цвет; остальные — нормальная шерсть
+        this.neckGfx.fillStyle(age >= 4 ? 0xd8c090 : 0xf0e8d0, 1);
+        this.neckGfx.fillPoints(neckPts, true);
+      }
     }
 
     // ── Сбор купюр головой при прогибе ───────────────────────────────────────

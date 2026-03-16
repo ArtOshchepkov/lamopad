@@ -956,11 +956,65 @@ class GameScene extends Phaser.Scene {
   }
 
   _flashAgeTrans() {
-    const g = this.add.graphics().setDepth(15);
-    g.fillStyle(0xffffff, 1);
-    g.fillRect(this.LX - 25, this.GY - 65, 65, 65);
-    g.setAlpha(0.8);
-    this.tweens.add({ targets: g, alpha: 0, duration: 400, ease: 'Sine.Out', onComplete: () => g.destroy() });
+    // Цвет вспышки усиливается с каждой стадией
+    const COLORS = [0xffffff, 0xffee88, 0xddddbb, 0xff9944, 0xff3322, 0xe8e8ff];
+    const col = COLORS[this.state.age] || 0xffffff;
+
+    const cx = this.LX + 10;   // примерный центр ламы
+    const cy = this.GY - 30;
+
+    // ── 1. Центральная вспышка — быстро гаснет ────────────────────────────────
+    const flash = this.add.graphics().setDepth(56);
+    flash.fillStyle(col, 1);
+    flash.fillRect(cx - 32, cy - 42, 74, 70);
+    flash.setAlpha(0.75);
+    this.tweens.add({
+      targets: flash, alpha: 0, duration: 220, ease: 'Sine.In',
+      onComplete: () => flash.destroy(),
+    });
+
+    // ── 2. Ударная волна — кольцо, расширяется и исчезает ────────────────────
+    const spawnRing = (delay, radius, thickness, maxScale, dur) => {
+      this.time.delayedCall(delay, () => {
+        const ring = this.add.graphics().setDepth(55).setPosition(cx, cy);
+        ring.lineStyle(thickness, col, 1);
+        ring.strokeCircle(0, 0, radius);
+        this.tweens.add({
+          targets: ring, scaleX: maxScale, scaleY: maxScale, alpha: 0,
+          duration: dur, ease: 'Sine.Out',
+          onComplete: () => ring.destroy(),
+        });
+      });
+    };
+    spawnRing(0,   6, 2, 9, 480);   // первое кольцо
+    spawnRing(80,  4, 1, 7, 380);   // эхо — чуть меньше и позже
+
+    // ── 3. Разлёт частиц — вихрь осколков ────────────────────────────────────
+    const COUNT = 14;
+    for (let i = 0; i < COUNT; i++) {
+      const angle = (i / COUNT) * Math.PI * 2 + Math.random() * 0.3;
+      const speed = Phaser.Math.Between(45, 110);
+      this.particles.push({
+        x: cx + Phaser.Math.Between(-6, 6),
+        y: cy + Phaser.Math.Between(-6, 6),
+        vx: Math.cos(angle) * speed,
+        vy: Math.sin(angle) * speed - 15,
+        life: 1.0,
+        col,
+      });
+    }
+
+    // ── 4. Тряска ламы — короткий горизонтальный импульс ─────────────────────
+    const origX = this.llamaBody.x;
+    this.tweens.add({
+      targets: [this.llamaBody, this.harnessGfx, this.llamaHead, this.neckGfx],
+      x: '+=4', duration: 40, yoyo: true, repeat: 3,
+      ease: 'Sine.InOut',
+      onComplete: () => {
+        this.llamaBody.x  = origX;
+        this.harnessGfx.x = origX;
+      },
+    });
   }
 
   _restartFrontWalkTweens() {
@@ -1069,8 +1123,11 @@ class GameScene extends Phaser.Scene {
     if (Math.random() < 0.8) {
       this.showFloatingText('ОТКАЗАНО', '#ff2244');
     } else {
-      const saved = this.state.speed;
-      this.state.speed = 0;
+      this._dayOffActive = true;
+      this.walkTween1.timeScale  = 0;
+      this.walkTween2.timeScale  = 0;
+      if (this.walkTween1f) this.walkTween1f.timeScale = 0;
+      if (this.walkTween2f) this.walkTween2f.timeScale = 0;
       let n = 3;
       const tick = () => {
         this.showFloatingText(String(n), '#44ff88');
@@ -1078,8 +1135,8 @@ class GameScene extends Phaser.Scene {
         if (n >= 0) {
           this.time.delayedCall(1000, tick);
         } else {
-          this.state.speed  = saved;
-          this.state.health = Math.min(100, this.state.health + 5);
+          this._dayOffActive = false;
+          this.state.health  = Math.min(100, this.state.health + 5);
         }
       };
       tick();
@@ -1120,32 +1177,91 @@ class GameScene extends Phaser.Scene {
     if (this.state.isDead) return;
     this.state.isDead = true;
     this.state.speed  = 0;
-    // Стоп — задние ноги
     this.walkTween1.stop();
     this.walkTween2.stop();
     if (this.walkTween1f) this.walkTween1f.stop();
     if (this.walkTween2f) this.walkTween2f.stop();
 
-    const cx = this.scale.width / 2;
-    const cy = this.scale.height / 2;
-    // Тёмный оверлей
-    const overlay = this.add.graphics().setDepth(60);
-    overlay.fillStyle(0x000000, 0);
-    overlay.fillRect(0, 0, this.scale.width, this.scale.height);
-    this.tweens.add({ targets: overlay, alpha: 0, duration: 0 }); // just create it
-    // Затемнение через alpha на самом graphics неудобно — используем setAlpha
-    overlay.setAlpha(0);
-    this.tweens.add({ targets: overlay, alpha: 0.65, duration: 1200, ease: 'Sine.In' });
+    const W  = this.scale.width;
+    const H  = this.scale.height;
+    const cx = W / 2;
+    const cy = H / 2;
 
-    this.time.delayedCall(600, () => {
-      this.add.text(cx, cy - 14, 'ЛАМА УПАЛА', {
-        fontSize: '28px', fontFamily: 'Arial Black, Arial, sans-serif', fontStyle: 'bold',
+    // Затемнение
+    const overlay = this.add.graphics().setDepth(60).setAlpha(0);
+    overlay.fillStyle(0x000000, 1);
+    overlay.fillRect(0, 0, W, H);
+    this.tweens.add({ targets: overlay, alpha: 0.82, duration: 1400, ease: 'Sine.In' });
+
+    this.time.delayedCall(700, () => {
+      const DEPTH = 62;
+      const res   = 8;
+
+      // Заголовок
+      this.add.text(cx, cy - 68, 'ИГРА ОКОНЧЕНА', {
+        fontSize: '22px', fontFamily: 'Arial Black, Arial, sans-serif', fontStyle: 'bold',
         color: '#ff2222', stroke: '#000000', strokeThickness: 5, align: 'center',
-      }).setOrigin(0.5).setDepth(62).setResolution(8);
-      this.add.text(cx, cy + 16, 'ОНА УСТАЛА', {
-        fontSize: '14px', fontFamily: 'Arial, sans-serif',
-        color: '#aaaaaa', stroke: '#000000', strokeThickness: 3, align: 'center',
-      }).setOrigin(0.5).setDepth(62).setResolution(8);
+      }).setOrigin(0.5).setDepth(DEPTH).setResolution(res);
+
+      this.add.text(cx, cy - 46, 'ЛАМА УПАЛА. ОНА УСТАЛА.', {
+        fontSize: '10px', fontFamily: 'Arial, sans-serif',
+        color: '#888888', stroke: '#000000', strokeThickness: 2, align: 'center',
+      }).setOrigin(0.5).setDepth(DEPTH).setResolution(res);
+
+      // ── Кнопки ──────────────────────────────────────────────────────────────
+      const BTN_W = 200, BTN_H = 28, BTN_GAP = 10;
+      const btnY  = [cy - 8, cy + BTN_H + BTN_GAP - 8, cy + (BTN_H + BTN_GAP) * 2 - 8];
+
+      const mkGoBtn = (idx, label, col, onClick) => {
+        const by  = btnY[idx];
+        const gfx = this.add.graphics().setDepth(DEPTH);
+        const lbl = this.add.text(cx, by + BTN_H / 2, label, {
+          fontSize: '13px', fontFamily: 'Arial, sans-serif', fontStyle: 'bold',
+          color: '#ffffff', stroke: '#000000', strokeThickness: 3, align: 'center',
+        }).setOrigin(0.5).setDepth(DEPTH + 1).setResolution(res);
+
+        const draw = (pressed) => {
+          gfx.clear();
+          gfx.fillStyle(col, pressed ? 0.95 : 0.75);
+          gfx.fillRoundedRect(cx - BTN_W / 2, by, BTN_W, BTN_H, 4);
+          gfx.lineStyle(1, 0xffffff, pressed ? 0.5 : 0.2);
+          gfx.strokeRoundedRect(cx - BTN_W / 2, by, BTN_W, BTN_H, 4);
+        };
+        draw(false);
+
+        const zone = this.add.zone(cx - BTN_W / 2, by, BTN_W, BTN_H)
+          .setOrigin(0, 0).setDepth(DEPTH + 2).setInteractive();
+        zone.on('pointerdown', () => { draw(true);  onClick(); });
+        zone.on('pointerup',   () => draw(false));
+        zone.on('pointerout',  () => draw(false));
+
+        return { gfx, lbl };
+      };
+
+      // Кнопка 1: НАЧАТЬ ЗАНОВО
+      mkGoBtn(0, 'НАЧАТЬ ЗАНОВО', 0x1e3a5c, () => {
+        alert('НАЧАТЬ СНАЧАЛА НЕВОЗМОЖНО');
+      });
+
+      // Кнопка 2: ПРОДОЛЖИТЬ ИГРУ
+      let countdown = 3;
+      const btn2 = mkGoBtn(1, 'ПРОДОЛЖИТЬ ИГРУ', 0x1c4c2c, () => {
+        const tick = () => {
+          btn2.lbl.setText('ВОЗВРАЩЕНИЕ ЧЕРЕЗ ' + countdown + '...');
+          countdown--;
+          if (countdown >= 0) {
+            this.time.delayedCall(1000, tick);
+          } else {
+            window.location.href = 'about:blank';
+          }
+        };
+        tick();
+      });
+
+      // Кнопка 3: ДОБАВИТЬ ТРЕК К СЕБЕ
+      mkGoBtn(2, 'ДОБАВИТЬ ТРЕК К СЕБЕ', 0x3c1c5c, () => {
+        window.location.href = 'https://example.com';
+      });
     });
   }
 
@@ -1215,7 +1331,7 @@ class GameScene extends Phaser.Scene {
 
     const spd       = this.state.speed;
     const bowFactor = this.state.isBowing ? 0.4 : 1;
-    const effSpd    = (this.state.isSprinting ? spd * 2 : spd) * bowFactor;
+    const effSpd    = this._dayOffActive ? 0 : (this.state.isSprinting ? spd * 2 : spd) * bowFactor;
 
     // Спринт: дополнительный расход здоровья
     if (this.state.isSprinting) {

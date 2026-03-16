@@ -740,7 +740,7 @@ class GameScene extends Phaser.Scene {
 
     // ── Граффити на стенах ────────────────────────────────────────────────────
     this.graffiti = [];
-    this._graffitiNext = Phaser.Math.Between(3000, 8000);
+    this._graffitiNext = Phaser.Math.Between(200, 4000);
 
     for (let i = 0; i < 8; i++) {
       const gfx = this.add.graphics().setDepth(20).setVisible(false);
@@ -894,23 +894,21 @@ class GameScene extends Phaser.Scene {
   }
 
   _spawnGraffiti() {
-    const WORDS   = ['ЛОХ', 'ПРИВЕТ', 'ПОКА', 'ЛОХ!!', 'ЛОХ И ЕСТЬ', 'ПРИВЕТ МИР', 'ПОКА ВСЕМ', 'АУ'];
-    const COLORS  = ['#e03030', '#28c028', '#c8c020', '#2060d0', '#c020c0', '#20b0b0'];
+    const WORDS   = ['ЗАЧЕМ?', 'АХМАТОВА СИЛА', 'В КРАСИВОМ ПАЛЬТО', '***', '*****', 'ПЕРЕМЕН!', 'ХОЧУ ОТГУЛ'];
+    const COLORS  = ['#e03030', '#000000', '#7a7a7a', '#2060d0', '#c020c0', '#20b0b0'];
     const word    = Phaser.Math.RND.pick(WORDS);
     const color   = Phaser.Math.RND.pick(COLORS);
-    const size    = Phaser.Math.Between(9, 16);
+    const size    = Phaser.Math.Between(6, 9);
     const wallY   = this.UPPER_ROAD_LINE;
-    const y       = Phaser.Math.Between(wallY - 22, wallY - 4);
-    const angle   = Phaser.Math.Between(-12, 12);
+    const y       = Phaser.Math.Between(wallY, wallY + 3);
+    const angle   = Phaser.Math.Between(-6, 9);
     const txt = this.add.text(
       this.scale.width + 30, y, word,
       {
         fontSize: size + 'px',
         fontFamily: 'Arial Black, Impact, Arial, sans-serif',
-        fontStyle: 'bold',
         color,
-        stroke: '#00000088',
-        strokeThickness: 2,
+        opacity: Phaser.Math.Between(0.5, 0.95),
       },
     ).setDepth(1).setAngle(angle).setAlpha(0.72).setResolution(4);
     this.graffiti.push(txt);
@@ -1072,7 +1070,7 @@ class GameScene extends Phaser.Scene {
     this._graffitiNext -= delta;
     if (this._graffitiNext <= 0) {
       this._spawnGraffiti();
-      this._graffitiNext = Phaser.Math.Between(3000, 8000);
+      this._graffitiNext = Phaser.Math.Between(3000, 10000);
     }
     for (let i = this.graffiti.length - 1; i >= 0; i--) {
       this.graffiti[i].x -= BASE_SPEED * 1.0 * effSpd * dt;

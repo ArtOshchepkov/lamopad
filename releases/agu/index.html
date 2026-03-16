@@ -466,7 +466,8 @@ class GameScene extends Phaser.Scene {
 
     // Четыре ноги — отдельные Graphics-объекты, анимированы через tweens
     const LEG_H = 14, LEG_W = 5;
-    const makeLeg = (lx) => {
+    // Задние ноги: пивот в (0,0), рисуются в мировых координатах
+    const makeRearLeg = (lx) => {
       const lg = this.add.graphics().setDepth(9);
       lg.fillStyle(WOOL2, 1);
       lg.fillRect(lx, GY - LEG_H, LEG_W, LEG_H);
@@ -474,21 +475,28 @@ class GameScene extends Phaser.Scene {
       lg.fillRect(lx - 1, GY - 3, LEG_W + 2, 3);
       return lg;
     };
+    // Передние ноги: пивот у земли (lx, GY) — rotation вокруг копыта
+    const makeFrontLeg = (lx) => {
+      const lg = this.add.graphics().setDepth(9).setPosition(lx, GY);
+      lg.fillStyle(WOOL2, 1);
+      lg.fillRect(0, -LEG_H, LEG_W, LEG_H);
+      lg.fillStyle(HOOF, 1);
+      lg.fillRect(-1, -3, LEG_W + 2, 3);
+      return lg;
+    };
 
-    this.legBL = makeLeg(LX - 18);   // задняя левая
-    this.legBR = makeLeg(LX - 10);   // задняя правая
-    this.legFL = makeLeg(LX +  9);   // передняя левая
-    this.legFR = makeLeg(LX + 17);   // передняя правая
+    this.legBL = makeRearLeg(LX - 18);   // задняя левая
+    this.legBR = makeRearLeg(LX - 10);   // задняя правая
+    this.legFL = makeFrontLeg(LX +  9);  // передняя левая
+    this.legFR = makeFrontLeg(LX + 17);  // передняя правая
+    this.frontLegBaseX = { FL: LX + 9, FR: LX + 17 };
 
-    // Диагональные пары: BL+FR и BR+FL шагают в противофазе
-    this.walkTween1 = this.tweens.add({
-      targets: [this.legBL, this.legFR],
-      y: -5, duration: 260, yoyo: true, repeat: -1, ease: 'Sine.InOut',
-    });
-    this.walkTween2 = this.tweens.add({
-      targets: [this.legBR, this.legFL],
-      y: -5, duration: 260, yoyo: true, repeat: -1, delay: 260, ease: 'Sine.InOut',
-    });
+    // Диагональные пары: BL+FR и BR+FL шагают в противофазе.
+    // Передние ноги имеют y=GY изначально, поэтому их tween цель = GY-5
+    this.walkTween1  = this.tweens.add({ targets: this.legBL, y: -5,    duration: 260, yoyo: true, repeat: -1, ease: 'Sine.InOut' });
+    this.walkTween1f = this.tweens.add({ targets: this.legFR, y: GY - 5, duration: 260, yoyo: true, repeat: -1, ease: 'Sine.InOut' });
+    this.walkTween2  = this.tweens.add({ targets: this.legBR, y: -5,    duration: 260, yoyo: true, repeat: -1, delay: 260, ease: 'Sine.InOut' });
+    this.walkTween2f = this.tweens.add({ targets: this.legFL, y: GY - 5, duration: 260, yoyo: true, repeat: -1, delay: 260, ease: 'Sine.InOut' });
 
     // ── Корпорация-корабль — НАСТОЛЬКО ОГРОМНАЯ, что нос не вмещается в экран ─
     // Виден только нижний правый угол носа. Стена денег уходит вверх и влево.
@@ -639,16 +647,16 @@ class GameScene extends Phaser.Scene {
     const BAR_W = 72, BAR_H = 6, BAR_GAP = 5, BAR_Y = 8;
     const BAR_RIGHT = W - 8;          // правый край полоски
     const BAR_X     = BAR_RIGHT - BAR_W;
-    const LBL_X     = BAR_X - 18;    // x надписи HP / $
+    const LBL_X     = BAR_X - 45;    // x надписи HP / $
     this.barGfx = this.add.graphics().setDepth(40);
-    this.add.text(LBL_X, BAR_Y - 1, 'HP', {
-      fontSize: '8px', fontFamily: 'Arial, sans-serif', fontStyle: 'bold', color: '#ff5555',
-      stroke: '#000000', strokeThickness: 2,
-    }).setDepth(41).setResolution(4);
-    this.add.text(LBL_X, BAR_Y + BAR_H + BAR_GAP - 1, '$', {
-      fontSize: '8px', fontFamily: 'Arial, sans-serif', fontStyle: 'bold', color: '#44ee66',
-      stroke: '#000000', strokeThickness: 2,
-    }).setDepth(41).setResolution(4);
+    this.add.text(LBL_X, BAR_Y - 1, 'ЗДОРОВЬЕ', {
+      fontSize: '9px', color: '#ff5555',
+      stroke: '#000000', strokeThickness: 1,
+    }).setDepth(41).setResolution(3);
+    this.add.text(LBL_X, BAR_Y + BAR_H + BAR_GAP - 1, 'ДЕНЬГИ', {
+      fontSize: '9px', fontFamily: 'Arial, sans-serif', color: '#44ee66',
+      stroke: '#000000', strokeThickness: 1,
+    }).setDepth(41).setResolution(2);
     this.BAR_CFG = { x: BAR_X, y: BAR_Y, w: BAR_W, h: BAR_H, gap: BAR_GAP };
 
     // ── Таймеры состояния ─────────────────────────────────────────────────────
@@ -766,7 +774,7 @@ class GameScene extends Phaser.Scene {
         stroke: '#000000',
         strokeThickness: 3,
         align: 'center',
-      }).setOrigin(0.5, 0.5).setDepth(31).setResolution(4);
+      }).setOrigin(0.5, 0.5).setDepth(31).setResolution(8);
 
       const zone = this.add.zone(cx - BW / 2, by, BW, BH)
         .setOrigin(0, 0).setDepth(32).setInteractive();
@@ -784,10 +792,22 @@ class GameScene extends Phaser.Scene {
     mkBtn(5, () => { this.showBusy();                 }, () => {});
   }
 
+  _restartFrontWalkTweens() {
+    if (this.walkTween1f) this.walkTween1f.stop();
+    if (this.walkTween2f) this.walkTween2f.stop();
+    // Пересоздаём с текущего y объектов (после bow-tween'а это GY)
+    this.walkTween1f = this.tweens.add({ targets: this.legFR, y: this.GY - 5, duration: 260, yoyo: true, repeat: -1, ease: 'Sine.InOut' });
+    this.walkTween2f = this.tweens.add({ targets: this.legFL, y: this.GY - 5, duration: 260, yoyo: true, repeat: -1, delay: 260, ease: 'Sine.InOut' });
+  }
+
   startBow() {
-    // Остановить текущие tween прогиба (чтобы не было прыжка)
     if (this._bowTweenBody) { this._bowTweenBody.stop(); this._bowTweenBody = null; }
     if (this._bowTweenHead) { this._bowTweenHead.stop(); this._bowTweenHead = null; }
+    if (this._bowTweenLegs) { this._bowTweenLegs.stop(); this._bowTweenLegs = null; }
+
+    // Полностью останавливаем walk tweens передних ног — bow tween единолично владеет y
+    if (this.walkTween1f) { this.walkTween1f.stop(); this.walkTween1f = null; }
+    if (this.walkTween2f) { this.walkTween2f.stop(); this.walkTween2f = null; }
 
     this._bowTweenBody = this.tweens.add({
       targets: [this.llamaBody, this.harnessGfx],
@@ -801,11 +821,17 @@ class GameScene extends Phaser.Scene {
       duration: 300, ease: 'Cubic.Out',
       onComplete: () => { this._bowTweenHead = null; },
     });
+    this.tweens.add({ targets: this.legFL, x: this.frontLegBaseX.FL - 10, angle: 28, y: this.GY + 10, duration: 300, ease: 'Cubic.Out' });
+    this._bowTweenLegs = this.tweens.add({
+      targets: this.legFR, x: this.frontLegBaseX.FR - 10, angle: 28, y: this.GY + 10, duration: 300, ease: 'Cubic.Out',
+      onComplete: () => { this._bowTweenLegs = null; },
+    });
   }
 
   endBow() {
     if (this._bowTweenBody) { this._bowTweenBody.stop(); this._bowTweenBody = null; }
     if (this._bowTweenHead) { this._bowTweenHead.stop(); this._bowTweenHead = null; }
+    if (this._bowTweenLegs) { this._bowTweenLegs.stop(); this._bowTweenLegs = null; }
 
     this._bowTweenBody = this.tweens.add({
       targets: [this.llamaBody, this.harnessGfx],
@@ -818,6 +844,11 @@ class GameScene extends Phaser.Scene {
       y: this.llamaHeadBase.y,
       duration: 250, ease: 'Cubic.In',
       onComplete: () => { this._bowTweenHead = null; },
+    });
+    this.tweens.add({ targets: this.legFL, x: this.frontLegBaseX.FL, angle: 0, y: this.GY, duration: 250, ease: 'Cubic.In' });
+    this._bowTweenLegs = this.tweens.add({
+      targets: this.legFR, x: this.frontLegBaseX.FR, angle: 0, y: this.GY, duration: 250, ease: 'Cubic.In',
+      onComplete: () => { this._bowTweenLegs = null; this._restartFrontWalkTweens(); },
     });
   }
 
@@ -860,7 +891,7 @@ class GameScene extends Phaser.Scene {
     const t = this.add.text(this.LX, this.GY - 65, msg, {
       fontSize: '14px', fontFamily: 'Arial, sans-serif', fontStyle: 'bold', color,
       stroke: '#000000', strokeThickness: 4, align: 'center',
-    }).setOrigin(0.5, 1).setDepth(50).setResolution(4);
+    }).setOrigin(0.5, 1).setDepth(50).setResolution(8);
     this.tweens.add({
       targets: t, y: t.y - 22, alpha: 0, duration: 1200,
       ease: 'Sine.Out', onComplete: () => t.destroy(),
@@ -1020,10 +1051,12 @@ class GameScene extends Phaser.Scene {
       this.particleGfx.fillRect(Math.round(p.x), Math.round(p.y), 2, 3);
     }
 
-    // Ноги: во время прогиба замедляются (лама упирается), но не останавливаются
+    // Задние ноги замедляются при прогибе; передние управляются bow/walk tweens
     const walkScale = this.state.isBowing ? effSpd * 0.25 : effSpd;
     this.walkTween1.timeScale = walkScale;
     this.walkTween2.timeScale = walkScale;
+    if (this.walkTween1f) this.walkTween1f.timeScale = effSpd;
+    if (this.walkTween2f) this.walkTween2f.timeScale = effSpd;
 
     // Корабль и пушка покачиваются вместе
     this.boatGfx.x  = this.boatBob.x;
@@ -1089,7 +1122,7 @@ class GameScene extends Phaser.Scene {
           const t = this.add.text(hx, hy - 10, '+' + bn.denomination, {
             fontSize: '12px', fontFamily: 'Arial, sans-serif', fontStyle: 'bold',
             color: '#ffdd00', stroke: '#000000', strokeThickness: 3,
-          }).setOrigin(0.5, 1).setDepth(50).setResolution(4);
+          }).setOrigin(0.5, 1).setDepth(50).setResolution(8);
           this.tweens.add({
             targets: t, y: t.y - 30, alpha: 0, duration: 800,
             ease: 'Sine.Out', onComplete: () => t.destroy(),
@@ -1196,7 +1229,10 @@ const config = {
     autoCenter: Phaser.Scale.CENTER_BOTH,
   },
   // Увеличиваем лимит источников: 1 прожектор + ~8 фонарей + запас
-  render: { maxLights: 16, antialias: false, pixelArt: true },
+  // antialias: true — bilinear scaling for text textures (makes setResolution work correctly)
+  // roundPixels: true — integer pixel positioning for pixel art objects (no sub-pixel wobble)
+  // CSS image-rendering: pixelated handles the final canvas→screen upscale as nearest-neighbor
+  render: { maxLights: 16, antialias: true, roundPixels: true },
 };
 
 new Phaser.Game(config);

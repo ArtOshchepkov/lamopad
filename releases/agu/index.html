@@ -752,7 +752,7 @@ class GameScene extends Phaser.Scene {
         .setDepth(20)
         .setVisible(false);
 
-      this.banknotes.push({ sprite, x: 0, y: 0, vx: 0, vy: 0, grav: 0, floatPhase: 0, state: 'idle', denomination: 5000 });
+      this.banknotes.push({ sprite, x: 0, y: 0, vx: 0, vy: 0, grav: 0, floatPhase: 0, splashTimer: 0, state: 'idle', denomination: 5000 });
     }
 
     // ── Частицы (пот, слёзы) ─────────────────────────────────────────────────
@@ -1279,7 +1279,7 @@ class GameScene extends Phaser.Scene {
     const bw = 28 + age * 3;
     slot.denomination = denomination;
     slot.sprite.setTexture(`money${Phaser.Math.Between(1, 5)}`);
-    slot.sprite.setDisplaySize(bw * 2, bw);
+    slot.sprite.setDisplaySize(bw * 2 / 1.2, bw / 1.2);
 
     slot.x = this.cannonMuzzleBase.x + this.boatBob.x;
     slot.y = this.cannonMuzzleBase.y + this.boatBob.y;
@@ -1548,7 +1548,7 @@ class GameScene extends Phaser.Scene {
           this.tweens.add({
             targets: [bn.sprite], scaleX: 0, scaleY: 0, duration: 150,
             onComplete: () => {
-              bn.sprite.setVisible(false).setScale(1);
+              bn.sprite.setVisible(false).setAngle(0);
             },
           });
           this.state.money += bn.denomination;
@@ -1575,33 +1575,81 @@ class GameScene extends Phaser.Scene {
       if (bn.state === 'idle') continue;
 
       if (bn.state === 'flying') {
-        // Парабола: горизонталь равномерно, вертикаль с ускорением свободного падения
+        // Парабола: горизонталь равномерно, вертикаль с ускорением
         bn.vy += bn.grav * dt;
         bn.x  += bn.vx  * dt;
         bn.y  += bn.vy  * dt;
-        // Угол купюры следует вектору скорости — кувыркается как настоящая
+        // Угол следует вектору скорости — кувыркается в воздухе
         const ang = Math.atan2(bn.vy, bn.vx) * (180 / Math.PI);
         bn.sprite.setAngle(ang * 0.5);
-        // Приземление: чуть за правым краем экрана
-        if (bn.y >= baseY + 4 && bn.x >= sceneW - 20) {
+
+        // Касание воды — переход к всплеску
+        if (bn.y >= baseY + 4) {
+          bn.y   = baseY + 4;
+          bn.vy  = -Math.abs(bn.vy) * 0.22;  // небольшой отскок
+          bn.vx *= 0.08;                       // резкое торможение (вода)
+          bn.state       = 'splashing';
+          bn.splashTimer = 0;
+          bn.floatPhase  = bn.x * 0.04;
+
+          // Визуальный всплеск: два расходящихся эллипса
+          for (const [sx, sy, w, h, dur] of [
+            [bn.x, bn.y - 1, 20, 7,  380],   // основная волна
+            [bn.x, bn.y - 2, 10, 12, 260],   // вертикальный выброс
+          ]) {
+            const sg = this.add.graphics().setDepth(19).setAlpha(0.72);
+            sg.fillStyle(0xb8d4e4, 1);
+            sg.fillEllipse(0, 0, w, h);
+            sg.x = sx; sg.y = sy;
+            this.tweens.add({
+              targets: sg, scaleX: 2.6, scaleY: 1.8, alpha: 0,
+              duration: dur, ease: 'Quad.Out',
+              onComplete: () => sg.destroy(),
+            });
+          }
+
+          // Приземление: лёгкий сплющивающий squish (относительно текущего масштаба)
+          const sx = bn.sprite.scaleX, sy = bn.sprite.scaleY;
+          bn.sprite.setScale(sx * 1.35, sy * 0.65);
+          this.tweens.add({
+            targets: bn.sprite, scaleX: sx, scaleY: sy,
+            duration: 280, ease: 'Back.Out',
+          });
+        }
+
+      } else if (bn.state === 'splashing') {
+        // Полная гравитация — дуга отскока физически корректна
+        bn.vy += bn.grav * dt;
+        bn.x  += bn.vx * dt;
+        bn.y  += bn.vy * dt;
+        bn.vx *= Math.max(0, 1 - 6 * dt);    // затухание горизонтали
+
+        // Угол плавно выравнивается к горизонтали
+        bn.sprite.setAngle(bn.sprite.angle * (1 - 8 * dt));
+
+        // Второе касание воды — переход к плаванию (без таймера)
+        if (bn.y >= baseY + 4 && bn.vy > 0) {
+          bn.y  = baseY + 4;
+          bn.vy = 0;
+          bn.vx = 0;
           bn.state = 'floating';
           bn.floatPhase = bn.x * 0.04;
         }
+
       } else {
-        // Плывёт по течению влево
+        // Плывёт влево по течению
         bn.x -= BASE_SPEED * effSpd * dt;
         if (bn.x < -40) {
           bn.state = 'idle';
           bn.sprite.setAngle(0).setVisible(false);
-          // Купюра уплыла — начислить зарплату
           this.state.money += 5;
           continue;
         }
-        // Покачивается на волнах — та же формула, что и waveGfx
+        // Позиция Y повторяет волновую формулу waveGfx
         bn.y = baseY + 4 +
           AMP * Math.sin(bn.x * FREQ1 + wt * SPD1) +
           (AMP * 0.5) * Math.sin(bn.x * FREQ2 - wt * SPD2);
-        // Лёгкий крен — уникальная фаза у каждой купюры
+        // Крен на волне — уникальная фаза у каждой купюры
         const rock = Math.sin(wt * 1.8 + bn.floatPhase) * 7;
         bn.sprite.setAngle(rock);
       }

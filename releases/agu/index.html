@@ -396,8 +396,8 @@ class GameScene extends Phaser.Scene {
 
     // ── Состояние ламы ────────────────────────────────────────────────────────
     this.state = {
-      health: 100, money: 0, age: 0, speed: 1.0,
-      isBowing: false, isSprinting: false, isCrying: false,
+      health: 100, money: 50000, age: 0, speed: 1.0,
+      isBowing: false, isSprinting: false, isCrying: false, isDead: false,
     };
 
     // ── Лама-бурлак ───────────────────────────────────────────────────────────
@@ -738,6 +738,10 @@ class GameScene extends Phaser.Scene {
     this.bnTimer      = 0;
     this.bnDelay      = Phaser.Math.Between(2000, 4000);
 
+    // ── Граффити на стенах ────────────────────────────────────────────────────
+    this.graffiti = [];
+    this._graffitiNext = Phaser.Math.Between(3000, 8000);
+
     for (let i = 0; i < 8; i++) {
       const gfx = this.add.graphics().setDepth(20).setVisible(false);
       // Рисуем купюру один раз — перемещаем через gfx.x / gfx.y
@@ -825,8 +829,8 @@ class GameScene extends Phaser.Scene {
     mkBtn(1, () => { this.state.isSprinting = true;  }, () => { this.state.isSprinting = false; });
     mkBtn(2, () => { this.requestDayOff();            }, () => {});
     mkBtn(3, () => { this.startCrying();              }, () => {});
-    mkBtn(4, () => { this.showBusy();                 }, () => {});
-    mkBtn(5, () => { this.showBusy();                 }, () => {});
+    mkBtn(4, () => { this.hangWithFriends();           }, () => {});
+    mkBtn(5, () => { this.annoyingRelatives();        }, () => {});
   }
 
   _restartFrontWalkTweens() {
@@ -889,10 +893,33 @@ class GameScene extends Phaser.Scene {
     });
   }
 
+  _spawnGraffiti() {
+    const WORDS   = ['ЛОХ', 'ПРИВЕТ', 'ПОКА', 'ЛОХ!!', 'ЛОХ И ЕСТЬ', 'ПРИВЕТ МИР', 'ПОКА ВСЕМ', 'АУ'];
+    const COLORS  = ['#e03030', '#28c028', '#c8c020', '#2060d0', '#c020c0', '#20b0b0'];
+    const word    = Phaser.Math.RND.pick(WORDS);
+    const color   = Phaser.Math.RND.pick(COLORS);
+    const size    = Phaser.Math.Between(9, 16);
+    const wallY   = this.UPPER_ROAD_LINE;
+    const y       = Phaser.Math.Between(wallY - 22, wallY - 4);
+    const angle   = Phaser.Math.Between(-12, 12);
+    const txt = this.add.text(
+      this.scale.width + 30, y, word,
+      {
+        fontSize: size + 'px',
+        fontFamily: 'Arial Black, Impact, Arial, sans-serif',
+        fontStyle: 'bold',
+        color,
+        stroke: '#00000088',
+        strokeThickness: 2,
+      },
+    ).setDepth(1).setAngle(angle).setAlpha(0.72).setResolution(4);
+    this.graffiti.push(txt);
+  }
+
   applyCharge(label, amount) {
     this.state.money -= amount;
-    const x = this.LX + Phaser.Math.Between(-30, 30);
-    const y = this.GY - 65 + Phaser.Math.Between(-10, 10);
+    const x = this.LX + Phaser.Math.Between(-50, 50);
+    const y = this.GY - 60 + Phaser.Math.Between(-15, 15);
     const t = this.add.text(x, y, label + '\n-' + amount + '₽', {
       fontSize: '11px', fontFamily: 'Arial, sans-serif', fontStyle: 'bold',
       color: '#ff3333', stroke: '#000000', strokeThickness: 3,
@@ -939,6 +966,59 @@ class GameScene extends Phaser.Scene {
     this.showFloatingText(Math.random() < 0.5 ? 'ВЫ ЗАНЯТЫ' : 'ВАМ НЕКОГДА', '#ff8800');
   }
 
+  hangWithFriends() {
+    if (Math.random() < 0.9) {
+      this.showFloatingText(Math.random() < 0.5 ? 'ВАМ НЕКОГДА' : 'ВЫ ЗАНЯТЫ', '#ff8800');
+    } else {
+      const gain = Phaser.Math.Between(5, 10);
+      this.state.health = Math.min(100, this.state.health + gain);
+      this.showFloatingText('+' + gain + ' ЗДОРОВЬЯ', '#ff88cc');
+    }
+  }
+
+  annoyingRelatives() {
+    if (Math.random() < 0.9) {
+      this.showFloatingText(Math.random() < 0.5 ? 'ВАМ НЕКОГДА' : 'ВЫ ЗАНЯТЫ', '#ff8800');
+    } else {
+      const gain = Phaser.Math.Between(5, 10);
+      this.state.health = Math.min(100, this.state.health + gain);
+      this.showFloatingText('+' + gain + ' ЗДОРОВЬЯ', '#ffcc44');
+    }
+  }
+
+  triggerGameOver() {
+    if (this.state.isDead) return;
+    this.state.isDead = true;
+    this.state.speed  = 0;
+    // Стоп — задние ноги
+    this.walkTween1.stop();
+    this.walkTween2.stop();
+    if (this.walkTween1f) this.walkTween1f.stop();
+    if (this.walkTween2f) this.walkTween2f.stop();
+
+    const cx = this.scale.width / 2;
+    const cy = this.scale.height / 2;
+    // Тёмный оверлей
+    const overlay = this.add.graphics().setDepth(60);
+    overlay.fillStyle(0x000000, 0);
+    overlay.fillRect(0, 0, this.scale.width, this.scale.height);
+    this.tweens.add({ targets: overlay, alpha: 0, duration: 0 }); // just create it
+    // Затемнение через alpha на самом graphics неудобно — используем setAlpha
+    overlay.setAlpha(0);
+    this.tweens.add({ targets: overlay, alpha: 0.65, duration: 1200, ease: 'Sine.In' });
+
+    this.time.delayedCall(600, () => {
+      this.add.text(cx, cy - 14, 'ЛАМА УПАЛА', {
+        fontSize: '28px', fontFamily: 'Arial Black, Arial, sans-serif', fontStyle: 'bold',
+        color: '#ff2222', stroke: '#000000', strokeThickness: 5, align: 'center',
+      }).setOrigin(0.5).setDepth(62).setResolution(8);
+      this.add.text(cx, cy + 16, 'ОНА УСТАЛА', {
+        fontSize: '14px', fontFamily: 'Arial, sans-serif',
+        color: '#aaaaaa', stroke: '#000000', strokeThickness: 3, align: 'center',
+      }).setOrigin(0.5).setDepth(62).setResolution(8);
+    });
+  }
+
   showFloatingText(msg, color) {
     const t = this.add.text(this.LX, this.GY - 65, msg, {
       fontSize: '14px', fontFamily: 'Arial, sans-serif', fontStyle: 'bold', color,
@@ -968,6 +1048,10 @@ class GameScene extends Phaser.Scene {
   }
 
   update(_time, delta) {
+    if (this.state.isDead) return;
+
+    if (this.state.health <= 0) { this.triggerGameOver(); return; }
+
     const dt        = delta / 1000;
     const spd       = this.state.speed;
     const bowFactor = this.state.isBowing ? 0.4 : 1;
@@ -983,6 +1067,20 @@ class GameScene extends Phaser.Scene {
     this.tl3.tilePositionX += BASE_SPEED * 0.3 * effSpd * dt;
     this.tl2.tilePositionX += BASE_SPEED * 1.0 * effSpd * dt;
     this.tl1.tilePositionX += BASE_SPEED * 1.0 * effSpd * dt;
+
+    // ── Граффити ──────────────────────────────────────────────────────────────
+    this._graffitiNext -= delta;
+    if (this._graffitiNext <= 0) {
+      this._spawnGraffiti();
+      this._graffitiNext = Phaser.Math.Between(3000, 8000);
+    }
+    for (let i = this.graffiti.length - 1; i >= 0; i--) {
+      this.graffiti[i].x -= BASE_SPEED * 1.0 * effSpd * dt;
+      if (this.graffiti[i].x < -80) {
+        this.graffiti[i].destroy();
+        this.graffiti.splice(i, 1);
+      }
+    }
 
     // Синусоидная граница воды
     // Две наложенных волны с разными частотами → органичный, не механический рисунок
@@ -1065,6 +1163,20 @@ class GameScene extends Phaser.Scene {
       this.barGfx.lineStyle(1, 0x444444, 0.7);
       this.barGfx.strokeRect(x, hy, w, h);
       this.barGfx.strokeRect(x, my, w, h);
+      // долг: мигающий красный текст справа от пустой полоски
+      if (this.state.money < 0) {
+        const debt = Math.abs(Math.round(this.state.money));
+        if (!this._debtTxt) {
+          this._debtTxt = this.add.text(x + w + 3, my + h / 2, '', {
+            fontSize: '8px', fontFamily: 'Arial, sans-serif', fontStyle: 'bold',
+            color: '#ff3333', stroke: '#000000', strokeThickness: 1,
+          }).setOrigin(0, 0.5).setDepth(41).setResolution(4);
+        }
+        this._debtTxt.setText('-' + debt.toLocaleString('ru') + '₽');
+        this._debtTxt.setAlpha(0.6 + 0.4 * Math.abs(Math.sin(this.time.now * 0.004)));
+      } else if (this._debtTxt) {
+        this._debtTxt.setText('');
+      }
     }
 
     // Прожектор: обновляем позицию источника (следует за качанием корабля)
@@ -1170,7 +1282,7 @@ class GameScene extends Phaser.Scene {
               bn.txt.setVisible(false).setScale(1);
             },
           });
-          this.state.money = Math.min(200, this.state.money + bn.denomination);
+          this.state.money += bn.denomination;
           const t = this.add.text(hx, hy - 10, '+' + bn.denomination, {
             fontSize: '12px', fontFamily: 'Arial, sans-serif', fontStyle: 'bold',
             color: '#ffdd00', stroke: '#000000', strokeThickness: 3,
@@ -1215,7 +1327,7 @@ class GameScene extends Phaser.Scene {
           bn.gfx.setAngle(0).setVisible(false);
           bn.txt.setAngle(0).setVisible(false);
           // Купюра уплыла — начислить зарплату
-          this.state.money = Math.min(200, this.state.money + 5);
+          this.state.money += 5;
           continue;
         }
         // Покачивается на волнах — та же формула, что и waveGfx

@@ -1001,9 +1001,10 @@ class GameScene extends Phaser.Scene {
       });
     }
     if (this.state.isCrying && Math.random() < 12 * dt) {
+      // Глаз в локальных coords llamaHead: fillRect(1,-5,3,3) → центр (2,-4)
       this.particles.push({
-        x: this.LX + 23, y: this.GY - 54,
-        vx: Phaser.Math.FloatBetween(-4, 4), vy: 10,
+        x: this.llamaHead.x + 2, y: this.llamaHead.y - 4,
+        vx: Phaser.Math.FloatBetween(-2, 2), vy: 10,
         life: 1.0, col: 0x3366ff,
       });
     }

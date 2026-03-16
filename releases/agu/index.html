@@ -139,6 +139,8 @@ class GameScene extends Phaser.Scene {
   preload() {
     this.load.image('snake_sprite', 'snake_sprite.png');
     for (let i = 1; i <= 5; i++) this.load.image(`money${i}`, `money${i}.png`);
+    ['building1','building1big','building2','building3','building4','building5','building6','building7','building8']
+      .forEach(k => this.load.image(k, `${k}.png`));
   }
 
   create() {
@@ -396,10 +398,14 @@ class GameScene extends Phaser.Scene {
     this.tl3 = this.add.tileSprite(0, H - h3, W, h3, 'layer3').setOrigin(0, 0);
 
     // дорога: y = H - h1 - h2 (прямо над рекой)
-    this.tl2 = this.add.tileSprite(0, H - h1 - h2, W, h2, 'layer2').setOrigin(0, 0);
+    this.tl2 = this.add.tileSprite(0, H - h1 - h2, W, h2, 'layer2').setOrigin(0, 0).setDepth(1);
 
     // река: depth 15 > корабль (8) — при покачивании подводная часть уходит под воду
     this.tl1 = this.add.tileSprite(0, H - h1, W, h1, 'layer1').setOrigin(0, 0).setDepth(15);
+
+    // ── Слой ближних зданий (между фоном и дорогой, 0.6x) ────────────────────
+    this.fgBuildings      = [];
+    this.fgBuildingTimer  = Phaser.Math.Between(100, 2000);
 
     // Синусоидная граница воды — рисуется каждый кадр поверх всего, depth 16
     // Заменяет прямую линию между дорогой и рекой живой волной
@@ -1072,6 +1078,19 @@ class GameScene extends Phaser.Scene {
     });
   }
 
+  _spawnFgBuilding() {
+    const W = this.scale.width;
+    const scale = Phaser.Math.Between(60, 80) / 100;
+
+    const keys = ['building1','building2','building3','building4','building5','building6','building7','building8'];
+    const sprite = this.add.image(W + 60, this.UPPER_ROAD_LINE + 10, Phaser.Math.RND.pick(keys))
+      .setOrigin(0.5, 1)
+      .setDepth(0.1)
+      .setPipeline('Light2D')
+      .setScale(scale, scale);
+    this.fgBuildings.push(sprite);
+  }
+
   _spawnGraffiti() {
     const WORDS   = ['ЗАЧЕМ?', 'АХМАТОВА СИЛА', 'В КРАСИВОМ ПАЛЬТО', '***', '*****', 'ПЕРЕМЕН!', 'ХОЧУ ОТГУЛ'];
     const COLORS  = ['#e03030', '#000000', '#7a7a7a', '#2060d0', '#c020c0', '#20b0b0'];
@@ -1080,7 +1099,7 @@ class GameScene extends Phaser.Scene {
     const size    = Phaser.Math.Between(6, 9);
     const wallY   = this.UPPER_ROAD_LINE;
     const y       = Phaser.Math.Between(wallY, wallY + 3);
-    const angle   = Phaser.Math.Between(-6, 9);
+    const angle   = Phaser.Math.Between(-6, 6);
     const txt = this.add.text(
       this.scale.width + 30, y, word,
       {
@@ -1329,6 +1348,21 @@ class GameScene extends Phaser.Scene {
     this.tl3.tilePositionX += BASE_SPEED * 0.3 * effSpd * dt;
     this.tl2.tilePositionX += BASE_SPEED * 1.0 * effSpd * dt;
     this.tl1.tilePositionX += BASE_SPEED * 1.0 * effSpd * dt;
+
+    // ── Ближние здания (foreground, 0.6x) ────────────────────────────────────
+    this.fgBuildingTimer -= delta;
+    if (this.fgBuildingTimer <= 0) {
+      this.fgBuildingTimer = Phaser.Math.Between(4000, 12000);
+      this._spawnFgBuilding();
+    }
+    for (let i = this.fgBuildings.length - 1; i >= 0; i--) {
+      const b = this.fgBuildings[i];
+      b.x -= BASE_SPEED * 0.6 * effSpd * dt;
+      if (b.x < -100) {
+        b.destroy();
+        this.fgBuildings.splice(i, 1);
+      }
+    }
 
     // ── Граффити ──────────────────────────────────────────────────────────────
     this._graffitiNext -= delta;

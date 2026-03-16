@@ -410,47 +410,57 @@ class GameScene extends Phaser.Scene {
     const WOOL2 = 0xd8c9a8;  // чуть темнее — ноги, уши
     const HOOF  = 0x3e2c1a;  // копыта
 
-    // Статичные части: тело, шея, голова, ухо, морда, глаз, соска
-    this.llamaBody = this.add.graphics().setDepth(10);
+    // Тело + шея — вращается при прогибе вокруг заднего нижнего угла
+    // pivot: (LX-20, GY-14); все координаты относительны этой точки
+    const PBX = LX - 20, PBY = GY - 14;
+    this.llamaBodyPivot = { x: PBX, y: PBY };
+    this.llamaBody = this.add.graphics().setDepth(10).setPosition(PBX, PBY);
     const lb = this.llamaBody;
 
     lb.fillStyle(WOOL, 1);
-    lb.fillRect(LX - 20, GY - 30, 40, 16);   // тело
-    lb.fillRect(LX + 13, GY - 47, 8,  17);   // шея
-    lb.fillRect(LX + 11, GY - 58, 20, 13);   // голова
+    lb.fillRect( 0, -16, 40, 16);   // тело
+    // шея рисуется динамически в update() через neckGfx
 
-    lb.fillStyle(WOOL2, 1);
-    lb.fillRect(LX + 13, GY - 67,  5, 10);   // ухо
+    // Шея — динамически перерисовывается каждый кадр, depth 10 (между телом и головой)
+    this.neckGfx = this.add.graphics().setDepth(10);
 
-    lb.fillStyle(WOOL, 1);
-    lb.fillRect(LX + 29, GY - 54, 11,  7);   // морда
+    // Голова (и всё выше шеи) — перемещается независимо при прогибе
+    // pivot: центр головы (LX+21, GY-51); все координаты относительны
+    const PHX = LX + 21, PHY = GY - 51;
+    this.llamaHeadBase = { x: PHX, y: PHY };
+    this.llamaHead = this.add.graphics().setDepth(11).setPosition(PHX, PHY);
+    const lh = this.llamaHead;
 
-    lb.fillStyle(0x0e0808, 1);
-    lb.fillRect(LX + 22, GY - 56,  3,  3);   // глаз — смотрит вдаль
+    lh.fillStyle(WOOL, 1);
+    lh.fillRect(-10, -7, 20, 13);   // голова
+    lh.fillStyle(WOOL2, 1);
+    lh.fillRect( -8,-16,  5, 10);   // ухо
+    lh.fillStyle(WOOL, 1);
+    lh.fillRect(  8, -3, 11,  7);   // морда
+    lh.fillStyle(0x0e0808, 1);
+    lh.fillRect(  1, -5,  3,  3);   // глаз
+    lh.fillStyle(0xee2850, 1);
+    lh.fillCircle(20, 1, 3);        // соска
 
-    lb.fillStyle(0xee2850, 1);                // соска
-    lb.fillCircle(LX + 41, GY - 50, 3);
-
-    // ── Упряжь (лямки) — поверх тела ламы, depth 12 ─────────────────────────
-    // Лямка на груди + плечевой ремень + пряжка в точке крепления верёвки
-    const hp = this.harnessGfx = this.add.graphics().setDepth(12);
-    const HC = 0x52301a;   // тёмная кожа
-    const HB = 0x8a5828;   // бронзовая пряжка
+    // Упряжь — depth 12, тот же pivot что у тела, вращается вместе
+    const HC = 0x52301a, HB = 0x8a5828;
+    const hp = this.harnessGfx = this.add.graphics().setDepth(12).setPosition(PBX, PBY);
 
     hp.fillStyle(HC, 1);
-    hp.fillRect(LX - 20, GY - 25, 33, 3);   // поперечная нагрудная лямка
-    hp.fillRect(LX - 19, GY - 30, 3, 18);   // вертикальная лямка (левый бок)
-
+    hp.fillRect( 0, -11, 33, 3);           // нагрудная лямка
+    hp.fillRect( 1, -16,  3, 18);          // вертикальная лямка
     hp.lineStyle(2, HC, 1);
-    hp.lineBetween(LX + 13, GY - 36, LX - 18, GY - 24);  // плечевой ремень (шея→пряжка)
-
-    // Пряжка — точка крепления верёвки
+    hp.lineBetween(33, -22, 2, -10);       // плечевой ремень
     hp.fillStyle(HC, 1);
-    hp.fillCircle(LX - 18, GY - 24, 5);
+    hp.fillCircle(2, -10, 5);              // основание пряжки
     hp.fillStyle(HB, 1);
-    hp.fillCircle(LX - 18, GY - 24, 3);
+    hp.fillCircle(2, -10, 3);             // пряжка
     hp.fillStyle(0x0c0808, 1);
-    hp.fillCircle(LX - 18, GY - 24, 1);   // отверстие пряжки
+    hp.fillCircle(2, -10, 1);             // отверстие пряжки
+
+    // Ссылки для tween прогиба
+    this._bowTweenBody = null;
+    this._bowTweenHead = null;
 
     // Четыре ноги — отдельные Graphics-объекты, анимированы через tweens
     const LEG_H = 14, LEG_W = 5;
@@ -695,7 +705,7 @@ class GameScene extends Phaser.Scene {
         fontSize: '6px', fontFamily: 'monospace', color: '#ffffff',
       }).setDepth(21).setOrigin(0.5, 0.5).setVisible(false);
 
-      this.banknotes.push({ gfx, txt, x: 0, y: 0, vx: 0, vy: 0, grav: 0, floatPhase: 0, state: 'idle' });
+      this.banknotes.push({ gfx, txt, x: 0, y: 0, vx: 0, vy: 0, grav: 0, floatPhase: 0, state: 'idle', denomination: 5000 });
     }
 
     // ── Частицы (пот, слёзы) ─────────────────────────────────────────────────
@@ -708,7 +718,7 @@ class GameScene extends Phaser.Scene {
     // Все видимые объекты → Light2D pipeline
     [
       this.tl4, this.tl3, this.tl2, this.tl1,
-      this.boatGfx, this.llamaBody, this.harnessGfx,
+      this.boatGfx, this.llamaBody, this.neckGfx, this.llamaHead, this.harnessGfx,
       this.legBL, this.legBR, this.legFL, this.legFR,
       this.ropeGfx, this.waveGfx, this.lampBodyGfx, this.snakeImg,
       this.particleGfx,
@@ -763,12 +773,50 @@ class GameScene extends Phaser.Scene {
       zone.on('pointerout',  () => { draw(false); onUp();   });
     };
 
-    mkBtn(0, () => { this.state.isBowing    = true;  }, () => { this.state.isBowing    = false; });
+    mkBtn(0, () => { this.state.isBowing = true;  this.startBow(); },
+             () => { this.state.isBowing = false; this.endBow();   });
     mkBtn(1, () => { this.state.isSprinting = true;  }, () => { this.state.isSprinting = false; });
     mkBtn(2, () => { this.requestDayOff();            }, () => {});
     mkBtn(3, () => { this.startCrying();              }, () => {});
     mkBtn(4, () => { this.showBusy();                 }, () => {});
     mkBtn(5, () => { this.showBusy();                 }, () => {});
+  }
+
+  startBow() {
+    // Остановить текущие tween прогиба (чтобы не было прыжка)
+    if (this._bowTweenBody) { this._bowTweenBody.stop(); this._bowTweenBody = null; }
+    if (this._bowTweenHead) { this._bowTweenHead.stop(); this._bowTweenHead = null; }
+
+    this._bowTweenBody = this.tweens.add({
+      targets: [this.llamaBody, this.harnessGfx],
+      angle: 35, duration: 300, ease: 'Cubic.Out',
+      onComplete: () => { this._bowTweenBody = null; },
+    });
+    this._bowTweenHead = this.tweens.add({
+      targets: this.llamaHead,
+      x: this.llamaHeadBase.x + 30,
+      y: this.llamaHeadBase.y + 70,
+      duration: 300, ease: 'Cubic.Out',
+      onComplete: () => { this._bowTweenHead = null; },
+    });
+  }
+
+  endBow() {
+    if (this._bowTweenBody) { this._bowTweenBody.stop(); this._bowTweenBody = null; }
+    if (this._bowTweenHead) { this._bowTweenHead.stop(); this._bowTweenHead = null; }
+
+    this._bowTweenBody = this.tweens.add({
+      targets: [this.llamaBody, this.harnessGfx],
+      angle: 0, duration: 250, ease: 'Cubic.In',
+      onComplete: () => { this._bowTweenBody = null; },
+    });
+    this._bowTweenHead = this.tweens.add({
+      targets: this.llamaHead,
+      x: this.llamaHeadBase.x,
+      y: this.llamaHeadBase.y,
+      duration: 250, ease: 'Cubic.In',
+      onComplete: () => { this._bowTweenHead = null; },
+    });
   }
 
   requestDayOff() {
@@ -835,9 +883,10 @@ class GameScene extends Phaser.Scene {
   }
 
   update(_time, delta) {
-    const dt     = delta / 1000;
-    const spd    = this.state.speed;
-    const effSpd = this.state.isSprinting ? spd * 2 : spd;
+    const dt        = delta / 1000;
+    const spd       = this.state.speed;
+    const bowFactor = this.state.isBowing ? 0.4 : 1;
+    const effSpd    = (this.state.isSprinting ? spd * 2 : spd) * bowFactor;
 
     // Спринт: дополнительный расход здоровья
     if (this.state.isSprinting) {
@@ -968,9 +1017,10 @@ class GameScene extends Phaser.Scene {
       this.particleGfx.fillRect(Math.round(p.x), Math.round(p.y), 2, 3);
     }
 
-    // Скорость анимации ног = эффективная скорость
-    this.walkTween1.timeScale = effSpd;
-    this.walkTween2.timeScale = effSpd;
+    // Ноги: во время прогиба замедляются (лама упирается), но не останавливаются
+    const walkScale = this.state.isBowing ? effSpd * 0.25 : effSpd;
+    this.walkTween1.timeScale = walkScale;
+    this.walkTween2.timeScale = walkScale;
 
     // Корабль и пушка покачиваются вместе
     this.boatGfx.x  = this.boatBob.x;
@@ -983,6 +1033,67 @@ class GameScene extends Phaser.Scene {
     // Кнехт двигается вместе с корпусом — обновляем точку крепления верёвки
     this.ropeBoat.x = this.knechtBase.x + this.boatBob.x;
     this.ropeBoat.y = this.knechtBase.y + this.boatBob.y;
+
+    // Пряжка упряжи + шея следуют повороту тела
+    {
+      const r = this.llamaBody.rotation;
+      const cos = Math.cos(r), sin = Math.sin(r);
+      const rot = (lx, ly) => ({
+        x: this.llamaBodyPivot.x + lx * cos - ly * sin,
+        y: this.llamaBodyPivot.y + lx * sin + ly * cos,
+      });
+
+      // Пряжка в локальных coords тела: (2, -10)
+      const buckle = rot(2, -10);
+      this.ropeNeck.x = buckle.x;
+      this.ropeNeck.y = buckle.y;
+
+      // Шея: от верхнего края тела (37, -16) до основания головы
+      // llamaHead.y + 4 ≈ нижний край головы (head rect нарисован от y=-7)
+      const base = rot(37, -16);           // точка на теле (основание шеи)
+      const tip  = { x: this.llamaHead.x - 4, y: this.llamaHead.y + 4 }; // точка на голове
+
+      const dx = tip.x - base.x, dy = tip.y - base.y;
+      const len = Math.sqrt(dx * dx + dy * dy) || 1;
+      const px = -dy / len * 4, py = dx / len * 4; // перпендикуляр (полуширина шеи 4px)
+
+      this.neckGfx.clear();
+      this.neckGfx.fillStyle(0xf0e8d0, 1);
+      this.neckGfx.fillPoints([
+        { x: base.x - px, y: base.y - py },
+        { x: base.x + px, y: base.y + py },
+        { x: tip.x  + px, y: tip.y  + py },
+        { x: tip.x  - px, y: tip.y  - py },
+      ], true);
+    }
+
+    // ── Сбор купюр головой при прогибе ───────────────────────────────────────
+    if (this.state.isBowing) {
+      const hx = this.llamaHead.x, hy = this.llamaHead.y;
+      for (const bn of this.banknotes) {
+        if (bn.state !== 'floating') continue;
+        const dx = bn.x - hx, dy = bn.y - hy;
+        if (dx * dx + dy * dy < 12 * 12) {
+          bn.state = 'idle';
+          this.tweens.add({
+            targets: [bn.gfx, bn.txt], scaleX: 0, scaleY: 0, duration: 150,
+            onComplete: () => {
+              bn.gfx.setVisible(false).setScale(1);
+              bn.txt.setVisible(false).setScale(1);
+            },
+          });
+          this.state.money = Math.min(200, this.state.money + bn.denomination);
+          const t = this.add.text(hx, hy - 10, '+' + bn.denomination, {
+            fontSize: '12px', fontFamily: 'Arial, sans-serif', fontStyle: 'bold',
+            color: '#ffdd00', stroke: '#000000', strokeThickness: 3,
+          }).setOrigin(0.5, 1).setDepth(50).setResolution(4);
+          this.tweens.add({
+            targets: t, y: t.y - 30, alpha: 0, duration: 800,
+            ease: 'Sine.Out', onComplete: () => t.destroy(),
+          });
+        }
+      }
+    }
 
     // ── Купюры ────────────────────────────────────────────────────────────────
     this.bnTimer += delta;

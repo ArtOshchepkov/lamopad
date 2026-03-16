@@ -765,6 +765,7 @@ class GameScene extends Phaser.Scene {
     this.particles   = [];
     this.particleGfx = this.add.graphics().setDepth(14);
     this.caneGfx     = this.add.graphics().setDepth(9);
+    this.eyeGfx      = this.add.graphics().setDepth(11.5); // поверх llamaHead (11)
     this._prevAge    = -1;
 
     // ── Кнопки управления ─────────────────────────────────────────────────────
@@ -776,7 +777,7 @@ class GameScene extends Phaser.Scene {
       this.boatGfx, this.llamaBody, this.neckGfx, this.llamaHead, this.harnessGfx,
       this.legBL, this.legBR, this.legFL, this.legFR,
       this.ropeGfx, this.waveGfx, this.lampBodyGfx, this.snakeImg,
-      this.particleGfx, this.caneGfx,
+      this.particleGfx, this.caneGfx, this.eyeGfx,
       ...this.banknotes.map(b => b.sprite),
     ].forEach(obj => obj.setPipeline('Light2D'));
   }
@@ -1158,7 +1159,7 @@ class GameScene extends Phaser.Scene {
   startCrying() {
     if (this.state.isCrying) return;
     this.state.isCrying = true;
-    this.time.delayedCall(2000, () => { this.state.isCrying = false; });
+    this.time.delayedCall(4000, () => { this.state.isCrying = false; });
   }
 
   showBusy() {
@@ -1332,6 +1333,36 @@ class GameScene extends Phaser.Scene {
       const tilt = AGE_TILT[age];
       this.llamaBody.angle  = tilt;
       this.harnessGfx.angle = tilt;
+    }
+
+    // ── Цвет глаза ламы зависит от здоровья ──────────────────────────────────
+    if (age < 5) {
+      const h = this.state.health;
+      let eyeColor;
+      if (h >= 80) {
+        eyeColor = 0x0e0808;
+      } else if (h >= 40) {
+        const t = (80 - h) / 40;                       // 0→1 по мере падения 80→40
+        eyeColor = Phaser.Display.Color.Interpolate.ColorWithColor(
+          Phaser.Display.Color.ValueToColor(0x0e0808),
+          Phaser.Display.Color.ValueToColor(0xcc1010),
+          100, Math.round(t * 100),
+        );
+        eyeColor = Phaser.Display.Color.GetColor(eyeColor.r, eyeColor.g, eyeColor.b);
+      } else {
+        const t = (40 - h) / 40;                       // 0→1 по мере падения 40→0
+        eyeColor = Phaser.Display.Color.Interpolate.ColorWithColor(
+          Phaser.Display.Color.ValueToColor(0xcc1010),
+          Phaser.Display.Color.ValueToColor(0x9090a0),
+          100, Math.round(t * 100),
+        );
+        eyeColor = Phaser.Display.Color.GetColor(eyeColor.r, eyeColor.g, eyeColor.b);
+      }
+      this.eyeGfx.clear();
+      this.eyeGfx.fillStyle(eyeColor, 1);
+      this.eyeGfx.fillRect(this.llamaHead.x + 1, this.llamaHead.y - 5, 3, 3);
+    } else {
+      this.eyeGfx.clear();
     }
 
     const spd       = this.state.speed;

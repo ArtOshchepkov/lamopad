@@ -842,8 +842,28 @@ class GameScene extends Phaser.Scene {
                                   font-family:Arial,sans-serif">
         НАЖМИ ЧТОБЫ НАЧАТЬ
       </div>
+      <div id="_agu_rotate" style="
+        position:absolute;bottom:3vmin;left:0;right:0;
+        font-size:1.8vmin;color:#888;font-weight:normal;
+        font-family:Arial,sans-serif;display:none;
+        pointer-events:none;
+      ">
+        <span style="display:inline-block;animation:_spin 2s linear infinite">&#x21BB;</span>
+        &nbsp;лучше повернуть устройство горизонтально
+      </div>
     `;
+    document.head.insertAdjacentHTML('beforeend',
+      '<style>@keyframes _spin{from{transform:rotate(0deg)}to{transform:rotate(360deg)}}</style>'
+    );
     document.body.appendChild(overlay);
+
+    // Подсказка о повороте
+    const rotateEl = overlay.querySelector('#_agu_rotate');
+    const checkOrientation = () => {
+      rotateEl.style.display = window.innerHeight > window.innerWidth ? 'block' : 'none';
+    };
+    checkOrientation();
+    window.addEventListener('resize', checkOrientation);
 
     // Мигание подсказки
     const hintEl = overlay.querySelector('#_agu_hint');
@@ -856,6 +876,7 @@ class GameScene extends Phaser.Scene {
     overlay.addEventListener('pointerdown', () => {
       this.gameStarted = true;
       clearInterval(blinkId);
+      window.removeEventListener('resize', checkOrientation);
       document.body.removeChild(overlay);
     });
   }

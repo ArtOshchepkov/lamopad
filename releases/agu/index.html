@@ -462,11 +462,12 @@ class GameScene extends Phaser.Scene {
     lh.fillStyle(0x0e0808, 1);
     lh.fillRect(  1, -5,  3,  3);   // глаз
 
-    // Соска — спрайт, позиция обновляется каждый кадр в update()
+    // Соска — спрайт за головой (depth 10, т.е. под головой depth 11)
+    // Позиция обновляется каждый кадр в update()
     this.soskaImg = this.add.image(PHX + 20, PHY + 1, 'soska')
       .setOrigin(0.5, 0.5)
       .setDisplaySize(8, 8)
-      .setDepth(11.5);
+      .setDepth(10);
 
     // Упряжь — depth 12, тот же pivot что у тела, вращается вместе
     const HC = 0x52301a, HB = 0x8a5828;
@@ -1372,7 +1373,7 @@ class GameScene extends Phaser.Scene {
     }
 
     // Соска следует за головой
-    this.soskaImg.x = this.llamaHead.x + 20;
+    this.soskaImg.x = this.llamaHead.x + 19;
     this.soskaImg.y = this.llamaHead.y + 1;
 
     const spd       = this.state.speed;

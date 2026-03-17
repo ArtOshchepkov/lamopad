@@ -25,6 +25,7 @@
 
 const BASE_SPEED = 100; // px/sec
 const EXPECTED_GAME_TIME = 100; // секунд — среднее время игры до смерти
+const LAMP_COUNT = 6;  // количество уличных фонарей (+ столько же отражений на воде)
 
 const AGE_TILT  = [0, 5, 5, 8, 10, 12];   // degrees of resting body tilt per stage
 const AGE_SPEED = [1.0, 0.85, 0.70, 0.55, 0.35, 0.15];
@@ -741,7 +742,7 @@ class GameScene extends Phaser.Scene {
     scheduleRandom();
 
     // ── Физическое освещение (Phaser Light2D) ────────────────────────────────
-    this.lights.enable().setAmbientColor(0x0d1828);
+    this.lights.enable().setAmbientColor(0x1a2e40);
 
     // Точечный свет глаза змеи — янтарное тление, двигается с корпусом
     this.eyeLight = this.lights.addLight(
@@ -750,18 +751,18 @@ class GameScene extends Phaser.Scene {
 
     // Прожектор корабля: холодный ксенон, большой радиус
     this.spotLight = this.lights.addLight(
-      this.beamOBase.x, this.beamOBase.y, 460, 0xb0ccf8, 3.2,
+      this.beamOBase.x, this.beamOBase.y, 460, 0xb0ccf8, 0.5,
     );
 
-    // Уличные фонари: тёплый янтарь, 5 источников (позиции пересчитываются каждый кадр)
+    // Уличные фонари: тёплый янтарь, N источников (позиции пересчитываются каждый кадр)
     this.lampLights = [];
-    for (let i = 0; i < 5; i++) {
-      this.lampLights.push(this.lights.addLight(i * 336, UPPER_ROAD_LINE, 105, 0xffcc60, 2.2));
+    for (let i = 0; i < LAMP_COUNT; i++) {
+      this.lampLights.push(this.lights.addLight(i * 336, UPPER_ROAD_LINE, 125, 0xffcc60, 2.5));
     }
 
     // Отражения фонарей на воде — те же x, у ватерлинии, тусклее
     this.waterLampLights = [];
-    for (let i = 0; i < 5; i++) {
+    for (let i = 0; i < LAMP_COUNT; i++) {
       this.waterLampLights.push(this.lights.addLight(i * 336, H - h1, 55, 0xffaa30, 0.7));
     }
 

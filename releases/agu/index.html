@@ -759,6 +759,12 @@ class GameScene extends Phaser.Scene {
       this.lampLights.push(this.lights.addLight(i * 336, UPPER_ROAD_LINE, 105, 0xffcc60, 2.2));
     }
 
+    // Отражения фонарей на воде — те же x, у ватерлинии, тусклее
+    this.waterLampLights = [];
+    for (let i = 0; i < 5; i++) {
+      this.waterLampLights.push(this.lights.addLight(i * 336, H - h1, 55, 0xffaa30, 0.7));
+    }
+
     // ── Пул купюр (макс. 8) ──────────────────────────────────────────────────
     this.banknotes    = [];
     this.banknoteIdx  = 0;          // round-robin: следующий слот
@@ -1631,6 +1637,9 @@ class GameScene extends Phaser.Scene {
       for (let i = 0; i < this.lampLights.length; i++) {
         this.lampLights[i].x = startX - TILE_W + i * TILE_W;
         this.lampLights[i].y = headY;
+        // Отражение на воде — тот же x, у ватерлинии
+        this.waterLampLights[i].x = startX - TILE_W + i * TILE_W;
+        this.waterLampLights[i].y = this.waterY;
       }
     }
 

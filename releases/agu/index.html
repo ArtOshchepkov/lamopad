@@ -410,15 +410,16 @@ class GameScene extends Phaser.Scene {
 
     // Мигание окон в зданиях
     this.blinkGfx = this.add.graphics().setDepth(0.05);
+    const UPPER_BLINK_INTERVAL = 90_000;
     this.blinkWindows = [
-      { tx: 26,  ty: 36, w: 16, h: 8, on: false, timer: Phaser.Math.Between(500, 3000) },
-      { tx: 64,  ty: 47, w: 16, h: 8, on: false, timer: Phaser.Math.Between(500, 3000) },
-      { tx: 45,  ty: 69, w: 16, h: 8, on: false, timer: Phaser.Math.Between(500, 3000) },
-      { tx: 132, ty: 16, w: 14, h: 7, on: false, timer: Phaser.Math.Between(500, 3000) },
-      { tx: 166, ty: 36, w: 14, h: 7, on: false, timer: Phaser.Math.Between(500, 3000) },
-      { tx: 98,  ty: 66, w: 14, h: 7, on: false, timer: Phaser.Math.Between(500, 3000) },
-      { tx: 255, ty: 37, w: 15, h: 8, on: false, timer: Phaser.Math.Between(500, 3000) },
-      { tx: 291, ty: 59, w: 15, h: 8, on: false, timer: Phaser.Math.Between(500, 3000) },
+      { tx: 26,  ty: 36, w: 16, h: 8, on: false, timer: Phaser.Math.Between(5000, UPPER_BLINK_INTERVAL) },
+      { tx: 64,  ty: 47, w: 16, h: 8, on: false, timer: Phaser.Math.Between(1000, UPPER_BLINK_INTERVAL) },
+      { tx: 45,  ty: 69, w: 16, h: 8, on: false, timer: Phaser.Math.Between(10000, UPPER_BLINK_INTERVAL) },
+      { tx: 132, ty: 16, w: 14, h: 7, on: false, timer: Phaser.Math.Between(10000, UPPER_BLINK_INTERVAL) },
+      { tx: 166, ty: 36, w: 14, h: 7, on: false, timer: Phaser.Math.Between(10000, UPPER_BLINK_INTERVAL) },
+      { tx: 98,  ty: 66, w: 14, h: 7, on: false, timer: Phaser.Math.Between(10000, UPPER_BLINK_INTERVAL) },
+      { tx: 255, ty: 37, w: 15, h: 8, on: false, timer: Phaser.Math.Between(10000, UPPER_BLINK_INTERVAL) },
+      { tx: 291, ty: 59, w: 15, h: 8, on: false, timer: Phaser.Math.Between(10000, UPPER_BLINK_INTERVAL) },
     ];
 
     // дорога: y = H - h1 - h2 (прямо над рекой)
@@ -1705,7 +1706,7 @@ class GameScene extends Phaser.Scene {
         bw.timer -= delta;
         if (bw.timer <= 0) {
           bw.on    = !bw.on;
-          bw.timer = bw.on ? Phaser.Math.Between(800, 5000) : Phaser.Math.Between(200, 2000);
+          bw.timer = bw.on ? Phaser.Math.Between(800, 5000) : Phaser.Math.Between(1000, 10000);
         }
         if (!bw.on) continue;
         for (let rep = 0; rep <= 2; rep++) {

@@ -24,6 +24,7 @@
 'use strict';
 
 const BASE_SPEED = 100; // px/sec
+const EXPECTED_GAME_TIME = 100; // секунд — среднее время игры до смерти
 
 const AGE_TILT  = [0, 5, 5, 8, 10, 12];   // degrees of resting body tilt per stage
 const AGE_SPEED = [1.0, 0.85, 0.70, 0.55, 0.35, 0.15];
@@ -394,7 +395,14 @@ class GameScene extends Phaser.Scene {
     // ── TileSprites (порядок = z-порядок: позже = выше) ──────────────────────
     // Стек снизу вверх экрана:  река [h1=33px] | дорога [h2=60px] | панельки | небо
     // Z-порядок (спереди): layer1 > layer2 > layer3 > layer4
-    this.tl4 = this.add.tileSprite(0, 0, W, H, 'layer4').setOrigin(0, 0);
+    this.tl4 = this.add.tileSprite(0, 0, W, H, 'layer4').setOrigin(0, 0).setDepth(-2);
+
+    // ── Ламопад — крошечные падающие ламки на фоне неба ──────────────────────
+    this.llamaRainGfx   = this.add.graphics().setDepth(-1);
+    this.llamaRainDrops = [];
+    for (let i = 0; i < 2; i++) {
+      this.llamaRainDrops.push(this._spawnLlamaDrop(true));
+    }
 
     this.tl3 = this.add.tileSprite(0, H - h3, W, h3, 'layer3').setOrigin(0, 0);
 
@@ -691,7 +699,7 @@ class GameScene extends Phaser.Scene {
     // Здоровье убывает: -2/сек
     this.time.addEvent({
       delay: 1000, loop: true,
-      callback: () => { this.state.health = Math.max(0, this.state.health - 2); },
+      callback: () => { if (this.gameStarted) this.state.health = Math.max(0, this.state.health - 100 / EXPECTED_GAME_TIME); },
     });
     // age и speed вычисляются каждый кадр из здоровья в update()
 
@@ -789,6 +797,51 @@ class GameScene extends Phaser.Scene {
       this.particleGfx, this.caneGfx, this.eyeGfx, this.soskaImg,
       ...this.banknotes.map(b => b.sprite),
     ].forEach(obj => obj.setPipeline('Light2D'));
+
+    // ── Стартовый экран (HTML-оверлей поверх canvas) ──────────────────────────
+    this.gameStarted = false;
+
+    const overlay = document.createElement('div');
+    overlay.style.cssText = [
+      'position:fixed;inset:0;display:flex;flex-direction:column',
+      'align-items:center;justify-content:center;text-align:center',
+      'background:rgba(0,0,0,0.93);z-index:9999;cursor:pointer',
+      'font-family:"Arial Black",Arial,sans-serif;user-select:none',
+    ].join(';');
+
+    overlay.innerHTML = `
+      <div style="font-size:6vmin;color:#ee3333;font-weight:900;
+                  text-shadow:0 0 12px #ff2200,2px 2px 0 #000;letter-spacing:.15em;margin-bottom:3vmin">
+        А Г У
+      </div>
+      <div style="font-size:2.8vmin;color:#fff;font-weight:900;
+                  text-shadow:1px 1px 0 #000;margin-bottom:1vmin">
+        ПРОГИБАЙСЯ,
+      </div>
+      <div style="font-size:2.4vmin;color:#ffdd44;font-weight:900;
+                  text-shadow:1px 1px 0 #000;margin-bottom:5vmin">
+        ЧТОБЫ СОБИРАТЬ ДЕНЬГИ
+      </div>
+      <div id="_agu_hint" style="font-size:1.6vmin;color:#666;font-weight:normal;
+                                  font-family:Arial,sans-serif">
+        НАЖМИ ЧТОБЫ НАЧАТЬ
+      </div>
+    `;
+    document.body.appendChild(overlay);
+
+    // Мигание подсказки
+    const hintEl = overlay.querySelector('#_agu_hint');
+    let blinkOn = true;
+    const blinkId = setInterval(() => {
+      blinkOn = !blinkOn;
+      hintEl.style.opacity = blinkOn ? '1' : '0.15';
+    }, 600);
+
+    overlay.addEventListener('pointerdown', () => {
+      this.gameStarted = true;
+      clearInterval(blinkId);
+      document.body.removeChild(overlay);
+    });
   }
 
   createButtons() {
@@ -1095,6 +1148,32 @@ class GameScene extends Phaser.Scene {
     });
   }
 
+  _spawnLlamaDrop(spread = false) {
+    const W = this.scale.width, H = this.scale.height;
+    return {
+      x:     Phaser.Math.Between(0, W),
+      y:     spread ? Phaser.Math.Between(-10, H * 0.80) : Phaser.Math.Between(-30, -4),
+      vx:    Phaser.Math.FloatBetween(-6, 6),
+      vy:    Phaser.Math.Between(20, 55),
+      u:     Phaser.Math.RND.pick([1, 1, 1, 2]),   // в основном 1px, редко 2px
+      alpha: Phaser.Math.FloatBetween(0.10, 0.35),
+      col:   Phaser.Math.RND.pick([0xf0e8d0, 0xf0e8d0, 0xd8c9a8, 0xe8d0b8]),
+    };
+  }
+
+  // Крошечная ламка: тело 6u×2u, шея 2u×2u, голова 3u×2u, 4 ножки 1u×2u, хвостик
+  _drawTinyLlama(g, x, y, u, col, alpha) {
+    g.fillStyle(col, alpha);
+    g.fillRect(x,         y,        6*u, 2*u);   // тело
+    g.fillRect(x + 4*u,   y - 2*u,  2*u, 2*u);   // шея
+    g.fillRect(x + 3*u,   y - 4*u,  3*u, 2*u);   // голова
+    g.fillRect(x - u,     y - u,    u,   2*u);    // хвост
+    g.fillRect(x + u,     y + 2*u,  u,   2*u);    // нога 1
+    g.fillRect(x + 2*u,   y + 2*u,  u,   2*u);    // нога 2
+    g.fillRect(x + 3*u,   y + 2*u,  u,   2*u);    // нога 3
+    g.fillRect(x + 4*u,   y + 2*u,  u,   2*u);    // нога 4
+  }
+
   _spawnFgBuilding() {
     const W = this.scale.width;
     const scale = Phaser.Math.Between(60, 80) / 100;
@@ -1331,6 +1410,7 @@ class GameScene extends Phaser.Scene {
 
   update(_time, delta) {
     if (this.state.isDead) return;
+    if (!this.gameStarted) return;
 
     if (this.state.health <= 0) { this.triggerGameOver(); return; }
 
@@ -1399,6 +1479,19 @@ class GameScene extends Phaser.Scene {
     this.tl3.tilePositionX += BASE_SPEED * 0.3 * effSpd * dt;
     this.tl2.tilePositionX += BASE_SPEED * 1.0 * effSpd * dt;
     this.tl1.tilePositionX += BASE_SPEED * 1.0 * effSpd * dt;
+
+    // ── Ламопад ───────────────────────────────────────────────────────────────
+    this.llamaRainGfx.clear();
+    for (let i = 0; i < this.llamaRainDrops.length; i++) {
+      const d = this.llamaRainDrops[i];
+      d.x += d.vx * dt;
+      d.y += d.vy * dt;
+      if (d.y > this.scale.height + 20) {
+        this.llamaRainDrops[i] = this._spawnLlamaDrop();
+        continue;
+      }
+      this._drawTinyLlama(this.llamaRainGfx, Math.round(d.x), Math.round(d.y), d.u, d.col, d.alpha);
+    }
 
     // ── Ближние здания (foreground, 0.6x) ────────────────────────────────────
     this.fgBuildingTimer -= delta;

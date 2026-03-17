@@ -843,13 +843,14 @@ class GameScene extends Phaser.Scene {
         НАЖМИ ЧТОБЫ НАЧАТЬ
       </div>
       <div id="_agu_rotate" style="
-        position:absolute;bottom:3vmin;left:0;right:0;
-        font-size:1.8vmin;color:#888;font-weight:normal;
-        font-family:Arial,sans-serif;display:none;
-        pointer-events:none;
+        position:absolute;bottom:0;left:0;right:0;padding:3vmin;
+        font-size:3.5vmin;color:#ffcc44;font-weight:900;
+        font-family:'Arial Black',Arial,sans-serif;display:none;
+        text-shadow:0 0 12px #ff8800,1px 1px 0 #000;
+        pointer-events:none;letter-spacing:.03em;
       ">
-        <span style="display:inline-block;animation:_spin 2s linear infinite">&#x21BB;</span>
-        &nbsp;лучше повернуть устройство горизонтально
+        <span style="display:inline-block;font-size:5vmin;animation:_spin 2.5s linear infinite">&#x21BB;</span><br>
+        ПОВЕРНИ УСТРОЙСТВО ГОРИЗОНТАЛЬНО
       </div>
     `;
     document.head.insertAdjacentHTML('beforeend',

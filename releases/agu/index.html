@@ -885,16 +885,12 @@ class GameScene extends Phaser.Scene {
   createButtons() {
     const W = this.scale.width, H = this.scale.height;
     const BW = 160, BH = 26, GAP = 4;
-    const totalH = 6 * BH + 5 * GAP;
+    const totalH = 5 * BH + 4 * GAP;
     const startY = Math.round((H - totalH) / 2);
     const cx = W - Math.round(BW / 2) - 6;
-    const PALETTE = [0x1e3a5c, 0x5c1c1c, 0x1c4c2c, 0x1c2c5c, 0x3c1c5c, 0x3c1c5c];
-    const LABELS  = [
-      'ПРОГНУТЬСЯ', 'ФИГАЧИТЬ', 'ВЗЯТЬ ОТГУЛ',
-      'ПОПЛАКАТЬ', 'ПОВИДАТЬ ДРУЗЕЙ', 'ПОВИДАТЬ СЕМЬЮ',
-    ];
+    const PALETTE = [0x1e3a5c, 0x5c1c1c, 0x1c4c2c, 0x1c2c5c, 0x3c1c5c];
 
-    const mkBtn = (i, onDown, onUp) => {
+    const mkBtn = (i, label, onDown, onUp) => {
       const by  = startY + i * (BH + GAP);
       const col = PALETTE[i];
       const gfx = this.add.graphics().setDepth(30);
@@ -913,8 +909,8 @@ class GameScene extends Phaser.Scene {
 
       draw(false);
 
-      this.add.text(cx, by + BH / 2, LABELS[i], {
-        fontSize: '14px',
+      const txt = this.add.text(cx, by + BH / 2, label, {
+        fontSize: '12px',
         fontFamily: 'Arial, sans-serif',
         color: '#ffffff',
         stroke: '#000000',
@@ -927,15 +923,29 @@ class GameScene extends Phaser.Scene {
       zone.on('pointerdown', () => { draw(true);  onDown(); });
       zone.on('pointerup',   () => { draw(false); onUp();   });
       zone.on('pointerout',  () => { draw(false); onUp();   });
+
+      return txt;
     };
 
-    mkBtn(0, () => { this.state.isBowing = true;  this.startBow(); },
-             () => { this.state.isBowing = false; this.endBow();   });
-    mkBtn(1, () => { this.state.isSprinting = true;  }, () => { this.state.isSprinting = false; });
-    mkBtn(2, () => { this.requestDayOff();            }, () => {});
-    mkBtn(3, () => { this.startCrying();              }, () => {});
-    mkBtn(4, () => { this.hangWithFriends();           }, () => {});
-    mkBtn(5, () => { this.annoyingRelatives();        }, () => {});
+    mkBtn(0, 'ПРОГНУТЬСЯ',  () => { this.state.isBowing = true;  this.startBow(); },
+                             () => { this.state.isBowing = false; this.endBow();   });
+    mkBtn(1, 'ФИГАЧИТЬ',    () => { this.state.isSprinting = true;  }, () => { this.state.isSprinting = false; });
+    mkBtn(2, 'ВЗЯТЬ ОТГУЛ', () => { this.requestDayOff(); }, () => {});
+    mkBtn(3, 'ПОПЛАКАТЬ',   () => { this.startCrying();   }, () => {});
+
+    // Социальная кнопка — надпись меняется после нажатия с вероятностью 70%
+    const SOCIAL = [
+      'ПОВИДАТЬ ДРУЗЕЙ', 'ПОВИДАТЬ СЕМЬЮ',
+      'ПОЗВОНИТЬ БАБУШКЕ', 'УСТРОИТЬ СВИДАНИЕ', 'ВЫЙТИ НА ПРИРОДУ',
+    ];
+    let curSocial = Phaser.Math.RND.pick(SOCIAL);
+    const socialTxt = mkBtn(4, curSocial, () => {
+      this.hangWithFriends();
+      if (Math.random() < 0.70) {
+        curSocial = Phaser.Math.RND.pick(SOCIAL.filter(s => s !== curSocial));
+        socialTxt.setText(curSocial);
+      }
+    }, () => {});
   }
 
   _redrawLlama(age) {

@@ -406,6 +406,20 @@ class GameScene extends Phaser.Scene {
     }
 
     this.tl3 = this.add.tileSprite(0, H - h3, W, h3, 'layer3').setOrigin(0, 0);
+    this.h3 = h3;
+
+    // Мигание окон в зданиях
+    this.blinkGfx = this.add.graphics().setDepth(0.05);
+    this.blinkWindows = [
+      { tx: 26,  ty: 36, w: 16, h: 8, on: false, timer: Phaser.Math.Between(500, 3000) },
+      { tx: 64,  ty: 47, w: 16, h: 8, on: false, timer: Phaser.Math.Between(500, 3000) },
+      { tx: 45,  ty: 69, w: 16, h: 8, on: false, timer: Phaser.Math.Between(500, 3000) },
+      { tx: 132, ty: 16, w: 14, h: 7, on: false, timer: Phaser.Math.Between(500, 3000) },
+      { tx: 166, ty: 36, w: 14, h: 7, on: false, timer: Phaser.Math.Between(500, 3000) },
+      { tx: 98,  ty: 66, w: 14, h: 7, on: false, timer: Phaser.Math.Between(500, 3000) },
+      { tx: 255, ty: 37, w: 15, h: 8, on: false, timer: Phaser.Math.Between(500, 3000) },
+      { tx: 291, ty: 59, w: 15, h: 8, on: false, timer: Phaser.Math.Between(500, 3000) },
+    ];
 
     // дорога: y = H - h1 - h2 (прямо над рекой)
     this.tl2 = this.add.tileSprite(0, H - h1 - h2, W, h2, 'layer2').setOrigin(0, 0).setDepth(1);
@@ -789,11 +803,21 @@ class GameScene extends Phaser.Scene {
     this.particles   = [];
     this.particleGfx = this.add.graphics().setDepth(14);
     this.caneGfx     = this.add.graphics().setDepth(9);
+    this.shadowGfx   = this.add.graphics().setDepth(8.5);
+    this.vaporGfx    = this.add.graphics().setDepth(12);
+    this.vaporParticles = [];
     this.eyeGfx      = this.add.graphics().setDepth(11.5); // поверх llamaHead (11)
     this._prevAge    = -1;
 
     // ── Кнопки управления ─────────────────────────────────────────────────────
     this.createButtons();
+
+    // Дождь
+    this.rainGfx = this.add.graphics().setDepth(35);
+    this.rainDrops = [];
+    for (let i = 0; i < 80; i++) {
+      this.rainDrops.push(this._spawnRainDrop(true));
+    }
 
     // Все видимые объекты → Light2D pipeline
     [
@@ -802,6 +826,7 @@ class GameScene extends Phaser.Scene {
       this.legBL, this.legBR, this.legFL, this.legFR,
       this.ropeGfx, this.waveGfx, this.lampBodyGfx, this.snakeImg,
       this.particleGfx, this.caneGfx, this.eyeGfx, this.soskaImg,
+      this.blinkGfx, this.vaporGfx, this.rainGfx,
       ...this.banknotes.map(b => b.sprite),
     ].forEach(obj => obj.setPipeline('Light2D'));
 
@@ -825,6 +850,11 @@ class GameScene extends Phaser.Scene {
       #_pb:hover .bl:nth-child(11) { transform:translateY(0vmin)   rotate(-4deg);  }
     `;
     document.head.appendChild(bendStyle);
+
+    // Виньетка — постоянный CSS-оверлей поверх canvas
+    const vignetteEl = document.createElement('div');
+    vignetteEl.style.cssText = 'position:fixed;inset:0;pointer-events:none;z-index:50;background:radial-gradient(ellipse at 50% 50%, transparent 40%, rgba(0,0,0,0.72) 100%)';
+    document.body.appendChild(vignetteEl);
 
     const overlay = document.createElement('div');
     overlay.style.cssText = [
@@ -1216,6 +1246,17 @@ class GameScene extends Phaser.Scene {
     };
   }
 
+  _spawnRainDrop(spread = false) {
+    const W = this.scale.width, H = this.scale.height;
+    return {
+      x:     Phaser.Math.Between(-30, W + 20),
+      y:     spread ? Phaser.Math.Between(-20, H) : -Phaser.Math.Between(5, 25),
+      len:   Phaser.Math.Between(4, 9),
+      speed: Phaser.Math.Between(200, 380),
+      alpha: Phaser.Math.FloatBetween(0.10, 0.28),
+    };
+  }
+
   // Крошечная ламка: тело 6u×2u, шея 2u×2u, голова 3u×2u, 4 ножки 1u×2u, хвостик
   _drawTinyLlama(g, x, y, u, col, alpha) {
     g.fillStyle(col, alpha);
@@ -1520,6 +1561,16 @@ class GameScene extends Phaser.Scene {
     this.soskaImg.x = this.llamaHead.x + 19;
     this.soskaImg.y = this.llamaHead.y + 1;
 
+    // Тень под ламой
+    this.shadowGfx.clear();
+    this.shadowGfx.fillStyle(0x000000, this.state.isBowing ? 0.42 : 0.30);
+    this.shadowGfx.fillEllipse(
+      this.LX - 2 + (this.state.isBowing ? 14 : 0),
+      this.GY - 1,
+      this.state.isBowing ? 44 : 36,
+      this.state.isBowing ? 3 : 5,
+    );
+
     const spd       = this.state.speed;
     const bowFactor = this.state.isBowing ? 0.4 : 1;
     const effSpd    = this._dayOffActive ? 0 : (this.state.isSprinting ? spd * 2 : spd) * bowFactor;
@@ -1644,6 +1695,29 @@ class GameScene extends Phaser.Scene {
       }
     }
 
+    // Мигание окон в панельках
+    {
+      const BLINK_TILE_W = 320;
+      const tpx    = this.tl3.tilePositionX;
+      const startX = -((tpx % BLINK_TILE_W + BLINK_TILE_W) % BLINK_TILE_W);
+      this.blinkGfx.clear();
+      for (const bw of this.blinkWindows) {
+        bw.timer -= delta;
+        if (bw.timer <= 0) {
+          bw.on    = !bw.on;
+          bw.timer = bw.on ? Phaser.Math.Between(800, 5000) : Phaser.Math.Between(200, 2000);
+        }
+        if (!bw.on) continue;
+        for (let rep = 0; rep <= 2; rep++) {
+          const sx = startX + bw.tx + rep * BLINK_TILE_W;
+          if (sx > sceneW || sx + bw.w < 0) continue;
+          const sy = this.scale.height - this.h3 + bw.ty;
+          this.blinkGfx.fillStyle(0xd4a020, 0.9);
+          this.blinkGfx.fillRect(sx, sy, bw.w, bw.h);
+        }
+      }
+    }
+
     // ── HUD полоски ───────────────────────────────────────────────────────────
     {
       const { x, y, w, h, gap } = this.BAR_CFG;
@@ -1711,6 +1785,29 @@ class GameScene extends Phaser.Scene {
       if (p.life <= 0) { this.particles.splice(i, 1); continue; }
       this.particleGfx.fillStyle(p.col, p.life);
       this.particleGfx.fillRect(Math.round(p.x), Math.round(p.y), 2, 3);
+    }
+
+    // Пар изо рта
+    if (age < 5 && Math.random() < 4 * dt) {
+      this.vaporParticles.push({
+        x:    this.soskaImg.x + 6 + Phaser.Math.FloatBetween(-1, 1),
+        y:    this.soskaImg.y - 1,
+        vx:   Phaser.Math.FloatBetween(3, 8),
+        vy:   Phaser.Math.FloatBetween(-10, -4),
+        life: 1.0,
+        r:    Phaser.Math.FloatBetween(1.2, 2.5),
+      });
+    }
+    this.vaporGfx.clear();
+    for (let i = this.vaporParticles.length - 1; i >= 0; i--) {
+      const p = this.vaporParticles[i];
+      p.x    += p.vx * dt;
+      p.y    += p.vy * dt;
+      p.vy   += 3 * dt;
+      p.life -= dt * 1.5;
+      if (p.life <= 0) { this.vaporParticles.splice(i, 1); continue; }
+      this.vaporGfx.fillStyle(0xddeeff, p.life * 0.45);
+      this.vaporGfx.fillCircle(Math.round(p.x), Math.round(p.y), Math.ceil(p.r * (1 + (1 - p.life) * 0.8)));
     }
 
     // Задние ноги замедляются при прогибе; передние управляются bow/walk tweens
@@ -1892,6 +1989,25 @@ class GameScene extends Phaser.Scene {
 
       bn.sprite.x = Math.round(bn.x);
       bn.sprite.y = Math.round(bn.y);
+    }
+
+    // Дождь
+    {
+      this.rainGfx.clear();
+      for (let i = 0; i < this.rainDrops.length; i++) {
+        const r = this.rainDrops[i];
+        r.x -= r.speed * 0.15 * dt;
+        r.y += r.speed * dt;
+        if (r.y > this.scale.height + 10) {
+          this.rainDrops[i] = this._spawnRainDrop();
+          continue;
+        }
+        this.rainGfx.lineStyle(1, 0x8ab8cc, r.alpha);
+        this.rainGfx.lineBetween(
+          Math.round(r.x), Math.round(r.y),
+          Math.round(r.x - r.len * 0.15), Math.round(r.y - r.len),
+        );
+      }
     }
 
     // Верёвка: квадратичная кривая с анимированным провисом

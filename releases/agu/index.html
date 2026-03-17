@@ -441,6 +441,9 @@ class GameScene extends Phaser.Scene {
 
     lb.fillStyle(WOOL, 1);
     lb.fillRect( 0, -16, 40, 16);   // тело
+    lb.fillRect(-1, -22,  6,  6);   // хвост — основание
+    lb.fillStyle(WOOL2, 1);
+    lb.fillRect( 0, -26,  4,  4);   // хвост — кончик
     // шея рисуется динамически в update() через neckGfx
 
     // Шея — динамически перерисовывается каждый кадр, depth 10 (между телом и головой)
@@ -865,22 +868,28 @@ class GameScene extends Phaser.Scene {
       lb.lineBetween(38, -12, 38, -2);          // грудина (стернум)
       lb.strokeCircle(3,  -7,  4);              // тазовая кость
       lb.strokeCircle(37, -11, 3);              // плечевая кость
+      lb.lineBetween(2, -16, 1, -22);           // хвостовые позвонки
     } else if (age >= 4) {
       // ── ДРЯБЛАЯ: обвисшая шерсть и жир ──────────────────────────────────────
-      // Основное тело — немного шире и ниже
       lb.fillStyle(WOOL, 1);
       lb.fillRect(0, -15, 42, 17);
-      // Обвисший живот — тёмная складка снизу
       lb.fillStyle(0xd8c090, 1);
       lb.fillRect(6,   2,  28,  4);             // брюшная складка
       lb.fillRect(3,   1,   8,  3);             // левый бок
       lb.fillRect(32,  1,   8,  3);             // правый бок (у шеи)
-      // Подгрудок у шеи
       lb.fillStyle(0xcab888, 1);
       lb.fillRect(34, -18, 7,  6);
+      // Хвост обвис — короче и ниже
+      lb.fillStyle(0xd8c090, 1);
+      lb.fillRect(-1, -20,  6,  5);
+      lb.fillStyle(0xcab888, 1);
+      lb.fillRect( 0, -23,  4,  3);
     } else {
       lb.fillStyle(WOOL, 1);
       lb.fillRect(0, -16, 40, 16);
+      lb.fillRect(-1, -22,  6,  6);             // хвост — основание
+      lb.fillStyle(WOOL2, 1);
+      lb.fillRect( 0, -26,  4,  4);             // хвост — кончик
     }
 
     // ── Голова ─────────────────────────────────────────────────────────────────

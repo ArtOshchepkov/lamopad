@@ -19,6 +19,25 @@
   </style>
 </head>
 <body>
+<div id="_loading_screen" style="
+  position:fixed;inset:0;z-index:99999;
+  background:#060608;
+  display:flex;flex-direction:column;align-items:center;justify-content:center;
+  font-family:'Arial Black',Arial,sans-serif;user-select:none;
+">
+  <div style="font-size:9vmin;font-weight:900;letter-spacing:.15em;margin-bottom:4vmin">
+    <span style="color:#ee3333">А</span><span style="color:#888">Т</span><span style="color:#ee3333">ГУ</span><span style="color:#888">Л</span>
+  </div>
+  <div id="_loading_dots" style="font-size:3vmin;color:#aa3322;letter-spacing:.3em"><span>&#x25A0;</span><span>&#x25A0;</span><span>&#x25A0;</span></div>
+  <style>
+    @keyframes _ldot {
+      0%,100%{opacity:.15} 50%{opacity:1}
+    }
+    #_loading_dots span:nth-child(1){animation:_ldot 1.2s ease-in-out infinite 0s}
+    #_loading_dots span:nth-child(2){animation:_ldot 1.2s ease-in-out infinite .4s}
+    #_loading_dots span:nth-child(3){animation:_ldot 1.2s ease-in-out infinite .8s}
+  </style>
+</div>
 <script src="https://cdn.jsdelivr.net/npm/phaser@3.60.0/dist/phaser.min.js"></script>
 <script>
 'use strict';
@@ -147,6 +166,8 @@ class GameScene extends Phaser.Scene {
   }
 
   create() {
+    document.getElementById('_loading_screen')?.remove();
+
     const W = this.scale.width;   // 480
     const H = this.scale.height;  // 270
 
@@ -866,28 +887,28 @@ class GameScene extends Phaser.Scene {
     ].join(';');
 
     overlay.innerHTML = `
-      <div style="font-size:6vmin;font-weight:900;
+      <div style="font-size:9vmin;font-weight:900;
                  letter-spacing:.15em;margin-bottom:3vmin">
         <span style="color:#ee3333">Ⓐ</span><span style="color:#888; text-shadow: none">Т</span><span style="color:#ee3333">ГУ</span><span style="color:#888; text-shadow: none">Л</span>
       </div>
-      <div id="_pb" style="font-size:2.8vmin;color:#fff;font-weight:900;
+      <div id="_pb" style="font-size:4.2vmin;color:#fff;font-weight:900;
                   text-shadow:1px 1px 0 #000;margin-bottom:1vmin;padding-bottom:.8vmin"><span class="bl">П</span><span class="bl">Р</span><span class="bl">О</span><span class="bl">Г</span><span class="bl">И</span><span class="bl">Б</span><span class="bl">А</span><span class="bl">Й</span><span class="bl">С</span><span class="bl">Я</span><span class="bl">,</span></div>
-      <div style="font-size:2.4vmin;color:#ffdd44;font-weight:900;
+      <div style="font-size:3.6vmin;color:#ffdd44;font-weight:900;
                   text-shadow:1px 1px 0 #000;margin-bottom:5vmin">
         ЧТОБЫ СОБИРАТЬ ДЕНЬГИ
       </div>
-      <div id="_agu_hint" style="font-size:1.6vmin;color:#666;font-weight:normal;
+      <div id="_agu_hint" style="font-size:2.4vmin;color:#666;font-weight:normal;
                                   font-family:Arial,sans-serif">
         НАЖМИ ЧТОБЫ НАЧАТЬ
       </div>
       <div id="_agu_rotate" style="
         position:absolute;bottom:0;left:0;right:0;padding:3vmin;
-        font-size:3.5vmin;color:#ffcc44;font-weight:900;
+        font-size:5.25vmin;color:#ffcc44;font-weight:900;
         font-family:'Arial Black',Arial,sans-serif;display:none;
         text-shadow:0 0 12px #ff8800,1px 1px 0 #000;
         pointer-events:none;letter-spacing:.03em;
       ">
-        <span style="display:inline-block;font-size:5vmin;animation:_spin 2.5s linear infinite">&#x21BB;</span><br>
+        <span style="display:inline-block;font-size:7.5vmin;animation:_spin 2.5s linear infinite">&#x21BB;</span><br>
         ПОВЕРНИ УСТРОЙСТВО ГОРИЗОНТАЛЬНО
       </div>
     `;

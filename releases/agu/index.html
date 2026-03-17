@@ -801,6 +801,24 @@ class GameScene extends Phaser.Scene {
     // ── Стартовый экран (HTML-оверлей поверх canvas) ──────────────────────────
     this.gameStarted = false;
 
+    // CSS для hover-изгиба надписи ПРОГИБАЙСЯ
+    const bendStyle = document.createElement('style');
+    bendStyle.textContent = `
+      #_pb .bl { display:inline-block; transition:transform .3s ease; }
+      #_pb:hover .bl:nth-child(1)  { transform:translateY(0vmin)   rotate(4deg);   }
+      #_pb:hover .bl:nth-child(2)  { transform:translateY(.18vmin) rotate(3.2deg); }
+      #_pb:hover .bl:nth-child(3)  { transform:translateY(.32vmin) rotate(2.4deg); }
+      #_pb:hover .bl:nth-child(4)  { transform:translateY(.42vmin) rotate(1.6deg); }
+      #_pb:hover .bl:nth-child(5)  { transform:translateY(.48vmin) rotate(.8deg);  }
+      #_pb:hover .bl:nth-child(6)  { transform:translateY(.5vmin)  rotate(0deg);   }
+      #_pb:hover .bl:nth-child(7)  { transform:translateY(.48vmin) rotate(-.8deg); }
+      #_pb:hover .bl:nth-child(8)  { transform:translateY(.42vmin) rotate(-1.6deg);}
+      #_pb:hover .bl:nth-child(9)  { transform:translateY(.32vmin) rotate(-2.4deg);}
+      #_pb:hover .bl:nth-child(10) { transform:translateY(.18vmin) rotate(-3.2deg);}
+      #_pb:hover .bl:nth-child(11) { transform:translateY(0vmin)   rotate(-4deg);  }
+    `;
+    document.head.appendChild(bendStyle);
+
     const overlay = document.createElement('div');
     overlay.style.cssText = [
       'position:fixed;inset:0;display:flex;flex-direction:column',
@@ -810,14 +828,12 @@ class GameScene extends Phaser.Scene {
     ].join(';');
 
     overlay.innerHTML = `
-      <div style="font-size:6vmin;color:#ee3333;font-weight:900;
-                  text-shadow:0 0 12px #ff2200,2px 2px 0 #000;letter-spacing:.15em;margin-bottom:3vmin">
-        А Г У
+      <div style="font-size:6vmin;font-weight:900;
+                 letter-spacing:.15em;margin-bottom:3vmin">
+        <span style="color:#ee3333">Ⓐ</span><span style="color:#888; text-shadow: none">т</span><span style="color:#ee3333">ГУ</span><span style="color:#888; text-shadow: none">л</span>
       </div>
-      <div style="font-size:2.8vmin;color:#fff;font-weight:900;
-                  text-shadow:1px 1px 0 #000;margin-bottom:1vmin">
-        ПРОГИБАЙСЯ,
-      </div>
+      <div id="_pb" style="font-size:2.8vmin;color:#fff;font-weight:900;
+                  text-shadow:1px 1px 0 #000;margin-bottom:1vmin;padding-bottom:.8vmin"><span class="bl">П</span><span class="bl">Р</span><span class="bl">О</span><span class="bl">Г</span><span class="bl">И</span><span class="bl">Б</span><span class="bl">А</span><span class="bl">Й</span><span class="bl">С</span><span class="bl">Я</span><span class="bl">,</span></div>
       <div style="font-size:2.4vmin;color:#ffdd44;font-weight:900;
                   text-shadow:1px 1px 0 #000;margin-bottom:5vmin">
         ЧТОБЫ СОБИРАТЬ ДЕНЬГИ

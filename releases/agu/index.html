@@ -1,0 +1,1911 @@
+<!DOCTYPE html>
+<html lang="ru">
+<head>
+  <meta charset="utf-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1, user-scalable=no, viewport-fit=cover" />
+  <title>АГУ — Ламопад</title>
+  <style>
+    *, *::before, *::after { margin: 0; padding: 0; box-sizing: border-box; }
+    html, body {
+      width: 100%; height: 100%;
+      /* На мобайле 100vh не учитывает адресную строку; fill-available исправляет */
+      min-height: -webkit-fill-available;
+      background: #060608;
+      overflow: hidden;
+      position: fixed;
+      top: 0; left: 0;
+    }
+    canvas { display: block; image-rendering: pixelated; image-rendering: crisp-edges; }
+  </style>
+</head>
+<body>
+<script src="https://cdn.jsdelivr.net/npm/phaser@3.60.0/dist/phaser.min.js"></script>
+<script>
+'use strict';
+
+const BASE_SPEED = 100; // px/sec
+const EXPECTED_GAME_TIME = 100; // секунд — среднее время игры до смерти
+
+const AGE_TILT  = [0, 5, 5, 8, 10, 12];   // degrees of resting body tilt per stage
+const AGE_SPEED = [1.0, 0.85, 0.70, 0.55, 0.35, 0.15];
+
+function getAge(health) {
+  if (health > 83) return 0;
+  if (health > 66) return 1;
+  if (health > 50) return 2;
+  if (health > 33) return 3;
+  if (health > 16) return 4;
+  return 5;
+}
+
+// ─── Helpers ──────────────────────────────────────────────────────────────────
+
+function makeTile(scene, key, w, h, paint) {
+  const g = scene.make.graphics({ add: false });
+  paint(g, w, h);
+  g.generateTexture(key, w, h);
+  g.destroy();
+}
+
+/** Затемнить hex-цвет на `amt` по каждому каналу. */
+function darker(col, amt) {
+  const r = Math.max(0, ((col >> 16) & 0xff) - amt);
+  const g = Math.max(0, ((col >>  8) & 0xff) - amt);
+  const b = Math.max(0, ( col        & 0xff) - amt);
+  return (r << 16) | (g << 8) | b;
+}
+
+// ─── Думерская панелька ───────────────────────────────────────────────────────
+
+/**
+ * Рисует жилой дом (панель/монолит) в думерской эстетике.
+ * Грязный советский бетон, редкие тёплые окна, потёки.
+ *
+ * @param {Phaser.GameObjects.Graphics} g
+ * @param {number} x, groundY, w, h  — позиция и габариты
+ * @param {number} wallCol           — базовый цвет стены
+ * @param {number} floors, cols      — сетка окон
+ * @param {object} [opts]            — { stains: [{x,w,h}], roofColor }
+ */
+function drawPanelka(g, x, groundY, w, h, wallCol, floors, cols, opts) {
+  const o = opts || {};
+  const top    = groundY - h;
+  const PAD_X  = 7, PAD_TOP = 7, PAD_BOT = 14;
+  const GAP_X  = 3, GAP_Y   = 3;
+
+  // стена
+  g.fillStyle(wallCol, 1);
+  g.fillRect(x, top, w, h);
+
+  // горизонтальные швы между панелями (тёмные щели)
+  g.fillStyle(darker(wallCol, 18), 1);
+  for (let fl = 0; fl < floors; fl++) {
+    const sy = top + PAD_TOP + fl * Math.floor((h - PAD_TOP - PAD_BOT) / floors);
+    g.fillRect(x, sy - 1, w, 1);
+  }
+
+  // потёки/следы воды (вертикальные тёмные полосы)
+  const stains = o.stains || [
+    { dx: Math.floor(w * 0.18), sw: 2, sh: Math.floor(h * 0.55) },
+    { dx: Math.floor(w * 0.52), sw: 1, sh: Math.floor(h * 0.35) },
+    { dx: Math.floor(w * 0.73), sw: 2, sh: Math.floor(h * 0.70) },
+  ];
+  g.fillStyle(darker(wallCol, 22), 1);
+  for (const s of stains) g.fillRect(x + s.dx, top, s.sw, s.sh);
+
+  // парапет крыши
+  const roofCol = o.roofColor !== undefined ? o.roofColor : darker(wallCol, 28);
+  g.fillStyle(roofCol, 1);
+  g.fillRect(x, top, w, 3);
+
+  // лифтовой холл / технический объём на крыше
+  const shW = Math.floor(w * 0.17);
+  g.fillStyle(roofCol, 1);
+  g.fillRect(x + Math.floor((w - shW) / 2), top - 5, shW, 5);
+
+  // сетка окон
+  const availW = w - 2 * PAD_X;
+  const availH = h - PAD_TOP - PAD_BOT;
+  const winW = Math.max(4, Math.floor((availW - (cols - 1) * GAP_X) / cols));
+  const winH = Math.max(4, Math.floor((availH - (floors - 1) * GAP_Y) / floors));
+
+  for (let r = 0; r < floors; r++) {
+    for (let c = 0; c < cols; c++) {
+      const wx = x + PAD_X + c * (winW + GAP_X);
+      const wy = top + PAD_TOP + r * (winH + GAP_Y);
+      const seed = ((r * 17 + c * 11 + x) * 3) % 100;
+      // ~6% окон светятся тёплым янтарным — остальные мёртвые тёмно-синие
+      const lit  = seed < 6;
+      g.fillStyle(lit ? 0xd4900a : 0x111c24, 1);
+      g.fillRect(wx, wy, winW, winH);
+      // блик на стекле у погашенных окон
+      if (!lit) {
+        g.fillStyle(0x1e2e3a, 1);
+        g.fillRect(wx, wy, 1, 1);
+      }
+    }
+  }
+
+  // подъезд (тёмный проём)
+  const entW = Math.max(8, Math.floor(w * 0.22));
+  g.fillStyle(0x0c1018, 1);
+  g.fillRect(x + Math.floor((w - entW) / 2), groundY - PAD_BOT, entW, PAD_BOT);
+}
+
+// ─── GameScene ────────────────────────────────────────────────────────────────
+
+class GameScene extends Phaser.Scene {
+  constructor() { super({ key: 'GameScene' }); }
+
+  preload() {
+    this.load.image('snake_sprite', 'snake_sprite.png');
+    this.load.image('soska', 'soska.png');
+    for (let i = 1; i <= 5; i++) this.load.image(`money${i}`, `money${i}.png`);
+    ['building1','building1big','building2','building3','building4','building5','building6','building7','building8']
+      .forEach(k => this.load.image(k, `${k}.png`));
+  }
+
+  create() {
+    const W = this.scale.width;   // 480
+    const H = this.scale.height;  // 270
+
+    // ── layer4: космос + экзистенция + Зона — 0.1x ──────────────────────────
+    // Кафка: система давит сверху. Тарковский: Зона светится снизу.
+    // Человек между двух бездн — звёздной и бетонной.
+    makeTile(this, 'layer4', 480, H, (g, tw, th) => {
+
+      // ── космическая бездна ────────────────────────────────────────────────
+      // Верх: абсолютно тёмный, почти без цвета — пустота
+      g.fillStyle(0x03030a, 1);
+      g.fillRect(0, 0, tw, th);
+
+      // Плавный переход к горизонту: добавляем чуть зелёного (промышленная Зона)
+      // Полосы градиента сверху вниз
+      const skyBands = [
+        { y:  0, h: 40, c: 0x03030a }, // космос
+        { y: 40, h: 30, c: 0x04050c }, // глубокий ноль
+        { y: 70, h: 20, c: 0x050810 }, // чуть теплее
+        { y: 90, h: 20, c: 0x060c0e }, // намёк на зелёное
+        { y:110, h: 18, c: 0x080f0c }, // зона начинается
+        { y:128, h: 12, c: 0x0b160e }, // свечение снизу
+        { y:140, h: 10, c: 0x101c12 }, // ореол горизонта
+      ];
+      for (const b of skyBands) {
+        g.fillStyle(b.c, 1);
+        g.fillRect(0, b.y, tw, b.h);
+      }
+
+      // ── звёзды ────────────────────────────────────────────────────────────
+      // Детерминированный LCG — каждый раз одна и та же карта звёзд
+      let rng = 48271;
+      function rand() {
+        rng = Math.imul(rng, 1664525) + 1013904223 | 0;
+        return (rng >>> 0) / 4294967296;
+      }
+
+      // Звёзды только в верхней части (атмосфера скрывает нижние)
+      // Плотность убывает к горизонту
+      const STAR_ZONE_H = 148; // px от верха, в которых могут быть звёзды
+      for (let i = 0; i < 360; i++) {
+        const sx = Math.floor(rand() * tw);
+        // Гравитация: звёзды гуще вверху, реже внизу
+        const t  = rand();
+        const sy = Math.floor(t * t * STAR_ZONE_H); // квадратичное распределение
+        const br = rand(); // яркость
+
+        let col, sz;
+        if      (br < 0.45) { col = 0x1a2035; sz = 1; } // призрачные, почти невидимые
+        else if (br < 0.72) { col = 0x384868; sz = 1; } // тусклые
+        else if (br < 0.88) { col = 0x6878a8; sz = 1; } // средние
+        else if (br < 0.96) { col = 0x9aa8cc; sz = 1; } // яркие
+        else                { col = 0xd0dcf4; sz = 2; } // очень яркие
+
+        g.fillStyle(col, 1);
+        g.fillRect(sx, sy, sz, sz);
+
+        // Крест-блик у самых ярких (ощущение резкости оптики, как у Тарковского)
+        if (br > 0.975) {
+          g.fillStyle(0x606888, 1);
+          g.fillRect(sx - 1, sy,     1, 1);
+          g.fillRect(sx + sz, sy,    1, 1);
+          g.fillRect(sx,     sy - 1, 1, 1);
+        }
+      }
+
+      // ── туманность / Млечный путь — смутная полоса ────────────────────────
+      // Очень тихая, как будто её почти нет. Кафка не даёт смотреть вверх.
+      const mwY = 18, mwH = 28;
+      for (let i = 0; i < 180; i++) {
+        const mx = Math.floor(rand() * tw);
+        const my = mwY + Math.floor(rand() * mwH);
+        if (rand() > 0.55) continue; // разреженность
+        g.fillStyle(0x141828, 1);
+        g.fillRect(mx, my, 1, 1);
+      }
+
+      // ── зелёное свечение горизонта (Зона Тарковского) ─────────────────────
+      // Не красиво — тревожно. Как радиация. Как нечто за пределами понимания.
+      g.fillStyle(0x0f2214, 1);
+      g.fillRect(0, 148, tw, 6);
+      g.fillStyle(0x0c1c10, 1);
+      g.fillRect(0, 154, tw, 5);
+      g.fillStyle(0x09140c, 1);
+      g.fillRect(0, 159, tw, 4);
+
+      // ── дальний урбанистический фон (за горизонтом) ───────────────────────
+      g.fillStyle(0x060d08, 1);
+      g.fillRect(0, 163, tw, th - 163);
+
+      // ── монолиты Кудрово — чёрные силуэты против неба ────────────────────
+      // Абсолютно чёрные. Как надгробия. Как буква закона у Кафки.
+      const HY = 163;
+      const towers = [
+        { x:   0, w: 24, h: 70 }, { x:  27, w: 18, h: 88 },
+        { x:  48, w: 23, h: 56 }, { x:  74, w: 20, h: 98 },
+        { x:  97, w: 28, h: 72 }, { x: 128, w: 16, h: 84 },
+        { x: 147, w: 25, h: 60 }, { x: 175, w: 22, h: 95 },
+        { x: 200, w: 18, h: 76 }, { x: 221, w: 30, h: 58 },
+        { x: 254, w: 20, h: 91 }, { x: 277, w: 24, h: 68 },
+        { x: 304, w: 18, h: 97 }, { x: 325, w: 26, h: 74 },
+        { x: 354, w: 22, h: 62 }, { x: 379, w: 18, h: 86 },
+        { x: 400, w: 25, h: 70 }, { x: 428, w: 20, h: 92 },
+        { x: 451, w: 27, h: 78 },
+      ];
+      for (const t of towers) {
+        // Тело: почти чёрное, чуть теплее у основания (городской свет снизу)
+        g.fillStyle(0x080c0a, 1);
+        g.fillRect(t.x, HY - t.h, t.w, t.h + (th - HY));
+
+        // Ореол вокруг верхушки — здание поглощает свет звёзд
+        g.fillStyle(0x060a08, 1);
+        g.fillRect(t.x - 1, HY - t.h - 1, t.w + 2, 2);
+
+        // Редкие окна: холодный синеватый свет (флуоресцентные лампы, никто не спит)
+        // и изредка — тёплый янтарь (кто-то ещё дома)
+        const s0 = t.x * 11 + t.h * 7;
+        for (let row = 0; row < Math.floor(t.h / 9); row++) {
+          for (let col = 0; col < Math.floor(t.w / 7); col++) {
+            const sv = (s0 + row * 17 + col * 13) % 100;
+            if (sv > 6) continue; // только 6% светятся
+            const cold = sv < 3; // половина — холодный синий, половина — тусклый жёлтый
+            g.fillStyle(cold ? 0x4060a0 : 0x806010, 1);
+            g.fillRect(t.x + 3 + col * 6, HY - t.h + 5 + row * 8, 2, 2);
+          }
+        }
+      }
+    });
+
+    // ── layer3: панельки Кудрово — 0.3x ─────────────────────────────────────
+    // Тайл 320 × h3 (149). Прозрачный фон — небо из layer4 видно сквозь зазоры.
+    // A (9 эт.): x=0,  w=88,  h=120  | B (12 эт.): x=91, w=118, h=140
+    // C (10 эт.): x=212, w=105, h=130 | зазоры 3 px
+    const h3 = Math.ceil(H * 0.55); // 149
+    makeTile(this, 'layer3', 320, h3, (g, tw, th) => {
+      // A: серо-бежевый советский
+      drawPanelka(g,   0, th,  88, 120, 0x848078,  9, 4, {
+        stains: [{ dx: 12, sw: 2, sh: 70 }, { dx: 50, sw: 1, sh: 45 }, { dx: 72, sw: 2, sh: 80 }],
+      });
+      // B: тёмный брутальный монолит
+      drawPanelka(g,  91, th, 118, 140, 0x706a64, 12, 6, {
+        stains: [{ dx: 10, sw: 1, sh: 90 }, { dx: 38, sw: 2, sh: 60 }, { dx: 72, sw: 1, sh: 100 }, { dx: 98, sw: 2, sh: 55 }],
+      });
+      // C: выцветший бежево-серый
+      drawPanelka(g, 212, th, 105, 130, 0x7c7870, 10, 5, {
+        stains: [{ dx: 14, sw: 2, sh: 75 }, { dx: 55, sw: 1, sh: 50 }, { dx: 82, sw: 2, sh: 85 }],
+      });
+    });
+
+    // ── layer2: асфальт — 1x ─────────────────────────────────────────────────
+    // Городской тротуар + дорога. Серый, мокрый, немного трещин.
+    // Tile 112 × h2. Разметка: пунктирная осевая линия.
+    const h1 = Math.ceil(H * 0.12); // 33px — река (спереди, у самого низа)
+    const h2 = Math.ceil(H * 0.22); // 60px — дорога прямо над рекой
+    makeTile(this, 'layer2', 112, h2, (g, tw, th) => {
+      // тротуарная плитка / бордюрная зона (верхние ~30%)
+      const sidewalkH = Math.floor(th * 0.30); // 18px
+      g.fillStyle(0x4a4844, 1);
+      g.fillRect(0, 0, tw, sidewalkH);
+
+      // швы тротуарных плит
+      g.fillStyle(0x3a3836, 1);
+      for (let x = 0; x < tw; x += 28) g.fillRect(x, 0, 1, sidewalkH);
+      g.fillRect(0, Math.floor(sidewalkH / 2), tw, 1);
+
+      // бордюрный камень (поребрик)
+      g.fillStyle(0x606058, 1);
+      g.fillRect(0, sidewalkH, tw, 3);
+      // бликующая грань поребрика
+      g.fillStyle(0x787870, 1);
+      g.fillRect(0, sidewalkH + 1, tw, 1);
+
+      // асфальт
+      const roadY = sidewalkH + 3;
+      g.fillStyle(0x282826, 1);
+      g.fillRect(0, roadY, tw, th - roadY);
+
+      // лёгкая текстура асфальта — тёмные и светлые пятна
+      g.fillStyle(0x242422, 1);
+      for (let x = 8; x < tw; x += 22) g.fillRect(x, roadY + 4, 10, 5);
+      g.fillStyle(0x2e2e2c, 1);
+      for (let x = 0; x < tw; x += 18) g.fillRect(x, roadY + 13, 14, 3);
+
+      // осевая пунктирная линия (белая разметка)
+      const markY = roadY + Math.floor((th - roadY) * 0.45); // примерно середина дороги
+      g.fillStyle(0xd4d0c4, 1);
+      // 3 тире по 24px с отступом 12px → 3*24 + 2*12 = 96px, остаток 16px
+      const dashW = 24, dashGap = 16, dashH = 2;
+      for (let x = 0; x + dashW <= tw; x += dashW + dashGap) {
+        g.fillRect(x, markY, dashW, dashH);
+      }
+
+      // правая крайняя линия (жёлтая)
+      g.fillStyle(0xb89848, 1);
+      g.fillRect(0, roadY, tw, 2);
+    });
+
+    // ── layer1: река — 1x ────────────────────────────────────────────────────
+    makeTile(this, 'layer1', 128, h1, (g, tw, th) => {
+      // Тёмная ночная вода
+      g.fillStyle(0x0c2a42, 1);
+      g.fillRect(0, 0, tw, th);
+
+      // Градиент: у ватерлинии чуть светлее (отражение неба)
+      g.fillStyle(0x183f5c, 1); g.fillRect(0, 0, tw, 3);
+      g.fillStyle(0x112e46, 1); g.fillRect(0, 3, tw, 3);
+
+      // Горизонтальные волны — чередование светлых гребней и тёмных впадин
+      const waves = [
+        { y:  6, h: 2, c: 0x1a4e70 }, { y:  9, h: 1, c: 0x071520 },
+        { y: 12, h: 2, c: 0x154060 }, { y: 16, h: 1, c: 0x060f1c },
+        { y: 19, h: 2, c: 0x1c5272 }, { y: 23, h: 1, c: 0x071825 },
+        { y: 26, h: 2, c: 0x133858 }, { y: 30, h: 1, c: 0x050d18 },
+      ];
+      for (const w of waves) {
+        if (w.y >= th) continue;
+        g.fillStyle(w.c, 1);
+        g.fillRect(0, w.y, tw, Math.min(w.h, th - w.y));
+      }
+
+      // Рябь: короткие случайные штрихи (seeded)
+      let rng = 7919;
+      const rand = () => { rng = Math.imul(rng, 1664525) + 1013904223 | 0; return (rng >>> 0) / 4294967296; };
+      for (let i = 0; i < 55; i++) {
+        const rx = Math.floor(rand() * tw);
+        const ry = 2 + Math.floor(rand() * (th - 4));
+        const rw = 3 + Math.floor(rand() * 16);
+        const br = rand();
+        const col = br > 0.8 ? 0x2a6a90 : br > 0.5 ? 0x153c58 : 0x060e18;
+        g.fillStyle(col, 1);
+        g.fillRect(rx, ry, Math.min(rw, tw - rx), 1);
+      }
+
+      // Отражения фонарей: прерывистые вертикальные золотые колонки
+      const lamps = [22, 68, 108];
+      for (const lx of lamps) {
+        for (let dy = 0; dy < th; dy++) {
+          const gap = Math.floor(1 + dy * 0.2);
+          if ((dy + lx) % (gap + 2) < gap) continue;
+          const hw = Math.max(1, Math.ceil(2.5 - dy * 0.08));
+          g.fillStyle(dy < 5 ? 0xa07828 : 0x6a4c14, 1);
+          g.fillRect(lx - hw + 1, dy, hw * 2 - 1, 1);
+        }
+      }
+    });
+
+    // ── TileSprites (порядок = z-порядок: позже = выше) ──────────────────────
+    // Стек снизу вверх экрана:  река [h1=33px] | дорога [h2=60px] | панельки | небо
+    // Z-порядок (спереди): layer1 > layer2 > layer3 > layer4
+    this.tl4 = this.add.tileSprite(0, 0, W, H, 'layer4').setOrigin(0, 0).setDepth(-2);
+
+    // ── Ламопад — крошечные падающие ламки на фоне неба ──────────────────────
+    this.llamaRainGfx   = this.add.graphics().setDepth(-1);
+    this.llamaRainDrops = [];
+    for (let i = 0; i < 2; i++) {
+      this.llamaRainDrops.push(this._spawnLlamaDrop(true));
+    }
+
+    this.tl3 = this.add.tileSprite(0, H - h3, W, h3, 'layer3').setOrigin(0, 0);
+
+    // дорога: y = H - h1 - h2 (прямо над рекой)
+    this.tl2 = this.add.tileSprite(0, H - h1 - h2, W, h2, 'layer2').setOrigin(0, 0).setDepth(1);
+
+    // река: depth 15 > корабль (8) — при покачивании подводная часть уходит под воду
+    this.tl1 = this.add.tileSprite(0, H - h1, W, h1, 'layer1').setOrigin(0, 0).setDepth(15);
+
+    // ── Слой ближних зданий (между фоном и дорогой, 0.6x) ────────────────────
+    this.fgBuildings      = [];
+    this.fgBuildingTimer  = Phaser.Math.Between(8000, 15000);
+
+    // Синусоидная граница воды — рисуется каждый кадр поверх всего, depth 16
+    // Заменяет прямую линию между дорогой и рекой живой волной
+    this.waveGfx  = this.add.graphics().setDepth(16);
+    this.waveTime = 0;
+    this.waterY   = H - h1;   // номинальная y ватерлинии
+
+    // ── Состояние ламы ────────────────────────────────────────────────────────
+    this.state = {
+      health: 100, money: 50000, age: 0, speed: 1.0,
+      isBowing: false, isSprinting: false, isCrying: false, isDead: false,
+    };
+
+    // ── Лама-бурлак ───────────────────────────────────────────────────────────
+    const LX   = 195;                   // x ламы (фиксирован, мир скроллится)
+    const GY   = H - h1 - h2 + 35;          // y поверхности дороги (верхний край layer2)
+    const UPPER_ROAD_LINE = H - h1 - h2;
+    this.UPPER_ROAD_LINE = UPPER_ROAD_LINE; // нужен в update для частиц и текста
+    this.GY    = GY;
+    this.LX    = LX;                    // нужен в update для частиц и текста
+
+    const WOOL  = 0xf0e8d0;  // кремовая шерсть
+    const WOOL2 = 0xd8c9a8;  // чуть темнее — ноги, уши
+    const HOOF  = 0x3e2c1a;  // копыта
+
+    // Тело + шея — вращается при прогибе вокруг заднего нижнего угла
+    // pivot: (LX-20, GY-14); все координаты относительны этой точки
+    const PBX = LX - 20, PBY = GY - 14;
+    this.llamaBodyPivot = { x: PBX, y: PBY };
+    this.llamaBody = this.add.graphics().setDepth(10).setPosition(PBX, PBY);
+    const lb = this.llamaBody;
+
+    lb.fillStyle(WOOL, 1);
+    lb.fillRect( 0, -16, 40, 16);   // тело
+    lb.fillRect(-1, -22,  6,  6);   // хвост — основание
+    lb.fillStyle(WOOL2, 1);
+    lb.fillRect( 0, -26,  4,  4);   // хвост — кончик
+    // шея рисуется динамически в update() через neckGfx
+
+    // Шея — динамически перерисовывается каждый кадр, depth 10 (между телом и головой)
+    this.neckGfx = this.add.graphics().setDepth(10);
+
+    // Голова (и всё выше шеи) — перемещается независимо при прогибе
+    // pivot: центр головы (LX+21, GY-51); все координаты относительны
+    const PHX = LX + 21, PHY = GY - 51;
+    this.llamaHeadBase = { x: PHX, y: PHY };
+    this.llamaHead = this.add.graphics().setDepth(11).setPosition(PHX, PHY);
+    const lh = this.llamaHead;
+
+    lh.fillStyle(WOOL, 1);
+    lh.fillRect(-10, -7, 20, 13);   // голова
+    lh.fillStyle(WOOL2, 1);
+    lh.fillRect( -8,-16,  5, 10);   // ухо
+    lh.fillStyle(WOOL, 1);
+    lh.fillRect(  8, -3, 11,  7);   // морда
+    lh.fillStyle(0x0e0808, 1);
+    lh.fillRect(  1, -5,  3,  3);   // глаз
+
+    // Соска — спрайт за головой (depth 10, т.е. под головой depth 11)
+    // Позиция обновляется каждый кадр в update()
+    this.soskaImg = this.add.image(PHX + 20, PHY + 1, 'soska')
+      .setOrigin(0.5, 0.5)
+      .setDisplaySize(8, 8)
+      .setDepth(10);
+
+    // Упряжь — depth 12, тот же pivot что у тела, вращается вместе
+    const HC = 0x52301a, HB = 0x8a5828;
+    const hp = this.harnessGfx = this.add.graphics().setDepth(12).setPosition(PBX, PBY);
+
+    hp.fillStyle(HC, 1);
+    hp.fillRect( 0, -11, 33, 3);           // нагрудная лямка
+    hp.fillRect( 1, -16,  3, 18);          // вертикальная лямка
+    hp.lineStyle(2, HC, 1);
+    hp.lineBetween(33, -22, 2, -10);       // плечевой ремень
+    hp.fillStyle(HC, 1);
+    hp.fillCircle(2, -10, 5);              // основание пряжки
+    hp.fillStyle(HB, 1);
+    hp.fillCircle(2, -10, 3);             // пряжка
+    hp.fillStyle(0x0c0808, 1);
+    hp.fillCircle(2, -10, 1);             // отверстие пряжки
+
+    // Ссылки для tween прогиба
+    this._bowTweenBody = null;
+    this._bowTweenHead = null;
+
+    // Четыре ноги — отдельные Graphics-объекты, анимированы через tweens
+    const LEG_H = 14, LEG_W = 5;
+    // Задние ноги: пивот в (0,0), рисуются в мировых координатах
+    const makeRearLeg = (lx) => {
+      const lg = this.add.graphics().setDepth(9);
+      lg.fillStyle(WOOL2, 1);
+      lg.fillRect(lx, GY - LEG_H, LEG_W, LEG_H);
+      lg.fillStyle(HOOF, 1);
+      lg.fillRect(lx - 1, GY - 3, LEG_W + 2, 3);
+      return lg;
+    };
+    // Передние ноги: пивот у земли (lx, GY) — rotation вокруг копыта
+    const makeFrontLeg = (lx) => {
+      const lg = this.add.graphics().setDepth(9).setPosition(lx, GY);
+      lg.fillStyle(WOOL2, 1);
+      lg.fillRect(0, -LEG_H, LEG_W, LEG_H);
+      lg.fillStyle(HOOF, 1);
+      lg.fillRect(-1, -3, LEG_W + 2, 3);
+      return lg;
+    };
+
+    this.legBL = makeRearLeg(LX - 18);   // задняя левая
+    this.legBR = makeRearLeg(LX - 10);   // задняя правая
+    this.legFL = makeFrontLeg(LX +  9);  // передняя левая
+    this.legFR = makeFrontLeg(LX + 17);  // передняя правая
+    this.frontLegBaseX = { FL: LX + 9, FR: LX + 17 };
+
+    // Диагональные пары: BL+FR и BR+FL шагают в противофазе.
+    // Передние ноги имеют y=GY изначально, поэтому их tween цель = GY-5
+    this.walkTween1  = this.tweens.add({ targets: this.legBL, y: -5,    duration: 260, yoyo: true, repeat: -1, ease: 'Sine.InOut' });
+    this.walkTween1f = this.tweens.add({ targets: this.legFR, y: GY - 5, duration: 260, yoyo: true, repeat: -1, ease: 'Sine.InOut' });
+    this.walkTween2  = this.tweens.add({ targets: this.legBR, y: -5,    duration: 260, yoyo: true, repeat: -1, delay: 260, ease: 'Sine.InOut' });
+    this.walkTween2f = this.tweens.add({ targets: this.legFL, y: GY - 5, duration: 260, yoyo: true, repeat: -1, delay: 260, ease: 'Sine.InOut' });
+
+    // ── Корпорация-корабль — НАСТОЛЬКО ОГРОМНАЯ, что нос не вмещается в экран ─
+    // Виден только нижний правый угол носа. Стена денег уходит вверх и влево.
+    const waterY     = H - h1;
+    // Прямой нос огромного судна: навис сверху вправо над ламой
+    // Нос нависает правее вверху и немного отступает внизу у ватерлинии
+    const BOW_DECK_X = 148; // x передней кромки палубы (y=0) — правее всего, нависает
+    const BOW_WL_X   = 108; // x носа у ватерлинии — чуть отступает назад (типичный форштевень)
+    // bowX(y): линия носовой грани идёт от (BOW_DECK_X,0) до (BOW_WL_X,waterY)
+    // т.е. нос УХОДИТ ВЛЕВО книзу — прямой нос как у большого судна
+    const bowX = (y) => BOW_DECK_X - (BOW_DECK_X - BOW_WL_X) * (y / waterY);
+
+    // Цвета купюры 50 рублей
+    const S_SIDE   = 0x1e6070;  // боковой борт (в тени, смотрит вбок)
+    const S_BOW    = 0x2e8898;  // поверхность носа (освещена, смотрит вперёд)
+    const S_KEEL   = 0x0d3040;  // подводная часть
+    const S_BELT   = 0x0b2c3c;  // ватерлинейный пояс
+    const S_LINE   = 0x0b2e3e;  // линии сгибов/плит
+    const S_PORT   = 0x78c8d8;  // иллюминаторы
+    const S_KNECHT = 0x4a8898;  // кнехт (bollard) для верёвки
+
+    // Спрайт 353×97 RGBA. Голова справа (смотрит влево→вправо).
+    // origin (1, 0.5): якорь у правого края, по центру высоты.
+    // scale 0.5 → рендер 176×48px.
+    // Змея сидит на палубе. Её видно только когда корабль покачивается
+    {
+      const SX = 190, SY = -18;
+      this.snakeBase = { x: SX, y: SY };
+
+      this.snakeImg = this.add.image(SX, SY, 'snake_sprite')
+        .setOrigin(1, 0.5)
+        .setScale(0.5)
+        .setDepth(1);
+
+      // Смещения от якоря origin(1,0.5) при scale 0.5:
+      //   dx = (spriteX - 353) * 0.5,  dy = (spriteY - 48.5) * 0.5
+      // Рот  ~(347, 52): dx = -3,  dy = +2
+      // Глаз ~(290, 35): dx = -32, dy = -7
+      this.cannonMuzzleBase = { x: SX - 3,  y: SY + 2 };
+      this.eyeBase          = { x: SX - 32, y: SY - 7 };
+    }
+
+    this.boatGfx = this.add.graphics().setDepth(8);
+    const bg = this.boatGfx;
+
+    // ── Подводный форштевень (тёмный клин в воде) ─────────────────────────────
+    bg.fillStyle(S_KEEL, 1);
+    // Клин под носом у ватерлинии — уходит в воду вниз-вправо
+    bg.fillTriangle(0, waterY,  BOW_WL_X, waterY,  0, H);
+    bg.fillTriangle(BOW_WL_X, waterY,  BOW_WL_X + 14, waterY + 18,  0, H);
+
+    // ── Главный борт (боковая грань корпуса) ──────────────────────────────────
+    // Заполняем всё пространство ЛЕВЕЕ носовой грани (прямой нос нависает сверху)
+    bg.fillStyle(S_SIDE, 1);
+    // Прямоугольник от левого края до BOW_WL_X по всей высоте
+    bg.fillRect(-10, 0, BOW_WL_X + 10, waterY + 10);
+    // Треугольник-нависание: носовая грань от (BOW_WL_X,waterY) до (BOW_DECK_X,0)
+    bg.fillTriangle(BOW_WL_X, 0,  BOW_DECK_X, 0,  BOW_WL_X, waterY);
+
+    // ── Носовая грань (наклонная поверхность носа, освещена) ─────────────────
+    // Полоса от нависающей кромки палубы (BOW_DECK_X,0) до ватерлинии (BOW_WL_X,waterY)
+    bg.fillStyle(S_BOW, 1);
+    const FACE_W = 16;  // ширина видимой плоскости носа
+    bg.fillTriangle(BOW_DECK_X,          0,
+                    BOW_DECK_X + FACE_W, 0,
+                    BOW_WL_X,            waterY);
+
+    // ── Ватерлинейный пояс (тёмная полоса вдоль ватерлинии) ──────────────────
+    bg.fillStyle(S_BELT, 1);
+    bg.fillRect(-10, waterY - 7, BOW_WL_X + 10, 7);
+
+    // ── Горизонтальные линии листов обшивки (складки купюры) ─────────────────
+    // Линии идут от левого края до носовой грани на каждом уровне
+    bg.lineStyle(1, S_LINE, 1);
+    for (let ly = 15; ly < waterY - 8; ly += 18) {
+      bg.lineBetween(-10, ly, bowX(ly), ly);
+    }
+
+    // ── Иллюминаторы (ряд у ватерлинии) ──────────────────────────────────────
+    bg.fillStyle(S_PORT, 1);
+    for (let px = 10; px < BOW_WL_X - 18; px += 22) {
+      bg.fillCircle(px, waterY - 18, 3);
+    }
+    // Второй ряд, мельче
+    for (let px = 20; px < BOW_WL_X - 30; px += 28) {
+      bg.fillCircle(px, waterY - 34, 2);
+    }
+
+    // ── Кнехт — точка крепления верёвки (на носовой грани у ватерлинии) ──────
+    const KNECHT_X = BOW_WL_X + 2;
+    const KNECHT_Y = waterY - 14;
+    bg.fillStyle(S_LINE, 1);
+    bg.fillRect(KNECHT_X - 4, KNECHT_Y - 5, 9, 9);  // основание
+    bg.fillStyle(S_KNECHT, 1);
+    bg.fillRect(KNECHT_X - 3, KNECHT_Y - 4, 7, 7);  // верхняя часть
+    bg.fillStyle(S_LINE, 1);
+    bg.fillRect(KNECHT_X - 5, KNECHT_Y - 2, 11, 3); // перекладина кнехта
+
+    // ── Покачивание корабля на воде ───────────────────────────────────────────
+    // Тяжёлое судно: медленный вертикальный дрейф ±5px (период ~2.8с)
+    // + лёгкий горизонтальный ±2px (другой период — создаёт ощущение объёма)
+    this.boatBob = { y: 0, x: 0 };
+    this.tweens.add({
+      targets: this.boatBob,
+      y: 10,
+      duration: 4000,
+      yoyo: true,
+      repeat: -1,
+      ease: 'Sine.InOut',
+    });
+    this.tweens.add({
+      targets: this.boatBob,
+      x: 2,
+      duration: 3700,
+      yoyo: true,
+      repeat: -1,
+      ease: 'Sine.InOut',
+    });
+
+    // ── Верёвка (перерисовывается каждый кадр) ────────────────────────────────
+    this.ropeGfx  = this.add.graphics().setDepth(11);
+    this.ropeNeck = { x: LX - 18, y: GY - 24 };          // пряжка упряжи ламы
+    this.ropeBoat = { x: KNECHT_X, y: KNECHT_Y };         // кнехт корабля (обновляется в update)
+    this.knechtBase  = { x: KNECHT_X, y: KNECHT_Y };       // базовые координаты без покачивания
+    this.shipEdgeX   = BOW_DECK_X + FACE_W + 4;           // правый край корпуса + запас
+
+
+
+    // Прожектор на носу корабля — лампа чуть ниже палубной кромки
+    this.beamOBase = { x: BOW_DECK_X + FACE_W - 2, y: 30 };
+    this.beamGfx   = this.add.graphics().setDepth(18);
+
+    // Фонари на набережной
+    this.lampBodyGfx = this.add.graphics().setDepth(7);
+
+    // Анимация натяжения: провис пульсирует 10↔34 — верёвка дышит под нагрузкой
+    this.ropeSag = { v: 22 };
+    this.tweens.add({
+      targets: this.ropeSag,
+      v: 8,
+      duration: 380,
+      yoyo: true,
+      repeat: -1,
+      ease: 'Sine.InOut',
+    });
+
+    // ── HUD: полоски здоровья и денег (правый верхний угол) ──────────────────
+    const BAR_W = 72, BAR_H = 6, BAR_GAP = 5, BAR_Y = 8;
+    const BAR_RIGHT = W - 8;          // правый край полоски
+    const BAR_X     = BAR_RIGHT - BAR_W;
+    const LBL_X     = BAR_X - 45;    // x надписи HP / $
+    this.barGfx = this.add.graphics().setDepth(40);
+    this.add.text(LBL_X, BAR_Y - 1, 'ЗДОРОВЬЕ', {
+      fontSize: '9px', color: '#ff5555',
+      stroke: '#000000', strokeThickness: 1,
+    }).setDepth(41).setResolution(3);
+    this.add.text(LBL_X, BAR_Y + BAR_H + BAR_GAP - 1, 'ДЕНЬГИ', {
+      fontSize: '9px', fontFamily: 'Arial, sans-serif', color: '#44ee66',
+      stroke: '#000000', strokeThickness: 1,
+    }).setDepth(41).setResolution(2);
+    this.BAR_CFG = { x: BAR_X, y: BAR_Y, w: BAR_W, h: BAR_H, gap: BAR_GAP };
+
+    // ── Таймеры состояния ─────────────────────────────────────────────────────
+    // Здоровье убывает: -2/сек
+    this.time.addEvent({
+      delay: 1000, loop: true,
+      callback: () => { if (this.gameStarted) this.state.health = Math.max(0, this.state.health - 100 / EXPECTED_GAME_TIME); },
+    });
+    // age и speed вычисляются каждый кадр из здоровья в update()
+
+    // ── Ежемесячные платежи (каждые 30 секунд) ───────────────────────────────
+    const MONTHLY = [
+      { label: 'ИНТЕРНЕТ ДОМАШНИЙ',   min: 999,  max: 1000  },
+      { label: 'МОБИЛЬНАЯ СВЯЗЬ',   min: 500,  max:  1500},
+      { label: 'КОММУНАЛКА', min: 8000,  max: 12000 },
+      { label: 'ТРАНСПОРТ',  min: 1500,  max: 3500  },
+    ];
+    this.time.addEvent({
+      delay: 30000, loop: true,
+      callback: () => {
+        for (const item of MONTHLY) {
+          this.time.delayedCall(Phaser.Math.Between(0, 5000), () => {
+            this.applyCharge(item.label, Phaser.Math.Between(item.min, item.max));
+          });
+        }
+      },
+    });
+
+    // ── Рандомные платежи ─────────────────────────────────────────────────────
+    const RANDOM_CHARGES = [
+      { label: 'ПРАЗДНИЧНАЯ ШАВУХА', min: 300,  max: 800   },
+      { label: 'ПРОДУКТЫ',           min: 3000, max: 8000  },
+      { label: 'ЛЕКАРСТВА',          min: 500,  max: 10000 },
+      { label: 'ОТДАЛ ДОЛГ',         min: 500,  max: 15000 },
+      { label: 'ШТРАФ',         min: 500,  max: 9000 },
+      { label: 'ПОДПИСКА НА МУЗЫКУ',         min: 200,  max: 400 },
+      { label: 'ОДЕЖДА',         min: 2000,  max: 12000 },
+    ];
+    const scheduleRandom = () => {
+      this.time.delayedCall(Phaser.Math.Between(2000, 10000), () => {
+        const item = Phaser.Math.RND.pick(RANDOM_CHARGES);
+        this.applyCharge(item.label, Phaser.Math.Between(item.min, item.max));
+        scheduleRandom();
+      });
+    };
+    scheduleRandom();
+
+    // ── Физическое освещение (Phaser Light2D) ────────────────────────────────
+    this.lights.enable().setAmbientColor(0x0d1828);
+
+    // Точечный свет глаза змеи — янтарное тление, двигается с корпусом
+    this.eyeLight = this.lights.addLight(
+      this.eyeBase.x, this.eyeBase.y, 55, 0xff9900, 2.0,
+    );
+
+    // Прожектор корабля: холодный ксенон, большой радиус
+    this.spotLight = this.lights.addLight(
+      this.beamOBase.x, this.beamOBase.y, 460, 0xb0ccf8, 3.2,
+    );
+
+    // Уличные фонари: тёплый янтарь, 5 источников (позиции пересчитываются каждый кадр)
+    this.lampLights = [];
+    for (let i = 0; i < 5; i++) {
+      this.lampLights.push(this.lights.addLight(i * 336, UPPER_ROAD_LINE, 105, 0xffcc60, 2.2));
+    }
+
+    // ── Пул купюр (макс. 8) ──────────────────────────────────────────────────
+    this.banknotes    = [];
+    this.banknoteIdx  = 0;          // round-robin: следующий слот
+    this.bnTimer      = 0;
+    this.bnDelay      = Phaser.Math.Between(12000, 18000);
+
+    // ── Граффити на стенах ────────────────────────────────────────────────────
+    this.graffiti = [];
+    this._graffitiNext = Phaser.Math.Between(200, 4000);
+
+    for (let i = 0; i < 8; i++) {
+      const sprite = this.add.image(0, 0, 'money1')
+        .setOrigin(0.5, 0.5)
+        .setDepth(20)
+        .setVisible(false);
+
+      this.banknotes.push({ sprite, x: 0, y: 0, vx: 0, vy: 0, grav: 0, floatPhase: 0, splashTimer: 0, state: 'idle', denomination: 5000 });
+    }
+
+    // ── Частицы (пот, слёзы) ─────────────────────────────────────────────────
+    this.particles   = [];
+    this.particleGfx = this.add.graphics().setDepth(14);
+    this.caneGfx     = this.add.graphics().setDepth(9);
+    this.eyeGfx      = this.add.graphics().setDepth(11.5); // поверх llamaHead (11)
+    this._prevAge    = -1;
+
+    // ── Кнопки управления ─────────────────────────────────────────────────────
+    this.createButtons();
+
+    // Все видимые объекты → Light2D pipeline
+    [
+      this.tl4, this.tl3, this.tl2, this.tl1,
+      this.boatGfx, this.llamaBody, this.neckGfx, this.llamaHead, this.harnessGfx,
+      this.legBL, this.legBR, this.legFL, this.legFR,
+      this.ropeGfx, this.waveGfx, this.lampBodyGfx, this.snakeImg,
+      this.particleGfx, this.caneGfx, this.eyeGfx, this.soskaImg,
+      ...this.banknotes.map(b => b.sprite),
+    ].forEach(obj => obj.setPipeline('Light2D'));
+
+    // ── Стартовый экран (HTML-оверлей поверх canvas) ──────────────────────────
+    this.gameStarted = false;
+
+    // CSS для hover-изгиба надписи ПРОГИБАЙСЯ
+    const bendStyle = document.createElement('style');
+    bendStyle.textContent = `
+      #_pb .bl { display:inline-block; transition:transform .3s ease; }
+      #_pb:hover .bl:nth-child(1)  { transform:translateY(0vmin)   rotate(4deg);   }
+      #_pb:hover .bl:nth-child(2)  { transform:translateY(.18vmin) rotate(3.2deg); }
+      #_pb:hover .bl:nth-child(3)  { transform:translateY(.32vmin) rotate(2.4deg); }
+      #_pb:hover .bl:nth-child(4)  { transform:translateY(.42vmin) rotate(1.6deg); }
+      #_pb:hover .bl:nth-child(5)  { transform:translateY(.48vmin) rotate(.8deg);  }
+      #_pb:hover .bl:nth-child(6)  { transform:translateY(.5vmin)  rotate(0deg);   }
+      #_pb:hover .bl:nth-child(7)  { transform:translateY(.48vmin) rotate(-.8deg); }
+      #_pb:hover .bl:nth-child(8)  { transform:translateY(.42vmin) rotate(-1.6deg);}
+      #_pb:hover .bl:nth-child(9)  { transform:translateY(.32vmin) rotate(-2.4deg);}
+      #_pb:hover .bl:nth-child(10) { transform:translateY(.18vmin) rotate(-3.2deg);}
+      #_pb:hover .bl:nth-child(11) { transform:translateY(0vmin)   rotate(-4deg);  }
+    `;
+    document.head.appendChild(bendStyle);
+
+    const overlay = document.createElement('div');
+    overlay.style.cssText = [
+      'position:fixed;inset:0;display:flex;flex-direction:column',
+      'align-items:center;justify-content:center;text-align:center',
+      'background:rgba(0,0,0,0.93);z-index:9999;cursor:pointer',
+      'font-family:"Arial Black",Arial,sans-serif;user-select:none',
+    ].join(';');
+
+    overlay.innerHTML = `
+      <div style="font-size:6vmin;font-weight:900;
+                 letter-spacing:.15em;margin-bottom:3vmin">
+        <span style="color:#ee3333">Ⓐ</span><span style="color:#888; text-shadow: none">т</span><span style="color:#ee3333">ГУ</span><span style="color:#888; text-shadow: none">л</span>
+      </div>
+      <div id="_pb" style="font-size:2.8vmin;color:#fff;font-weight:900;
+                  text-shadow:1px 1px 0 #000;margin-bottom:1vmin;padding-bottom:.8vmin"><span class="bl">П</span><span class="bl">Р</span><span class="bl">О</span><span class="bl">Г</span><span class="bl">И</span><span class="bl">Б</span><span class="bl">А</span><span class="bl">Й</span><span class="bl">С</span><span class="bl">Я</span><span class="bl">,</span></div>
+      <div style="font-size:2.4vmin;color:#ffdd44;font-weight:900;
+                  text-shadow:1px 1px 0 #000;margin-bottom:5vmin">
+        ЧТОБЫ СОБИРАТЬ ДЕНЬГИ
+      </div>
+      <div id="_agu_hint" style="font-size:1.6vmin;color:#666;font-weight:normal;
+                                  font-family:Arial,sans-serif">
+        НАЖМИ ЧТОБЫ НАЧАТЬ
+      </div>
+    `;
+    document.body.appendChild(overlay);
+
+    // Мигание подсказки
+    const hintEl = overlay.querySelector('#_agu_hint');
+    let blinkOn = true;
+    const blinkId = setInterval(() => {
+      blinkOn = !blinkOn;
+      hintEl.style.opacity = blinkOn ? '1' : '0.15';
+    }, 600);
+
+    overlay.addEventListener('pointerdown', () => {
+      this.gameStarted = true;
+      clearInterval(blinkId);
+      document.body.removeChild(overlay);
+    });
+  }
+
+  createButtons() {
+    const W = this.scale.width, H = this.scale.height;
+    const BW = 160, BH = 26, GAP = 4;
+    const totalH = 6 * BH + 5 * GAP;
+    const startY = Math.round((H - totalH) / 2);
+    const cx = W - Math.round(BW / 2) - 6;
+    const PALETTE = [0x1e3a5c, 0x5c1c1c, 0x1c4c2c, 0x1c2c5c, 0x3c1c5c, 0x3c1c5c];
+    const LABELS  = [
+      'ПРОГНУТЬСЯ', 'ФИГАЧИТЬ', 'ВЗЯТЬ ОТГУЛ',
+      'ПОПЛАКАТЬ', 'ПОВИДАТЬ ДРУЗЕЙ', 'ПОВИДАТЬ СЕМЬЮ',
+    ];
+
+    const mkBtn = (i, onDown, onUp) => {
+      const by  = startY + i * (BH + GAP);
+      const col = PALETTE[i];
+      const gfx = this.add.graphics().setDepth(30);
+
+      const draw = (pressed) => {
+        gfx.clear();
+        gfx.fillStyle(col, pressed ? 0.95 : 0.70);
+        gfx.fillRoundedRect(cx - BW / 2, by, BW, BH, 4);
+        if (pressed) {
+          gfx.fillStyle(0x000000, 0.20);
+          gfx.fillRoundedRect(cx - BW / 2, by, BW, BH, 4);
+        }
+        gfx.lineStyle(1, 0xffffff, pressed ? 0.55 : 0.18);
+        gfx.strokeRoundedRect(cx - BW / 2, by, BW, BH, 4);
+      };
+
+      draw(false);
+
+      this.add.text(cx, by + BH / 2, LABELS[i], {
+        fontSize: '14px',
+        fontFamily: 'Arial, sans-serif',
+        color: '#ffffff',
+        stroke: '#000000',
+        strokeThickness: 3,
+        align: 'center',
+      }).setOrigin(0.5, 0.5).setDepth(31).setResolution(8);
+
+      const zone = this.add.zone(cx - BW / 2, by, BW, BH)
+        .setOrigin(0, 0).setDepth(32).setInteractive();
+      zone.on('pointerdown', () => { draw(true);  onDown(); });
+      zone.on('pointerup',   () => { draw(false); onUp();   });
+      zone.on('pointerout',  () => { draw(false); onUp();   });
+    };
+
+    mkBtn(0, () => { this.state.isBowing = true;  this.startBow(); },
+             () => { this.state.isBowing = false; this.endBow();   });
+    mkBtn(1, () => { this.state.isSprinting = true;  }, () => { this.state.isSprinting = false; });
+    mkBtn(2, () => { this.requestDayOff();            }, () => {});
+    mkBtn(3, () => { this.startCrying();              }, () => {});
+    mkBtn(4, () => { this.hangWithFriends();           }, () => {});
+    mkBtn(5, () => { this.annoyingRelatives();        }, () => {});
+  }
+
+  _redrawLlama(age) {
+    const WOOL  = 0xf0e8d0;
+    const WOOL2 = 0xd8c9a8;
+    const HOOF  = 0x3e2c1a;
+    const BONE  = 0xe8e8e8;
+
+    // ── Тело ───────────────────────────────────────────────────────────────────
+    const lb = this.llamaBody;
+    lb.clear();
+    lb.setAlpha(1);
+
+    if (age >= 5) {
+      // ── СКЕЛЕТ: только кости ─────────────────────────────────────────────────
+      lb.lineStyle(1, BONE, 1);
+      lb.lineBetween(4, -15, 4,  -1);          // позвоночник
+      lb.lineBetween(4, -14, 38, -12);          // верхнее ребро
+      lb.lineBetween(4,  -9, 38,  -7);          // среднее ребро
+      lb.lineBetween(4,  -4, 38,  -2);          // нижнее ребро
+      lb.lineBetween(38, -12, 38, -2);          // грудина (стернум)
+      lb.strokeCircle(3,  -7,  4);              // тазовая кость
+      lb.strokeCircle(37, -11, 3);              // плечевая кость
+      lb.lineBetween(2, -16, 1, -22);           // хвостовые позвонки
+    } else if (age >= 4) {
+      // ── ДРЯБЛАЯ: обвисшая шерсть и жир ──────────────────────────────────────
+      lb.fillStyle(WOOL, 1);
+      lb.fillRect(0, -15, 42, 17);
+      lb.fillStyle(0xd8c090, 1);
+      lb.fillRect(6,   2,  28,  4);             // брюшная складка
+      lb.fillRect(3,   1,   8,  3);             // левый бок
+      lb.fillRect(32,  1,   8,  3);             // правый бок (у шеи)
+      lb.fillStyle(0xcab888, 1);
+      lb.fillRect(34, -18, 7,  6);
+      // Хвост обвис — короче и ниже
+      lb.fillStyle(0xd8c090, 1);
+      lb.fillRect(-1, -20,  6,  5);
+      lb.fillStyle(0xcab888, 1);
+      lb.fillRect( 0, -23,  4,  3);
+    } else {
+      lb.fillStyle(WOOL, 1);
+      lb.fillRect(0, -16, 40, 16);
+      lb.fillRect(-1, -22,  6,  6);             // хвост — основание
+      lb.fillStyle(WOOL2, 1);
+      lb.fillRect( 0, -26,  4,  4);             // хвост — кончик
+    }
+
+    // ── Голова ─────────────────────────────────────────────────────────────────
+    const lh = this.llamaHead;
+    lh.clear();
+    lh.setAlpha(1);
+
+    if (age >= 5) {
+      this.soskaImg.setVisible(false);
+      // ── ЧЕРЕП ────────────────────────────────────────────────────────────────
+      lh.lineStyle(1, BONE, 1);
+      lh.strokeRect(-10, -7, 20, 12);           // черепная коробка
+      lh.strokeRect(-8,  -16,  5, 10);          // ушная кость
+      // Глазница — пустая дыра
+      lh.fillStyle(0x000000, 1);
+      lh.fillCircle(1, -2, 4);
+      lh.strokeCircle(1, -2, 4);
+      // Морда-череп
+      lh.lineStyle(1, BONE, 1);
+      lh.strokeRect(8, -3, 11, 8);              // носовая кость
+      // Зубы
+      lh.fillStyle(BONE, 1);
+      lh.fillRect( 9, 4, 2, 3);
+      lh.fillRect(12, 4, 2, 3);
+      lh.fillRect(15, 4, 2, 3);
+    } else if (age >= 4) {
+      this.soskaImg.setVisible(false);
+      // ── ДРЯБЛАЯ ГОЛОВА ───────────────────────────────────────────────────────
+      // Голова чуть больше, обвисшие щёки
+      lh.fillStyle(WOOL, 1);
+      lh.fillRect(-11, -7, 22, 14);
+      // Обвисшие щёки / брыли
+      lh.fillStyle(0xcab888, 1);
+      lh.fillRect(-11, 3,   7,  5);             // левая брыль
+      lh.fillRect(  5, 3,   6,  4);             // правая
+      // Ухо — серое, обвислое
+      lh.fillStyle(0x888888, 1);
+      lh.fillRect(-9, -16, 6, 12);              // длиннее и шире обычного
+      // Морда
+      lh.fillStyle(WOOL, 1);
+      lh.fillRect(8, -3, 12, 8);
+      // Глаз полуприкрыт — тяжёлое веко
+      lh.fillStyle(0x0e0808, 1);
+      lh.fillRect(1, -5, 3, 3);
+      lh.fillStyle(0x0e0808, 0.8);
+      lh.fillRect(1, -5, 3, 2);                 // веко закрывает половину
+      // Морщины (как age 3 + гуще)
+      lh.lineStyle(1, 0x9a7858, 1);
+      lh.lineBetween(-8, -4, -2, -4);
+      lh.lineBetween(-8, -2, -2, -2);
+      lh.lineBetween(-8,  0, -2,  0);
+      lh.lineBetween(-8,  2, -1,  2);
+    } else {
+      lh.fillStyle(WOOL, 1);
+      lh.fillRect(-10, -7, 20, 13);
+      lh.fillStyle(age >= 2 ? 0xaaaaaa : WOOL2, 1);
+      lh.fillRect(-8, -16, 5, 10);
+      lh.fillStyle(WOOL, 1);
+      lh.fillRect(8, -3, 11, 7);
+      lh.fillStyle(0x0e0808, 1);
+      lh.fillRect(1, -5, 3, 3);
+      this.soskaImg.setVisible(true);
+      if (age >= 3) {
+        lh.lineStyle(1, 0x9a8868, 0.85);
+        lh.lineBetween(-7, -4, -2, -4);
+        lh.lineBetween(-7, -2, -2, -2);
+        lh.lineBetween(-7,  0, -2,  0);
+      }
+    }
+
+    // ── Трость (age >= 2) ──────────────────────────────────────────────────────
+    this.caneGfx.clear();
+    if (age >= 2) {
+      const cx = this.frontLegBaseX.FL - 1;
+      const cy = this.GY;
+      this.caneGfx.lineStyle(2, 0x6a4020, 1);
+      this.caneGfx.lineBetween(cx, cy - 10, cx, cy + 5);
+      this.caneGfx.lineBetween(cx - 3, cy - 10, cx + 3, cy - 10);
+    }
+  }
+
+  _flashAgeTrans() {
+    // Цвет вспышки усиливается с каждой стадией
+    const COLORS = [0xffffff, 0xffee88, 0xddddbb, 0xff9944, 0xff3322, 0xe8e8ff];
+    const col = COLORS[this.state.age] || 0xffffff;
+
+    const cx = this.LX + 10;   // примерный центр ламы
+    const cy = this.GY - 30;
+
+    // ── 1. Центральная вспышка — быстро гаснет ────────────────────────────────
+    const flash = this.add.graphics().setDepth(56);
+    flash.fillStyle(col, 1);
+    flash.fillRect(cx - 32, cy - 42, 74, 70);
+    flash.setAlpha(0.75);
+    this.tweens.add({
+      targets: flash, alpha: 0, duration: 220, ease: 'Sine.In',
+      onComplete: () => flash.destroy(),
+    });
+
+    // ── 2. Ударная волна — кольцо, расширяется и исчезает ────────────────────
+    const spawnRing = (delay, radius, thickness, maxScale, dur) => {
+      this.time.delayedCall(delay, () => {
+        const ring = this.add.graphics().setDepth(55).setPosition(cx, cy);
+        ring.lineStyle(thickness, col, 1);
+        ring.strokeCircle(0, 0, radius);
+        this.tweens.add({
+          targets: ring, scaleX: maxScale, scaleY: maxScale, alpha: 0,
+          duration: dur, ease: 'Sine.Out',
+          onComplete: () => ring.destroy(),
+        });
+      });
+    };
+    spawnRing(0,   6, 2, 9, 480);   // первое кольцо
+    spawnRing(80,  4, 1, 7, 380);   // эхо — чуть меньше и позже
+
+    // ── 3. Разлёт частиц — вихрь осколков ────────────────────────────────────
+    const COUNT = 14;
+    for (let i = 0; i < COUNT; i++) {
+      const angle = (i / COUNT) * Math.PI * 2 + Math.random() * 0.3;
+      const speed = Phaser.Math.Between(45, 110);
+      this.particles.push({
+        x: cx + Phaser.Math.Between(-6, 6),
+        y: cy + Phaser.Math.Between(-6, 6),
+        vx: Math.cos(angle) * speed,
+        vy: Math.sin(angle) * speed - 15,
+        life: 1.0,
+        col,
+      });
+    }
+
+    // ── 4. Тряска ламы — короткий горизонтальный импульс ─────────────────────
+    const origX = this.llamaBody.x;
+    this.tweens.add({
+      targets: [this.llamaBody, this.harnessGfx, this.llamaHead, this.neckGfx],
+      x: '+=4', duration: 40, yoyo: true, repeat: 3,
+      ease: 'Sine.InOut',
+      onComplete: () => {
+        this.llamaBody.x  = origX;
+        this.harnessGfx.x = origX;
+      },
+    });
+  }
+
+  _restartFrontWalkTweens() {
+    if (this.walkTween1f) this.walkTween1f.stop();
+    if (this.walkTween2f) this.walkTween2f.stop();
+    // Пересоздаём с текущего y объектов (после bow-tween'а это GY)
+    this.walkTween1f = this.tweens.add({ targets: this.legFR, y: this.GY - 5, duration: 260, yoyo: true, repeat: -1, ease: 'Sine.InOut' });
+    this.walkTween2f = this.tweens.add({ targets: this.legFL, y: this.GY - 5, duration: 260, yoyo: true, repeat: -1, delay: 260, ease: 'Sine.InOut' });
+  }
+
+  startBow() {
+    if (this._bowTweenBody) { this._bowTweenBody.stop(); this._bowTweenBody = null; }
+    if (this._bowTweenHead) { this._bowTweenHead.stop(); this._bowTweenHead = null; }
+    if (this._bowTweenLegs) { this._bowTweenLegs.stop(); this._bowTweenLegs = null; }
+
+    // Полностью останавливаем walk tweens передних ног — bow tween единолично владеет y
+    if (this.walkTween1f) { this.walkTween1f.stop(); this.walkTween1f = null; }
+    if (this.walkTween2f) { this.walkTween2f.stop(); this.walkTween2f = null; }
+
+    const baseTilt = AGE_TILT[this.state.age] || 0;
+    this._bowTweenBody = this.tweens.add({
+      targets: [this.llamaBody, this.harnessGfx],
+      angle: baseTilt + 35, duration: 300, ease: 'Cubic.Out',
+      onComplete: () => { this._bowTweenBody = null; },
+    });
+    this._bowTweenHead = this.tweens.add({
+      targets: this.llamaHead,
+      x: this.llamaHeadBase.x + 30,
+      y: this.llamaHeadBase.y + 70,
+      duration: 300, ease: 'Cubic.Out',
+      onComplete: () => { this._bowTweenHead = null; },
+    });
+    this.tweens.add({ targets: this.legFL, x: this.frontLegBaseX.FL - 10, angle: 28, y: this.GY + 10, duration: 300, ease: 'Cubic.Out' });
+    this._bowTweenLegs = this.tweens.add({
+      targets: this.legFR, x: this.frontLegBaseX.FR - 10, angle: 28, y: this.GY + 10, duration: 300, ease: 'Cubic.Out',
+      onComplete: () => { this._bowTweenLegs = null; },
+    });
+  }
+
+  endBow() {
+    if (this._bowTweenBody) { this._bowTweenBody.stop(); this._bowTweenBody = null; }
+    if (this._bowTweenHead) { this._bowTweenHead.stop(); this._bowTweenHead = null; }
+    if (this._bowTweenLegs) { this._bowTweenLegs.stop(); this._bowTweenLegs = null; }
+
+    const baseTilt = AGE_TILT[this.state.age] || 0;
+    this._bowTweenBody = this.tweens.add({
+      targets: [this.llamaBody, this.harnessGfx],
+      angle: baseTilt, duration: 250, ease: 'Cubic.In',
+      onComplete: () => { this._bowTweenBody = null; },
+    });
+    this._bowTweenHead = this.tweens.add({
+      targets: this.llamaHead,
+      x: this.llamaHeadBase.x,
+      y: this.llamaHeadBase.y,
+      duration: 250, ease: 'Cubic.In',
+      onComplete: () => { this._bowTweenHead = null; },
+    });
+    this.tweens.add({ targets: this.legFL, x: this.frontLegBaseX.FL, angle: 0, y: this.GY, duration: 250, ease: 'Cubic.In' });
+    this._bowTweenLegs = this.tweens.add({
+      targets: this.legFR, x: this.frontLegBaseX.FR, angle: 0, y: this.GY, duration: 250, ease: 'Cubic.In',
+      onComplete: () => { this._bowTweenLegs = null; this._restartFrontWalkTweens(); },
+    });
+  }
+
+  _spawnLlamaDrop(spread = false) {
+    const W = this.scale.width, H = this.scale.height;
+    return {
+      x:     Phaser.Math.Between(0, W),
+      y:     spread ? Phaser.Math.Between(-10, H * 0.80) : Phaser.Math.Between(-30, -4),
+      vx:    Phaser.Math.FloatBetween(-6, 6),
+      vy:    Phaser.Math.Between(20, 55),
+      u:     Phaser.Math.RND.pick([1, 1, 1, 2]),   // в основном 1px, редко 2px
+      alpha: Phaser.Math.FloatBetween(0.10, 0.35),
+      col:   Phaser.Math.RND.pick([0xf0e8d0, 0xf0e8d0, 0xd8c9a8, 0xe8d0b8]),
+    };
+  }
+
+  // Крошечная ламка: тело 6u×2u, шея 2u×2u, голова 3u×2u, 4 ножки 1u×2u, хвостик
+  _drawTinyLlama(g, x, y, u, col, alpha) {
+    g.fillStyle(col, alpha);
+    g.fillRect(x,         y,        6*u, 2*u);   // тело
+    g.fillRect(x + 4*u,   y - 2*u,  2*u, 2*u);   // шея
+    g.fillRect(x + 3*u,   y - 4*u,  3*u, 2*u);   // голова
+    g.fillRect(x - u,     y - u,    u,   2*u);    // хвост
+    g.fillRect(x + u,     y + 2*u,  u,   2*u);    // нога 1
+    g.fillRect(x + 2*u,   y + 2*u,  u,   2*u);    // нога 2
+    g.fillRect(x + 3*u,   y + 2*u,  u,   2*u);    // нога 3
+    g.fillRect(x + 4*u,   y + 2*u,  u,   2*u);    // нога 4
+  }
+
+  _spawnFgBuilding() {
+    const W = this.scale.width;
+    const scale = Phaser.Math.Between(60, 80) / 100;
+
+    const keys = ['building1','building2','building3','building4','building5','building6','building7','building8'];
+    const sprite = this.add.image(W + 60, this.UPPER_ROAD_LINE + 10, Phaser.Math.RND.pick(keys))
+      .setOrigin(0.5, 1)
+      .setDepth(0.1)
+      .setPipeline('Light2D')
+      .setScale(scale, scale);
+    this.fgBuildings.push(sprite);
+  }
+
+  _spawnGraffiti() {
+    const WORDS   = ['ЗАЧЕМ?', 'АХМАТОВА СИЛА', 'В КРАСИВОМ ПАЛЬТО', '***', '*****', 'ПЕРЕМЕН!', 'ХОЧУ ОТГУЛ'];
+    const COLORS  = ['#e03030', '#000000', '#7a7a7a', '#2060d0', '#c020c0', '#20b0b0'];
+    const word    = Phaser.Math.RND.pick(WORDS);
+    const color   = Phaser.Math.RND.pick(COLORS);
+    const size    = Phaser.Math.Between(6, 9);
+    const wallY   = this.UPPER_ROAD_LINE;
+    const y       = Phaser.Math.Between(wallY, wallY + 3);
+    const angle   = Phaser.Math.Between(-6, 6);
+    const txt = this.add.text(
+      this.scale.width + 30, y, word,
+      {
+        fontSize: size + 'px',
+        fontFamily: 'Arial Black, Impact, Arial, sans-serif',
+        color,
+        opacity: Phaser.Math.Between(0.5, 0.95),
+      },
+    ).setDepth(1).setAngle(angle).setAlpha(0.72).setResolution(4);
+    this.graffiti.push(txt);
+  }
+
+  applyCharge(label, amount) {
+    this.state.money -= amount;
+    const x = this.LX + Phaser.Math.Between(-50, 50);
+    const y = this.GY - 60 + Phaser.Math.Between(-15, 15);
+    const t = this.add.text(x, y, label + '\n-' + amount + '₽', {
+      fontSize: '11px', fontFamily: 'Arial, sans-serif', fontStyle: 'bold',
+      color: '#ff3333', stroke: '#000000', strokeThickness: 3,
+      align: 'center', lineSpacing: 2,
+    }).setOrigin(0.5, 1).setDepth(50).setResolution(8);
+    this.tweens.add({
+      targets: t, y: t.y - 30, alpha: 0, duration: 2000,
+      ease: 'Sine.Out', onComplete: () => t.destroy(),
+    });
+  }
+
+  requestDayOff() {
+    if (this._dayOffCooldown) return;
+    this._dayOffCooldown = true;
+    this.time.delayedCall(600, () => { this._dayOffCooldown = false; });
+
+    if (Math.random() < 0.8) {
+      this.showFloatingText('ОТКАЗАНО', '#ff2244');
+    } else {
+      this._dayOffActive = true;
+      this.walkTween1.timeScale  = 0;
+      this.walkTween2.timeScale  = 0;
+      if (this.walkTween1f) this.walkTween1f.timeScale = 0;
+      if (this.walkTween2f) this.walkTween2f.timeScale = 0;
+      let n = 3;
+      const tick = () => {
+        this.showFloatingText(String(n), '#44ff88');
+        n--;
+        if (n >= 0) {
+          this.time.delayedCall(1000, tick);
+        } else {
+          this._dayOffActive = false;
+          this.state.health  = Math.min(100, this.state.health + 5);
+        }
+      };
+      tick();
+    }
+  }
+
+  startCrying() {
+    if (this.state.isCrying) return;
+    this.state.isCrying = true;
+    this.time.delayedCall(4000, () => { this.state.isCrying = false; });
+  }
+
+  showBusy() {
+    this.showFloatingText(Math.random() < 0.5 ? 'ВЫ ЗАНЯТЫ' : 'ВАМ НЕКОГДА', '#ff8800');
+  }
+
+  hangWithFriends() {
+    if (Math.random() < 0.9) {
+      this.showFloatingText(Math.random() < 0.5 ? 'ВАМ НЕКОГДА' : 'ВЫ ЗАНЯТЫ', '#ff8800');
+    } else {
+      const gain = Phaser.Math.Between(5, 10);
+      this.state.health = Math.min(100, this.state.health + gain);
+      this.showFloatingText('+' + gain + ' ЗДОРОВЬЯ', '#ff88cc');
+    }
+  }
+
+  annoyingRelatives() {
+    if (Math.random() < 0.9) {
+      this.showFloatingText(Math.random() < 0.5 ? 'ВАМ НЕКОГДА' : 'ВЫ ЗАНЯТЫ', '#ff8800');
+    } else {
+      const gain = Phaser.Math.Between(5, 10);
+      this.state.health = Math.min(100, this.state.health + gain);
+      this.showFloatingText('+' + gain + ' ЗДОРОВЬЯ', '#ffcc44');
+    }
+  }
+
+  triggerGameOver() {
+    if (this.state.isDead) return;
+    this.state.isDead = true;
+    this.state.speed  = 0;
+    this.walkTween1.stop();
+    this.walkTween2.stop();
+    if (this.walkTween1f) this.walkTween1f.stop();
+    if (this.walkTween2f) this.walkTween2f.stop();
+
+    const W  = this.scale.width;
+    const H  = this.scale.height;
+    const cx = W / 2;
+    const cy = H / 2;
+
+    // Затемнение
+    const overlay = this.add.graphics().setDepth(60).setAlpha(0);
+    overlay.fillStyle(0x000000, 1);
+    overlay.fillRect(0, 0, W, H);
+    this.tweens.add({ targets: overlay, alpha: 0.82, duration: 1400, ease: 'Sine.In' });
+
+    this.time.delayedCall(700, () => {
+      const DEPTH = 62;
+      const res   = 8;
+
+      // Заголовок
+      this.add.text(cx, cy - 68, 'ИГРА ОКОНЧЕНА', {
+        fontSize: '22px', fontFamily: 'Arial Black, Arial, sans-serif', fontStyle: 'bold',
+        color: '#ff2222', stroke: '#000000', strokeThickness: 5, align: 'center',
+      }).setOrigin(0.5).setDepth(DEPTH).setResolution(res);
+
+      this.add.text(cx, cy - 46, 'ЛАМА УПАЛА. ОНА УСТАЛА.', {
+        fontSize: '10px', fontFamily: 'Arial, sans-serif',
+        color: '#888888', stroke: '#000000', strokeThickness: 2, align: 'center',
+      }).setOrigin(0.5).setDepth(DEPTH).setResolution(res);
+
+      // ── Кнопки ──────────────────────────────────────────────────────────────
+      const BTN_W = 200, BTN_H = 28, BTN_GAP = 10;
+      const btnY  = [cy - 8, cy + BTN_H + BTN_GAP - 8, cy + (BTN_H + BTN_GAP) * 2 - 8];
+
+      const mkGoBtn = (idx, label, col, onClick) => {
+        const by  = btnY[idx];
+        const gfx = this.add.graphics().setDepth(DEPTH);
+        const lbl = this.add.text(cx, by + BTN_H / 2, label, {
+          fontSize: '13px', fontFamily: 'Arial, sans-serif', fontStyle: 'bold',
+          color: '#ffffff', stroke: '#000000', strokeThickness: 3, align: 'center',
+        }).setOrigin(0.5).setDepth(DEPTH + 1).setResolution(res);
+
+        const draw = (pressed) => {
+          gfx.clear();
+          gfx.fillStyle(col, pressed ? 0.95 : 0.75);
+          gfx.fillRoundedRect(cx - BTN_W / 2, by, BTN_W, BTN_H, 4);
+          gfx.lineStyle(1, 0xffffff, pressed ? 0.5 : 0.2);
+          gfx.strokeRoundedRect(cx - BTN_W / 2, by, BTN_W, BTN_H, 4);
+        };
+        draw(false);
+
+        const zone = this.add.zone(cx - BTN_W / 2, by, BTN_W, BTN_H)
+          .setOrigin(0, 0).setDepth(DEPTH + 2).setInteractive();
+        zone.on('pointerdown', () => { draw(true);  onClick(); });
+        zone.on('pointerup',   () => draw(false));
+        zone.on('pointerout',  () => draw(false));
+
+        return { gfx, lbl };
+      };
+
+      // Кнопка 1: НАЧАТЬ ЗАНОВО
+      mkGoBtn(0, 'НАЧАТЬ ЗАНОВО', 0x1e3a5c, () => {
+        alert('НАЧАТЬ СНАЧАЛА НЕВОЗМОЖНО');
+      });
+
+      // Кнопка 2: ПРОДОЛЖИТЬ ИГРУ
+      let countdown = 3;
+      const btn2 = mkGoBtn(1, 'ПРОДОЛЖИТЬ ИГРУ', 0x1c4c2c, () => {
+        const tick = () => {
+          btn2.lbl.setText('ВОЗВРАЩЕНИЕ ЧЕРЕЗ ' + countdown + '...');
+          countdown--;
+          if (countdown >= 0) {
+            this.time.delayedCall(1000, tick);
+          } else {
+            window.location.href = 'about:blank';
+          }
+        };
+        tick();
+      });
+
+      // Кнопка 3: ДОБАВИТЬ ТРЕК К СЕБЕ
+      mkGoBtn(2, 'ДОБАВИТЬ ТРЕК К СЕБЕ', 0x3c1c5c, () => {
+        window.location.href = 'https://example.com';
+      });
+    });
+  }
+
+  showFloatingText(msg, color) {
+    const t = this.add.text(this.LX, this.GY - 65, msg, {
+      fontSize: '14px', fontFamily: 'Arial, sans-serif', fontStyle: 'bold', color,
+      stroke: '#000000', strokeThickness: 4, align: 'center',
+    }).setOrigin(0.5, 1).setDepth(50).setResolution(8);
+    this.tweens.add({
+      targets: t, y: t.y - 22, alpha: 0, duration: 1200,
+      ease: 'Sine.Out', onComplete: () => t.destroy(),
+    });
+  }
+
+  spawnBanknote() {
+    const slot = this.banknotes[this.banknoteIdx];
+    this.banknoteIdx = (this.banknoteIdx + 1) % this.banknotes.length;
+
+    // Номинал и размер купюры растут со стадией старения
+    const age = this.state.age;
+    const denomination = Phaser.Math.Between(8000, 110000);
+    const bw = 28 + age * 3;
+    slot.denomination = denomination;
+    slot.sprite.setTexture(`money${Phaser.Math.Between(1, 5)}`);
+    slot.sprite.setDisplaySize(bw * 2 / 1.2, bw / 1.2);
+
+    slot.x = this.cannonMuzzleBase.x + this.boatBob.x;
+    slot.y = this.cannonMuzzleBase.y + this.boatBob.y;
+
+    // Физика: горизонтальный бросок с небольшим разбросом
+    slot.vx   = 180 + Phaser.Math.Between(-20, 40);  // px/s вправо
+    slot.vy   = Phaser.Math.Between(-40, 10);         // px/s (слегка вверх или вниз)
+    slot.grav = 260;                                   // гравитация px/s²
+    slot.floatPhase = slot.x * 0.04;                  // уникальная фаза волны
+    slot.state = 'flying';
+    slot.sprite.setAngle(0).setVisible(true);
+  }
+
+  update(_time, delta) {
+    if (this.state.isDead) return;
+    if (!this.gameStarted) return;
+
+    if (this.state.health <= 0) { this.triggerGameOver(); return; }
+
+    const dt  = delta / 1000;
+    const age = getAge(this.state.health);
+    this.state.age   = age;
+    this.state.speed = AGE_SPEED[age];
+    if (age !== this._prevAge) {
+      this._redrawLlama(age);
+      if (this._prevAge >= 0) this._flashAgeTrans();
+      this._prevAge = age;
+    }
+
+    // Рестинг-наклон тела по стадии (не во время bow-tween)
+    if (!this.state.isBowing && !this._bowTweenBody) {
+      const tilt = AGE_TILT[age];
+      this.llamaBody.angle  = tilt;
+      this.harnessGfx.angle = tilt;
+    }
+
+    // ── Цвет глаза ламы зависит от здоровья ──────────────────────────────────
+    if (age < 5) {
+      const h = this.state.health;
+      let eyeColor;
+      if (h >= 80) {
+        eyeColor = 0x0e0808;
+      } else if (h >= 40) {
+        const t = (80 - h) / 40;                       // 0→1 по мере падения 80→40
+        eyeColor = Phaser.Display.Color.Interpolate.ColorWithColor(
+          Phaser.Display.Color.ValueToColor(0x0e0808),
+          Phaser.Display.Color.ValueToColor(0xcc1010),
+          100, Math.round(t * 100),
+        );
+        eyeColor = Phaser.Display.Color.GetColor(eyeColor.r, eyeColor.g, eyeColor.b);
+      } else {
+        const t = (40 - h) / 40;                       // 0→1 по мере падения 40→0
+        eyeColor = Phaser.Display.Color.Interpolate.ColorWithColor(
+          Phaser.Display.Color.ValueToColor(0xcc1010),
+          Phaser.Display.Color.ValueToColor(0x9090a0),
+          100, Math.round(t * 100),
+        );
+        eyeColor = Phaser.Display.Color.GetColor(eyeColor.r, eyeColor.g, eyeColor.b);
+      }
+      this.eyeGfx.clear();
+      this.eyeGfx.fillStyle(eyeColor, 1);
+      this.eyeGfx.fillRect(this.llamaHead.x + 1, this.llamaHead.y - 5, 3, 3);
+    } else {
+      this.eyeGfx.clear();
+    }
+
+    // Соска следует за головой
+    this.soskaImg.x = this.llamaHead.x + 19;
+    this.soskaImg.y = this.llamaHead.y + 1;
+
+    const spd       = this.state.speed;
+    const bowFactor = this.state.isBowing ? 0.4 : 1;
+    const effSpd    = this._dayOffActive ? 0 : (this.state.isSprinting ? spd * 2 : spd) * bowFactor;
+
+    // Спринт: дополнительный расход здоровья
+    if (this.state.isSprinting) {
+      this.state.health = Math.max(0, this.state.health - 5 * dt);
+    }
+
+    // Все слои масштабируются на effSpd — спринт ускоряет мир
+    this.tl4.tilePositionX += BASE_SPEED * 0.1 * effSpd * dt;
+    this.tl3.tilePositionX += BASE_SPEED * 0.3 * effSpd * dt;
+    this.tl2.tilePositionX += BASE_SPEED * 1.0 * effSpd * dt;
+    this.tl1.tilePositionX += BASE_SPEED * 1.0 * effSpd * dt;
+
+    // ── Ламопад ───────────────────────────────────────────────────────────────
+    this.llamaRainGfx.clear();
+    for (let i = 0; i < this.llamaRainDrops.length; i++) {
+      const d = this.llamaRainDrops[i];
+      d.x += d.vx * dt;
+      d.y += d.vy * dt;
+      if (d.y > this.scale.height + 20) {
+        this.llamaRainDrops[i] = this._spawnLlamaDrop();
+        continue;
+      }
+      this._drawTinyLlama(this.llamaRainGfx, Math.round(d.x), Math.round(d.y), d.u, d.col, d.alpha);
+    }
+
+    // ── Ближние здания (foreground, 0.6x) ────────────────────────────────────
+    this.fgBuildingTimer -= delta;
+    if (this.fgBuildingTimer <= 0) {
+      this.fgBuildingTimer = Phaser.Math.Between(6000, 14000);
+      this._spawnFgBuilding();
+    }
+    for (let i = this.fgBuildings.length - 1; i >= 0; i--) {
+      const b = this.fgBuildings[i];
+      b.x -= BASE_SPEED * 0.6 * effSpd * dt;
+      if (b.x < -100) {
+        b.destroy();
+        this.fgBuildings.splice(i, 1);
+      }
+    }
+
+    // ── Граффити ──────────────────────────────────────────────────────────────
+    this._graffitiNext -= delta;
+    if (this._graffitiNext <= 0) {
+      this._spawnGraffiti();
+      this._graffitiNext = Phaser.Math.Between(3000, 10000);
+    }
+    for (let i = this.graffiti.length - 1; i >= 0; i--) {
+      this.graffiti[i].x -= BASE_SPEED * 1.0 * effSpd * dt;
+      if (this.graffiti[i].x < -80) {
+        this.graffiti[i].destroy();
+        this.graffiti.splice(i, 1);
+      }
+    }
+
+    // Синусоидная граница воды
+    // Две наложенных волны с разными частотами → органичный, не механический рисунок
+    this.waveTime += dt;
+    const wt      = this.waveTime;
+    const baseY   = this.waterY;
+    const sceneW  = this.scale.width;
+    const AMP     = 3;    // амплитуда ±3px
+    const FREQ1   = 0.040, SPD1 = 1.1;   // основная волна
+    const FREQ2   = 0.071, SPD2 = 0.65;  // вторичная, сдвигает форму
+    // Цвет воды у ватерлинии (верхний градиент тайла) и асфальт у края дороги
+    const C_WATER = 0x183f5c;
+    const C_ROAD  = 0x282826;
+
+    this.waveGfx.clear();
+    for (let x = 0; x < sceneW; x++) {
+      const dy = Math.round(
+        AMP * Math.sin(x * FREQ1 + wt * SPD1) +
+        (AMP * 0.5) * Math.sin(x * FREQ2 - wt * SPD2),
+      );
+      const edgeY = baseY + dy;
+      if (dy < 0) {
+        // волна выше ватерлинии — заполняем водой
+        this.waveGfx.fillStyle(C_WATER, 1);
+        this.waveGfx.fillRect(x, edgeY, 1, -dy);
+      } else if (dy > 0 && x >= this.shipEdgeX) {
+        // волна ниже ватерлинии — заполняем дорогой (не в зоне корабля)
+        this.waveGfx.fillStyle(C_ROAD, 1);
+        this.waveGfx.fillRect(x, baseY, 1, dy);
+      }
+    }
+
+    // ── Фонари на набережной ──────────────────────────────────────────────────
+    {
+      const TILE_W  = 336;   // период расстановки фонарей (каждые 3 тайла дороги)
+      const LX_TILE = 112;   // смещение фонаря внутри периода
+      const baseY   = this.UPPER_ROAD_LINE; // базовая линия дороги, по которой стоят фонари
+      const headY   = baseY - 26;   // высота головки фонаря
+      const tilePos = this.tl2.tilePositionX;
+      const startX  = ((LX_TILE - tilePos % TILE_W) % TILE_W + TILE_W) % TILE_W;
+
+      this.lampBodyGfx.clear();
+      // Начинаем на период раньше экрана — свет плавно уходит за край, не обрезается
+      for (let lx = startX - TILE_W; lx < sceneW + TILE_W; lx += TILE_W) {
+        // Столб
+        this.lampBodyGfx.fillStyle(0x242230, 1);
+        this.lampBodyGfx.fillRect(lx - 1, headY + 5, 2, baseY - headY - 5);
+        // Кронштейн
+        this.lampBodyGfx.fillStyle(0x1e1c28, 1);
+        this.lampBodyGfx.fillRect(lx - 1, headY + 4, 5, 1);
+        // Корпус фонаря
+        this.lampBodyGfx.fillStyle(0x2a2840, 1);
+        this.lampBodyGfx.fillRect(lx - 3, headY, 7, 5);
+        // Стекло — тёплое янтарное
+        this.lampBodyGfx.fillStyle(0xffd870, 1);
+        this.lampBodyGfx.fillRect(lx - 2, headY + 1, 5, 3);
+      }
+
+      // Обновляем позиции точечных источников (включая заэкранные)
+      for (let i = 0; i < this.lampLights.length; i++) {
+        this.lampLights[i].x = startX - TILE_W + i * TILE_W;
+        this.lampLights[i].y = headY;
+      }
+    }
+
+    // ── HUD полоски ───────────────────────────────────────────────────────────
+    {
+      const { x, y, w, h, gap } = this.BAR_CFG;
+      const hy = y, my = y + h + gap;
+      this.barGfx.clear();
+      // фон
+      this.barGfx.fillStyle(0x110808, 0.85); this.barGfx.fillRect(x, hy, w, h);
+      this.barGfx.fillStyle(0x081108, 0.85); this.barGfx.fillRect(x, my, w, h);
+      // заливка
+      const hw = Math.round(w * Math.min(this.state.health, 100) / 100);
+      const mw = Math.round(w * Math.min(this.state.money, 1_000_000) / 1_000_000);
+      if (hw > 0) { this.barGfx.fillStyle(0xdd2222, 1); this.barGfx.fillRect(x, hy, hw, h); }
+      if (mw > 0) { this.barGfx.fillStyle(0x22dd55, 1); this.barGfx.fillRect(x, my, mw, h); }
+      // рамка
+      this.barGfx.lineStyle(1, 0x444444, 0.7);
+      this.barGfx.strokeRect(x, hy, w, h);
+      this.barGfx.strokeRect(x, my, w, h);
+      // долг: мигающий красный текст справа от пустой полоски
+      if (this.state.money < 0) {
+        const debt = Math.abs(Math.round(this.state.money));
+        if (!this._debtTxt) {
+          this._debtTxt = this.add.text(x + w + 3, my + h / 2, '', {
+            fontSize: '8px', fontFamily: 'Arial, sans-serif', fontStyle: 'bold',
+            color: '#ff3333', stroke: '#000000', strokeThickness: 1,
+          }).setOrigin(0, 0.5).setDepth(41).setResolution(4);
+        }
+        this._debtTxt.setText('-' + debt.toLocaleString('ru') + '₽');
+        this._debtTxt.setAlpha(0.6 + 0.4 * Math.abs(Math.sin(this.time.now * 0.004)));
+      } else if (this._debtTxt) {
+        this._debtTxt.setText('');
+      }
+    }
+
+    // Прожектор: обновляем позицию источника (следует за качанием корабля)
+    this.spotLight.x = this.beamOBase.x + this.boatBob.x;
+    this.spotLight.y = this.beamOBase.y + this.boatBob.y;
+    this.beamGfx.clear();
+
+    // ── Частицы (пот при спринте, слёзы при плаче) ───────────────────────────
+    if (this.state.isSprinting && Math.random() < 40 * dt) {
+      // Пот — по всей спине ламы (верхний край тела LX-20..LX+20)
+      this.particles.push({
+        x: this.LX + Phaser.Math.Between(-20, 20),
+        y: this.GY - 30 + Phaser.Math.Between(-1, 1),
+        vx: Phaser.Math.FloatBetween(-10, 10),
+        vy: Phaser.Math.FloatBetween(-30, -8),
+        life: 1.0, col: 0xaaccff,
+      });
+    }
+    if (this.state.isCrying && Math.random() < 12 * dt) {
+      // Глаз в локальных coords llamaHead: fillRect(1,-5,3,3) → центр (2,-4)
+      this.particles.push({
+        x: this.llamaHead.x + 2, y: this.llamaHead.y - 4,
+        vx: Phaser.Math.FloatBetween(-2, 2), vy: 10,
+        life: 1.0, col: 0x3366ff,
+      });
+    }
+    this.particleGfx.clear();
+    for (let i = this.particles.length - 1; i >= 0; i--) {
+      const p = this.particles[i];
+      p.vy   += 130 * dt;
+      p.x    += p.vx * dt;
+      p.y    += p.vy * dt;
+      p.life -= dt * 2.0;
+      if (p.life <= 0) { this.particles.splice(i, 1); continue; }
+      this.particleGfx.fillStyle(p.col, p.life);
+      this.particleGfx.fillRect(Math.round(p.x), Math.round(p.y), 2, 3);
+    }
+
+    // Задние ноги замедляются при прогибе; передние управляются bow/walk tweens
+    const walkScale = this.state.isBowing ? effSpd * 0.25 : effSpd;
+    this.walkTween1.timeScale = walkScale;
+    this.walkTween2.timeScale = walkScale;
+    if (this.walkTween1f) this.walkTween1f.timeScale = effSpd;
+    if (this.walkTween2f) this.walkTween2f.timeScale = effSpd;
+
+    // Корабль и пушка покачиваются вместе
+    this.boatGfx.x  = this.boatBob.x;
+    this.boatGfx.y  = this.boatBob.y;
+    this.snakeImg.x = this.snakeBase.x + this.boatBob.x;
+    this.snakeImg.y = this.snakeBase.y + this.boatBob.y;
+    this.eyeLight.x = this.eyeBase.x + this.boatBob.x;
+    this.eyeLight.y = this.eyeBase.y + this.boatBob.y;
+
+    // Кнехт двигается вместе с корпусом — обновляем точку крепления верёвки
+    this.ropeBoat.x = this.knechtBase.x + this.boatBob.x;
+    this.ropeBoat.y = this.knechtBase.y + this.boatBob.y;
+
+    // Пряжка упряжи + шея следуют повороту тела
+    {
+      const r = this.llamaBody.rotation;
+      const cos = Math.cos(r), sin = Math.sin(r);
+      const rot = (lx, ly) => ({
+        x: this.llamaBodyPivot.x + lx * cos - ly * sin,
+        y: this.llamaBodyPivot.y + lx * sin + ly * cos,
+      });
+
+      // Пряжка в локальных coords тела: (2, -10)
+      const buckle = rot(2, -10);
+      this.ropeNeck.x = buckle.x;
+      this.ropeNeck.y = buckle.y;
+
+      // Шея: от верхнего края тела (37, -16) до основания головы
+      // llamaHead.y + 4 ≈ нижний край головы (head rect нарисован от y=-7)
+      const base = rot(37, -16);           // точка на теле (основание шеи)
+      const tip  = { x: this.llamaHead.x - 4, y: this.llamaHead.y + 4 }; // точка на голове
+
+      const dx = tip.x - base.x, dy = tip.y - base.y;
+      const len = Math.sqrt(dx * dx + dy * dy) || 1;
+      const neckHW = age >= 5 ? 2 : age >= 4 ? 6 : 4; // полуширина шеи по стадии
+      const px = -dy / len * neckHW, py = dx / len * neckHW;
+
+      this.neckGfx.clear();
+      const neckPts = [
+        { x: base.x - px, y: base.y - py },
+        { x: base.x + px, y: base.y + py },
+        { x: tip.x  + px, y: tip.y  + py },
+        { x: tip.x  - px, y: tip.y  - py },
+      ];
+      if (age >= 5) {
+        this.neckGfx.lineStyle(1, 0xe8e8e8, 1);
+        this.neckGfx.strokePoints(neckPts, true);
+      } else {
+        // Age 4: чуть темнее, дряблый цвет; остальные — нормальная шерсть
+        this.neckGfx.fillStyle(age >= 4 ? 0xd8c090 : 0xf0e8d0, 1);
+        this.neckGfx.fillPoints(neckPts, true);
+      }
+    }
+
+    // ── Сбор купюр головой при прогибе ───────────────────────────────────────
+    if (this.state.isBowing) {
+      const hx = this.llamaHead.x, hy = this.llamaHead.y;
+      for (const bn of this.banknotes) {
+        if (bn.state !== 'floating') continue;
+        const dx = bn.x - hx, dy = bn.y - hy;
+        if (dx * dx + dy * dy < 12 * 12) {
+          bn.state = 'idle';
+          this.tweens.add({
+            targets: [bn.sprite], scaleX: 0, scaleY: 0, duration: 150,
+            onComplete: () => {
+              bn.sprite.setVisible(false).setAngle(0);
+            },
+          });
+          this.state.money += bn.denomination;
+          const t = this.add.text(hx, hy - 10, '+' + bn.denomination, {
+            fontSize: '12px', fontFamily: 'Arial, sans-serif', fontStyle: 'bold',
+            color: '#ffdd00', stroke: '#000000', strokeThickness: 3,
+          }).setOrigin(0.5, 1).setDepth(50).setResolution(8);
+          this.tweens.add({
+            targets: t, y: t.y - 30, alpha: 0, duration: 800,
+            ease: 'Sine.Out', onComplete: () => t.destroy(),
+          });
+        }
+      }
+    }
+
+    // ── Купюры ────────────────────────────────────────────────────────────────
+    this.bnTimer += delta;
+    if (this.bnTimer >= this.bnDelay) {
+      this.bnTimer = 0;
+      this.bnDelay = Phaser.Math.Between(12000, 18000);
+      this.spawnBanknote();
+    }
+    for (const bn of this.banknotes) {
+      if (bn.state === 'idle') continue;
+
+      if (bn.state === 'flying') {
+        // Парабола: горизонталь равномерно, вертикаль с ускорением
+        bn.vy += bn.grav * dt;
+        bn.x  += bn.vx  * dt;
+        bn.y  += bn.vy  * dt;
+        // Угол следует вектору скорости — кувыркается в воздухе
+        const ang = Math.atan2(bn.vy, bn.vx) * (180 / Math.PI);
+        bn.sprite.setAngle(ang * 0.5);
+
+        // Касание воды — переход к всплеску
+        if (bn.y >= baseY + 4) {
+          bn.y   = baseY + 4;
+          bn.vy  = -Math.abs(bn.vy) * 0.22;  // небольшой отскок
+          bn.vx *= 0.08;                       // резкое торможение (вода)
+          bn.state       = 'splashing';
+          bn.splashTimer = 0;
+          bn.floatPhase  = bn.x * 0.04;
+
+          // Визуальный всплеск: два расходящихся эллипса
+          for (const [sx, sy, w, h, dur] of [
+            [bn.x, bn.y - 1, 20, 7,  380],   // основная волна
+            [bn.x, bn.y - 2, 10, 12, 260],   // вертикальный выброс
+          ]) {
+            const sg = this.add.graphics().setDepth(19).setAlpha(0.72);
+            sg.fillStyle(0xb8d4e4, 1);
+            sg.fillEllipse(0, 0, w, h);
+            sg.x = sx; sg.y = sy;
+            this.tweens.add({
+              targets: sg, scaleX: 2.6, scaleY: 1.8, alpha: 0,
+              duration: dur, ease: 'Quad.Out',
+              onComplete: () => sg.destroy(),
+            });
+          }
+
+          // Приземление: лёгкий сплющивающий squish (относительно текущего масштаба)
+          const sx = bn.sprite.scaleX, sy = bn.sprite.scaleY;
+          bn.sprite.setScale(sx * 1.35, sy * 0.65);
+          this.tweens.add({
+            targets: bn.sprite, scaleX: sx, scaleY: sy,
+            duration: 280, ease: 'Back.Out',
+          });
+        }
+
+      } else if (bn.state === 'splashing') {
+        // Полная гравитация — дуга отскока физически корректна
+        bn.vy += bn.grav * dt;
+        bn.x  += bn.vx * dt;
+        bn.y  += bn.vy * dt;
+        bn.vx *= Math.max(0, 1 - 6 * dt);    // затухание горизонтали
+
+        // Угол плавно выравнивается к горизонтали
+        bn.sprite.setAngle(bn.sprite.angle * (1 - 8 * dt));
+
+        // Второе касание воды — переход к плаванию (без таймера)
+        if (bn.y >= baseY + 4 && bn.vy > 0) {
+          bn.y  = baseY + 4;
+          bn.vy = 0;
+          bn.vx = 0;
+          bn.state = 'floating';
+          bn.floatPhase = bn.x * 0.04;
+        }
+
+      } else {
+        // Плывёт влево по течению
+        bn.x -= BASE_SPEED * effSpd * dt;
+        if (bn.x < -40) {
+          bn.state = 'idle';
+          bn.sprite.setAngle(0).setVisible(false);
+          this.state.money += 5;
+          continue;
+        }
+        // Позиция Y повторяет волновую формулу waveGfx
+        bn.y = baseY + 4 +
+          AMP * Math.sin(bn.x * FREQ1 + wt * SPD1) +
+          (AMP * 0.5) * Math.sin(bn.x * FREQ2 - wt * SPD2);
+        // Крен на волне — уникальная фаза у каждой купюры
+        const rock = Math.sin(wt * 1.8 + bn.floatPhase) * 7;
+        bn.sprite.setAngle(rock);
+      }
+
+      bn.sprite.x = Math.round(bn.x);
+      bn.sprite.y = Math.round(bn.y);
+    }
+
+    // Верёвка: квадратичная кривая с анимированным провисом
+    // Натяжение пульсирует через tween ropeSag.v — эффект живой тяги
+    const { x: nx, y: ny } = this.ropeNeck;
+    const { x: bx, y: by } = this.ropeBoat;
+    const cpx = nx + (bx - nx) * 0.42;
+    const cpy = (ny + by) / 2 + this.ropeSag.v;
+
+    const drawRopeCurve = (ox, oy) => {
+      this.ropeGfx.beginPath();
+      this.ropeGfx.moveTo(nx + ox, ny + oy);
+      const STEPS = 20;
+      for (let i = 1; i <= STEPS; i++) {
+        const t = i / STEPS, mt = 1 - t;
+        this.ropeGfx.lineTo(
+          mt * mt * (nx + ox) + 2 * mt * t * (cpx + ox) + t * t * (bx + ox),
+          mt * mt * (ny + oy) + 2 * mt * t * (cpy + oy) + t * t * (by + oy),
+        );
+      }
+      this.ropeGfx.strokePath();
+    };
+
+    this.ropeGfx.clear();
+    // Тень (имитирует толщину верёвки и ощущение веса)
+    this.ropeGfx.lineStyle(3, 0x3a1e08, 1);
+    drawRopeCurve(0, 1);
+    // Основная верёвка
+    this.ropeGfx.lineStyle(2, 0xb08030, 1);
+    drawRopeCurve(0, 0);
+    // Бликующий волосок (ощущение натяжения)
+    this.ropeGfx.lineStyle(1, 0xd8b060, 1);
+    drawRopeCurve(-0.5, -0.5);
+  }
+}
+
+// ─── Phaser config ────────────────────────────────────────────────────────────
+
+const config = {
+  type: Phaser.AUTO,
+  width: 480,
+  height: 270,
+  backgroundColor: '#060608',
+  scene: [GameScene],
+  scale: {
+    mode: Phaser.Scale.EXPAND,
+    autoCenter: Phaser.Scale.CENTER_BOTH,
+  },
+  // Увеличиваем лимит источников: 1 прожектор + ~8 фонарей + запас
+  // antialias: true — bilinear scaling for text textures (makes setResolution work correctly)
+  // roundPixels: true — integer pixel positioning for pixel art objects (no sub-pixel wobble)
+  // CSS image-rendering: pixelated handles the final canvas→screen upscale as nearest-neighbor
+  render: { maxLights: 16, antialias: true, roundPixels: true },
+};
+
+new Phaser.Game(config);
+</script>
+</body>
+</html>

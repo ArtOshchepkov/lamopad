@@ -1437,26 +1437,29 @@ class GameScene extends Phaser.Scene {
 
       // ── Кнопки ──────────────────────────────────────────────────────────────
       const BTN_W = 200, BTN_H = 28, BTN_GAP = 10;
-      const btnY  = [cy - 8, cy + BTN_H + BTN_GAP - 8, cy + (BTN_H + BTN_GAP) * 2 - 8];
+      const CTA_W = 244, CTA_H = 42;
+      // Порядок: ПРОДОЛЖИТЬ · [CTA] · НАЧАТЬ ЗАНОВО
+      // Всего высота блока: 28 + 10 + 42 + 10 + 28 = 118 → старт = cy - 59 + небольшой сдвиг вниз
+      const btnY = [cy - 26, cy + 12, cy + 64];
 
-      const mkGoBtn = (idx, label, col, onClick) => {
+      const mkGoBtn = (idx, label, col, onClick, w = BTN_W, h = BTN_H, fs = '13px') => {
         const by  = btnY[idx];
         const gfx = this.add.graphics().setDepth(DEPTH);
-        const lbl = this.add.text(cx, by + BTN_H / 2, label, {
-          fontSize: '13px', fontFamily: 'Arial, sans-serif', fontStyle: 'bold',
+        const lbl = this.add.text(cx, by + h / 2, label, {
+          fontSize: fs, fontFamily: 'Arial, sans-serif', fontStyle: 'bold',
           color: '#ffffff', stroke: '#000000', strokeThickness: 3, align: 'center',
         }).setOrigin(0.5).setDepth(DEPTH + 1).setResolution(res);
 
         const draw = (pressed) => {
           gfx.clear();
           gfx.fillStyle(col, pressed ? 0.95 : 0.75);
-          gfx.fillRoundedRect(cx - BTN_W / 2, by, BTN_W, BTN_H, 4);
-          gfx.lineStyle(1, 0xffffff, pressed ? 0.5 : 0.2);
-          gfx.strokeRoundedRect(cx - BTN_W / 2, by, BTN_W, BTN_H, 4);
+          gfx.fillRoundedRect(cx - w / 2, by, w, h, 5);
+          gfx.lineStyle(pressed ? 1 : 2, 0xffffff, pressed ? 0.5 : 0.45);
+          gfx.strokeRoundedRect(cx - w / 2, by, w, h, 5);
         };
         draw(false);
 
-        const zone = this.add.zone(cx - BTN_W / 2, by, BTN_W, BTN_H)
+        const zone = this.add.zone(cx - w / 2, by, w, h)
           .setOrigin(0, 0).setDepth(DEPTH + 2).setInteractive();
         zone.on('pointerdown', () => { draw(true);  onClick(); });
         zone.on('pointerup',   () => draw(false));
@@ -1465,29 +1468,29 @@ class GameScene extends Phaser.Scene {
         return { gfx, lbl };
       };
 
-      // Кнопка 1: НАЧАТЬ ЗАНОВО
-      mkGoBtn(0, 'НАЧАТЬ ЗАНОВО', 0x1e3a5c, () => {
-        alert('НАЧАТЬ СНАЧАЛА НЕВОЗМОЖНО');
-      });
-
-      // Кнопка 2: ПРОДОЛЖИТЬ ИГРУ
+      // Кнопка 1: ПРОДОЛЖИТЬ ИГРУ
       let countdown = 3;
-      const btn2 = mkGoBtn(1, 'ПРОДОЛЖИТЬ ИГРУ', 0x1c4c2c, () => {
+      const btn2 = mkGoBtn(0, 'ПРОДОЛЖИТЬ ИГРУ', 0x1c4c2c, () => {
         const tick = () => {
-          btn2.lbl.setText('ВОЗВРАЩЕНИЕ ЧЕРЕЗ ' + countdown + '...');
+          btn2.lbl.setText('ИГРА ПРОДОЛЖИТСЯ В ЛЮБОМ СЛУЧАЕ ' + countdown + '...');
           countdown--;
           if (countdown >= 0) {
             this.time.delayedCall(1000, tick);
           } else {
-            window.location.href = 'about:blank';
+            this.scene.restart();
           }
         };
         tick();
       });
 
-      // Кнопка 3: ДОБАВИТЬ ТРЕК К СЕБЕ
-      mkGoBtn(2, 'ДОБАВИТЬ ТРЕК К СЕБЕ', 0x3c1c5c, () => {
+      // Кнопка 2 (CTA): ДОБАВИТЬ ТРЕК К СЕБЕ
+      mkGoBtn(1, 'ДОБАВИТЬ ТРЕК К СЕБЕ', 0x3c1c5c, () => {
         window.location.href = 'https://example.com';
+      }, CTA_W, CTA_H, '16px');
+
+      // Кнопка 3: НАЧАТЬ ЗАНОВО
+      mkGoBtn(2, 'НАЧАТЬ ЗАНОВО', 0x1e3a5c, () => {
+        alert('НАЧАТЬ СНАЧАЛА НЕВОЗМОЖНО');
       });
     });
   }

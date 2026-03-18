@@ -764,9 +764,10 @@ class GameScene extends Phaser.Scene {
       { label: 'ПРОДУКТЫ',           min: 3000, max: 8000  },
       { label: 'ЛЕКАРСТВА',          min: 500,  max: 10000 },
       { label: 'ОТДАЛ ДОЛГ',         min: 500,  max: 15000 },
-      { label: 'ШТРАФ',         min: 500,  max: 9000 },
-      { label: 'ПОДПИСКА НА МУЗЫКУ',         min: 200,  max: 400 },
-      { label: 'ОДЕЖДА',         min: 2000,  max: 12000 },
+      { label: 'ШТРАФ',              min: 500,  max: 9000 },
+      { label: 'ПОДПИСКА НА МУЗЫКУ', min: 200,  max: 400 },
+      { label: 'ОДЕЖДА',             min: 3000,  max: 18000 },
+      { label: 'ТАКСИ',              min: 800,  max: 3000 },
     ];
     const scheduleRandom = () => {
       this.time.delayedCall(Phaser.Math.Between(2000, 10000), () => {

@@ -11,7 +11,7 @@
   <meta property="og:type" content="music.song">
   <link rel="canonical" href="/osen-9/text/">
 
-  <link rel="icon" href="/img/lamopad_cursor_48px.png" sizes="any">
+  <link rel="icon" href="/osen-9/osen_32px.JPG" sizes="any">
 
   <script type="application/ld+json">
   {
@@ -52,85 +52,38 @@
       cursor: url('/img/lamopad_cursor_48px.png') 0 0, auto;
     }
 
-    /* ── atmosphere layers ──────────────────────────────── */
-
-    /* warm glow from bottom — dying summer */
-    .glow-bottom {
-      position: fixed;
-      bottom: 0; left: 0; right: 0;
-      height: 50vh;
-      pointer-events: none;
-      z-index: 0;
-      background: radial-gradient(ellipse 80% 60% at 30% 100%,
-        rgba(205, 89, 38, 0.18) 0%,
-        rgba(236, 144, 66, 0.08) 45%,
-        transparent 100%
-      );
+    /* ── window background ──────────────────────────────── */
+    body {
+      background:
+        radial-gradient(ellipse 35% 50% at 10% 75%, rgba(205, 89, 38, 0.45) 0%, transparent 65%),
+        radial-gradient(ellipse 25% 35% at 85% 25%, rgba(236, 144, 66, 0.22) 0%, transparent 60%),
+        radial-gradient(ellipse 50% 30% at 50% 100%, rgba(164, 77, 50, 0.28) 0%, transparent 65%),
+        #0a0c07;
     }
 
-    /* cold mist from top — autumn arriving */
-    .mist-top {
-      position: fixed;
-      top: 0; left: 0; right: 0;
-      height: 35vh;
-      pointer-events: none;
-      z-index: 0;
-      background: linear-gradient(to bottom,
-        rgba(118, 131, 137, 0.12) 0%,
-        rgba(118, 131, 137, 0.05) 50%,
-        transparent 100%
-      );
-    }
-
-    /* rain streaks — two layers, different speeds */
-    .rain {
+    /* ── canvas: rain + drops ───────────────────────────── */
+    #rain-canvas {
       position: fixed;
       inset: 0;
-      pointer-events: none;
       z-index: 0;
-      overflow: hidden;
-      opacity: 0.55;
+      pointer-events: none;
     }
-    .rain::before,
-    .rain::after {
-      content: '';
-      position: absolute;
-      top: -100%;
-      left: 0; right: 0;
-      height: 200%;
-    }
-    .rain::before {
-      background-image: repeating-linear-gradient(
-        to bottom,
-        transparent 0px, transparent 60px,
-        rgba(118, 131, 137, 0.07) 60px, rgba(118, 131, 137, 0.07) 62px
-      );
-      background-size: 11px 80px;
-      animation: rainA 2.8s linear infinite;
-    }
-    .rain::after {
-      background-image: repeating-linear-gradient(
-        to bottom,
-        transparent 0px, transparent 40px,
-        rgba(118, 131, 137, 0.05) 40px, rgba(118, 131, 137, 0.05) 41px
-      );
-      background-size: 17px 60px;
-      background-position: 7px 15px;
-      animation: rainB 1.9s linear infinite;
-    }
-    @keyframes rainA {
-      from { transform: translateY(0); }
-      to   { transform: translateY(80px); }
-    }
-    @keyframes rainB {
-      from { transform: translateY(0); }
-      to   { transform: translateY(60px); }
+
+    /* ── glass fog overlay ──────────────────────────────── */
+    .glass-fog {
+      position: fixed;
+      inset: 0;
+      z-index: 1;
+      pointer-events: none;
+      background: rgba(200, 210, 215, 0.045);
+      /* subtle vignette — colder at edges like real glass */
+      box-shadow: inset 0 0 120px rgba(180, 200, 210, 0.06);
     }
 
     /* ── layout ─────────────────────────────────────────── */
     .page {
       position: relative;
-      z-index: 1;
+      z-index: 2;
       max-width: 600px;
       margin: 0 auto;
       padding: 10vh 24px 10vh;
@@ -148,8 +101,7 @@
       width: 96px;
       height: 96px;
       object-fit: cover;
-      image-rendering: pixelated;
-      opacity: 0.85;
+      opacity: 0.9;
     }
 
     .title {
@@ -288,14 +240,13 @@
 </head>
 <body>
 
-<div class="glow-bottom"></div>
-<div class="mist-top"></div>
-<div class="rain"></div>
+<canvas id="rain-canvas"></canvas>
+<div class="glass-fog"></div>
 
 <main class="page">
 
   <header class="header">
-    <img class="cover" src="/osen-9/osen_32px.JPG" alt="Осень, девять — Ламопад">
+    <img class="cover" src="/osen-9/osen_1024px.JPG" alt="Осень, девять — Ламопад">
     <h1 class="title">
       <span class="warm">Осень,</span> <span class="cold">девять</span>
     </h1>
@@ -390,5 +341,110 @@
 
 </main>
 
+<script>
+(function () {
+  const canvas = document.getElementById('rain-canvas');
+  const ctx = canvas.getContext('2d');
+
+  function resize() {
+    canvas.width  = window.innerWidth;
+    canvas.height = window.innerHeight;
+  }
+  resize();
+  window.addEventListener('resize', resize);
+
+  // ── Rain streaks — flying past outside ──────────────────
+  function Streak() { this.reset(true); }
+  Streak.prototype.reset = function (scatter) {
+    this.x   = Math.random() * canvas.width;
+    this.y   = scatter ? Math.random() * canvas.height : -30;
+    this.len = 18 + Math.random() * 28;
+    this.vy  = 14 + Math.random() * 10;
+    this.vx  = -2 - Math.random() * 3;
+    this.a   = 0.10 + Math.random() * 0.18;
+  };
+  Streak.prototype.update = function () {
+    this.x += this.vx;
+    this.y += this.vy;
+    if (this.y > canvas.height + 40) this.reset(false);
+  };
+  Streak.prototype.draw = function () {
+    ctx.beginPath();
+    ctx.moveTo(this.x, this.y);
+    ctx.lineTo(this.x - this.vx * (this.len / this.vy),
+               this.y - this.len);
+    ctx.strokeStyle = 'rgba(175, 200, 215, ' + this.a + ')';
+    ctx.lineWidth = 0.7;
+    ctx.stroke();
+  };
+
+  // ── Glass drops — hit and slide on the pane ─────────────
+  function Drop() { this.reset(true); }
+  Drop.prototype.reset = function (scatter) {
+    this.x      = Math.random() * canvas.width;
+    this.y      = scatter ? Math.random() * canvas.height : -12;
+    this.r      = 3 + Math.random() * 7;
+    this.vy     = 0;
+    this.ay     = 0.012 + Math.random() * 0.022;
+    this.maxVy  = 0.4  + Math.random() * 1.0;
+    this.a      = 0.45 + Math.random() * 0.35;
+    this.trail  = [];
+    // pause before starting to slide (surface tension)
+    this.wait   = Math.floor(Math.random() * 180);
+  };
+  Drop.prototype.update = function () {
+    if (this.wait > 0) { this.wait--; return; }
+    this.vy = Math.min(this.vy + this.ay, this.maxVy);
+    this.y += this.vy;
+    this.trail.push({ x: this.x, y: this.y - this.r * 0.8 });
+    if (this.trail.length > 28) this.trail.shift();
+    if (this.y > canvas.height + 20) this.reset(false);
+  };
+  Drop.prototype.draw = function () {
+    // thin water trail
+    if (this.trail.length > 1) {
+      ctx.beginPath();
+      ctx.moveTo(this.trail[0].x, this.trail[0].y);
+      for (var i = 1; i < this.trail.length; i++)
+        ctx.lineTo(this.trail[i].x, this.trail[i].y);
+      ctx.strokeStyle = 'rgba(210, 228, 238, ' + (this.a * 0.18) + ')';
+      ctx.lineWidth = this.r * 0.45;
+      ctx.lineCap = 'round';
+      ctx.stroke();
+    }
+    // drop body — radial highlight for refraction feel
+    var g = ctx.createRadialGradient(
+      this.x - this.r * 0.28, this.y - this.r * 0.32, 0,
+      this.x, this.y, this.r
+    );
+    g.addColorStop(0,   'rgba(240, 250, 255, ' + (this.a * 0.72) + ')');
+    g.addColorStop(0.45,'rgba(195, 218, 232, ' + (this.a * 0.28) + ')');
+    g.addColorStop(1,   'rgba(130, 158, 172, ' + (this.a * 0.04) + ')');
+    ctx.beginPath();
+    ctx.ellipse(this.x, this.y, this.r * 0.72, this.r, 0, 0, Math.PI * 2);
+    ctx.fillStyle = g;
+    ctx.fill();
+    // thin rim
+    ctx.beginPath();
+    ctx.ellipse(this.x, this.y, this.r * 0.72, this.r, 0, 0, Math.PI * 2);
+    ctx.strokeStyle = 'rgba(220, 238, 248, ' + (this.a * 0.22) + ')';
+    ctx.lineWidth = 0.5;
+    ctx.stroke();
+  };
+
+  var streaks = [];
+  var drops   = [];
+  for (var i = 0; i < 90; i++)  streaks.push(new Streak());
+  for (var j = 0; j < 30; j++)  drops.push(new Drop());
+
+  function tick() {
+    ctx.clearRect(0, 0, canvas.width, canvas.height);
+    for (var s of streaks) { s.update(); s.draw(); }
+    for (var d of drops)   { d.update(); d.draw(); }
+    requestAnimationFrame(tick);
+  }
+  tick();
+})();
+</script>
 </body>
 </html>

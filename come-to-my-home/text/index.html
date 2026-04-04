@@ -437,7 +437,7 @@
   window.addEventListener('resize', resize);
 
   /* ── Direction: bearing 225° from north (SW) ─────────── */
-  const BEARING   = 225 * Math.PI / 180;
+  const BEARING   = 45 * Math.PI / 180;
   const DIR_X     = Math.sin(BEARING);   // ≈ -0.707
   const DIR_Y     = -Math.cos(BEARING);  // ≈  0.707
   /* Perpendicular (rotated 90° CW): (DIR_Y, -DIR_X) */
@@ -445,10 +445,10 @@
   const PERP_Y    = -DIR_X;             // ≈  0.707
   const DRAW_ANGLE = BEARING;            // canvas rotate angle for the nose
 
-  const SPEED        = 110;   // px / s
+  const SPEED        = 38;    // px / s
   const PAUSE_MS     = 42000; // pause between flights (ms)
   const TRAIL_SPREAD = 3.5;   // px between the two contrail lines
-  const FADE_RATE    = 0.10;  // alpha lost per second (trail)
+  const FADE_RATE    = 0.05;  // alpha lost per second (trail)
   const PART_FADE    = 0.55;  // alpha lost per second (particles)
 
   /* ── State ─────────────────────────────────────────────── */
@@ -504,9 +504,9 @@
     if (!active) {
       elapsed += dt;
       if (elapsed >= waitMs) {
-        /* Launch from top-right, slightly off-screen */
-        px = canvas.width * 0.88;
-        py = -45;
+        /* Launch from bottom-left, slightly off-screen */
+        px = canvas.width * 0.12;
+        py = canvas.height + 45;
         active  = true;
         elapsed = 0;
         waitMs  = PAUSE_MS;

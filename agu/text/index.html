@@ -235,6 +235,20 @@
       cursor: default;
     }
 
+    /* ── inline links ─────────────────────────────────── */
+    .verse a, .chorus a, .aside a {
+      color: inherit;
+      text-decoration: underline;
+      text-decoration-color: var(--amber);
+      text-underline-offset: 3px;
+      text-decoration-thickness: 1px;
+      transition: color 0.3s, text-decoration-color 0.3s;
+    }
+    .verse a:hover, .chorus a:hover, .aside a:hover {
+      color: var(--amber);
+      text-decoration-color: transparent;
+    }
+
     /* ── footer ───────────────────────────────────────── */
     .footer {
       margin-top: 64px;
@@ -371,7 +385,7 @@
 
     <p class="verse">Пускай всё так — на самотёк
 Но встреча будет, пляж, песок
-Ведь скоро отпуск, бурлачок
+Ведь скоро <a href="https://ru.wikipedia.org/wiki/%D0%9E%D1%82%D0%BF%D1%83%D1%81%D0%BA">отпуск</a>, бурлачок
 Чудесный остров дураков</p>
 
     <p class="aside">Сегодня на луну?

@@ -70,6 +70,86 @@
       z-index: 0;
     }
 
+    /* ── clouds ─────────────────────────────────────────── */
+    .clouds {
+      position: fixed;
+      inset: 0;
+      pointer-events: none;
+      z-index: 0;
+      overflow: hidden;
+    }
+
+    .cloud {
+      position: absolute;
+      border-radius: 50%;
+      filter: blur(72px);
+    }
+
+    /* amber — lamp warmth */
+    .cloud-1 {
+      width: 55vw; height: 35vh;
+      background: radial-gradient(ellipse, rgba(200,144,10,0.18) 0%, transparent 70%);
+      top: 10%; left: -10%;
+      animation: drift1 22s ease-in-out infinite;
+    }
+    /* teal — rain reflection */
+    .cloud-2 {
+      width: 40vw; height: 45vh;
+      background: radial-gradient(ellipse, rgba(26,126,140,0.14) 0%, transparent 70%);
+      top: 35%; right: -5%;
+      animation: drift2 28s ease-in-out infinite;
+    }
+    /* neutral warm — people drifting */
+    .cloud-3 {
+      width: 65vw; height: 28vh;
+      background: radial-gradient(ellipse, rgba(160,146,120,0.12) 0%, transparent 70%);
+      top: 60%; left: 15%;
+      animation: drift3 34s ease-in-out infinite;
+    }
+    /* small amber wisp */
+    .cloud-4 {
+      width: 28vw; height: 22vh;
+      background: radial-gradient(ellipse, rgba(232,176,48,0.14) 0%, transparent 70%);
+      top: 5%; right: 20%;
+      animation: drift4 18s ease-in-out infinite;
+    }
+    /* large dark blue mass */
+    .cloud-5 {
+      width: 70vw; height: 50vh;
+      background: radial-gradient(ellipse, rgba(22,40,72,0.35) 0%, transparent 65%);
+      top: -10%; left: 20%;
+      animation: drift5 40s ease-in-out infinite;
+    }
+
+    @keyframes drift1 {
+      0%,100% { transform: translate(0, 0)      scale(1);    }
+      33%      { transform: translate(12vw, 8vh)  scale(1.08); }
+      66%      { transform: translate(-6vw, 15vh) scale(0.95); }
+    }
+    @keyframes drift2 {
+      0%,100% { transform: translate(0, 0)       scale(1);    }
+      40%     { transform: translate(-15vw, -10vh) scale(1.1); }
+      70%     { transform: translate(-8vw, 12vh)  scale(0.92); }
+    }
+    @keyframes drift3 {
+      0%,100% { transform: translate(0, 0)      scale(1);    }
+      25%     { transform: translate(-10vw, -8vh) scale(1.05); }
+      60%     { transform: translate(8vw, -14vh) scale(0.96); }
+    }
+    @keyframes drift4 {
+      0%,100% { transform: translate(0, 0)     scale(1);    }
+      50%     { transform: translate(-18vw, 10vh) scale(1.15); }
+    }
+    @keyframes drift5 {
+      0%,100% { transform: translate(0, 0)     scale(1);    }
+      30%     { transform: translate(10vw, 6vh) scale(1.04); }
+      70%     { transform: translate(-5vw, 12vh) scale(0.97); }
+    }
+
+    @media (prefers-reduced-motion: reduce) {
+      .cloud { animation: none; }
+    }
+
     /* ── layout ─────────────────────────────────────────── */
     .page {
       position: relative;
@@ -213,6 +293,14 @@
   </style>
 </head>
 <body>
+
+<div class="clouds">
+  <div class="cloud cloud-1"></div>
+  <div class="cloud cloud-2"></div>
+  <div class="cloud cloud-3"></div>
+  <div class="cloud cloud-4"></div>
+  <div class="cloud cloud-5"></div>
+</div>
 
 <main class="page">
 

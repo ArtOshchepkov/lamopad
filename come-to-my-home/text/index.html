@@ -150,6 +150,14 @@
       .cloud { animation: none; }
     }
 
+    /* ── airplane canvas ───────────────────────────────── */
+    #plane-canvas {
+      position: fixed;
+      inset: 0;
+      z-index: 2;
+      pointer-events: none;
+    }
+
     /* ── layout ─────────────────────────────────────────── */
     .page {
       position: relative;
@@ -294,6 +302,8 @@
 </head>
 <body>
 
+<canvas id="plane-canvas" aria-hidden="true"></canvas>
+
 <div class="clouds">
   <div class="cloud cloud-1"></div>
   <div class="cloud cloud-2"></div>
@@ -411,6 +421,218 @@
   </footer>
 
 </main>
+
+<script>
+(function () {
+  if (window.matchMedia('(prefers-reduced-motion: reduce)').matches) return;
+
+  const canvas = document.getElementById('plane-canvas');
+  const ctx = canvas.getContext('2d');
+
+  function resize() {
+    canvas.width  = window.innerWidth;
+    canvas.height = window.innerHeight;
+  }
+  resize();
+  window.addEventListener('resize', resize);
+
+  /* ── Direction: bearing 225° from north (SW) ─────────── */
+  const BEARING   = 225 * Math.PI / 180;
+  const DIR_X     = Math.sin(BEARING);   // ≈ -0.707
+  const DIR_Y     = -Math.cos(BEARING);  // ≈  0.707
+  /* Perpendicular (rotated 90° CW): (DIR_Y, -DIR_X) */
+  const PERP_X    = DIR_Y;               // ≈  0.707
+  const PERP_Y    = -DIR_X;             // ≈  0.707
+  const DRAW_ANGLE = BEARING;            // canvas rotate angle for the nose
+
+  const SPEED        = 110;   // px / s
+  const PAUSE_MS     = 42000; // pause between flights (ms)
+  const TRAIL_SPREAD = 3.5;   // px between the two contrail lines
+  const FADE_RATE    = 0.10;  // alpha lost per second (trail)
+  const PART_FADE    = 0.55;  // alpha lost per second (particles)
+
+  /* ── State ─────────────────────────────────────────────── */
+  let px = 0, py = 0, active = false;
+  let waitMs  = 1500; // first flight after 1.5 s
+  let elapsed = 0;
+
+  // trail: [{x1,y1,x2,y2,a}]  two lines offset perpendicular to flight
+  let trail = [];
+  // particles: [{x,y,vx,vy,a,r}]
+  let particles = [];
+
+  let lastTrailX = -9999, lastTrailY = -9999;
+  const TRAIL_STEP = 5; // add trail point every N px of travel
+
+  /* ── Helpers ───────────────────────────────────────────── */
+  function isOff(x, y) {
+    return x < -80 || x > canvas.width + 80 ||
+           y < -80 || y > canvas.height + 80;
+  }
+
+  function spawnParticles(x, y) {
+    for (let i = 0; i < 2; i++) {
+      const side  = (Math.random() < 0.5 ? 1 : -1);
+      const along = (Math.random() - 0.5) * 8;
+      particles.push({
+        x:  x + PERP_X * side * TRAIL_SPREAD + DIR_X * along,
+        y:  y + PERP_Y * side * TRAIL_SPREAD + DIR_Y * along,
+        vx: PERP_X * side * (4 + Math.random() * 6) + (Math.random() - 0.5) * 4,
+        vy: PERP_Y * side * (4 + Math.random() * 6) + (Math.random() - 0.5) * 4,
+        a:  0.18 + Math.random() * 0.12,
+        r:  0.8 + Math.random() * 1.0,
+      });
+    }
+  }
+
+  /* ── Update ─────────────────────────────────────────────── */
+  function update(dt) {
+    const dtS = dt / 1000;
+
+    /* Fade trail */
+    for (const t of trail)      t.a -= FADE_RATE * dtS;
+    trail = trail.filter(t => t.a > 0.005);
+
+    /* Move + fade particles */
+    for (const p of particles) {
+      p.x += p.vx * dtS;
+      p.y += p.vy * dtS;
+      p.a -= PART_FADE * dtS;
+    }
+    particles = particles.filter(p => p.a > 0.005);
+
+    if (!active) {
+      elapsed += dt;
+      if (elapsed >= waitMs) {
+        /* Launch from top-right, slightly off-screen */
+        px = canvas.width * 0.88;
+        py = -45;
+        active  = true;
+        elapsed = 0;
+        waitMs  = PAUSE_MS;
+        lastTrailX = px;
+        lastTrailY = py;
+      }
+      return;
+    }
+
+    /* Fly */
+    const move = SPEED * dtS;
+    px += DIR_X * move;
+    py += DIR_Y * move;
+
+    /* Add trail segment when moved enough */
+    const ddx = px - lastTrailX, ddy = py - lastTrailY;
+    if (Math.sqrt(ddx * ddx + ddy * ddy) >= TRAIL_STEP) {
+      trail.push({
+        x1: px + PERP_X * TRAIL_SPREAD,
+        y1: py + PERP_Y * TRAIL_SPREAD,
+        x2: px - PERP_X * TRAIL_SPREAD,
+        y2: py - PERP_Y * TRAIL_SPREAD,
+        lx1: lastTrailX + PERP_X * TRAIL_SPREAD,
+        ly1: lastTrailY + PERP_Y * TRAIL_SPREAD,
+        lx2: lastTrailX - PERP_X * TRAIL_SPREAD,
+        ly2: lastTrailY - PERP_Y * TRAIL_SPREAD,
+        a: 0.50,
+      });
+      if (Math.random() < 0.30) spawnParticles(px, py);
+      lastTrailX = px;
+      lastTrailY = py;
+    }
+
+    if (isOff(px, py)) active = false;
+  }
+
+  /* ── Draw ───────────────────────────────────────────────── */
+  function drawPlane() {
+    ctx.save();
+    ctx.translate(px, py);
+    ctx.rotate(DRAW_ANGLE);
+
+    const body = 'rgba(205, 213, 235, 0.92)';
+    ctx.fillStyle = body;
+
+    /* Fuselage */
+    ctx.beginPath();
+    ctx.ellipse(0, 0, 2.5, 14, 0, 0, Math.PI * 2);
+    ctx.fill();
+
+    /* Main wings (swept-back) */
+    ctx.beginPath();
+    ctx.moveTo(0, -3);
+    ctx.lineTo(-16, 9);
+    ctx.lineTo(-13, 11);
+    ctx.lineTo(0,   4);
+    ctx.lineTo(13, 11);
+    ctx.lineTo(16,  9);
+    ctx.closePath();
+    ctx.fill();
+
+    /* Horizontal stabiliser */
+    ctx.beginPath();
+    ctx.moveTo(0, 11);
+    ctx.lineTo(-7, 17);
+    ctx.lineTo(-5, 19);
+    ctx.lineTo(0,  16);
+    ctx.lineTo(5,  19);
+    ctx.lineTo(7,  17);
+    ctx.closePath();
+    ctx.fill();
+
+    ctx.restore();
+  }
+
+  function drawTrail() {
+    ctx.lineCap = 'round';
+    for (let i = 0; i < trail.length; i++) {
+      const t = trail[i];
+      /* Width: newer segments (high index) are slightly thicker */
+      const w = 1.0 + (i / trail.length) * 1.2;
+      ctx.lineWidth = w;
+      ctx.strokeStyle = `rgba(212, 224, 248, ${t.a})`;
+
+      /* Left line */
+      ctx.beginPath();
+      ctx.moveTo(t.lx1, t.ly1);
+      ctx.lineTo(t.x1,  t.y1);
+      ctx.stroke();
+
+      /* Right line */
+      ctx.beginPath();
+      ctx.moveTo(t.lx2, t.ly2);
+      ctx.lineTo(t.x2,  t.y2);
+      ctx.stroke();
+    }
+  }
+
+  function drawParticles() {
+    for (const p of particles) {
+      ctx.beginPath();
+      ctx.arc(p.x, p.y, p.r, 0, Math.PI * 2);
+      ctx.fillStyle = `rgba(218, 228, 250, ${p.a})`;
+      ctx.fill();
+    }
+  }
+
+  /* ── Loop ───────────────────────────────────────────────── */
+  let lastTs = null;
+  function loop(ts) {
+    if (lastTs === null) lastTs = ts;
+    const dt = Math.min(ts - lastTs, 100); // cap delta to avoid spiral on tab re-focus
+    lastTs = ts;
+
+    ctx.clearRect(0, 0, canvas.width, canvas.height);
+    update(dt);
+    drawTrail();
+    drawParticles();
+    if (active) drawPlane();
+
+    requestAnimationFrame(loop);
+  }
+
+  requestAnimationFrame(loop);
+})();
+</script>
 
 </body>
 </html>

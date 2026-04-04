@@ -55,6 +55,7 @@
       font-family: var(--font-body);
       min-height: 100vh;
       overflow-x: hidden;
+      cursor: url('/img/lamopad_cursor_48px.png') 0 0, auto;
     }
 
     /* ── blobs ────────────────────────────────────────────── */
@@ -141,10 +142,23 @@
 
     .cover-wrap {
       display: inline-block;
+      position: relative;
       margin-bottom: 28px;
       animation: wobble 6s ease-in-out infinite;
       transform-origin: center bottom;
     }
+
+    .lens-glint {
+      position: absolute;
+      width: 14%;
+      height: 7%;
+      border-radius: 50%;
+      background: radial-gradient(ellipse, rgba(255,255,255,0.45) 0%, rgba(255,255,255,0.10) 55%, transparent 75%);
+      pointer-events: none;
+      transition: transform 0.10s ease-out;
+    }
+    #lens-l { left: 31%; top: 52%; }
+    #lens-r { left: 52%; top: 42%; }
 
     @keyframes wobble {
       0%,100% { transform: rotate(-1.5deg) scale(1); }
@@ -399,7 +413,9 @@
 
   <header class="header">
     <div class="cover-wrap">
-      <img class="cover" src="/shmurdiki/img/shmurdiki600px.png" alt="Шмурдики — Ламопад">
+      <img class="cover" id="cover-img" src="/shmurdiki/img/shmurdiki600px.png" alt="Шмурдики — Ламопад">
+      <div class="lens-glint" id="lens-l"></div>
+      <div class="lens-glint" id="lens-r"></div>
     </div>
     <h1 class="title">Шмурдики</h1>
     <div class="divider"></div>
@@ -594,7 +610,32 @@
   document.querySelectorAll('.chorus').forEach(addScatter);
   document.querySelectorAll('.hook .shout').forEach(addScatter);
 
-  /* ── 2. Cursor trail ─────────────────────────────────── */
+  /* ── 2. Lens glint tracking ─────────────────────────── */
+  const coverImg = document.getElementById('cover-img');
+  const lenses = [
+    { el: document.getElementById('lens-l'), cx: 0.38, cy: 0.555 },
+    { el: document.getElementById('lens-r'), cx: 0.59, cy: 0.455 },
+  ];
+
+  function trackEyes(clientX, clientY) {
+    const rect = coverImg.getBoundingClientRect();
+    lenses.forEach(({ el, cx, cy }) => {
+      const lx = rect.left + cx * rect.width;
+      const ly = rect.top  + cy * rect.height;
+      const dx = clientX - lx;
+      const dy = clientY - ly;
+      const d  = Math.sqrt(dx * dx + dy * dy) || 1;
+      const r  = Math.min(d * 0.04, 4);
+      el.style.transform = `translate(${dx / d * r}px, ${dy / d * r}px)`;
+    });
+  }
+
+  window.addEventListener('mousemove', e => trackEyes(e.clientX, e.clientY));
+  window.addEventListener('touchmove', e => {
+    trackEyes(e.touches[0].clientX, e.touches[0].clientY);
+  }, { passive: true });
+
+  /* ── 3. Cursor trail ─────────────────────────────────── */
   let lastTrail = 0;
   const TRAIL_GAP = 45;
 

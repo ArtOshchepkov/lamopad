@@ -261,9 +261,9 @@
       align-items: center;
       gap: 7px;
       text-decoration: none;
-      color: var(--dim);
+      color: #6a5a3a;
       font-family: var(--font);
-      font-size: clamp(12px, 2.4vw, 15px);
+      font-size: clamp(14px, 2.8vw, 17px);
       letter-spacing: .05em;
       transition: color .25s;
     }
@@ -280,10 +280,10 @@
 
     .footer-nav a {
       font-family: var(--font);
-      font-size: clamp(11px, 2vw, 13px);
+      font-size: clamp(13px, 2.4vw, 15px);
       letter-spacing: .2em;
       text-transform: uppercase;
-      color: var(--dim);
+      color: #6a5a3a;
       text-decoration: none;
       transition: color .2s;
       font-style: normal;
@@ -609,12 +609,12 @@
     ctx.save();
     ctx.translate(px, py);
     ctx.rotate(DRAW_ANGLE);
-    ctx.fillStyle = 'rgba(205, 213, 235, 0.92)';
 
-    ctx.beginPath();
-    ctx.ellipse(0, 0, 2.5, 14, 0, 0, Math.PI * 2);
-    ctx.fill();
-
+    /* ── Wings ───────────────────────────────────────────── */
+    const wg = ctx.createLinearGradient(-16, 9, 0, 4);
+    wg.addColorStop(0, 'rgba(175, 185, 210, 0.80)');
+    wg.addColorStop(1, 'rgba(205, 213, 235, 0.90)');
+    ctx.fillStyle = wg;
     ctx.beginPath();
     ctx.moveTo(0, -3);
     ctx.lineTo(-16, 9); ctx.lineTo(-13, 11);
@@ -623,6 +623,8 @@
     ctx.closePath();
     ctx.fill();
 
+    /* ── Horizontal stabiliser ───────────────────────────── */
+    ctx.fillStyle = 'rgba(188, 197, 220, 0.85)';
     ctx.beginPath();
     ctx.moveTo(0, 11);
     ctx.lineTo(-7, 17); ctx.lineTo(-5, 19);
@@ -630,6 +632,38 @@
     ctx.lineTo(5, 19);  ctx.lineTo(7, 17);
     ctx.closePath();
     ctx.fill();
+
+
+    /* ── Fuselage body ───────────────────────────────────── */
+    const fg = ctx.createLinearGradient(-3, -14, 3, 14);
+    fg.addColorStop(0,   'rgba(228, 234, 250, 0.97)');
+    fg.addColorStop(0.45,'rgba(238, 242, 255, 1.00)');
+    fg.addColorStop(1,   'rgba(210, 218, 238, 0.93)');
+    ctx.fillStyle = fg;
+    ctx.beginPath();
+    ctx.ellipse(0, 0, 2.8, 15, 0, 0, Math.PI * 2);
+    ctx.fill();
+
+
+    /* ── Cockpit windows (nose) ──────────────────────────── */
+    ctx.fillStyle = 'rgba(160, 185, 215, 0.30)';
+    ctx.beginPath();
+    ctx.ellipse(0, -11.5, 1.6, 2.2, 0, 0, Math.PI * 2);
+    ctx.fill();
+    /* cockpit divider line */
+    ctx.strokeStyle = 'rgba(120, 145, 180, 0.20)';
+    ctx.lineWidth = 0.5;
+    ctx.beginPath();
+    ctx.moveTo(0, -13.2); ctx.lineTo(0, -9.8);
+    ctx.stroke();
+
+    /* ── Passenger windows ───────────────────────────────── */
+    ctx.fillStyle = 'rgba(140, 175, 220, 0.55)';
+    for (let i = 0; i < 7; i++) {
+      const wy = -6.5 + i * 1.7;
+      ctx.beginPath(); ctx.ellipse(-2.1, wy, 0.55, 0.75, 0, 0, Math.PI * 2); ctx.fill();
+      ctx.beginPath(); ctx.ellipse( 2.1, wy, 0.55, 0.75, 0, 0, Math.PI * 2); ctx.fill();
+    }
 
     /* ── Wingtip beacons ─────────────────────────────────────
        Alternating pattern (Airbus-style), 60 flashes/min per wing.

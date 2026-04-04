@@ -378,69 +378,12 @@
     ctx.stroke();
   };
 
-  // ── Glass drops — hit and slide on the pane ─────────────
-  function Drop() { this.reset(true); }
-  Drop.prototype.reset = function (scatter) {
-    this.x      = Math.random() * canvas.width;
-    this.y      = scatter ? Math.random() * canvas.height : -12;
-    this.r      = 3 + Math.random() * 7;
-    this.vy     = 0;
-    this.ay     = 0.012 + Math.random() * 0.022;
-    this.maxVy  = 0.4  + Math.random() * 1.0;
-    this.a      = 0.45 + Math.random() * 0.35;
-    this.trail  = [];
-    // pause before starting to slide (surface tension)
-    this.wait   = Math.floor(Math.random() * 180);
-  };
-  Drop.prototype.update = function () {
-    if (this.wait > 0) { this.wait--; return; }
-    this.vy = Math.min(this.vy + this.ay, this.maxVy);
-    this.y += this.vy;
-    this.trail.push({ x: this.x, y: this.y - this.r * 0.8 });
-    if (this.trail.length > 28) this.trail.shift();
-    if (this.y > canvas.height + 20) this.reset(false);
-  };
-  Drop.prototype.draw = function () {
-    // thin water trail
-    if (this.trail.length > 1) {
-      ctx.beginPath();
-      ctx.moveTo(this.trail[0].x, this.trail[0].y);
-      for (var i = 1; i < this.trail.length; i++)
-        ctx.lineTo(this.trail[i].x, this.trail[i].y);
-      ctx.strokeStyle = 'rgba(210, 228, 238, ' + (this.a * 0.18) + ')';
-      ctx.lineWidth = this.r * 0.45;
-      ctx.lineCap = 'round';
-      ctx.stroke();
-    }
-    // drop body — radial highlight for refraction feel
-    var g = ctx.createRadialGradient(
-      this.x - this.r * 0.28, this.y - this.r * 0.32, 0,
-      this.x, this.y, this.r
-    );
-    g.addColorStop(0,   'rgba(240, 250, 255, ' + (this.a * 0.72) + ')');
-    g.addColorStop(0.45,'rgba(195, 218, 232, ' + (this.a * 0.28) + ')');
-    g.addColorStop(1,   'rgba(130, 158, 172, ' + (this.a * 0.04) + ')');
-    ctx.beginPath();
-    ctx.ellipse(this.x, this.y, this.r * 0.72, this.r, 0, 0, Math.PI * 2);
-    ctx.fillStyle = g;
-    ctx.fill();
-    // thin rim
-    ctx.beginPath();
-    ctx.ellipse(this.x, this.y, this.r * 0.72, this.r, 0, 0, Math.PI * 2);
-    ctx.strokeStyle = 'rgba(220, 238, 248, ' + (this.a * 0.22) + ')';
-    ctx.lineWidth = 0.5;
-    ctx.stroke();
-  };
-
   var streaks = [];
-  var drops   = [];
-  for (var i = 0; i < 90; i++)  streaks.push(new Streak());
-  for (var j = 0; j < 30; j++)  drops.push(new Drop());
+  for (var i = 0; i < 90; i++) streaks.push(new Streak());
 
   function tick() {
     ctx.clearRect(0, 0, canvas.width, canvas.height);
     for (var s of streaks) { s.update(); s.draw(); }
-    for (var d of drops)   { d.update(); d.draw(); }
     requestAnimationFrame(tick);
   }
   tick();

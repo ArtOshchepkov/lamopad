@@ -1,0 +1,394 @@
+<!DOCTYPE html>
+<html lang="ru">
+<head>
+  <meta charset="utf-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1">
+  <title>Осень, девять — текст песни | Ламопад</title>
+  <meta name="description" content="Текст песни Ламопад «Осень, девять»">
+  <meta name="keywords" content="Ламопад, Осень девять, текст песни, слова, осень девять что же там, ливень дай мне поспать">
+  <meta property="og:title" content="Осень, девять — текст песни | Ламопад">
+  <meta property="og:description" content="Текст песни Ламопад «Осень, девять»">
+  <meta property="og:type" content="music.song">
+  <link rel="canonical" href="/osen-9/text/">
+
+  <link rel="icon" href="/img/lamopad_cursor_48px.png" sizes="any">
+
+  <script type="application/ld+json">
+  {
+    "@context": "https://schema.org",
+    "@type": "MusicRecording",
+    "name": "Осень, девять",
+    "byArtist": { "@type": "MusicGroup", "name": "Ламопад" },
+    "lyrics": {
+      "@type": "CreativeWork",
+      "text": "Осень, девять, что же там? Ливень, дай мне поспать, не стучи! Захватили города дыханье любимых людей"
+    }
+  }
+  </script>
+
+  <style>
+    *, *::before, *::after { margin: 0; padding: 0; box-sizing: border-box; }
+
+    :root {
+      --bg:     #0B0D08;
+      --orange: #EC9042;
+      --rust:   #CD5926;
+      --red:    #D15749;
+      --dark:   #A44D32;
+      --grey:   #768389;
+      --text:   #c8b4a0;
+      --dim:    #4a3f38;
+    }
+
+    html { scroll-behavior: smooth; }
+
+    body {
+      background-color: var(--bg);
+      color: var(--text);
+      font-family: 'Georgia', serif;
+      min-height: 100vh;
+      overflow-x: hidden;
+      position: relative;
+      cursor: url('/img/lamopad_cursor_48px.png') 0 0, auto;
+    }
+
+    /* ── atmosphere layers ──────────────────────────────── */
+
+    /* warm glow from bottom — dying summer */
+    .glow-bottom {
+      position: fixed;
+      bottom: 0; left: 0; right: 0;
+      height: 50vh;
+      pointer-events: none;
+      z-index: 0;
+      background: radial-gradient(ellipse 80% 60% at 30% 100%,
+        rgba(205, 89, 38, 0.18) 0%,
+        rgba(236, 144, 66, 0.08) 45%,
+        transparent 100%
+      );
+    }
+
+    /* cold mist from top — autumn arriving */
+    .mist-top {
+      position: fixed;
+      top: 0; left: 0; right: 0;
+      height: 35vh;
+      pointer-events: none;
+      z-index: 0;
+      background: linear-gradient(to bottom,
+        rgba(118, 131, 137, 0.12) 0%,
+        rgba(118, 131, 137, 0.05) 50%,
+        transparent 100%
+      );
+    }
+
+    /* rain streaks — two layers, different speeds */
+    .rain {
+      position: fixed;
+      inset: 0;
+      pointer-events: none;
+      z-index: 0;
+      overflow: hidden;
+      opacity: 0.55;
+    }
+    .rain::before,
+    .rain::after {
+      content: '';
+      position: absolute;
+      top: -100%;
+      left: 0; right: 0;
+      height: 200%;
+    }
+    .rain::before {
+      background-image: repeating-linear-gradient(
+        to bottom,
+        transparent 0px, transparent 60px,
+        rgba(118, 131, 137, 0.07) 60px, rgba(118, 131, 137, 0.07) 62px
+      );
+      background-size: 11px 80px;
+      animation: rainA 2.8s linear infinite;
+    }
+    .rain::after {
+      background-image: repeating-linear-gradient(
+        to bottom,
+        transparent 0px, transparent 40px,
+        rgba(118, 131, 137, 0.05) 40px, rgba(118, 131, 137, 0.05) 41px
+      );
+      background-size: 17px 60px;
+      background-position: 7px 15px;
+      animation: rainB 1.9s linear infinite;
+    }
+    @keyframes rainA {
+      from { transform: translateY(0); }
+      to   { transform: translateY(80px); }
+    }
+    @keyframes rainB {
+      from { transform: translateY(0); }
+      to   { transform: translateY(60px); }
+    }
+
+    /* ── layout ─────────────────────────────────────────── */
+    .page {
+      position: relative;
+      z-index: 1;
+      max-width: 600px;
+      margin: 0 auto;
+      padding: 10vh 24px 10vh;
+    }
+
+    /* ── header ─────────────────────────────────────────── */
+    .header {
+      text-align: center;
+      margin-bottom: 56px;
+    }
+
+    .cover {
+      display: block;
+      margin: 0 auto 24px;
+      width: 96px;
+      height: 96px;
+      object-fit: cover;
+      image-rendering: pixelated;
+      opacity: 0.85;
+    }
+
+    .title {
+      font-family: 'Georgia', serif;
+      font-size: clamp(28px, 8vw, 56px);
+      font-weight: normal;
+      letter-spacing: .06em;
+      line-height: 1.15;
+      margin-bottom: 16px;
+    }
+    .title .warm { color: var(--orange); }
+    .title .cold { color: var(--grey); }
+
+    .divider {
+      margin: 20px auto;
+      width: 40px;
+      height: 1px;
+      background: linear-gradient(90deg, transparent, var(--rust), transparent);
+    }
+
+    .artist {
+      font-size: clamp(11px, 2.5vw, 14px);
+      letter-spacing: .25em;
+      text-transform: uppercase;
+      color: var(--dim);
+      font-family: 'Arial', sans-serif;
+    }
+
+    /* ── lyrics ─────────────────────────────────────────── */
+    .lyrics {
+      display: flex;
+      flex-direction: column;
+      gap: 32px;
+    }
+
+    .verse {
+      font-size: clamp(17px, 4vw, 22px);
+      line-height: 1.9;
+      color: var(--text);
+      white-space: pre-line;
+    }
+
+    .chorus {
+      font-size: clamp(17px, 4vw, 22px);
+      line-height: 1.9;
+      color: var(--orange);
+      white-space: pre-line;
+      padding-left: 20px;
+      border-left: 2px solid rgba(236, 144, 66, 0.35);
+    }
+
+    .bridge {
+      font-size: clamp(15px, 3.5vw, 19px);
+      line-height: 2;
+      color: var(--grey);
+      font-style: italic;
+      white-space: pre-line;
+    }
+
+    /* parenthetical aside lines "(и стекает)" etc */
+    .verse .paren {
+      color: var(--dark);
+      font-size: .85em;
+    }
+
+    .sep {
+      width: 100%;
+      height: 1px;
+      background: linear-gradient(90deg, transparent, rgba(205, 89, 38, 0.2), transparent);
+    }
+
+    /* ── footer ─────────────────────────────────────────── */
+    .footer {
+      margin-top: 64px;
+      padding-top: 24px;
+      border-top: 1px solid rgba(205, 89, 38, 0.15);
+      display: flex;
+      flex-direction: column;
+      gap: 20px;
+    }
+
+    .platforms {
+      display: flex;
+      flex-wrap: wrap;
+      gap: 14px;
+      align-items: center;
+    }
+
+    .platform-link {
+      display: flex;
+      align-items: center;
+      gap: 7px;
+      text-decoration: none;
+      color: var(--dim);
+      font-family: 'Arial', sans-serif;
+      font-size: clamp(11px, 2.2vw, 13px);
+      transition: color .25s;
+    }
+    .platform-link img {
+      width: 18px;
+      height: 18px;
+      filter: brightness(0) invert(0.35);
+      transition: filter .25s;
+    }
+    .platform-link:hover { color: var(--orange); }
+    .platform-link:hover img {
+      filter: brightness(0) invert(0.75) sepia(1) saturate(3) hue-rotate(340deg);
+    }
+
+    .footer-nav {
+      display: flex;
+      gap: 24px;
+      flex-wrap: wrap;
+    }
+    .footer-nav a {
+      font-family: 'Arial', sans-serif;
+      font-size: clamp(11px, 2.2vw, 13px);
+      letter-spacing: .15em;
+      text-transform: uppercase;
+      color: var(--dim);
+      text-decoration: none;
+      transition: color .2s;
+    }
+    .footer-nav a:hover { color: var(--rust); }
+
+    /* ── mobile ─────────────────────────────────────────── */
+    @media (max-width: 480px) {
+      .page { padding: 8vh 18px 8vh; }
+    }
+
+    @media (prefers-reduced-motion: reduce) {
+      .rain::before, .rain::after { animation: none; }
+      html { scroll-behavior: auto; }
+    }
+  </style>
+</head>
+<body>
+
+<div class="glow-bottom"></div>
+<div class="mist-top"></div>
+<div class="rain"></div>
+
+<main class="page">
+
+  <header class="header">
+    <img class="cover" src="/osen-9/osen_32px.JPG" alt="Осень, девять — Ламопад">
+    <h1 class="title">
+      <span class="warm">Осень,</span> <span class="cold">девять</span>
+    </h1>
+    <div class="divider"></div>
+    <p class="artist">Ламопад — текст песни</p>
+  </header>
+
+  <div class="lyrics" itemscope itemtype="https://schema.org/MusicRecording">
+    <meta itemprop="name" content="Осень, девять">
+    <span itemprop="byArtist" itemscope itemtype="https://schema.org/MusicGroup">
+      <meta itemprop="name" content="Ламопад">
+    </span>
+
+    <p class="verse">Тёплый ветер —
+Эхо лета
+Холодает
+Незаметно
+Тёмной ночью
+Прошептать окошку:
+«Солнце, где ты?»</p>
+
+    <p class="bridge">Где ты?
+Где ты?
+Где ты?</p>
+
+    <p class="chorus" itemprop="lyrics">Осень, девять, что же там?
+Ливень, дай мне поспать, не стучи!
+Захватили города
+Дыханье любимых людей
+Осень, девять, холода
+Приходят в мой дом, но не ты</p>
+
+    <div class="sep"></div>
+
+    <p class="verse">Бьётся в стёкла
+<span class="paren">(И стекает)</span>
+Капель стая
+<span class="paren">(Стая)</span>
+Тает лето —
+Улетаем
+Дождь надолго?
+<span class="paren">(Ты вернёшься?)</span>
+Нет ответа
+Всё шепчу я:</p>
+
+    <p class="bridge">«Где ты? Где ты? Где ты? Где ты?
+Где ты? Где ты? Где ты? Где ты?
+Где ты?»</p>
+
+    <p class="chorus">Осень, девять, что же там?
+Ливень, дай мне поспать, не стучи!
+Захватили города
+Дыханье любимых людей
+Осень, девять, холода
+Приходят в мой дом, но не ты</p>
+  </div>
+
+  <footer class="footer">
+    <div class="platforms">
+      <a class="platform-link" href="https://music.yandex.ru/album/28000054" target="_blank" rel="noopener">
+        <img src="https://cdn.simpleicons.org/yandex/ffffff" alt="Яндекс Музыка">
+        Яндекс Музыка
+      </a>
+      <a class="platform-link" href="https://music.vk.com/link/FzPVv" target="_blank" rel="noopener">
+        <img src="https://cdn.simpleicons.org/vk/ffffff" alt="VK Музыка">
+        VK Музыка
+      </a>
+      <a class="platform-link" href="https://open.spotify.com/album/1iYYRGmbXFKs8siJ57y5EZ" target="_blank" rel="noopener">
+        <img src="https://cdn.simpleicons.org/spotify/ffffff" alt="Spotify">
+        Spotify
+      </a>
+      <a class="platform-link" href="https://music.apple.com/ru/album/%D0%BE%D1%81%D0%B5%D0%BD%D1%8C-%D0%B4%D0%B5%D0%B2%D1%8F%D1%82%D1%8C-single/1715216174" target="_blank" rel="noopener">
+        <img src="https://cdn.simpleicons.org/applemusic/ffffff" alt="Apple Music">
+        Apple Music
+      </a>
+      <a class="platform-link" href="https://www.youtube.com/watch?v=YHE-b1y49Rk" target="_blank" rel="noopener">
+        <img src="https://cdn.simpleicons.org/youtube/ffffff" alt="YouTube">
+        YouTube
+      </a>
+      <a class="platform-link" href="https://www.deezer.com/track/2552834052" target="_blank" rel="noopener">
+        <img src="https://cdn.simpleicons.org/deezer/ffffff" alt="Deezer">
+        Deezer
+      </a>
+      <a class="platform-link" href="https://zvuk.com/release/31776334" target="_blank" rel="noopener">
+        Звук
+      </a>
+    </div>
+    <div class="footer-nav">
+      <a href="/">ламопад.рф</a>
+    </div>
+  </footer>
+
+</main>
+
+</body>
+</html>

@@ -341,6 +341,43 @@
       user-select: none;
     }
 
+    /* ── letter scatter ──────────────────────────────────── */
+    .letter {
+      display: inline-block;
+      transition: transform 0.38s cubic-bezier(.2,.8,.3,1.2), opacity 0.32s ease;
+      will-change: transform;
+    }
+
+    /* ── cursor trail dot ─────────────────────────────────── */
+    .cursor-dot {
+      position: fixed;
+      border-radius: 50%;
+      pointer-events: none;
+      z-index: 9999;
+      animation: dot-fade 0.65s ease-out forwards;
+      transform: translate(-50%, -50%);
+    }
+    @keyframes dot-fade {
+      0%   { opacity: 0.75; transform: translate(-50%, -50%) scale(1); }
+      100% { opacity: 0;    transform: translate(-50%, -50%) scale(0.1); }
+    }
+
+    /* ── QR glitch ────────────────────────────────────────── */
+    .qr-glitch {
+      display: inline;
+      animation: qr-flicker 9s 3s infinite;
+    }
+    @keyframes qr-flicker {
+      0%,  84%, 100% { transform: none; opacity: 1; text-shadow: none; }
+      85% { transform: translateX(-3px) skewX(-8deg); text-shadow:  3px 0 rgba(212,24,37,.8), -3px 0 rgba(106,180,204,.8); opacity: .85; }
+      86% { transform: translateX(4px);               text-shadow: -4px 0 rgba(212,24,37,.7); opacity: .65; }
+      87% { transform: none;                           text-shadow: none; opacity: 1; }
+      88% { transform: translateX(2px) scaleX(1.08);  text-shadow: -2px 0 rgba(106,180,204,.9); opacity: .9; }
+      89% { transform: none;                           text-shadow: none; opacity: 1; }
+      90% { transform: translateX(-2px);               text-shadow:  2px 0 rgba(212,24,37,.5); opacity: .95; }
+      91% { transform: none; opacity: 1; text-shadow: none; }
+    }
+
     /* ── responsive ───────────────────────────────────────── */
     @media (max-width: 480px) {
       .page   { padding: 6vh 18px 8vh; }
@@ -432,7 +469,7 @@
 Все любители кифлять</p>
 
     <p class="verse">Значит, грымзики — кифляне
-Излучают QR-код
+Излучают <span class="qr-glitch">QR-код</span>
 Мухропендия больная вот уже который год
 Пожалуйста, помогите найти профессионала своего дела
 Занимающегося мухропендиями
@@ -517,6 +554,76 @@
   </footer>
 
 </main>
+
+<script>
+(function () {
+  if (window.matchMedia('(prefers-reduced-motion: reduce)').matches) return;
+
+  /* ── 1. Letter scatter on .chorus and .hook .shout ──── */
+  function scatterify(el) {
+    const lines = el.innerText.split('\n');
+    el.innerHTML = lines.map(line =>
+      [...line].map(ch => {
+        if (ch === ' ') return ' ';
+        const safe = ch.replace(/&/g, '&amp;').replace(/</g, '&lt;').replace(/>/g, '&gt;');
+        return `<span class="letter">${safe}</span>`;
+      }).join('')
+    ).join('<br>');
+    el.style.whiteSpace = 'normal';
+  }
+
+  function addScatter(el) {
+    scatterify(el);
+    el.addEventListener('mouseenter', () => {
+      el.querySelectorAll('.letter').forEach(s => {
+        const dx  = (Math.random() - 0.5) * 52;
+        const dy  = (Math.random() - 0.5) * 38;
+        const rot = (Math.random() - 0.5) * 28;
+        s.style.transform = `translate(${dx}px,${dy}px) rotate(${rot}deg)`;
+        s.style.opacity   = String(0.2 + Math.random() * 0.8);
+      });
+    });
+    el.addEventListener('mouseleave', () => {
+      el.querySelectorAll('.letter').forEach(s => {
+        s.style.transform = '';
+        s.style.opacity   = '';
+      });
+    });
+  }
+
+  document.querySelectorAll('.chorus').forEach(addScatter);
+  document.querySelectorAll('.hook .shout').forEach(addScatter);
+
+  /* ── 2. Cursor trail ─────────────────────────────────── */
+  let lastTrail = 0;
+  const TRAIL_GAP = 45;
+
+  function spawnDot(x, y) {
+    const dot    = document.createElement('div');
+    dot.className = 'cursor-dot';
+    const size   = 3 + Math.random() * 5;
+    dot.style.cssText = `left:${x}px;top:${y}px;width:${size}px;height:${size}px;`
+      + `background:${Math.random() > 0.5 ? 'rgba(212,24,37,.65)' : 'rgba(106,180,204,.65)'};`;
+    document.body.appendChild(dot);
+    setTimeout(() => dot.remove(), 700);
+  }
+
+  window.addEventListener('mousemove', e => {
+    const now = Date.now();
+    if (now - lastTrail < TRAIL_GAP) return;
+    lastTrail = now;
+    spawnDot(e.clientX, e.clientY);
+  });
+
+  window.addEventListener('touchmove', e => {
+    const now = Date.now();
+    if (now - lastTrail < TRAIL_GAP) return;
+    lastTrail = now;
+    spawnDot(e.touches[0].clientX, e.touches[0].clientY);
+  }, { passive: true });
+
+})();
+</script>
 
 </body>
 </html>

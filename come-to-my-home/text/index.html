@@ -429,7 +429,7 @@
   if (window.matchMedia('(prefers-reduced-motion: reduce)').matches) return;
 
   const canvas = document.getElementById('plane-canvas');
-  const ctx = canvas.getContext('2d');
+  const ctx    = canvas.getContext('2d');
 
   function resize() {
     canvas.width  = window.innerWidth;
@@ -438,171 +438,160 @@
   resize();
   window.addEventListener('resize', resize);
 
-  /* ── Direction: bearing 225° from north (SW) ─────────── */
-  const BEARING   = 45 * Math.PI / 180;
-  const DIR_X     = Math.sin(BEARING);   // ≈ -0.707
-  const DIR_Y     = -Math.cos(BEARING);  // ≈  0.707
-  /* Perpendicular (rotated 90° CW): (DIR_Y, -DIR_X) */
-  const PERP_X    = DIR_Y;               // ≈  0.707
-  const PERP_Y    = -DIR_X;             // ≈  0.707
-  const DRAW_ANGLE = BEARING;            // canvas rotate angle for the nose
+  /* ── Direction: bearing 45° NE ─────────────────────────── */
+  const BEARING    = 45 * Math.PI / 180;
+  const DIR_X      =  Math.sin(BEARING);   //  0.707
+  const DIR_Y      = -Math.cos(BEARING);   // -0.707
+  const PERP_X     =  DIR_Y;               // -0.707  (90° CW of DIR)
+  const PERP_Y     = -DIR_X;              // -0.707
+  const DRAW_ANGLE =  BEARING;
 
-  const SPEED        = 38;    // px / s
-  const PAUSE_MS     = 42000; // pause between flights (ms)
-  const TRAIL_SPREAD = 3.5;   // px between the two contrail lines
-  const FADE_RATE    = 0.05;  // alpha lost per second (trail)
-  const PART_FADE    = 0.55;  // alpha lost per second (particles)
+  const SPEED        = 38;
+  const PAUSE_MS     = 42000;
+  const TRAIL_SPREAD = 3.5;
+  const FADE_RATE    = 0.05;   // alpha/s
+  const PART_FADE    = 0.55;   // alpha/s
 
-  /* ── State ─────────────────────────────────────────────── */
+  /* ── Interaction ────────────────────────────────────────── */
+  const INTERACT_R  = 100;   // px radius
+  const REPEL_F     = 220;   // force strength
+  const FRICTION    = 5;     // velocity decay rate (exp)
+
+  let curX = -9999, curY = -9999;
+
+  window.addEventListener('mousemove',  e => { curX = e.clientX; curY = e.clientY; });
+  window.addEventListener('mouseleave', () => { curX = -9999;    curY = -9999; });
+  window.addEventListener('touchmove',  e => {
+    curX = e.touches[0].clientX;
+    curY = e.touches[0].clientY;
+  }, { passive: true });
+  window.addEventListener('touchend',  () => { curX = -9999; curY = -9999; });
+
+  /* ── State ──────────────────────────────────────────────── */
   let px = 0, py = 0, active = false;
-  let waitMs  = 1500; // first flight after 1.5 s
-  let elapsed = 0;
+  let waitMs = 1500, elapsed = 0;
 
-  // trail: [{x1,y1,x2,y2,a}]  two lines offset perpendicular to flight
-  let trail = [];
-  // particles: [{x,y,vx,vy,a,r}]
-  let particles = [];
+  /* Trail as centre-points with independent drift.
+     Two contrail lines are drawn at ±PERP * TRAIL_SPREAD + (ox,oy). */
+  let trail = [];      // {x, y, a, ox, oy, vox, voy}
+  let particles = [];  // {x, y, vx, vy, a, r}
 
-  let lastTrailX = -9999, lastTrailY = -9999;
-  const TRAIL_STEP = 5; // add trail point every N px of travel
+  let lastTX = -9999, lastTY = -9999;
+  const TRAIL_STEP = 5;
 
-  /* ── Helpers ───────────────────────────────────────────── */
+  /* ── Helpers ─────────────────────────────────────────────── */
   function isOff(x, y) {
-    return x < -80 || x > canvas.width + 80 ||
+    return x < -80 || x > canvas.width  + 80 ||
            y < -80 || y > canvas.height + 80;
   }
 
   function spawnParticles(x, y) {
     for (let i = 0; i < 2; i++) {
-      const side  = (Math.random() < 0.5 ? 1 : -1);
-      const along = (Math.random() - 0.5) * 8;
+      const s = Math.random() < 0.5 ? 1 : -1;
+      const a = (Math.random() - 0.5) * 8;
       particles.push({
-        x:  x + PERP_X * side * TRAIL_SPREAD + DIR_X * along,
-        y:  y + PERP_Y * side * TRAIL_SPREAD + DIR_Y * along,
-        vx: PERP_X * side * (4 + Math.random() * 6) + (Math.random() - 0.5) * 4,
-        vy: PERP_Y * side * (4 + Math.random() * 6) + (Math.random() - 0.5) * 4,
+        x:  x + PERP_X * s * TRAIL_SPREAD + DIR_X * a,
+        y:  y + PERP_Y * s * TRAIL_SPREAD + DIR_Y * a,
+        vx: PERP_X * s * (4 + Math.random() * 6) + (Math.random() - 0.5) * 3,
+        vy: PERP_Y * s * (4 + Math.random() * 6) + (Math.random() - 0.5) * 3,
         a:  0.18 + Math.random() * 0.12,
-        r:  0.8 + Math.random() * 1.0,
+        r:  0.8  + Math.random() * 1.0,
       });
     }
   }
 
   /* ── Update ─────────────────────────────────────────────── */
   function update(dt) {
-    const dtS = dt / 1000;
+    const dtS     = dt / 1000;
+    const fric    = Math.exp(-FRICTION * dtS);
 
-    /* Fade trail */
-    for (const t of trail)      t.a -= FADE_RATE * dtS;
+    /* Trail: fade + drift decay + cursor repulsion */
+    for (const t of trail) {
+      t.a -= FADE_RATE * dtS;
+
+      t.vox *= fric;
+      t.voy *= fric;
+
+      const wx = (t.x + t.ox) - curX;
+      const wy = (t.y + t.oy) - curY;
+      const wd = Math.sqrt(wx * wx + wy * wy);
+      if (wd < INTERACT_R && wd > 0.1) {
+        const f = REPEL_F * (1 - wd / INTERACT_R) * dtS;
+        t.vox += (wx / wd) * f;
+        t.voy += (wy / wd) * f;
+      }
+
+      t.ox += t.vox * dtS;
+      t.oy += t.voy * dtS;
+    }
     trail = trail.filter(t => t.a > 0.005);
 
-    /* Move + fade particles */
+    /* Particles: move + fade + cursor repulsion */
     for (const p of particles) {
       p.x += p.vx * dtS;
       p.y += p.vy * dtS;
       p.a -= PART_FADE * dtS;
+
+      const wx = p.x - curX, wy = p.y - curY;
+      const wd = Math.sqrt(wx * wx + wy * wy);
+      if (wd < INTERACT_R * 0.6 && wd > 0.1) {
+        const f = REPEL_F * 0.4 * (1 - wd / (INTERACT_R * 0.6)) * dtS;
+        p.vx += (wx / wd) * f;
+        p.vy += (wy / wd) * f;
+      }
     }
     particles = particles.filter(p => p.a > 0.005);
 
+    /* Plane wait / launch */
     if (!active) {
       elapsed += dt;
       if (elapsed >= waitMs) {
-        /* Launch from bottom-left, slightly off-screen */
         px = canvas.width * 0.12;
         py = canvas.height + 45;
         active  = true;
         elapsed = 0;
         waitMs  = PAUSE_MS;
-        lastTrailX = px;
-        lastTrailY = py;
+        lastTX  = px;
+        lastTY  = py;
       }
       return;
     }
 
     /* Fly */
-    const move = SPEED * dtS;
-    px += DIR_X * move;
-    py += DIR_Y * move;
+    px += DIR_X * SPEED * dtS;
+    py += DIR_Y * SPEED * dtS;
 
-    /* Add trail segment when moved enough */
-    const ddx = px - lastTrailX, ddy = py - lastTrailY;
+    const ddx = px - lastTX, ddy = py - lastTY;
     if (Math.sqrt(ddx * ddx + ddy * ddy) >= TRAIL_STEP) {
-      trail.push({
-        x1: px + PERP_X * TRAIL_SPREAD,
-        y1: py + PERP_Y * TRAIL_SPREAD,
-        x2: px - PERP_X * TRAIL_SPREAD,
-        y2: py - PERP_Y * TRAIL_SPREAD,
-        lx1: lastTrailX + PERP_X * TRAIL_SPREAD,
-        ly1: lastTrailY + PERP_Y * TRAIL_SPREAD,
-        lx2: lastTrailX - PERP_X * TRAIL_SPREAD,
-        ly2: lastTrailY - PERP_Y * TRAIL_SPREAD,
-        a: 0.50,
-      });
+      trail.push({ x: px, y: py, a: 0.50, ox: 0, oy: 0, vox: 0, voy: 0 });
       if (Math.random() < 0.30) spawnParticles(px, py);
-      lastTrailX = px;
-      lastTrailY = py;
+      lastTX = px;
+      lastTY = py;
     }
 
     if (isOff(px, py)) active = false;
   }
 
   /* ── Draw ───────────────────────────────────────────────── */
-  function drawPlane() {
-    ctx.save();
-    ctx.translate(px, py);
-    ctx.rotate(DRAW_ANGLE);
-
-    const body = 'rgba(205, 213, 235, 0.92)';
-    ctx.fillStyle = body;
-
-    /* Fuselage */
-    ctx.beginPath();
-    ctx.ellipse(0, 0, 2.5, 14, 0, 0, Math.PI * 2);
-    ctx.fill();
-
-    /* Main wings (swept-back) */
-    ctx.beginPath();
-    ctx.moveTo(0, -3);
-    ctx.lineTo(-16, 9);
-    ctx.lineTo(-13, 11);
-    ctx.lineTo(0,   4);
-    ctx.lineTo(13, 11);
-    ctx.lineTo(16,  9);
-    ctx.closePath();
-    ctx.fill();
-
-    /* Horizontal stabiliser */
-    ctx.beginPath();
-    ctx.moveTo(0, 11);
-    ctx.lineTo(-7, 17);
-    ctx.lineTo(-5, 19);
-    ctx.lineTo(0,  16);
-    ctx.lineTo(5,  19);
-    ctx.lineTo(7,  17);
-    ctx.closePath();
-    ctx.fill();
-
-    ctx.restore();
-  }
-
   function drawTrail() {
+    if (trail.length < 2) return;
     ctx.lineCap = 'round';
-    for (let i = 0; i < trail.length; i++) {
-      const t = trail[i];
-      /* Width: newer segments (high index) are slightly thicker */
-      const w = 1.0 + (i / trail.length) * 1.2;
-      ctx.lineWidth = w;
-      ctx.strokeStyle = `rgba(212, 224, 248, ${t.a})`;
+    for (let i = 0; i < trail.length - 1; i++) {
+      const a = trail[i], b = trail[i + 1];
+      const alpha = Math.min(a.a, b.a);
+      ctx.lineWidth   = 1.0 + (i / trail.length) * 1.2;
+      ctx.strokeStyle = `rgba(212, 224, 248, ${alpha})`;
 
-      /* Left line */
+      /* Left track */
       ctx.beginPath();
-      ctx.moveTo(t.lx1, t.ly1);
-      ctx.lineTo(t.x1,  t.y1);
+      ctx.moveTo(a.x + PERP_X * TRAIL_SPREAD + a.ox, a.y + PERP_Y * TRAIL_SPREAD + a.oy);
+      ctx.lineTo(b.x + PERP_X * TRAIL_SPREAD + b.ox, b.y + PERP_Y * TRAIL_SPREAD + b.oy);
       ctx.stroke();
 
-      /* Right line */
+      /* Right track */
       ctx.beginPath();
-      ctx.moveTo(t.lx2, t.ly2);
-      ctx.lineTo(t.x2,  t.y2);
+      ctx.moveTo(a.x - PERP_X * TRAIL_SPREAD + a.ox, a.y - PERP_Y * TRAIL_SPREAD + a.oy);
+      ctx.lineTo(b.x - PERP_X * TRAIL_SPREAD + b.ox, b.y - PERP_Y * TRAIL_SPREAD + b.oy);
       ctx.stroke();
     }
   }
@@ -616,19 +605,71 @@
     }
   }
 
+  function drawPlane() {
+    ctx.save();
+    ctx.translate(px, py);
+    ctx.rotate(DRAW_ANGLE);
+    ctx.fillStyle = 'rgba(205, 213, 235, 0.92)';
+
+    ctx.beginPath();
+    ctx.ellipse(0, 0, 2.5, 14, 0, 0, Math.PI * 2);
+    ctx.fill();
+
+    ctx.beginPath();
+    ctx.moveTo(0, -3);
+    ctx.lineTo(-16, 9); ctx.lineTo(-13, 11);
+    ctx.lineTo(0, 4);
+    ctx.lineTo(13, 11); ctx.lineTo(16, 9);
+    ctx.closePath();
+    ctx.fill();
+
+    ctx.beginPath();
+    ctx.moveTo(0, 11);
+    ctx.lineTo(-7, 17); ctx.lineTo(-5, 19);
+    ctx.lineTo(0, 16);
+    ctx.lineTo(5, 19);  ctx.lineTo(7, 17);
+    ctx.closePath();
+    ctx.fill();
+
+    /* ── Wingtip beacons ─────────────────────────────────────
+       Alternating pattern (Airbus-style), 60 flashes/min per wing.
+       Cycle = 1000ms. Left flashes at 0ms, right at 500ms.
+       Each flash lasts 80ms.                                   */
+    const t   = Date.now();
+    const cyc = t % 1000;
+    const leftOn  = cyc < 80;
+    const rightOn = (cyc >= 500) && (cyc < 580);
+
+    [[- 16, 9, leftOn], [16, 9, rightOn]].forEach(([bx, by, on]) => {
+      if (!on) return;
+      const g = ctx.createRadialGradient(bx, by, 0, bx, by, 6);
+      g.addColorStop(0, 'rgba(255, 30, 30, 0.9)');
+      g.addColorStop(1, 'rgba(255, 30, 30, 0)');
+      ctx.fillStyle = g;
+      ctx.beginPath();
+      ctx.arc(bx, by, 6, 0, Math.PI * 2);
+      ctx.fill();
+
+      ctx.fillStyle = 'rgba(255, 140, 140, 1)';
+      ctx.beginPath();
+      ctx.arc(bx, by, 1.6, 0, Math.PI * 2);
+      ctx.fill();
+    });
+
+    ctx.restore();
+  }
+
   /* ── Loop ───────────────────────────────────────────────── */
   let lastTs = null;
   function loop(ts) {
     if (lastTs === null) lastTs = ts;
-    const dt = Math.min(ts - lastTs, 100); // cap delta to avoid spiral on tab re-focus
+    const dt = Math.min(ts - lastTs, 100);
     lastTs = ts;
-
     ctx.clearRect(0, 0, canvas.width, canvas.height);
     update(dt);
     drawTrail();
     drawParticles();
     if (active) drawPlane();
-
     requestAnimationFrame(loop);
   }
 

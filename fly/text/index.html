@@ -239,6 +239,20 @@
       line-height: 1.9;
       color: var(--text);
       white-space: pre-line;
+      cursor: default;
+    }
+
+    .verse:hover, .fly:hover, .chorus:hover,
+    .scroll:hover, .bridge:hover, .epitaph:hover {
+      animation: glitchPara 0.5s steps(2) infinite;
+    }
+
+    @keyframes glitchPara {
+      0%   { transform: translate(0, 0);    text-shadow: -2px 0 rgba(54,97,160,0.55),  2px 0 rgba(112,136,168,0.55); }
+      25%  { transform: translate(-1px, 0); text-shadow:  2px 0 rgba(54,97,160,0.55), -2px 0 rgba(112,136,168,0.55); }
+      50%  { transform: translate( 1px, 0); text-shadow: -1px 0 rgba(54,97,160,0.35),  1px 0 rgba(112,136,168,0.35); }
+      75%  { transform: translate(-1px, 0); text-shadow:  1px 0 rgba(54,97,160,0.55), -1px 0 rgba(112,136,168,0.55); }
+      100% { transform: translate(0, 0);    text-shadow: -2px 0 rgba(54,97,160,0.55),  2px 0 rgba(112,136,168,0.55); }
     }
 
     .epitaph .label {
@@ -406,7 +420,7 @@
       </a>
     </div>
     <div class="footer-nav">
-      <a href="/">ламопад.рф</a>
+      <a href="/">ламопад</a>
     </div>
   </footer>
 

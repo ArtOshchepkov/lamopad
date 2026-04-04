@@ -1,0 +1,522 @@
+<!DOCTYPE html>
+<html lang="ru">
+<head>
+  <meta charset="utf-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1">
+  <title>Шмурдики — текст песни | Ламопад</title>
+  <meta name="description" content="Текст песни Ламопад «Шмурдики»">
+  <meta name="keywords" content="Ламопад, Шмурдики, текст песни, слова, грымзики, мухропендия, бульдырка">
+  <meta property="og:title" content="Шмурдики — текст песни | Ламопад">
+  <meta property="og:description" content="Текст песни Ламопад «Шмурдики»">
+  <meta property="og:type" content="music.song">
+  <link rel="canonical" href="/shmurdiki/text/">
+  <link rel="icon" href="/shmurdiki/img/shmurdiki64px.png">
+
+  <link rel="preconnect" href="https://fonts.googleapis.com">
+  <link href="https://fonts.googleapis.com/css2?family=Nunito:ital,wght@0,400;0,600;0,700;1,400;1,600&family=Unbounded:wght@700;900&display=swap" rel="stylesheet">
+
+  <script type="application/ld+json">
+  {
+    "@context": "https://schema.org",
+    "@type": "MusicRecording",
+    "name": "Шмурдики",
+    "byArtist": { "@type": "MusicGroup", "name": "Ламопад" },
+    "lyrics": {
+      "@type": "CreativeWork",
+      "text": "Шмурдики придут на помощь, Шмурдики к нам спешат"
+    }
+  }
+  </script>
+
+  <style>
+    *, *::before, *::after { margin: 0; padding: 0; box-sizing: border-box; }
+
+    :root {
+      --bg:         #f7f3ee;
+      --red:        #d41825;
+      --red-soft:   #e85060;
+      --blue:       #6ab4cc;
+      --text:       #2e2420;
+      --mid:        #6a5a52;
+      --dim:        #a09088;
+      --font-body:  'Nunito', 'Arial Rounded MT Bold', sans-serif;
+      --font-title: 'Unbounded', 'Impact', sans-serif;
+    }
+
+    html { scroll-behavior: smooth; }
+
+    body {
+      background-color: var(--bg);
+      background-image:
+        radial-gradient(ellipse 55% 45% at 8% 18%,  rgba(212,24,37,0.07) 0%, transparent 70%),
+        radial-gradient(ellipse 42% 52% at 88% 72%, rgba(106,180,204,0.09) 0%, transparent 70%),
+        radial-gradient(ellipse 60% 28% at 50% 98%, rgba(212,24,37,0.05) 0%, transparent 60%);
+      color: var(--text);
+      font-family: var(--font-body);
+      min-height: 100vh;
+      overflow-x: hidden;
+    }
+
+    /* ── blobs ────────────────────────────────────────────── */
+    .blobs {
+      position: fixed;
+      inset: 0;
+      pointer-events: none;
+      z-index: 0;
+      overflow: hidden;
+    }
+
+    .blob {
+      position: absolute;
+      filter: blur(65px);
+    }
+
+    .blob-1 {
+      width: 48vw; height: 40vh;
+      background: radial-gradient(ellipse, rgba(212,24,37,0.11) 0%, transparent 70%);
+      border-radius: 42% 58% 52% 48% / 48% 42% 58% 52%;
+      top: -8%; left: -10%;
+      animation: morph1 22s ease-in-out infinite;
+    }
+    .blob-2 {
+      width: 40vw; height: 48vh;
+      background: radial-gradient(ellipse, rgba(106,180,204,0.13) 0%, transparent 70%);
+      border-radius: 60% 40% 46% 54% / 52% 60% 40% 48%;
+      top: 28%; right: -8%;
+      animation: morph2 28s ease-in-out infinite;
+    }
+    .blob-3 {
+      width: 58vw; height: 34vh;
+      background: radial-gradient(ellipse, rgba(212,24,37,0.07) 0%, transparent 70%);
+      border-radius: 50% 50% 38% 62% / 44% 56% 50% 50%;
+      bottom: 8%; left: 18%;
+      animation: morph3 35s ease-in-out infinite;
+    }
+    .blob-4 {
+      width: 30vw; height: 30vh;
+      background: radial-gradient(ellipse, rgba(106,180,204,0.10) 0%, transparent 70%);
+      border-radius: 38% 62% 55% 45% / 55% 38% 62% 45%;
+      top: 8%; right: 22%;
+      animation: morph4 19s ease-in-out infinite;
+    }
+
+    @keyframes morph1 {
+      0%,100% { transform: translate(0,0) scale(1); border-radius: 42% 58% 52% 48% / 48% 42% 58% 52%; }
+      33%     { transform: translate(9vw,6vh) scale(1.1); border-radius: 55% 45% 42% 58% / 44% 56% 50% 50%; }
+      66%     { transform: translate(-5vw,14vh) scale(0.94); border-radius: 46% 54% 60% 40% / 58% 42% 46% 54%; }
+    }
+    @keyframes morph2 {
+      0%,100% { transform: translate(0,0) scale(1); border-radius: 60% 40% 46% 54% / 52% 60% 40% 48%; }
+      40%     { transform: translate(-13vw,-9vh) scale(1.09); border-radius: 40% 60% 54% 46% / 60% 40% 50% 50%; }
+      70%     { transform: translate(-7vw,11vh) scale(0.91); border-radius: 50% 50% 42% 58% / 46% 54% 58% 42%; }
+    }
+    @keyframes morph3 {
+      0%,100% { transform: translate(0,0) scale(1); }
+      25%     { transform: translate(-9vw,-7vh) scale(1.06); }
+      60%     { transform: translate(7vw,-12vh) scale(0.95); }
+    }
+    @keyframes morph4 {
+      0%,100% { transform: translate(0,0) scale(1); }
+      50%     { transform: translate(-15vw,9vh) scale(1.14); }
+    }
+
+    @media (prefers-reduced-motion: reduce) {
+      .blob { animation: none; }
+    }
+
+    /* ── layout ───────────────────────────────────────────── */
+    .page {
+      position: relative;
+      z-index: 1;
+      max-width: 640px;
+      margin: 0 auto;
+      padding: 8vh 24px 10vh;
+    }
+
+    /* ── header ───────────────────────────────────────────── */
+    .header {
+      text-align: center;
+      margin-bottom: 60px;
+    }
+
+    .cover-wrap {
+      display: inline-block;
+      margin-bottom: 28px;
+      animation: wobble 6s ease-in-out infinite;
+      transform-origin: center bottom;
+    }
+
+    @keyframes wobble {
+      0%,100% { transform: rotate(-1.5deg) scale(1); }
+      25%     { transform: rotate(1.8deg)  scale(1.02); }
+      50%     { transform: rotate(-0.8deg) scale(1.01); }
+      75%     { transform: rotate(1.2deg)  scale(1.015); }
+    }
+
+    @media (prefers-reduced-motion: reduce) {
+      .cover-wrap { animation: none; }
+    }
+
+    .cover {
+      display: block;
+      width: clamp(150px, 46vw, 240px);
+      height: clamp(150px, 46vw, 240px);
+      object-fit: cover;
+      border-radius: 50%;
+      box-shadow:
+        0 0 0 4px rgba(212,24,37,0.18),
+        0 0 0 8px rgba(212,24,37,0.06),
+        0 10px 40px rgba(46,36,32,0.13);
+    }
+
+    .title {
+      font-family: var(--font-title);
+      font-size: clamp(30px, 9vw, 56px);
+      font-weight: 900;
+      letter-spacing: .02em;
+      line-height: 1.1;
+      color: var(--red);
+      margin-bottom: 12px;
+    }
+
+    .divider {
+      margin: 14px auto;
+      width: 44px;
+      height: 2px;
+      background: linear-gradient(90deg, transparent, var(--red), transparent);
+      opacity: .30;
+    }
+
+    .artist {
+      font-size: clamp(11px, 2.2vw, 13px);
+      letter-spacing: .26em;
+      text-transform: uppercase;
+      color: var(--dim);
+      font-weight: 700;
+    }
+
+    /* ── lyrics ───────────────────────────────────────────── */
+    .lyrics {
+      display: flex;
+      flex-direction: column;
+      gap: 28px;
+    }
+
+    /* intro monologue */
+    .monologue {
+      font-size: clamp(14px, 3vw, 17px);
+      line-height: 1.9;
+      color: var(--dim);
+      font-style: italic;
+      white-space: pre-line;
+    }
+
+    /* normal verse */
+    .verse {
+      font-size: clamp(17px, 3.8vw, 22px);
+      line-height: 1.9;
+      color: var(--text);
+      font-weight: 400;
+      white-space: pre-line;
+    }
+
+    /* chorus */
+    .chorus {
+      font-size: clamp(17px, 3.8vw, 22px);
+      line-height: 1.9;
+      color: var(--red);
+      font-weight: 700;
+      white-space: pre-line;
+    }
+
+    /* hook block with big Шмурдики! */
+    .hook {
+      font-size: clamp(17px, 3.8vw, 22px);
+      line-height: 2;
+      color: var(--text);
+      font-weight: 400;
+    }
+    .hook .shout {
+      font-family: var(--font-title);
+      font-size: clamp(22px, 6vw, 36px);
+      color: var(--red);
+      display: block;
+      margin-bottom: 6px;
+    }
+    .hook .echo {
+      color: var(--mid);
+      font-style: italic;
+    }
+    .hook .yu {
+      font-weight: 400;
+    }
+
+    /* absurdist interlude */
+    .absurd {
+      font-size: clamp(15px, 3.2vw, 19px);
+      line-height: 1.85;
+      color: var(--mid);
+      font-style: italic;
+      white-space: pre-line;
+    }
+
+    /* Мама, мама */
+    .cry {
+      font-size: clamp(20px, 4.6vw, 28px);
+      line-height: 1.9;
+      color: var(--text);
+      font-weight: 700;
+      white-space: pre-line;
+    }
+
+    /* final line */
+    .finale {
+      font-family: var(--font-title);
+      font-size: clamp(17px, 4.2vw, 26px);
+      color: var(--red);
+      letter-spacing: .04em;
+      font-weight: 900;
+    }
+
+    .sep {
+      width: 100%;
+      height: 1px;
+      background: linear-gradient(90deg, transparent, rgba(212,24,37,0.22), transparent);
+    }
+
+    /* ── footer ───────────────────────────────────────────── */
+    .footer {
+      margin-top: 68px;
+      padding-top: 24px;
+      border-top: 1px solid rgba(212,24,37,0.15);
+      display: flex;
+      flex-direction: column;
+      gap: 18px;
+    }
+
+    .platforms {
+      display: flex;
+      flex-wrap: wrap;
+      gap: 14px;
+      align-items: center;
+    }
+
+    .platform-link {
+      display: flex;
+      align-items: center;
+      gap: 6px;
+      text-decoration: none;
+      color: var(--dim);
+      font-size: clamp(13px, 2.6vw, 16px);
+      font-weight: 600;
+      letter-spacing: .04em;
+      transition: color .2s;
+    }
+    .platform-link img {
+      width: 16px;
+      height: 16px;
+      filter: brightness(0) opacity(0.4);
+      transition: filter .2s;
+    }
+    .platform-link:hover { color: var(--red); }
+    .platform-link:hover img {
+      filter: brightness(0) saturate(1) invert(17%) sepia(78%) saturate(500%) hue-rotate(336deg) opacity(1);
+    }
+
+    .footer-nav a {
+      font-size: clamp(12px, 2.3vw, 14px);
+      letter-spacing: .22em;
+      text-transform: uppercase;
+      color: var(--dim);
+      text-decoration: none;
+      font-weight: 700;
+      transition: color .2s;
+    }
+    .footer-nav a:hover { color: var(--red); }
+
+    .copyright {
+      font-size: 13px;
+      letter-spacing: .1em;
+      color: var(--dim);
+      user-select: none;
+    }
+
+    /* ── responsive ───────────────────────────────────────── */
+    @media (max-width: 480px) {
+      .page   { padding: 6vh 18px 8vh; }
+      .lyrics { gap: 22px; }
+      .lyrics { text-align: left; }
+    }
+  </style>
+</head>
+<body>
+
+<div class="blobs">
+  <div class="blob blob-1"></div>
+  <div class="blob blob-2"></div>
+  <div class="blob blob-3"></div>
+  <div class="blob blob-4"></div>
+</div>
+
+<main class="page">
+
+  <header class="header">
+    <div class="cover-wrap">
+      <img class="cover" src="/shmurdiki/img/shmurdiki600px.png" alt="Шмурдики — Ламопад">
+    </div>
+    <h1 class="title">Шмурдики</h1>
+    <div class="divider"></div>
+    <p class="artist">Ламопад — текст песни</p>
+  </header>
+
+  <div class="lyrics" itemscope itemtype="https://schema.org/MusicRecording">
+    <meta itemprop="name" content="Шмурдики">
+    <span itemprop="byArtist" itemscope itemtype="https://schema.org/MusicGroup">
+      <meta itemprop="name" content="Ламопад">
+    </span>
+
+    <p class="monologue" itemprop="lyrics">Здравствуйте, дорогие друзья!
+С вами шмурдик
+Итак, мы начинаем</p>
+
+    <div class="sep"></div>
+
+    <p class="verse">Итак, я начинаю
+Шмурдики
+Шмурдики
+Шмурдики
+Я плохой
+Шмурдики
+Я хороший</p>
+
+    <div class="sep"></div>
+
+    <p class="verse">Стану брадобреем
+Всех братишкек я побрею
+Кто не бреет себя сам
+Может быть, побреюсь сам</p>
+
+    <p class="verse">Бредобреющий полёт
+Но кто понял — тот поймёт
+А где волки — там и ёлка
+Позовём-ка Дед Мороза</p>
+
+    <div class="sep"></div>
+
+    <p class="chorus">Шмурдики придут на помощь
+Шмурдики к нам спешат
+Но мы хитрее
+Мы быстрее
+Нас не догонят
+Нас не догонят</p>
+
+    <div class="hook">
+      <span class="shout">Шмурдики!</span>
+И я <span class="echo">(И я)</span><br>
+Вил олвейс лав ю<br>
+<span class="echo">(Лав ю)</span><br>
+<span class="yu">Буква ю<br>
+Буква ю<br>
+Буква ю<br>
+Буква ю</span>
+    </div>
+
+    <div class="sep"></div>
+
+    <p class="absurd">Варианты ответов
+Если тряхнуть бульдрыкой</p>
+
+    <p class="verse">В этой строчке я соврал лишь раз
+Два, три, калина пять
+Видел грымзиков с рогами
+Все любители кифлять</p>
+
+    <p class="verse">Значит, грымзики — кифляне
+Излучают QR-код
+Мухропендия больная вот уже который год
+Пожалуйста, помогите найти профессионала своего дела
+Занимающегося мухропендиями
+Пожалуйста, пожалуйста, помогите!</p>
+
+    <div class="sep"></div>
+
+    <p class="chorus">Шмурдики придут на помощь
+Шмурдики к нам спешат
+Но мы хитрее
+Мы быстрее
+Нас не догонят
+Нас не догонят</p>
+
+    <div class="hook">
+      <span class="shout">Шмурдики!</span>
+И я <span class="echo">(И я)</span><br>
+Вил олвейс лав ю<br>
+<span class="echo">(Лав ю)</span><br>
+<span class="yu">Буква ю<br>
+Буква ю<br>
+Буква ю<br>
+Буква ю</span>
+    </div>
+
+    <div class="sep"></div>
+
+    <p class="verse">Как жаль, Мирослав, что
+Тряхнули бульдыркой
+С того берега моря
+Облучили грымзян</p>
+
+    <p class="verse">Мама, мама
+Что я буду делать?
+Мама, мама
+Буду ли я жить?</p>
+
+    <p class="verse">Шмурдики
+Шмурдики</p>
+
+    <p class="finale">Начнётся стрельба</p>
+
+  </div>
+
+  <footer class="footer">
+    <div class="platforms">
+      <a class="platform-link" href="https://music.apple.com/ru/album/%D1%88%D0%BC%D1%83%D1%80%D0%B4%D0%B8%D0%BA%D0%B8-single/1725739023" target="_blank" rel="noopener">
+        <img src="https://cdn.simpleicons.org/applemusic/000000" alt="Apple Music">
+        Apple Music
+      </a>
+      <a class="platform-link" href="https://vk.com/music/album/-2000724564_19724564_bc4547da5e63c2225a" target="_blank" rel="noopener">
+        <img src="https://cdn.simpleicons.org/vk/000000" alt="VK">
+        VK
+      </a>
+      <a class="platform-link" href="https://music.yandex.ru/album/28998698" target="_blank" rel="noopener">
+        <img src="https://upload.wikimedia.org/wikipedia/commons/f/fa/Yandex_Music_icon_2023.svg" alt="Яндекс Музыка">
+        Яндекс Музыка
+      </a>
+      <a class="platform-link" href="https://music.vk.com/link/H7ozb" target="_blank" rel="noopener">
+        Boom
+      </a>
+      <a class="platform-link" href="https://open.spotify.com/album/5kP5YUfM2OqAbEkif8RDia" target="_blank" rel="noopener">
+        <img src="https://cdn.simpleicons.org/spotify/000000" alt="Spotify">
+        Spotify
+      </a>
+      <a class="platform-link" href="https://www.youtube.com/watch?v=1MuolX6RFOA&ab_channel=%D0%9B%D0%B0%D0%BC%D0%BE%D0%BF%D0%B0%D0%B4-Topic" target="_blank" rel="noopener">
+        <img src="https://cdn.simpleicons.org/youtube/000000" alt="YouTube">
+        YouTube
+      </a>
+      <a class="platform-link" href="https://www.deezer.com/track/2672545592" target="_blank" rel="noopener">
+        <img src="https://cdn.simpleicons.org/deezer/000000" alt="Deezer">
+        Deezer
+      </a>
+      <a class="platform-link" href="https://music.mts.ru/album/28998698" target="_blank" rel="noopener">
+        MTS Music
+      </a>
+    </div>
+    <div class="footer-nav">
+      <a href="/">ламопад.рф</a>
+    </div>
+    <p class="copyright">© Ламопад — все права защищены</p>
+  </footer>
+
+</main>
+
+</body>
+</html>

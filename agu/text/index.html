@@ -1,0 +1,378 @@
+<!DOCTYPE html>
+<html lang="ru">
+<head>
+  <meta charset="utf-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1">
+  <title>АТГУЛ — текст песни | Ламопад</title>
+  <meta name="description" content="Текст песни Ламопад «АТГУЛ»">
+  <meta name="keywords" content="Ламопад, АТГУЛ, текст песни, слова, агу агу агу, хочу отгул, русский рок">
+  <meta property="og:title" content="АТГУЛ — текст песни | Ламопад">
+  <meta property="og:description" content="Текст песни Ламопад «АТГУЛ»">
+  <meta property="og:type" content="music.song">
+  <link rel="canonical" href="/agu/text/">
+
+  <script type="application/ld+json">
+  {
+    "@context": "https://schema.org",
+    "@type": "MusicRecording",
+    "name": "Агу",
+    "byArtist": {
+      "@type": "MusicGroup",
+      "name": "Ламопад"
+    },
+    "lyrics": {
+      "@type": "CreativeWork",
+      "text": "Мы не виделись сколько, месяц? Полгода, год, три? Графики, планы, цели, да не твои"
+    }
+  }
+  </script>
+
+  <style>
+    *, *::before, *::after { margin: 0; padding: 0; box-sizing: border-box; }
+
+    :root {
+      --bg:        #060608;
+      --red:       #ee3333;
+      --grey:      #888;
+      --amber:     #d4900a;
+      --blue-cold: #4060a0;
+      --text:      #b0aaa8;
+      --text-dim:  #665f5c;
+    }
+
+    html { scroll-behavior: smooth; }
+
+    body {
+      background: var(--bg);
+      color: var(--text);
+      font-family: 'Arial', sans-serif;
+      min-height: 100vh;
+      overflow-x: hidden;
+      position: relative;
+    }
+
+    /* ── starfield ─────────────────────────────────────── */
+    .stars {
+      position: fixed;
+      inset: 0;
+      pointer-events: none;
+      z-index: 0;
+    }
+    .stars::before,
+    .stars::after {
+      content: '';
+      position: absolute;
+      inset: 0;
+    }
+    /* small dim stars */
+    .stars::before {
+      background-image:
+        radial-gradient(1px 1px at  7%  4%, #384868 0%, transparent 100%),
+        radial-gradient(1px 1px at 14%  9%, #1a2035 0%, transparent 100%),
+        radial-gradient(1px 1px at 23%  2%, #6878a8 0%, transparent 100%),
+        radial-gradient(1px 1px at 31% 15%, #384868 0%, transparent 100%),
+        radial-gradient(1px 1px at 38%  6%, #1a2035 0%, transparent 100%),
+        radial-gradient(1px 1px at 45% 11%, #9aa8cc 0%, transparent 100%),
+        radial-gradient(1px 1px at 52%  3%, #384868 0%, transparent 100%),
+        radial-gradient(1px 1px at 59% 18%, #1a2035 0%, transparent 100%),
+        radial-gradient(1px 1px at 66%  7%, #6878a8 0%, transparent 100%),
+        radial-gradient(1px 1px at 73% 12%, #384868 0%, transparent 100%),
+        radial-gradient(1px 1px at 80%  1%, #d0dcf4 0%, transparent 100%),
+        radial-gradient(1px 1px at 87%  8%, #384868 0%, transparent 100%),
+        radial-gradient(1px 1px at 93% 16%, #1a2035 0%, transparent 100%),
+        radial-gradient(1px 1px at  3% 22%, #6878a8 0%, transparent 100%),
+        radial-gradient(1px 1px at 11% 28%, #1a2035 0%, transparent 100%),
+        radial-gradient(1px 1px at 20% 19%, #384868 0%, transparent 100%),
+        radial-gradient(1px 1px at 28% 25%, #9aa8cc 0%, transparent 100%),
+        radial-gradient(1px 1px at 35% 32%, #1a2035 0%, transparent 100%),
+        radial-gradient(1px 1px at 43% 21%, #384868 0%, transparent 100%),
+        radial-gradient(1px 1px at 50% 27%, #6878a8 0%, transparent 100%),
+        radial-gradient(1px 1px at 57% 35%, #1a2035 0%, transparent 100%),
+        radial-gradient(1px 1px at 64% 23%, #384868 0%, transparent 100%),
+        radial-gradient(1px 1px at 71% 30%, #d0dcf4 0%, transparent 100%),
+        radial-gradient(1px 1px at 78% 17%, #1a2035 0%, transparent 100%),
+        radial-gradient(1px 1px at 85% 26%, #6878a8 0%, transparent 100%),
+        radial-gradient(1px 1px at 91% 33%, #384868 0%, transparent 100%),
+        radial-gradient(1px 1px at  5% 38%, #1a2035 0%, transparent 100%),
+        radial-gradient(1px 1px at 16% 41%, #9aa8cc 0%, transparent 100%),
+        radial-gradient(1px 1px at 26% 44%, #384868 0%, transparent 100%),
+        radial-gradient(1px 1px at 42% 39%, #1a2035 0%, transparent 100%);
+    }
+
+    /* ── sky + horizon glow ───────────────────────────── */
+    .horizon {
+      position: fixed;
+      bottom: 0;
+      left: 0; right: 0;
+      height: 45vh;
+      pointer-events: none;
+      z-index: 0;
+      background: linear-gradient(
+        to bottom,
+        transparent 0%,
+        #04080608 20%,
+        #060c0a18 45%,
+        #0b160e40 65%,
+        #0f221480 80%,
+        #0a1a0e 100%
+      );
+    }
+
+    /* ── building silhouettes ─────────────────────────── */
+    .buildings {
+      position: fixed;
+      bottom: 0;
+      left: 0; right: 0;
+      height: 28vh;
+      pointer-events: none;
+      z-index: 1;
+      overflow: hidden;
+    }
+    .buildings svg {
+      position: absolute;
+      bottom: 0;
+      width: 100%;
+      height: 100%;
+    }
+
+    /* ── page layout ──────────────────────────────────── */
+    .page {
+      position: relative;
+      z-index: 2;
+      max-width: 640px;
+      margin: 0 auto;
+      padding: 10vh 24px 32vh;
+    }
+
+    /* ── header ───────────────────────────────────────── */
+    .header {
+      text-align: center;
+      margin-bottom: 56px;
+    }
+
+    .title {
+      font-family: 'Arial Black', Arial, sans-serif;
+      font-weight: 900;
+      font-size: clamp(52px, 14vw, 96px);
+      letter-spacing: .15em;
+      line-height: 1;
+      margin-bottom: 12px;
+    }
+    .title .r { color: var(--red); }
+    .title .g { color: var(--grey); }
+
+    .artist {
+      font-family: 'Arial Black', Arial, sans-serif;
+      font-size: clamp(11px, 2.8vw, 16px);
+      letter-spacing: .35em;
+      text-transform: uppercase;
+      color: var(--text-dim);
+    }
+
+    .divider {
+      margin: 28px auto;
+      width: 48px;
+      height: 2px;
+      background: var(--red);
+      opacity: .55;
+    }
+
+    /* ── lyrics ───────────────────────────────────────── */
+    .lyrics {
+      display: flex;
+      flex-direction: column;
+      gap: 28px;
+    }
+
+    .verse {
+      line-height: 1.75;
+      font-size: clamp(14px, 3.5vw, 17px);
+      color: var(--text);
+      white-space: pre-line;
+    }
+
+    .chorus {
+      line-height: 1.75;
+      font-size: clamp(14px, 3.5vw, 17px);
+      color: var(--amber);
+      white-space: pre-line;
+      padding: 20px 0 20px 20px;
+      border-left: 2px solid #d4900a55;
+      position: relative;
+    }
+    .chorus::before {
+      content: '';
+      position: absolute;
+      left: 0; top: 0; bottom: 0;
+      width: 2px;
+      background: linear-gradient(to bottom, transparent, var(--amber), transparent);
+      opacity: .4;
+    }
+
+    .aside {
+      font-size: clamp(12px, 2.8vw, 14px);
+      color: var(--text-dim);
+      font-style: italic;
+      white-space: pre-line;
+      line-height: 1.65;
+    }
+
+    /* ── footer ───────────────────────────────────────── */
+    .footer {
+      margin-top: 64px;
+      padding-top: 24px;
+      border-top: 1px solid #1a1a1f;
+      display: flex;
+      gap: 24px;
+      flex-wrap: wrap;
+      align-items: center;
+    }
+
+    .footer a {
+      font-family: 'Arial Black', Arial, sans-serif;
+      font-size: 12px;
+      letter-spacing: .2em;
+      text-transform: uppercase;
+      color: var(--text-dim);
+      text-decoration: none;
+      transition: color .2s;
+    }
+    .footer a:hover { color: var(--red); }
+
+    /* ── mobile tweaks ────────────────────────────────── */
+    @media (max-width: 480px) {
+      .page { padding: 8vh 18px 30vh; }
+      .chorus { padding-left: 14px; }
+      .buildings { height: 22vh; }
+    }
+
+    /* ── reduce-motion ────────────────────────────────── */
+    @media (prefers-reduced-motion: reduce) {
+      html { scroll-behavior: auto; }
+    }
+  </style>
+</head>
+<body>
+
+<div class="stars"></div>
+<div class="horizon"></div>
+
+<div class="buildings">
+  <!-- Soviet panel-block silhouettes, same proportions as game layer3/layer4 -->
+  <svg viewBox="0 0 1200 200" preserveAspectRatio="xMidYMax meet" xmlns="http://www.w3.org/2000/svg">
+    <g fill="#060c0a">
+      <!-- far distant towers (darker, like game layer4 Кудрово silhouettes) -->
+      <rect x="0"   y="115" width="46" height="85"/>
+      <rect x="50"  y="95"  width="34" height="105"/>
+      <rect x="88"  y="125" width="42" height="75"/>
+      <rect x="134" y="80"  width="38" height="120"/>
+      <rect x="176" y="108" width="52" height="92"/>
+      <rect x="232" y="70"  width="30" height="130"/>
+      <rect x="266" y="100" width="48" height="100"/>
+      <rect x="318" y="82"  width="36" height="118"/>
+      <rect x="358" y="118" width="44" height="82"/>
+      <rect x="406" y="75"  width="38" height="125"/>
+      <rect x="448" y="105" width="54" height="95"/>
+      <rect x="506" y="88"  width="32" height="112"/>
+      <rect x="542" y="122" width="46" height="78"/>
+      <rect x="592" y="72"  width="40" height="128"/>
+      <rect x="636" y="98"  width="56" height="102"/>
+      <rect x="696" y="84"  width="34" height="116"/>
+      <rect x="734" y="110" width="50" height="90"/>
+      <rect x="788" y="78"  width="38" height="122"/>
+      <rect x="830" y="116" width="44" height="84"/>
+      <rect x="878" y="86"  width="36" height="114"/>
+      <rect x="918" y="102" width="52" height="98"/>
+      <rect x="974" y="74"  width="30" height="126"/>
+      <rect x="1008" y="112" width="48" height="88"/>
+      <rect x="1060" y="80"  width="42" height="120"/>
+      <rect x="1106" y="94"  width="38" height="106"/>
+      <rect x="1148" y="118" width="52" height="82"/>
+    </g>
+    <!-- tiny lit windows: amber & cold blue -->
+    <g>
+      <rect x="56"  y="100" width="2" height="2" fill="#d4900a" opacity=".7"/>
+      <rect x="140" y="85"  width="2" height="2" fill="#4060a0" opacity=".6"/>
+      <rect x="238" y="78"  width="2" height="2" fill="#d4900a" opacity=".65"/>
+      <rect x="270" y="105" width="2" height="2" fill="#4060a0" opacity=".6"/>
+      <rect x="414" y="82"  width="2" height="2" fill="#d4900a" opacity=".7"/>
+      <rect x="512" y="93"  width="2" height="2" fill="#4060a0" opacity=".55"/>
+      <rect x="600" y="79"  width="2" height="2" fill="#d4900a" opacity=".65"/>
+      <rect x="700" y="90"  width="2" height="2" fill="#4060a0" opacity=".6"/>
+      <rect x="792" y="84"  width="2" height="2" fill="#d4900a" opacity=".7"/>
+      <rect x="884" y="91"  width="2" height="2" fill="#4060a0" opacity=".55"/>
+      <rect x="976" y="80"  width="2" height="2" fill="#d4900a" opacity=".65"/>
+      <rect x="1064" y="86" width="2" height="2" fill="#4060a0" opacity=".6"/>
+      <rect x="1112" y="99" width="2" height="2" fill="#d4900a" opacity=".7"/>
+    </g>
+    <!-- ground fill -->
+    <rect x="0" y="185" width="1200" height="15" fill="#04080a"/>
+  </svg>
+</div>
+
+<main class="page">
+
+  <header class="header">
+    <h1 class="title">
+      <span class="r">А</span><span class="g">Т</span><span class="g">Г</span><span class="r">У</span><span class="g">Л</span>
+    </h1>
+    <div class="divider"></div>
+    <p class="artist">Ламопад — текст песни</p>
+  </header>
+
+  <div class="lyrics" itemscope itemtype="https://schema.org/MusicRecording">
+    <meta itemprop="name" content="Агу">
+    <span itemprop="byArtist" itemscope itemtype="https://schema.org/MusicGroup">
+      <meta itemprop="name" content="Ламопад">
+    </span>
+
+    <p class="verse">Мы не виделись сколько, месяц?
+Полгода, год, три?
+Графики, планы
+Цели, да не твои</p>
+
+    <p class="verse">Пять-два бурлак чужих идей
+Куколд бумажных кораблей
+Спина как парус тасок-рей</p>
+
+    <p class="aside">А ветер всё сильней
+И воют какаду:</p>
+
+    <p class="chorus" itemprop="lyrics">Агу агу агу
+Хочу отгул отгул отгул!
+Плак плак плак
+Начальник мой
+Дурак дурак
+Денежка кап кап кап</p>
+
+    <p class="verse">Обезличенное «я»
+В заботах ищет тень себя.
+Отрыв от будничных проблем
+И «альтрутащер» стал «пробел».
+(Спаси, о, Список Дел!)</p>
+
+    <p class="verse">Пускай всё так — на самотёк
+Но встреча будет, пляж, песок
+Ведь скоро отпуск, бурлачок
+Чудесный остров дураков</p>
+
+    <p class="aside">Сегодня на луну?
+Я занят, не смогу</p>
+
+    <p class="chorus">Агу агу агу
+Хочу отгул отгул отгул!
+Плак плак плак
+Начальник мой
+Дурак дурак
+Денежка кап кап кап</p>
+  </div>
+
+  <footer class="footer">
+    <a href="/agu/game">&#x25B6; играть</a>
+    <a href="/">ламопад.рф</a>
+  </footer>
+
+</main>
+
+</body>
+</html>

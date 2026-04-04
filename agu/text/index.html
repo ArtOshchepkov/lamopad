@@ -189,6 +189,7 @@
       font-size: clamp(20px, 5vw, 24px);
       color: var(--text);
       white-space: pre-line;
+      transition: color 5s ease-out, text-shadow 5s ease-out;
     }
 
     .chorus {
@@ -196,6 +197,7 @@
       font-size: clamp(20px, 5vw, 24px);
       color: var(--amber);
       white-space: pre-line;
+      transition: color 5s ease-out, text-shadow 5s ease-out;
       padding: 20px 0 20px 20px;
       border-left: 2px solid #d4900a55;
       position: relative;
@@ -215,6 +217,22 @@
       font-style: italic;
       white-space: pre-line;
       line-height: 1.65;
+      transition: color 5s ease-out, text-shadow 5s ease-out;
+    }
+
+    /* ── burnout hover ────────────────────────────────── */
+    @keyframes burnout {
+      0%   { color: inherit; text-shadow: none; }
+      25%  { color: #c07840; text-shadow: 0 0 6px #a05820; }
+      60%  { color: #7a4828; text-shadow: 0 0 2px #5a2800; }
+      100% { color: #3a3532; text-shadow: none; }
+    }
+
+    .verse:hover,
+    .chorus:hover,
+    .aside:hover {
+      animation: burnout 3.5s ease-in forwards;
+      cursor: default;
     }
 
     /* ── footer ───────────────────────────────────────── */
@@ -374,5 +392,28 @@
 
 </main>
 
+<script>
+  const BURNED = '#3a3532';
+
+  function startBurn(el) {
+    el.style.color = '';
+    el.classList.remove('burning');
+    void el.offsetWidth;
+    el.classList.add('burning');
+  }
+
+  function freezeAndRecover(el) {
+    const color = getComputedStyle(el).color;
+    el.classList.remove('burning');
+    el.style.color = color;
+    void el.offsetWidth;
+    el.style.color = '';
+  }
+
+  document.querySelectorAll('.verse, .chorus, .aside').forEach(el => {
+    el.addEventListener('mouseenter', () => startBurn(el));
+    el.addEventListener('mouseleave', () => freezeAndRecover(el));
+  });
+</script>
 </body>
 </html>

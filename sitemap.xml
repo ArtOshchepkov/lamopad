@@ -28,4 +28,8 @@
     <loc>https://lamopad.ru/fly/text/</loc>
     <priority>0.9</priority>
   </url>
+  <url>
+    <loc>https://lamopad.ru/come-to-my-home/text/</loc>
+    <priority>0.9</priority>
+  </url>
 </urlset>

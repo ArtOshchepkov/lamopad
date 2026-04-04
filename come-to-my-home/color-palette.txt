@@ -1,0 +1,7 @@
+#0b1220   deep night sky / background
+#162848   dark blue — wet street shadow
+#c8900a   warm amber — street lamp glow
+#e8b030   bright yellow — lamp highlight
+#1a7e8c   teal cyan — light reflection on rain
+#cc3a18   red-orange — traffic light / neon
+#3a1a08   dark warm brown — ground reflections

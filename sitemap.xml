@@ -20,4 +20,8 @@
     <loc>https://lamopad.ru/samosval/game/</loc>
     <priority>0.7</priority>
   </url>
+  <url>
+    <loc>https://lamopad.ru/osen-9/text/</loc>
+    <priority>0.9</priority>
+  </url>
 </urlset>

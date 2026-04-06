@@ -455,26 +455,25 @@
       fallAnim.addEventListener('finish', () => el.remove());
     }
 
-    // Mouse
-    el.addEventListener('mousedown', e => {
+    // Pointer Events — unified mouse + touch, setPointerCapture keeps
+    // events routed to this element even when pointer leaves it.
+    let isDragging = false;
+
+    el.addEventListener('pointerdown', e => {
       e.preventDefault();
+      el.setPointerCapture(e.pointerId);
+      isDragging = true;
       beginDrag(e.clientX, e.clientY);
-      const mm = e => moveDrag(e.clientX, e.clientY);
-      const mu = ()  => { endDrag(); document.removeEventListener('mousemove', mm); document.removeEventListener('mouseup', mu); };
-      document.addEventListener('mousemove', mm);
-      document.addEventListener('mouseup',   mu);
     });
 
-    // Touch
-    el.addEventListener('touchstart', e => {
+    el.addEventListener('pointermove', e => {
+      if (!isDragging) return;
       e.preventDefault();
-      const t = e.touches[0];
-      beginDrag(t.clientX, t.clientY);
-      const tm = e => { const t = e.touches[0]; moveDrag(t.clientX, t.clientY); };
-      const te = ()  => { endDrag(); document.removeEventListener('touchmove', tm); document.removeEventListener('touchend', te); };
-      document.addEventListener('touchmove', tm, { passive: false });
-      document.addEventListener('touchend',  te);
-    }, { passive: false });
+      moveDrag(e.clientX, e.clientY);
+    });
+
+    el.addEventListener('pointerup',     () => { if (!isDragging) return; isDragging = false; endDrag(); });
+    el.addEventListener('pointercancel', () => { if (!isDragging) return; isDragging = false; endDrag(); });
   }
 
   const lamaConfig = {

@@ -489,13 +489,20 @@
     filter: 'sepia(1) saturate(4) hue-rotate(300deg) brightness(0.85)',
   };
 
-  /* initial burst */
-  for (let i = 0; i < 5; i++) setTimeout(() => spawnItem(lamaConfig), rand(0, 2000));
-  for (let i = 0; i < 2; i++) setTimeout(() => spawnItem(bagConfig),  rand(500, 3000));
+  const glassesConfig = {
+    emoji: '🕶️', minSize: 12, maxSize: 26,
+    minDur: 8, maxDur: 18, minOpacity: 0.13, maxOpacity: 0.30,
+  };
 
-  /* steady drizzle: ~1 лама / 0.9 с, ~1 рюкзак / 2.5 с */
-  setInterval(() => spawnItem(lamaConfig), 900);
-  setInterval(() => spawnItem(bagConfig),  2500);
+  /* initial burst */
+  for (let i = 0; i < 2; i++) setTimeout(() => spawnItem(lamaConfig),   rand(0, 2000));
+  setTimeout(() => spawnItem(bagConfig),    rand(500, 3000));
+  setTimeout(() => spawnItem(glassesConfig),rand(1000, 3500));
+
+  /* steady drizzle */
+  setInterval(() => spawnItem(lamaConfig),   2700);
+  setInterval(() => spawnItem(bagConfig),    7500);
+  setInterval(() => spawnItem(glassesConfig),10500);
 })();
 </script>
 

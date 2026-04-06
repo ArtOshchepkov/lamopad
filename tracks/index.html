@@ -100,6 +100,42 @@
       .cloud { animation: none; }
     }
 
+    /* ── ламопад ──────────────────────────────────────── */
+    .lamopad-canvas {
+      position: fixed;
+      inset: 0;
+      pointer-events: none;
+      z-index: 0;
+      overflow: hidden;
+    }
+
+    .lama {
+      position: absolute;
+      top: -120px;
+      font-size: 32px;
+      line-height: 1;
+      user-select: none;
+      will-change: transform, opacity;
+      animation: lama-fall linear forwards;
+    }
+
+    @keyframes lama-fall {
+      0% {
+        opacity: 0;
+        transform: translateY(0) rotate(var(--rot-start));
+      }
+      8% {
+        opacity: var(--opacity);
+      }
+      88% {
+        opacity: var(--opacity);
+      }
+      100% {
+        opacity: 0;
+        transform: translateY(var(--fall-dist)) rotate(var(--rot-end));
+      }
+    }
+
     /* ── layout ───────────────────────────────────────── */
     .page {
       position: relative;
@@ -175,7 +211,7 @@
     .track-name {
       font-size: clamp(22px, 5.5vw, 36px);
       font-weight: 300;
-      color: var(--text);
+      color: #c8baa8;
       letter-spacing: .02em;
       line-height: 1.15;
       transition: color 0.2s;
@@ -197,15 +233,15 @@
       letter-spacing: .22em;
       text-transform: uppercase;
       text-decoration: none;
-      color: var(--dim);
-      border: 1px solid var(--dim);
+      color: var(--text);
+      border: 1px solid rgba(160,146,120,0.45);
       padding: 3px 8px;
       transition: color .2s, border-color .2s;
     }
 
     .track-link:hover {
-      color: var(--amber);
-      border-color: var(--amber);
+      color: var(--gold);
+      border-color: var(--gold);
     }
 
     /* ── footer ───────────────────────────────────────── */
@@ -242,6 +278,8 @@
   </style>
 </head>
 <body>
+
+<div class="lamopad-canvas" id="lamopad-canvas"></div>
 
 <div class="clouds">
   <div class="cloud cloud-1"></div>
@@ -333,13 +371,58 @@
 (function () {
   /* staggered entrance */
   const tracks = document.querySelectorAll('.track');
-  if (window.matchMedia('(prefers-reduced-motion: reduce)').matches) {
+  const reduced = window.matchMedia('(prefers-reduced-motion: reduce)').matches;
+  if (reduced) {
     tracks.forEach(t => t.classList.add('visible'));
-    return;
+  } else {
+    tracks.forEach((t, i) => {
+      setTimeout(() => t.classList.add('visible'), 80 + i * 90);
+    });
   }
-  tracks.forEach((t, i) => {
-    setTimeout(() => t.classList.add('visible'), 80 + i * 90);
-  });
+
+  /* ── ламопад ─────────────────────────────────────── */
+  if (reduced) return;
+
+  const canvas  = document.getElementById('lamopad-canvas');
+  const llamas  = ['🦙'];
+  const MIN_DUR = 6;   // seconds
+  const MAX_DUR = 14;
+  const MIN_SIZE = 18; // px
+  const MAX_SIZE = 40;
+
+  function rand(a, b) { return a + Math.random() * (b - a); }
+  function randInt(a, b) { return Math.floor(rand(a, b + 1)); }
+
+  function spawnLama() {
+    const el = document.createElement('span');
+    el.className = 'lama';
+    el.textContent = llamas[0];
+
+    const size    = rand(MIN_SIZE, MAX_SIZE);
+    const dur     = rand(MIN_DUR, MAX_DUR);
+    const left    = rand(-2, 100);              // vw
+    const dist    = (window.innerHeight + 160) + 'px';
+    const rotStart = rand(-25, 25)  + 'deg';
+    const rotEnd   = rand(-180, 180) + 'deg';
+    const opacity  = rand(0.12, 0.32);           // subtle, doesn't overpower content
+
+    el.style.cssText = `
+      left: ${left}vw;
+      font-size: ${size}px;
+      animation-duration: ${dur}s;
+      --fall-dist: ${dist};
+      --rot-start: ${rotStart};
+      --rot-end: ${rotEnd};
+      --opacity: ${opacity};
+    `;
+
+    canvas.appendChild(el);
+    el.addEventListener('animationend', () => el.remove());
+  }
+
+  /* initial burst then steady drizzle */
+  for (let i = 0; i < 5; i++) setTimeout(spawnLama, rand(0, 2000));
+  setInterval(spawnLama, 900);
 })();
 </script>
 

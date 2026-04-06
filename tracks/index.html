@@ -144,21 +144,22 @@
       margin-bottom: 72px;
     }
 
-    .label {
-      font-size: clamp(10px, 2vw, 12px);
-      letter-spacing: .32em;
-      text-transform: uppercase;
-      color: var(--dim);
-      font-weight: 400;
-      margin-bottom: 16px;
-    }
-
     h1 {
       font-size: clamp(36px, 10vw, 72px);
       font-weight: 300;
       color: var(--amber);
       letter-spacing: .04em;
       line-height: 1;
+    }
+
+    .label-inline {
+      font-size: clamp(12px, 2.5vw, 18px);
+      letter-spacing: .28em;
+      text-transform: uppercase;
+      color: var(--text);
+      font-weight: 400;
+      vertical-align: middle;
+      padding-left: .2em;
     }
 
     /* ── track list ───────────────────────────────────── */
@@ -284,8 +285,7 @@
 <main class="page">
 
   <header class="header">
-    <p class="label">Ламопад</p>
-    <h1>Треки</h1>
+    <h1>Треки <span class="label-inline">Ламопад</span></h1>
   </header>
 
   <ol class="tracklist">

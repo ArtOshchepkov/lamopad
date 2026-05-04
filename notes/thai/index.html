@@ -1,0 +1,729 @@
+<!DOCTYPE html>
+<html lang="ru">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <meta name="description" content="Практические заметки по Таиланду 2026: наличка, такси, связь, тук-туки, еда. Личный опыт без воды — от Ламопада.">
+  <meta property="og:title" content="Таиланд 2026 — записки с дороги">
+  <meta property="og:description" content="Наличка, Bolt, тук-туки, фраза «май Ау» и прикол про 555. Заметки из Бангкока.">
+  <title>Таиланд 2026 — записки с дороги | Ламопад</title>
+  <style>
+    *, *::before, *::after { box-sizing: border-box; margin: 0; padding: 0; }
+
+    :root {
+      --bg: #0f0f0f;
+      --surface: #1a1a1a;
+      --surface2: #222;
+      --border: #2e2e2e;
+      --text: #e8e4dc;
+      --muted: #888;
+      --accent: #e8a04a;
+      --accent-dim: rgba(232, 160, 74, 0.15);
+      --red: #d94f4f;
+      --radius: 12px;
+      --font: 'Georgia', serif;
+      --mono: 'Courier New', monospace;
+    }
+
+    html { scroll-behavior: smooth; }
+
+    body {
+      background: var(--bg);
+      color: var(--text);
+      font-family: var(--font);
+      font-size: 17px;
+      line-height: 1.75;
+    }
+
+    /* NAV */
+    .site-nav {
+      padding: 16px 20px;
+      border-bottom: 1px solid var(--border);
+      display: flex;
+      align-items: center;
+      gap: 12px;
+    }
+    .site-nav a {
+      color: var(--muted);
+      text-decoration: none;
+      font-size: 14px;
+      font-family: var(--mono);
+      letter-spacing: 0.04em;
+      transition: color 0.2s;
+    }
+    .site-nav a:hover { color: var(--accent); }
+    .site-nav .sep { color: var(--border); }
+
+    /* HERO */
+    .hero {
+      position: relative;
+      height: 70vw;
+      max-height: 520px;
+      min-height: 280px;
+      overflow: hidden;
+    }
+    .hero img {
+      width: 100%;
+      height: 100%;
+      object-fit: cover;
+      object-position: center 30%;
+      display: block;
+    }
+    .hero-overlay {
+      position: absolute;
+      inset: 0;
+      background: linear-gradient(to bottom, rgba(15,15,15,0.2) 0%, rgba(15,15,15,0.85) 100%);
+      display: flex;
+      flex-direction: column;
+      justify-content: flex-end;
+      padding: 28px 24px;
+    }
+    .hero-tag {
+      font-family: var(--mono);
+      font-size: 11px;
+      letter-spacing: 0.12em;
+      text-transform: uppercase;
+      color: var(--accent);
+      margin-bottom: 8px;
+    }
+    .hero h1 {
+      font-size: clamp(24px, 6vw, 44px);
+      font-weight: normal;
+      line-height: 1.2;
+      color: #fff;
+    }
+    .hero-meta {
+      margin-top: 10px;
+      font-size: 13px;
+      color: var(--muted);
+      font-family: var(--mono);
+    }
+
+    /* ARTICLE BODY */
+    .article-wrap {
+      max-width: 680px;
+      margin: 0 auto;
+      padding: 0 20px 60px;
+    }
+
+    /* INTRO */
+    .intro {
+      padding: 36px 0 20px;
+      border-bottom: 1px solid var(--border);
+      margin-bottom: 40px;
+    }
+    .intro p {
+      color: #cbc7bf;
+      font-size: 18px;
+      line-height: 1.8;
+    }
+
+    /* SECTIONS */
+    .section {
+      margin-bottom: 48px;
+    }
+    .section h2 {
+      font-size: 20px;
+      font-weight: normal;
+      color: var(--accent);
+      margin-bottom: 16px;
+      padding-bottom: 8px;
+      border-bottom: 1px solid var(--border);
+      display: flex;
+      align-items: center;
+      gap: 10px;
+    }
+    .section h2 .icon { font-size: 18px; }
+
+    .section p {
+      margin-bottom: 12px;
+      color: #d8d4cc;
+    }
+
+    /* PHOTO */
+    .photo-block {
+      margin: 24px 0;
+      border-radius: var(--radius);
+      overflow: hidden;
+    }
+    .photo-block img {
+      width: 100%;
+      display: block;
+      max-height: 420px;
+      object-fit: cover;
+    }
+    .photo-block figcaption {
+      padding: 10px 14px;
+      background: var(--surface);
+      font-size: 13px;
+      color: var(--muted);
+      font-family: var(--mono);
+      border-top: 1px solid var(--border);
+    }
+
+    .photo-grid {
+      display: grid;
+      grid-template-columns: 1fr 1fr;
+      gap: 8px;
+      margin: 24px 0;
+      border-radius: var(--radius);
+      overflow: hidden;
+    }
+    .photo-grid img {
+      width: 100%;
+      height: 200px;
+      object-fit: cover;
+      display: block;
+    }
+
+    /* TIP CARD */
+    .tip {
+      background: var(--surface);
+      border: 1px solid var(--border);
+      border-left: 3px solid var(--accent);
+      border-radius: var(--radius);
+      padding: 16px 20px;
+      margin: 20px 0;
+    }
+    .tip p { margin: 0; font-size: 15px; }
+    .tip strong { color: var(--accent); }
+
+    /* PRICE TABLE */
+    .price-list {
+      background: var(--surface);
+      border: 1px solid var(--border);
+      border-radius: var(--radius);
+      overflow: hidden;
+      margin: 20px 0;
+    }
+    .price-list .row {
+      display: flex;
+      justify-content: space-between;
+      align-items: center;
+      padding: 12px 20px;
+      border-bottom: 1px solid var(--border);
+      font-size: 15px;
+    }
+    .price-list .row:last-child { border-bottom: none; }
+    .price-list .row .label { color: #bbb; }
+    .price-list .row .price {
+      color: var(--accent);
+      font-family: var(--mono);
+      font-size: 14px;
+    }
+
+    /* HIGHLIGHT PHRASE */
+    .phrase-card {
+      background: var(--accent-dim);
+      border: 1px solid var(--accent);
+      border-radius: var(--radius);
+      padding: 20px 24px;
+      margin: 24px 0;
+      text-align: center;
+    }
+    .phrase-card .phrase {
+      font-size: 28px;
+      color: #fff;
+      letter-spacing: 0.05em;
+    }
+    .phrase-card .transcription {
+      font-size: 14px;
+      color: var(--accent);
+      font-family: var(--mono);
+      margin-top: 6px;
+    }
+    .phrase-card .note {
+      font-size: 13px;
+      color: var(--muted);
+      margin-top: 8px;
+    }
+
+    /* FUN FACT */
+    .fun-fact {
+      background: var(--surface2);
+      border-radius: var(--radius);
+      padding: 24px;
+      margin: 32px 0;
+      text-align: center;
+    }
+    .fun-fact .number {
+      font-size: 56px;
+      color: var(--accent);
+      font-family: var(--mono);
+      line-height: 1;
+      margin-bottom: 12px;
+    }
+    .fun-fact p {
+      font-size: 15px;
+      color: var(--muted);
+      margin: 0;
+    }
+
+    /* FAQ */
+    .faq-section {
+      margin-top: 56px;
+      padding-top: 40px;
+      border-top: 1px solid var(--border);
+    }
+    .faq-section h2 {
+      font-size: 22px;
+      font-weight: normal;
+      margin-bottom: 24px;
+      color: var(--text);
+    }
+    .faq-item {
+      border: 1px solid var(--border);
+      border-radius: var(--radius);
+      margin-bottom: 10px;
+      overflow: hidden;
+    }
+    .faq-question {
+      width: 100%;
+      background: var(--surface);
+      border: none;
+      color: var(--text);
+      text-align: left;
+      padding: 18px 20px;
+      font-family: var(--font);
+      font-size: 16px;
+      cursor: pointer;
+      display: flex;
+      justify-content: space-between;
+      align-items: center;
+      gap: 16px;
+      transition: background 0.2s;
+    }
+    .faq-question:hover { background: var(--surface2); }
+    .faq-question .chevron {
+      flex-shrink: 0;
+      width: 20px;
+      height: 20px;
+      fill: var(--muted);
+      transition: transform 0.3s;
+    }
+    .faq-item.open .faq-question .chevron { transform: rotate(180deg); }
+    .faq-answer {
+      max-height: 0;
+      overflow: hidden;
+      transition: max-height 0.35s ease;
+      background: var(--bg);
+    }
+    .faq-item.open .faq-answer { max-height: 400px; }
+    .faq-answer-inner {
+      padding: 16px 20px 20px;
+      font-size: 15px;
+      color: #bbb;
+      line-height: 1.7;
+    }
+    .faq-answer-inner strong { color: var(--accent); }
+
+    /* CTA */
+    .cta-block {
+      margin-top: 56px;
+      padding: 36px 28px;
+      background: var(--surface);
+      border: 1px solid var(--border);
+      border-radius: var(--radius);
+      text-align: center;
+    }
+    .cta-block p {
+      color: var(--muted);
+      font-size: 15px;
+      margin-bottom: 20px;
+    }
+    .cta-btn {
+      display: inline-block;
+      padding: 14px 32px;
+      background: var(--accent);
+      color: #0f0f0f;
+      font-family: var(--mono);
+      font-size: 14px;
+      font-weight: bold;
+      letter-spacing: 0.06em;
+      text-decoration: none;
+      border-radius: 8px;
+      text-transform: uppercase;
+      transition: opacity 0.2s, transform 0.15s;
+    }
+    .cta-btn:hover { opacity: 0.88; transform: translateY(-1px); }
+    .cta-eyebrow {
+      font-family: var(--mono);
+      font-size: 11px;
+      letter-spacing: 0.1em;
+      color: var(--accent);
+      text-transform: uppercase;
+      margin-bottom: 10px;
+    }
+    .cta-title {
+      font-size: 22px;
+      margin-bottom: 12px;
+      font-weight: normal;
+    }
+
+    /* FOOTER */
+    footer {
+      margin-top: 60px;
+      padding: 24px 20px;
+      border-top: 1px solid var(--border);
+      text-align: center;
+      font-family: var(--mono);
+      font-size: 12px;
+      color: var(--muted);
+    }
+    footer a { color: var(--muted); text-decoration: none; }
+    footer a:hover { color: var(--accent); }
+
+    /* MOBILE TWEAKS */
+    @media (max-width: 480px) {
+      .photo-grid { grid-template-columns: 1fr; }
+      .photo-grid img { height: 240px; }
+      .phrase-card .phrase { font-size: 22px; }
+    }
+  </style>
+</head>
+<body>
+
+  <nav class="site-nav">
+    <a href="../../index.html">Ламопад</a>
+    <span class="sep">/</span>
+    <a href="#">Таиланд 2026</a>
+  </nav>
+
+  <header class="hero">
+    <img src="me_in_bkk.jpg" alt="Бангкок, 2026">
+    <div class="hero-overlay">
+      <div class="hero-tag">Записки с дороги · 2026</div>
+      <h1>Таиланд</h1>
+      <div class="hero-meta">Бангкок, Хуа Хин, рынок у поездов — личный опыт</div>
+    </div>
+  </header>
+
+  <main class="article-wrap">
+
+    <div class="intro">
+      <p>
+        Cобрал заметки про деньги, транспорт, еду и местные приколы.
+      </p>
+    </div>
+
+    <!-- ДЕНЬГИ -->
+    <section class="section" id="money">
+      <h2><span class="icon">💵</span> Наличка и карты</h2>
+      <p>
+        Примерно в половине мест — только наличка. За оплату картой часто добавляют небольшую наценку.
+        Лучше иметь баты при себе.
+      </p>
+      <p>
+        Карты <strong>работают хорошо</strong> в такси (Bolt, Grab), ресторанах. Оплата в 7-Eleven при суммах от 200 бат.
+        Грузинские карты Credo и TBC принимают без проблем.
+      </p>
+
+      <figure class="photo-block">
+        <img src="atm.jpg" alt="Банкомат в Таиланде">
+        <figcaption>Банкоматов много — комиссия везде фикс</figcaption>
+      </figure>
+
+      <h2><span class="icon">🏧</span> Снятие наличных</h2>
+      <p>
+        Банкоматов много, но везде есть фиксированная комиссия — <strong>200-350 бат за транзакцию</strong>,
+        независимо от суммы. Снимайте сразу побольше — это выгоднее, чем несколько маленьких снятий.
+      </p>
+      <div class="tip">
+        <p><strong>Совет:</strong> снимайте от 5000–10 000 бат за раз.</p>
+      </div>
+    </section>
+
+    <!-- СВЯЗЬ -->
+    <section class="section" id="sim">
+      <h2><span class="icon">📶</span> Мобильная связь</h2>
+      <p>
+        Туристическую симку продают прямо в 7-Eleven и в аэропорту — цены одинаковые.
+        Пакеты стоят в среднем <strong>500–900 бат</strong> в зависимости от количества дней.
+        Покупаете, втыкаете, интернет сразу работает. Для оформления нужен паспорт.
+      </p>
+      <p>
+        Связь быстрая, ловит даже <strike>на парковке</strike> на трассе. Звонил родителям в дороге на ВК. Раздача интернета с телефона работает:
+        ноут через хотспот показал <strong>125 Мбит/с</strong> в speedtest.
+      </p>
+      <div class="tip">
+        <p><strong>Дешевле:</strong> купить eSIM заранее, ещё до поездки.</p>
+      </div>
+    </section>
+
+    <!-- ТАКСИ -->
+    <section class="section" id="taxi">
+      <h2><span class="icon">🚕</span> Такси: Bolt и Grab</h2>
+      <p>
+        Оба приложения работают отлично. Bolt обычно дешевле.
+        С грузинских карт оплата проходит без проблем.
+      </p>
+
+      <div class="price-list">
+        <div class="row">
+          <span class="label">Короткая поездка на байке</span>
+          <span class="price">30–60 ฿</span>
+        </div>
+        <div class="row">
+          <span class="label">Короткая на автомобиле</span>
+          <span class="price">~100 ฿ ($3)</span>
+        </div>
+        <div class="row">
+          <span class="label">20 минут на байке</span>
+          <span class="price">70–80 ฿</span>
+        </div>
+        <div class="row">
+          <span class="label">20 минут на авто (эконом)</span>
+          <span class="price">170–200 ฿</span>
+        </div>
+        <div class="row">
+          <span class="label">20 минут (комфорт)</span>
+          <span class="price">270 ฿</span>
+        </div>
+        <div class="row">
+          <span class="label">Бангкок → Хуа Хин (3 ч.)</span>
+          <span class="price">3400 ฿</span>
+        </div>
+      </div>
+
+      <p>
+        Межгород тоже работает — ездили в Хуа Хин и на <strong>Train Market</strong> (~1.5 часа от Бангкока).
+        Можно отправить передачку на байке или вещи на грузовичке.
+      </p>
+      <p>
+        Яндекс Такси в Таиланде нет.
+      </p>
+
+      <figure class="photo-block">
+        <img src="bike_taxi.jpg" alt="Байк-такси в Бангкоке">
+        <figcaption>Байки — самый быстрый способ перемещаться в пробках</figcaption>
+      </figure>
+    </section>
+
+    <!-- ТУК-ТУК -->
+    <section class="section" id="tuktuk">
+      <h2><span class="icon">🛺</span> Тук-Тук</h2>
+      <p>
+        Стоит дороже такси — это больше прикол, чем транспорт.
+        Торговаться надо, не бойтесь. В среднем сбивал цену в <strong>1.5–2 раза</strong>.
+      </p>
+      <p>
+        Достиг цены в 200–400 бат в зависимости от расстояния.
+        Местная тайка рядом с нами торговалась — лучше нас не получилось.
+        Вывод: первая цена — для туриста, после торга уже как для своих.
+      </p>
+
+      <figure class="photo-block">
+        <img src="tuk_tuk.jpg" alt="Тук-тук на улицах Бангкока">
+        <figcaption>Я синий</figcaption>
+      </figure>
+    </section>
+
+
+    <!-- ЕДА -->
+    <section class="section" id="food">
+      <h2><span class="icon">🍜</span> Еда и магазины</h2>
+      <p>
+        <strong>7-Eleven</strong> — легенда. Есть везде, работает всегда, есть всё.
+        Еда -- советую эпичные бутеры с сосисками, напитки, средства гигиены, зарядки, переходники.
+      </p>
+      <p>
+        Доставка еды — через <strong>Grab</strong>. В Bolt доставки нет.
+      </p>
+      <p>
+        Ночных рынков и кафе огромное количество — можно питаться дёшево и вкусно везде.
+      </p>
+    </section>
+
+    <!-- ОДЕЖДА / ПОГОДА -->
+    <section class="section" id="clothes">
+      <h2><span class="icon">👕</span> Одежда и погода</h2>
+
+      <div class="photo-grid">
+        <img src="rain.jpg" alt="Дождь в Бангкоке">
+        <img src="layers.jpg" alt="Улицы Бангкока">
+      </div>
+
+      <p>
+        <strong>Жара.</strong> Лёгкая кофта не нужна — она так и осталась в рюкзаке.
+        Открытая обувь — правильный выбор.
+      </p>
+      <p>
+        Штаны со слонами -- неизбежность. Не сопротивляйтесь им. Вы всё равно рано или поздно купите штаны со слонами.
+        Даже местные носят штаны со слонами. Штаны со слонами.
+        Продаются везде за <strong>100–250 бат</strong>. Это лёгкость, стиль, и грация кстати.
+      </p>
+    </section>
+
+    <!-- НОЧНОЙ ГОРОД -->
+    <section class="section" id="nightlife">
+      <h2><span class="icon">🌃</span> Ночной Бангкок</h2>
+      <figure class="photo-block">
+        <img src="night_city.jpg" alt="Ночной Бангкок">
+        <figcaption>Большие гороДАААА</figcaption>
+      </figure>
+    </section>
+
+    <!-- КАК ОТКАЗАТЬ -->
+    <section class="section" id="sellers">
+      <h2><span class="icon">🙏</span> Навязчивые продавцы</h2>
+      <p>Встречаются часто. Два рабочих способа:</p>
+      <div class="tip">
+        <p><strong>Легко:</strong> улыбнуться и сказать «Thank you» — вежливо уходят.</p>
+      </div>
+      <p>Но есть способ лучше — сказать «нет» на тайском:</p>
+      <div class="phrase-card">
+        <div class="phrase">ไม่เอา</div>
+        <div class="transcription">«май Ау» — «не хочу / не надо»</div>
+        <div class="note">
+          Если вы парень — «май Ау <strong>кхап</strong>»<br>
+          Если девушка — «май Ау <strong>кхаа</strong>»<br>
+          Продавцы умиляются тайскому и вежливо отходят.
+        </div>
+      </div>
+    </section>
+
+    <!-- ПРИКОЛ ПРО 555 -->
+    <section class="section" id="fivefive">
+      <h2><span class="icon">😄</span> Прикол про 555</h2>
+      <div class="fun-fact">
+        <div class="number">555</div>
+        <p>
+          По-тайски цифра 5 читается как «ха». Смех звучит как «ха-ха-ха» — то есть «пять-пять-пять».<br><br>
+          Поэтому вместо «ахаха» или «)))» тайцы пишут <strong>55555</strong>
+        </p>
+      </div>
+    </section>
+
+    <!-- FAQ -->
+    <section class="faq-section" id="faq">
+      <h2>Частые вопросы</h2>
+
+      <div class="faq-item">
+        <button class="faq-question" aria-expanded="false">
+          Нужна ли наличка в Таиланде в 2026?
+          <svg class="chevron" viewBox="0 0 24 24"><path d="M6 9l6 6 6-6"/></svg>
+        </button>
+        <div class="faq-answer">
+          <div class="faq-answer-inner">
+            Да, примерно в половине мест принимают только наличку. За карту бывает небольшая наценка.
+            Карты хорошо работают в Bolt, Grab и 7-Eleven при суммах от 200 бат.
+            <strong>Лучше иметь при себе 1500–3000 бат на каждый день.</strong>
+          </div>
+        </div>
+      </div>
+
+      <div class="faq-item">
+        <button class="faq-question" aria-expanded="false">
+          Какое приложение такси лучше — Bolt или Grab?
+          <svg class="chevron" viewBox="0 0 24 24"><path d="M6 9l6 6 6-6"/></svg>
+        </button>
+        <div class="faq-answer">
+          <div class="faq-answer-inner">
+            Оба работают хорошо. <strong>Bolt обычно дешевле.</strong> Grab чуть более распространён в некоторых районах.
+            Грузинские карты Credo и TBC принимают без проблем в обоих приложениях.
+          </div>
+        </div>
+      </div>
+
+      <div class="faq-item">
+        <button class="faq-question" aria-expanded="false">
+          Сколько снимать в банкомате сразу?
+          <svg class="chevron" viewBox="0 0 24 24"><path d="M6 9l6 6 6-6"/></svg>
+        </button>
+        <div class="faq-answer">
+          <div class="faq-answer-inner">
+            Фиксированная комиссия — <strong>350 бат за снятие</strong>, независимо от суммы.
+            Снимайте сразу как можно больше: 5000–10 000 бат — чтобы не терять лишние 350 бат каждый раз.
+          </div>
+        </div>
+      </div>
+
+      <div class="faq-item">
+        <button class="faq-question" aria-expanded="false">
+          Как купить симку в Таиланде?
+          <svg class="chevron" viewBox="0 0 24 24"><path d="M6 9l6 6 6-6"/></svg>
+        </button>
+        <div class="faq-answer">
+          <div class="faq-answer-inner">
+            Туристическая симка продаётся в любом 7-Eleven и в аэропорту — цены одинаковые, 500–900 бат.
+            <strong>Дешевле купить eSIM заранее</strong> из России или Грузии до поездки.
+          </div>
+        </div>
+      </div>
+
+      <div class="faq-item">
+        <button class="faq-question" aria-expanded="false">
+          Как отказать навязчивому продавцу?
+          <svg class="chevron" viewBox="0 0 24 24"><path d="M6 9l6 6 6-6"/></svg>
+        </button>
+        <div class="faq-answer">
+          <div class="faq-answer-inner">
+            Легко — улыбка и «Thank you». Эффективнее — сказать на тайском <strong>«май Ау»</strong> («не хочу»).
+            Продавцы умиляются тайскому и сразу вежливо отходят.
+            Если вы парень — «май Ау кхап», девушка — «май Ау кхаа».
+          </div>
+        </div>
+      </div>
+
+      <div class="faq-item">
+        <button class="faq-question" aria-expanded="false">
+          Стоит ли торговаться с тук-туком?
+          <svg class="chevron" viewBox="0 0 24 24"><path d="M6 9l6 6 6-6"/></svg>
+        </button>
+        <div class="faq-answer">
+          <div class="faq-answer-inner">
+            Обязательно. Первая цена — для туриста. После торга выходит как для местных.
+            Реально снизить в 1.5–2 раза — итоговая сумма обычно 200–400 бат в зависимости от расстояния.
+          </div>
+        </div>
+      </div>
+
+      <div class="faq-item">
+        <button class="faq-question" aria-expanded="false">
+          Что значит «555» в тайских переписках?
+          <svg class="chevron" viewBox="0 0 24 24"><path d="M6 9l6 6 6-6"/></svg>
+        </button>
+        <div class="faq-answer">
+          <div class="faq-answer-inner">
+            На тайском цифра 5 читается как «ха». Поэтому смех по-тайски звучит как «пять-пять-пять».
+            <strong>55555</strong> — это тайский аналог «ахаха» или «)))». Теперь вы знаете.
+          </div>
+        </div>
+      </div>
+    </section>
+
+    <!-- CTA -->
+    <div class="cta-block">
+      <div class="cta-eyebrow">Ламопад</div>
+      <div class="cta-title">Путешествия — это музыка</div>
+      <p>Треки про дорогу, свободу и всё то, ради чего стоит ехать куда-нибудь без обратного билета.</p>
+      <a class="cta-btn" href="https://band.link/lamopad" target="_blank" rel="noopener">
+        Послушать трек про путешествия
+      </a>
+    </div>
+
+  </main>
+
+  <footer>
+    <a href="../../index.html">Ламопад</a> · Записки с дороги · 2026
+  </footer>
+
+  <script>
+    document.querySelectorAll('.faq-question').forEach(btn => {
+      btn.addEventListener('click', () => {
+        const item = btn.closest('.faq-item');
+        const open = item.classList.contains('open');
+        document.querySelectorAll('.faq-item.open').forEach(el => {
+          el.classList.remove('open');
+          el.querySelector('.faq-question').setAttribute('aria-expanded', 'false');
+        });
+        if (!open) {
+          item.classList.add('open');
+          btn.setAttribute('aria-expanded', 'true');
+        }
+      });
+    });
+  </script>
+
+</body>
+</html>

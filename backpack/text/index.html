@@ -140,24 +140,53 @@
       padding-top: 20px;
       border-top: 1px solid rgba(0,0,0,0.10);
       display: flex;
-      gap: 20px;
+      flex-direction: column;
+      gap: 18px;
+    }
+
+    .platforms {
+      display: flex;
       flex-wrap: wrap;
+      gap: 14px;
       align-items: center;
     }
-    .footer a {
+
+    .platform-link {
+      display: flex;
+      align-items: center;
+      gap: 6px;
+      text-decoration: none;
+      color: var(--faded);
+      font-size: clamp(13px, 2.6vw, 16px);
+      font-weight: 600;
+      letter-spacing: .04em;
+      transition: color .15s;
+    }
+    .platform-link img {
+      width: 16px; height: 16px;
+      filter: brightness(0) opacity(0.38);
+      transition: filter .15s;
+    }
+    .platform-link:hover { color: var(--red); }
+    .platform-link:hover img {
+      filter: brightness(0) saturate(1) invert(17%) sepia(78%) saturate(500%) hue-rotate(336deg) opacity(1);
+    }
+
+    .footer-nav a {
       font-size: 13px;
       letter-spacing: .18em;
       text-transform: uppercase;
       color: var(--faded);
       text-decoration: none;
       font-weight: 700;
+      margin-right: 20px;
       transition: color .15s;
     }
-    .footer a:hover { color: var(--ink); }
+    .footer-nav a:hover { color: var(--ink); }
+
     .copyright {
       font-size: 12px;
       color: #bbb;
-      width: 100%;
       letter-spacing: .08em;
     }
   </style>
@@ -294,8 +323,35 @@
   </div>
 
   <footer class="footer">
-    <a href="/">ламопад.рф</a>
-    <a href="/tracks/">Больше треков</a>
+    <div class="platforms">
+      <a class="platform-link" href="https://music.yandex.ru/album/36061821" target="_blank" rel="noopener">
+        <img src="https://upload.wikimedia.org/wikipedia/commons/f/fa/Yandex_Music_icon_2023.svg" alt="Яндекс Музыка">
+        Яндекс Музыка
+      </a>
+      <a class="platform-link" href="https://music.apple.com/ru/album/1811336916" target="_blank" rel="noopener">
+        <img src="https://cdn.simpleicons.org/applemusic/000000" alt="Apple Music">
+        Apple Music
+      </a>
+      <a class="platform-link" href="https://open.spotify.com/album/1r7VYjD3McTcgjbk83e4VQ" target="_blank" rel="noopener">
+        <img src="https://cdn.simpleicons.org/spotify/000000" alt="Spotify">
+        Spotify
+      </a>
+      <a class="platform-link" href="https://vk.com/artist/lamopad?z=audio_playlist-2000694579_23694579_f3be72edcf9cdb94a5" target="_blank" rel="noopener">
+        <img src="https://cdn.simpleicons.org/vk/000000" alt="VK Музыка">
+        VK Музыка
+      </a>
+      <a class="platform-link" href="https://www.youtube.com/watch?v=eEbCRmORrgU&list=OLAK5uy_n6EfatXhHvUIs073j1AHNHS4X4lvgLcew" target="_blank" rel="noopener">
+        <img src="https://cdn.simpleicons.org/youtube/000000" alt="YouTube">
+        YouTube
+      </a>
+      <a class="platform-link" href="https://music.mts.ru/album/36061821" target="_blank" rel="noopener">
+        КИОН
+      </a>
+    </div>
+    <div class="footer-nav">
+      <a href="/">ламопад.рф</a>
+      <a href="/tracks/">Больше треков</a>
+    </div>
     <p class="copyright">© Ламопад — все права защищены</p>
   </footer>
 

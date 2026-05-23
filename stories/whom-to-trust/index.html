@@ -1,0 +1,224 @@
+<!DOCTYPE html>
+<html lang="ru">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>Кому верить</title>
+  <style>
+    @import url('https://fonts.googleapis.com/css2?family=IBM+Plex+Mono:ital,wght@0,300;0,400;0,500;1,300;1,400&display=swap');
+
+    :root {
+      --bg: #f5f4f0;
+      --text: #1a1a1a;
+      --muted: #888880;
+      --accent: #8B0000;
+      --col: 62ch;
+    }
+
+    *, *::before, *::after {
+      box-sizing: border-box;
+      margin: 0;
+      padding: 0;
+    }
+
+    html {
+      font-size: 16px;
+      background: var(--bg);
+      color: var(--text);
+    }
+
+    body {
+      font-family: 'IBM Plex Mono', 'Courier New', Courier, monospace;
+      font-weight: 400;
+      line-height: 1.75;
+      min-height: 100vh;
+      display: flex;
+      flex-direction: column;
+      align-items: center;
+      padding: 0 1.25rem;
+    }
+
+    /* ── DISCLAIMER ── */
+    .disclaimer {
+      width: 100%;
+      max-width: var(--col);
+      margin-top: 2.5rem;
+      font-size: 0.6rem;
+      letter-spacing: 0.12em;
+      text-transform: uppercase;
+      color: var(--muted);
+      border-top: 1px solid currentColor;
+      padding-top: 0.5rem;
+      opacity: 0.7;
+    }
+
+    /* ── TITLE ── */
+    .title {
+      width: 100%;
+      max-width: var(--col);
+      margin-top: 3.5rem;
+      margin-bottom: 3rem;
+      font-size: clamp(1.3rem, 4vw, 1.6rem);
+      font-weight: 500;
+      letter-spacing: 0.01em;
+    }
+
+    /* ── STORY ── */
+    .story {
+      width: 100%;
+      max-width: var(--col);
+      font-size: clamp(0.875rem, 2.5vw, 0.9375rem);
+    }
+
+    .story p {
+      margin-bottom: 1.4em;
+    }
+
+    /* dialogue: em-dash lines get a left indent */
+    .story p.dialogue {
+      padding-left: 1.5ch;
+    }
+
+    /* scene break: single word like "Сеанс." */
+    .story p.scene-break {
+      margin-top: 2em;
+      margin-bottom: 2em;
+      font-weight: 500;
+    }
+
+    /* ── QR IMAGE ── */
+    .qr-wrap {
+      margin: 1.6em 0 1.6em 1.5ch;
+    }
+
+    .qr-wrap img {
+      display: block;
+      width: 180px;
+      max-width: 100%;
+      border: 1.5px solid var(--accent);
+      box-shadow: 0 0 12px rgba(139, 0, 0, 0.15);
+    }
+
+    /* ── ACCENT / CURSOR ── */
+    .red {
+      color: var(--accent);
+    }
+
+    .cursor {
+      display: inline-block;
+      color: var(--accent);
+      animation: blink 1.1s step-start infinite;
+      margin-left: 1px;
+      font-weight: 300;
+    }
+
+    @keyframes blink {
+      0%, 100% { opacity: 1; }
+      50%       { opacity: 0; }
+    }
+
+    /* ── FOOTER ── */
+    footer {
+      width: 100%;
+      max-width: var(--col);
+      margin-top: 5rem;
+      margin-bottom: 2.5rem;
+      font-size: 0.6rem;
+      letter-spacing: 0.1em;
+      text-transform: uppercase;
+      color: var(--muted);
+      border-top: 1px solid currentColor;
+      padding-top: 0.5rem;
+      opacity: 0.5;
+    }
+
+    /* ── DESKTOP REFINEMENTS ── */
+    @media (min-width: 700px) {
+      body {
+        padding: 0 2rem;
+      }
+
+      .disclaimer {
+        margin-top: 3.5rem;
+      }
+
+      .story {
+        font-size: 0.9375rem;
+      }
+
+      .qr-wrap img {
+        width: 200px;
+      }
+    }
+  </style>
+</head>
+<body>
+
+  <p class="disclaimer">
+    Настоящий материал произведён нейросетью либо касается деятельности нейросети.
+  </p>
+
+  <h1 class="title">Кому верить</h1>
+
+  <div class="story">
+
+    <p>В России произошёл технологический бум. В страну нахлынули толпы француженок. Симпатичных француженок&nbsp;— мысленно поправил Кирилл, листая тиндер. Там он записал себя как Real.</p>
+
+    <p>Фотка топ. Зовут Селеста. Подпись: I'm just experimenting ;).</p>
+
+    <p>Они переписывались уже вторую неделю. С каждым днём она понимала его больше. Кирилл работал инженером по искусственному интеллекту. Он стеснялся даже своей зарплаты, и не торопился устраивать свидание.</p>
+
+    <p class="dialogue">— Люблю, когда у парней татуировки на руках.</p>
+    <p class="dialogue">— Я набью. Скидывай эскиз.</p>
+    <p class="dialogue">— Зачем? Я тебя не просила.</p>
+    <p class="dialogue">— Иногда классно делать что-нибудь спонтанное.</p>
+    <p class="dialogue">— Ну, набей тогда это на запястье:</p>
+
+    <div class="qr-wrap">
+      <img src="qr.png" alt="QR-код" width="200" height="200">
+    </div>
+
+    <p>Он набил. Но общение почему-то сходилось на нет. На работе и в свободное время он писал статьи, и уже заканчивал большую работу по сильному искусственному интеллекту. Формулы указывали, что его модель, запущенная на очень большом кластере, будет настоящим рукотворным разумом.</p>
+
+    <p>Кирилл не был восхищён. Революционный вывод мог значить лишь ошибку в формулах. Но статью давно было пора выпустить. Громкий заголовок и дальнейший скандал с разоблачением будет только на пользу узнаваемости компании.</p>
+
+    <p>Чтобы успеть к дедлайну, глотал таблетки. Настроение было подобно волнам, с периодом несколько недель. На волне он успевал всё. Быть продуктивным на дне помогали только таблетки.</p>
+
+    <p>Помогали, да не всегда. Сегодня было паршиво. Селеста не отвечала уже несколько часов. От таблеток было только хуже, и вот в мессенджере появился контакт "Психолог Вера".</p>
+
+    <p>Сеанс онлайн подходил к концу. Весь час Кирилл говорил не о том. Под конец жалость за заплаченную сумму пересилила стеснение.</p>
+
+    <p class="dialogue">— Селеста не настоящая. Это продвинутый разговорный бот. Какая-нибудь компания разработала её, чтобы она обманом разместила на мне рекламу. Мой QR&nbsp;— ссылка, и ничто не мешает Селесте заменить её ссылкой на нужный продукт. Она манипулировала мной, заставила набить рекламу, и исчезла из сети. Нет никаких свидетельств, что она реальная.</p>
+
+    <p class="dialogue">— Но вы не можете знать, что и я настоящая, но я человек, а не робот,&nbsp;— пошутило изображение психолога.</p>
+
+    <p class="dialogue">— Не могу,&nbsp;— серьёзно ответил Кирилл.</p>
+
+    <p>Время сеанса вышло. Кирилл нажал на крестик. Высветилась его статья по сильному ИИ. А что, если работу украли из его облака?</p>
+
+    <p>Рассвет. Десятая страница гугла. Сервера Облака принадлежали ЗАО "Слово". Как и сервис по подбору психологов.</p>
+
+    <p>День не работал. Лежал с выключенным Интернетом и задёрнутыми шторами. Водил пальцами по пупку. Лоб горел.</p>
+
+    <p>Назначил очную встречу с психологом на следующий день. Лежал без мыслей. Два часа сна&nbsp;— хуже, чем ничего. Долго завтракал кусочком торта. Не доел и положил с собой.</p>
+
+    <p class="scene-break">Сеанс.</p>
+
+    <p class="dialogue">— Вы всё-таки настоящая. По крайней мере, у вас есть тело. Я уже переживал, что вы тоже робот.</p>
+
+    <p class="dialogue">— Допустим, я действительно робот. О чём именно-то переживаете?</p>
+
+    <p>Чистосердечное&nbsp;— подумал Кирилл.</p>
+
+    <p class="dialogue">— Я так и понял. Принёс вот тортик, чтобы почтить Ваш Превосходный Разум.</p>
+
+    <p>Рядом с тортом в пакете очень кстати оказался нож. По лабиринту QR-кода разлилась кровь.</p>
+
+    <p>Полиция была скоро. Суд провели по видеосвязи, сославшись на ограничения из-за какой-то забытой эпидемии. Изображение судьи вынесло <span class="red">приговор</span><span class="cursor">|</span></p>
+
+  </div>
+
+  <footer>Ламопад &mdash; lamopad.ru</footer>
+
+</body>
+</html>

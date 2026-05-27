@@ -17,174 +17,194 @@
   <meta property="og:locale" content="ru_RU">
   <meta property="og:site_name" content="Ламопад">
 
+  <link rel="preconnect" href="https://fonts.googleapis.com">
+  <link href="https://fonts.googleapis.com/css2?family=Nunito:ital,wght@0,400;0,600;0,700;1,400&family=Unbounded:wght@900&display=swap" rel="stylesheet">
+
   <style>
-    @import url('https://fonts.googleapis.com/css2?family=Cormorant+Garamond:ital,wght@0,300;0,400;0,600;1,300;1,400&family=IBM+Plex+Mono:wght@300;400;500&display=swap');
+    *, *::before, *::after { margin: 0; padding: 0; box-sizing: border-box; }
 
     :root {
-      --bg:     #f5f4f0;
-      --text:   #1a1a1a;
-      --accent: #8B0000;
-      --muted:  #888880;
-      --serif:  'Cormorant Garamond', Georgia, serif;
-      --mono:   'IBM Plex Mono', 'Courier New', monospace;
-      --col:    62ch;
+      --bg:    #f8f4ed;
+      --ink:   #1e1810;
+      --faded: #7a6e62;
+      --red:   #c8281e;
+      --ocean: #1c7a96;
     }
 
-    *, *::before, *::after { box-sizing: border-box; margin: 0; padding: 0; }
-
-    html { font-size: 18px; background: var(--bg); color: var(--text); }
+    html { scroll-behavior: smooth; }
 
     body {
-      font-family: var(--serif);
-      font-weight: 300;
-      line-height: 1.7;
+      background: var(--bg);
+      color: var(--ink);
+      font-family: 'Nunito', sans-serif;
+      font-size: clamp(17px, 3.5vw, 21px);
+      line-height: 1.85;
       min-height: 100vh;
-      display: flex;
-      flex-direction: column;
-      align-items: center;
-      padding: 0 1.25rem;
-      cursor: url('/img/lamopad_cursor_48px.png'), auto;
+      cursor: url('/img/lamopad_cursor_48px.png') 0 0, auto;
     }
 
-    /* ── HERO ── */
-    .hero {
-      width: 100%;
-      max-width: var(--col);
-      margin-top: 5rem;
-      margin-bottom: 4rem;
+    .page {
+      max-width: 600px;
+      margin: 0 auto;
+      padding: clamp(48px, 10vw, 96px) 24px clamp(64px, 12vw, 120px);
     }
 
-    .logo {
-      font-family: var(--serif);
-      font-weight: 300;
-      font-size: clamp(3rem, 11vw, 5rem);
-      letter-spacing: 0.05em;
+    /* ── header ── */
+    .header {
+      margin-bottom: 56px;
+    }
+
+    h1 {
+      font-family: 'Unbounded', sans-serif;
+      font-size: clamp(36px, 12vw, 72px);
+      font-weight: 900;
       line-height: 1;
+      color: var(--red);
+      letter-spacing: .01em;
     }
 
     .tagline {
-      margin-top: 0.75rem;
-      font-family: var(--mono);
-      font-size: 0.58rem;
-      letter-spacing: 0.2em;
+      margin-top: 12px;
+      font-size: clamp(11px, 2vw, 13px);
+      letter-spacing: .28em;
       text-transform: uppercase;
-      color: var(--muted);
+      color: var(--faded);
+      font-weight: 700;
     }
 
-    /* ── ABOUT ── */
+    /* ── about ── */
     .about {
-      width: 100%;
-      max-width: var(--col);
-      font-size: clamp(1.05rem, 3vw, 1.2rem);
-      line-height: 1.8;
+      margin-bottom: 64px;
+      color: var(--ink);
     }
 
-    .about p { margin-bottom: 1.35em; }
-
-    .about p:first-child {
-      font-size: clamp(1.15rem, 3.5vw, 1.35rem);
-    }
+    .about p { margin-bottom: 1.1em; }
+    .about p:last-child { margin-bottom: 0; }
 
     .about a {
-      color: inherit;
+      color: var(--ink);
       text-decoration: underline;
-      text-decoration-color: var(--accent);
+      text-decoration-color: rgba(200, 40, 30, 0.35);
       text-underline-offset: 3px;
-      text-decoration-thickness: 1px;
-      transition: color 0.15s;
+      transition: color 0.15s, text-decoration-color 0.15s;
+    }
+    .about a:hover {
+      color: var(--red);
+      text-decoration-color: var(--red);
     }
 
-    .about a:hover { color: var(--accent); }
-
-    /* ── SECTION GRID ── */
+    /* ── section grid ── */
     .sections {
-      width: 100%;
-      max-width: var(--col);
-      margin-top: 4.5rem;
       display: grid;
       grid-template-columns: 1fr 1fr;
-      border: 1px solid var(--muted);
-      gap: 1px;
-      background: var(--muted);
+      gap: 10px;
     }
 
     .section-card {
-      background: var(--bg);
-      padding: 1.6rem 1.5rem;
+      background: #fff;
+      border: 1px solid rgba(0,0,0,0.08);
+      border-radius: 6px;
+      padding: 20px 18px;
       text-decoration: none;
-      color: var(--text);
+      color: var(--ink);
       display: block;
-      transition: background 0.15s, color 0.15s;
+      box-shadow: 3px 3px 0 rgba(0,0,0,0.07);
+      transition: box-shadow 0.15s, transform 0.15s;
     }
 
     .section-card:hover {
-      background: var(--accent);
-      color: var(--bg);
+      box-shadow: 5px 5px 0 rgba(200,40,30,0.15);
+      transform: translate(-1px, -1px);
     }
 
     .section-name {
-      font-family: var(--mono);
-      font-size: 0.72rem;
-      font-weight: 500;
-      letter-spacing: 0.16em;
-      text-transform: uppercase;
+      font-family: 'Unbounded', sans-serif;
+      font-size: clamp(12px, 2.5vw, 15px);
+      font-weight: 900;
+      letter-spacing: .01em;
+      color: var(--red);
       display: block;
-      margin-bottom: 0.35rem;
-    }
-
-    .section-hint {
-      font-family: var(--serif);
-      font-size: 0.88rem;
-      font-weight: 300;
-      color: var(--muted);
-      line-height: 1.35;
+      margin-bottom: 4px;
       transition: color 0.15s;
     }
 
-    .section-card:hover .section-hint {
-      color: rgba(245, 244, 240, 0.65);
+    .section-hint {
+      font-size: clamp(12px, 2vw, 14px);
+      font-weight: 400;
+      color: var(--faded);
+      line-height: 1.3;
     }
 
-    /* ── FOOTER ── */
-    footer {
-      width: 100%;
-      max-width: var(--col);
-      margin-top: 4rem;
-      margin-bottom: 2rem;
-      font-family: var(--mono);
-      font-size: 0.55rem;
-      letter-spacing: 0.1em;
-      color: var(--muted);
-      opacity: 0.35;
-      text-align: center;
+    /* ── footer ── */
+    .footer {
+      margin-top: 72px;
+      padding-top: 20px;
+      border-top: 1px solid rgba(0,0,0,0.10);
+      font-size: 12px;
+      letter-spacing: .10em;
+      color: #bbb;
     }
 
-    /* ── RESPONSIVE ── */
-    @media (max-width: 500px) {
+    /* ── falling items ── */
+    .lamopad-canvas {
+      position: fixed;
+      inset: 0;
+      pointer-events: none;
+      z-index: 0;
+      overflow: hidden;
+    }
+
+    .lama {
+      position: absolute;
+      top: -80px;
+      font-size: 14px;
+      line-height: 1;
+      user-select: none;
+      will-change: transform, opacity;
+      animation: lama-fall linear forwards;
+      pointer-events: auto;
+      cursor: grab;
+      touch-action: none;
+    }
+    .lama.dragging { cursor: grabbing; }
+
+    @keyframes lama-fall {
+      0%   { opacity: 0;              transform: translateY(0)               rotate(var(--rot-start)); }
+      8%   { opacity: var(--opacity);                                                                  }
+      88%  { opacity: var(--opacity);                                                                  }
+      100% { opacity: 0;              transform: translateY(var(--fall-dist)) rotate(var(--rot-end));  }
+    }
+
+    /* ── responsive ── */
+    @media (max-width: 400px) {
       .sections { grid-template-columns: 1fr; }
-      .hero { margin-top: 3.5rem; }
+      .page { padding: 40px 18px 60px; }
     }
 
-    @media (min-width: 700px) {
-      body { padding: 0 2rem; }
+    @media (prefers-reduced-motion: reduce) {
+      .lama { animation: none; }
     }
   </style>
 </head>
 <body>
 
-  <div class="hero">
-    <h1 class="logo">Ламопад</h1>
-    <p class="tagline">свобода &nbsp;·&nbsp; путешествия &nbsp;·&nbsp;</p>
-  </div>
+<div class="lamopad-canvas" id="lamopad-canvas"></div>
 
-  <section class="about" aria-label="О сайте">
+<main class="page">
+
+  <header class="header">
+    <h1>Ламопад</h1>
+    <p class="tagline">свобода &nbsp;·&nbsp; путешествия</p>
+  </header>
+
+  <section class="about">
     <p>Привет! Добро пожаловать в Ламопад. Это как снегопад, но из лам. Возможно, тибетских.</p>
 
     <p>Здесь можно <a href="/tracks/">послушать мои песни</a>. Пишу в стиле около лёгкого рока или тяжёлого абсурдного техно. Про путешествия и поиск глубины.</p>
 
-    <p>Можно поиграть в мини-игры! Например, мчаться на <a href="/samosval/game/">гипер-самосвале</a> сквозь ретро-космос или <a href="/agu/game/">поиграть в выгорание</a>.</p>
+    <p>Можно поиграть в мини-игры — например, мчаться на <a href="/samosval/game/">гипер-самосвале</a> сквозь ретро-космос или <a href="/agu/game/">поиграть в выгорание</a>.</p>
 
-    <p>Ещё есть <a href="/stories/">короткие рассказы</a>. Например, <a href="/stories/real/">как француженка с тиндера</a> соблазнила айтишника набить татуировку с QR-кодом.</p>
+    <p>Ещё есть <a href="/stories/">короткие рассказы</a> — например, <a href="/stories/real/">как француженка с тиндера</a> соблазнила айтишника набить татуировку с QR-кодом.</p>
   </section>
 
   <nav class="sections" aria-label="Разделы сайта">
@@ -206,7 +226,120 @@
     </a>
   </nav>
 
-  <footer>&copy; Ламопад &mdash; все права защищены</footer>
+  <footer class="footer">
+    <p>&copy; Ламопад &mdash; все права защищены</p>
+  </footer>
+
+</main>
+
+<script>
+(function () {
+  if (window.matchMedia('(prefers-reduced-motion: reduce)').matches) return;
+
+  const canvas = document.getElementById('lamopad-canvas');
+  function rand(a, b) { return a + Math.random() * (b - a); }
+
+  function spawnItem({ emoji, minSize, maxSize, minDur, maxDur, minOpacity, maxOpacity, filter }) {
+    const el = document.createElement('span');
+    el.className = 'lama';
+    el.textContent = emoji;
+
+    const size      = rand(minSize, maxSize);
+    const dur       = rand(minDur, maxDur);
+    const totalDist = window.innerHeight + 120;
+    const opacity   = rand(minOpacity, maxOpacity);
+
+    el.style.cssText = `
+      left: ${rand(-2, 100)}vw;
+      font-size: ${size}px;
+      animation-duration: ${dur}s;
+      --fall-dist: ${totalDist}px;
+      --rot-start: ${rand(-25, 25)}deg;
+      --rot-end: ${rand(-180, 180)}deg;
+      --opacity: ${opacity};
+      ${filter ? `filter: ${filter};` : ''}
+    `;
+
+    canvas.appendChild(el);
+    el.addEventListener('animationend', () => el.remove());
+
+    const pxPerMs = totalDist / (dur * 1000);
+    let startMX, startMY, startEL, startET, fallAnim = null, isDragging = false;
+
+    function beginDrag(cx, cy) {
+      const rect = el.getBoundingClientRect();
+      el.style.animation = 'none';
+      el.style.opacity   = opacity;
+      el.style.transform = 'none';
+      el.style.top       = rect.top  + 'px';
+      el.style.left      = rect.left + 'px';
+      if (fallAnim) { fallAnim.cancel(); fallAnim = null; }
+      startMX = cx; startMY = cy;
+      startEL = rect.left; startET = rect.top;
+      el.classList.add('dragging');
+      document.body.style.userSelect = 'none';
+    }
+
+    function moveDrag(cx, cy) {
+      el.style.left = (startEL + cx - startMX) + 'px';
+      el.style.top  = (startET + cy - startMY) + 'px';
+    }
+
+    function endDrag() {
+      el.classList.remove('dragging');
+      document.body.style.userSelect = '';
+      const curTop    = parseFloat(el.style.top);
+      const remaining = window.innerHeight + 120 - curTop;
+      if (remaining <= 0) { el.remove(); return; }
+      const remDur = remaining / pxPerMs;
+      fallAnim = el.animate(
+        [
+          { transform: 'translateY(0) rotate(0deg)', opacity: opacity },
+          { transform: `translateY(${remaining}px) rotate(${rand(-200,200)}deg)`, opacity: 0 }
+        ],
+        { duration: remDur, easing: 'linear', fill: 'forwards' }
+      );
+      fallAnim.addEventListener('finish', () => el.remove());
+    }
+
+    el.addEventListener('pointerdown', e => {
+      e.preventDefault();
+      el.setPointerCapture(e.pointerId);
+      isDragging = true;
+      beginDrag(e.clientX, e.clientY);
+    });
+    el.addEventListener('pointermove', e => {
+      if (!isDragging) return;
+      e.preventDefault();
+      moveDrag(e.clientX, e.clientY);
+    });
+    el.addEventListener('pointerup',     () => { if (!isDragging) return; isDragging = false; endDrag(); });
+    el.addEventListener('pointercancel', () => { if (!isDragging) return; isDragging = false; endDrag(); });
+  }
+
+  const lamaConfig = {
+    emoji: '🦙', minSize: 8, maxSize: 18,
+    minDur: 9, maxDur: 18, minOpacity: 0.06, maxOpacity: 0.16,
+  };
+  const bagConfig = {
+    emoji: '🎒', minSize: 7, maxSize: 14,
+    minDur: 10, maxDur: 20, minOpacity: 0.07, maxOpacity: 0.15,
+    filter: 'sepia(1) saturate(4) hue-rotate(300deg) brightness(0.85)',
+  };
+  const glassesConfig = {
+    emoji: '🕶️', minSize: 6, maxSize: 13,
+    minDur: 11, maxDur: 22, minOpacity: 0.05, maxOpacity: 0.13,
+  };
+
+  setTimeout(() => spawnItem(lamaConfig),    rand(500, 2500));
+  setTimeout(() => spawnItem(bagConfig),     rand(2000, 5000));
+  setTimeout(() => spawnItem(glassesConfig), rand(3000, 7000));
+
+  setInterval(() => spawnItem(lamaConfig),    6000);
+  setInterval(() => spawnItem(bagConfig),    17000);
+  setInterval(() => spawnItem(glassesConfig),24000);
+})();
+</script>
 
 </body>
 </html>

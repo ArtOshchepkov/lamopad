@@ -6,102 +6,37 @@
   <title>Треки | Ламопад</title>
   <meta name="description" content="Все треки Ламопада — тексты и игры">
   <link rel="canonical" href="/tracks/">
-  <link rel="icon" href="/favicon.ico">
+  <link rel="icon" href="/img/slon_32px.jpg">
 
   <link rel="preconnect" href="https://fonts.googleapis.com">
-  <link href="https://fonts.googleapis.com/css2?family=Cormorant+Garamond:ital,wght@0,300;0,400;1,300;1,400&display=swap" rel="stylesheet">
+  <link href="https://fonts.googleapis.com/css2?family=Nunito:ital,wght@0,400;0,600;0,700;1,400&family=Unbounded:wght@900&display=swap" rel="stylesheet">
   <link rel="stylesheet" href="https://cdn.jsdelivr.net/npm/aplayer/dist/APlayer.min.css">
 
   <style>
     *, *::before, *::after { margin: 0; padding: 0; box-sizing: border-box; }
 
     :root {
-      --bg:    #0b1220;
-      --navy:  #162848;
-      --amber: #c8900a;
-      --gold:  #e8b030;
-      --text:  #a09278;
-      --dim:   #3a3020;
-      --font:  'Cormorant Garamond', Georgia, serif;
+      --bg:    #f8f4ed;
+      --ink:   #1e1810;
+      --faded: #7a6e62;
+      --red:   #c8281e;
+      --ocean: #1c7a96;
     }
 
     html { scroll-behavior: smooth; }
 
     body {
-      background-color: var(--bg);
-      background-image:
-        radial-gradient(ellipse 50% 60% at 15% 55%, rgba(200,144,10,0.13) 0%, transparent 65%),
-        radial-gradient(ellipse 35% 45% at 80% 20%, rgba(200,144,10,0.08) 0%, transparent 60%),
-        radial-gradient(ellipse 65% 30% at 50% 100%, rgba(22,40,72,0.7) 0%, transparent 70%);
-      color: var(--text);
-      font-family: var(--font);
-      font-weight: 300;
+      background: var(--bg);
+      color: var(--ink);
+      font-family: 'Nunito', sans-serif;
+      font-size: clamp(15px, 3vw, 18px);
+      line-height: 1.75;
       min-height: 100vh;
       overflow-x: hidden;
       cursor: url('/img/lamopad_cursor_48px.png') 0 0, auto;
     }
 
-    body::after {
-      content: '';
-      position: fixed;
-      inset: 0;
-      background: radial-gradient(ellipse at center, transparent 40%, rgba(8,10,18,0.75) 100%);
-      pointer-events: none;
-      z-index: 0;
-    }
-
-    /* ── clouds ───────────────────────────────────────── */
-    .clouds {
-      position: fixed;
-      inset: 0;
-      pointer-events: none;
-      z-index: 0;
-      overflow: hidden;
-    }
-    .cloud {
-      position: absolute;
-      border-radius: 50%;
-      filter: blur(72px);
-    }
-    .cloud-1 {
-      width: 55vw; height: 35vh;
-      background: radial-gradient(ellipse, rgba(200,144,10,0.14) 0%, transparent 70%);
-      top: 5%; left: -10%;
-      animation: drift1 24s ease-in-out infinite;
-    }
-    .cloud-2 {
-      width: 40vw; height: 45vh;
-      background: radial-gradient(ellipse, rgba(22,40,72,0.40) 0%, transparent 70%);
-      top: 30%; right: -5%;
-      animation: drift2 30s ease-in-out infinite;
-    }
-    .cloud-3 {
-      width: 65vw; height: 28vh;
-      background: radial-gradient(ellipse, rgba(160,146,120,0.09) 0%, transparent 70%);
-      bottom: 15%; left: 15%;
-      animation: drift3 36s ease-in-out infinite;
-    }
-
-    @keyframes drift1 {
-      0%,100% { transform: translate(0,0) scale(1); }
-      40%     { transform: translate(10vw,7vh) scale(1.07); }
-      70%     { transform: translate(-5vw,13vh) scale(0.95); }
-    }
-    @keyframes drift2 {
-      0%,100% { transform: translate(0,0) scale(1); }
-      35%     { transform: translate(-12vw,-8vh) scale(1.09); }
-      65%     { transform: translate(-6vw,9vh) scale(0.93); }
-    }
-    @keyframes drift3 {
-      0%,100% { transform: translate(0,0) scale(1); }
-      50%     { transform: translate(8vw,-10vh) scale(1.04); }
-    }
-
-    @media (prefers-reduced-motion: reduce) {
-      .cloud { animation: none; }
-    }
-
-    /* ── ламопад ──────────────────────────────────────── */
+    /* ── falling items ── */
     .lamopad-canvas {
       position: fixed;
       inset: 0;
@@ -112,7 +47,7 @@
 
     .lama {
       position: absolute;
-      top: -120px;
+      top: -80px;
       font-size: 32px;
       line-height: 1;
       user-select: none;
@@ -125,45 +60,45 @@
     .lama.dragging { cursor: grabbing; }
 
     @keyframes lama-fall {
-      0%  { opacity: 0;              transform: translateY(0)                    rotate(var(--rot-start)); }
-      8%  { opacity: var(--opacity);                                                                       }
-      88% { opacity: var(--opacity);                                                                       }
-      100%{ opacity: 0;              transform: translateY(var(--fall-dist))     rotate(var(--rot-end));   }
+      0%   { opacity: 0;              transform: translateY(0)               rotate(var(--rot-start)); }
+      8%   { opacity: var(--opacity);                                                                  }
+      88%  { opacity: var(--opacity);                                                                  }
+      100% { opacity: 0;              transform: translateY(var(--fall-dist)) rotate(var(--rot-end));  }
     }
 
-    /* ── layout ───────────────────────────────────────── */
+    /* ── layout ── */
     .page {
       position: relative;
       z-index: 1;
-      max-width: 640px;
+      max-width: 600px;
       margin: 0 auto;
-      padding: 12vh 24px 12vh;
+      padding: clamp(40px, 8vw, 80px) 24px clamp(60px, 10vw, 100px);
     }
 
-    /* ── header ───────────────────────────────────────── */
+    /* ── header ── */
     .header {
-      margin-bottom: 72px;
+      margin-bottom: 56px;
     }
 
     h1 {
-      font-size: clamp(36px, 10vw, 72px);
-      font-weight: 300;
-      color: var(--amber);
-      letter-spacing: .04em;
+      font-family: 'Unbounded', sans-serif;
+      font-size: clamp(32px, 10vw, 60px);
+      font-weight: 900;
+      color: var(--red);
       line-height: 1;
+      letter-spacing: .01em;
     }
 
-    .label-inline {
-      font-size: clamp(12px, 2.5vw, 18px);
-      letter-spacing: .28em;
+    .header-sub {
+      margin-top: 10px;
+      font-size: 13px;
+      letter-spacing: .22em;
       text-transform: uppercase;
-      color: var(--text);
-      font-weight: 400;
-      vertical-align: middle;
-      padding-left: .2em;
+      color: var(--faded);
+      font-weight: 700;
     }
 
-    /* ── track list ───────────────────────────────────── */
+    /* ── track list ── */
     .tracklist {
       list-style: none;
       display: flex;
@@ -173,12 +108,12 @@
     .track {
       display: flex;
       align-items: baseline;
-      gap: 18px;
-      padding: 22px 0;
-      border-bottom: 1px solid rgba(200,144,10,0.08);
+      gap: 16px;
+      padding: 20px 0;
+      border-bottom: 1px solid rgba(0,0,0,0.08);
       opacity: 0;
-      transform: translateY(12px);
-      transition: opacity 0.5s ease, transform 0.5s ease;
+      transform: translateY(10px);
+      transition: opacity 0.45s ease, transform 0.45s ease;
     }
 
     .track.visible {
@@ -187,13 +122,14 @@
     }
 
     .track-num {
-      font-size: clamp(11px, 2vw, 13px);
+      font-size: 12px;
       letter-spacing: .18em;
-      color: var(--dim);
+      color: var(--faded);
       min-width: 24px;
-      font-weight: 400;
-      padding-top: 3px;
+      font-weight: 600;
+      padding-top: 4px;
       user-select: none;
+      opacity: 0.5;
     }
 
     .track-body {
@@ -201,49 +137,54 @@
       display: flex;
       flex-wrap: wrap;
       align-items: baseline;
-      gap: 10px 20px;
+      gap: 8px 16px;
     }
 
     .track-name {
-      font-size: clamp(22px, 5.5vw, 36px);
-      font-weight: 300;
-      color: #c8baa8;
-      letter-spacing: .02em;
-      line-height: 1.15;
-      transition: color 0.2s;
+      font-family: 'Unbounded', sans-serif;
+      font-size: clamp(18px, 4.5vw, 28px);
+      font-weight: 900;
+      color: var(--ink);
+      letter-spacing: .01em;
+      line-height: 1.2;
+      transition: color 0.15s;
       text-decoration: none;
     }
 
     .track:hover .track-name {
-      color: var(--gold);
+      color: var(--red);
     }
 
     .track-links {
       display: flex;
-      gap: 10px;
+      gap: 8px;
       align-items: center;
       padding-bottom: 2px;
     }
 
     .track-link {
-      font-size: clamp(12px, 2.2vw, 15px);
-      letter-spacing: .22em;
+      font-size: 12px;
+      letter-spacing: .18em;
       text-transform: uppercase;
       text-decoration: none;
-      color: var(--text);
-      border: 1px solid rgba(160,146,120,0.45);
-      padding: 6px 14px;
-      transition: color .2s, border-color .2s;
+      color: var(--faded);
+      border: 1px solid rgba(0,0,0,0.18);
+      padding: 5px 12px;
+      font-weight: 600;
+      border-radius: 2px;
+      transition: color .15s, border-color .15s, background .15s;
     }
 
     .track-link:hover {
-      color: var(--gold);
-      border-color: var(--gold);
+      color: var(--red);
+      border-color: var(--red);
     }
 
-    /* ── footer ───────────────────────────────────────── */
+    /* ── footer ── */
     .footer {
-      margin-top: 72px;
+      margin-top: 64px;
+      padding-top: 20px;
+      border-top: 1px solid rgba(0,0,0,0.10);
       display: flex;
       justify-content: space-between;
       align-items: center;
@@ -252,68 +193,85 @@
     }
 
     .footer a {
-      font-size: clamp(11px, 2.2vw, 13px);
-      letter-spacing: .22em;
+      font-size: 12px;
+      letter-spacing: .18em;
       text-transform: uppercase;
-      color: var(--dim);
+      color: var(--faded);
       text-decoration: none;
-      transition: color .2s;
+      font-weight: 700;
+      transition: color .15s;
     }
-    .footer a:hover { color: var(--amber); }
+    .footer a:hover { color: var(--ink); }
 
     .copyright {
       font-size: 12px;
-      letter-spacing: .12em;
-      color: var(--dim);
-      user-select: none;
+      color: #bbb;
+      letter-spacing: .08em;
     }
 
     @media (max-width: 480px) {
-      .page { padding: 10vh 18px 10vh; }
-      .track { gap: 12px; padding: 18px 0; }
+      .page { padding: 32px 18px 60px; }
+      .track { gap: 10px; padding: 16px 0; }
     }
 
-    /* ── КРОШКИ ── */
-    .crumbs { position: relative; z-index: 100; padding: 0.9rem 1.5rem 0; font-family: var(--font); font-size: 0.7rem; letter-spacing: 0.1em; text-transform: uppercase; color: var(--text); }
+    @media (prefers-reduced-motion: reduce) {
+      .lama { animation: none; }
+    }
+
+    /* ── breadcrumbs ── */
+    .crumbs {
+      position: relative;
+      z-index: 100;
+      padding: 0.9rem 1.5rem 0;
+      font-size: 0.7rem;
+      letter-spacing: 0.1em;
+      text-transform: uppercase;
+      color: var(--faded);
+      font-family: 'Nunito', sans-serif;
+      font-weight: 600;
+    }
     .crumbs a { color: inherit; text-decoration: none; transition: color 0.15s; }
-    .crumbs a:hover { color: var(--amber); }
+    .crumbs a:hover { color: var(--red); }
     .crumbs .sep { margin: 0 0.5ch; opacity: 0.35; }
 
-    /* ── APlayer тёмный скин ─────────────────────────── */
+    /* ── APlayer light skin ── */
     .aplayer {
-      background: rgba(22, 40, 72, 0.35) !important;
-      border: 1px solid rgba(200, 144, 10, 0.15) !important;
-      border-radius: 0 !important;
-      box-shadow: none !important;
-      font-family: var(--font) !important;
-      margin-bottom: 56px;
+      background: #fff !important;
+      border: 1px solid rgba(0,0,0,0.10) !important;
+      border-radius: 6px !important;
+      box-shadow: 3px 3px 0 rgba(0,0,0,0.07) !important;
+      font-family: 'Nunito', sans-serif !important;
+      margin-bottom: 48px;
     }
     .aplayer .aplayer-body { background: transparent !important; }
     .aplayer .aplayer-info { background: transparent !important; }
     .aplayer .aplayer-music .aplayer-title {
-      color: #c8baa8 !important;
-      font-family: var(--font) !important;
-      font-weight: 300 !important;
-      font-size: 20px !important;
-      letter-spacing: .02em !important;
+      color: var(--ink) !important;
+      font-family: 'Nunito', sans-serif !important;
+      font-weight: 700 !important;
+      font-size: 18px !important;
     }
-    .aplayer .aplayer-music .aplayer-author { color: var(--text) !important; font-family: var(--font) !important; }
-    .aplayer .aplayer-controller .aplayer-time { color: var(--text) !important; }
-    .aplayer .aplayer-controller .aplayer-time .aplayer-icon path { fill: var(--text) !important; }
-    .aplayer .aplayer-controller .aplayer-time .aplayer-icon:hover path { fill: var(--gold) !important; }
-    .aplayer .aplayer-bar-wrap .aplayer-bar .aplayer-loaded { background: rgba(200,144,10,0.18) !important; }
-    .aplayer .aplayer-list { background: rgba(11, 18, 32, 0.85) !important; }
-    .aplayer .aplayer-list ol li { border-top-color: rgba(200,144,10,0.07) !important; color: var(--text) !important; }
-    .aplayer .aplayer-list ol li:hover { background: rgba(200,144,10,0.07) !important; }
-    .aplayer .aplayer-list ol li.aplayer-list-light { background: rgba(200,144,10,0.12) !important; }
-    .aplayer .aplayer-list ol li .aplayer-list-index { color: var(--dim) !important; }
+    .aplayer .aplayer-music .aplayer-author {
+      color: var(--faded) !important;
+      font-family: 'Nunito', sans-serif !important;
+    }
+    .aplayer .aplayer-controller .aplayer-time { color: var(--faded) !important; }
+    .aplayer .aplayer-controller .aplayer-time .aplayer-icon path { fill: var(--faded) !important; }
+    .aplayer .aplayer-controller .aplayer-time .aplayer-icon:hover path { fill: var(--red) !important; }
+    .aplayer .aplayer-bar-wrap .aplayer-bar .aplayer-loaded { background: rgba(200,40,30,0.15) !important; }
+    .aplayer .aplayer-bar-wrap .aplayer-bar .aplayer-played { background: var(--red) !important; }
+    .aplayer .aplayer-list { background: var(--bg) !important; }
+    .aplayer .aplayer-list ol li { border-top-color: rgba(0,0,0,0.06) !important; color: var(--ink) !important; }
+    .aplayer .aplayer-list ol li:hover { background: rgba(200,40,30,0.06) !important; }
+    .aplayer .aplayer-list ol li.aplayer-list-light { background: rgba(200,40,30,0.10) !important; }
+    .aplayer .aplayer-list ol li .aplayer-list-index { color: var(--faded) !important; }
     .aplayer .aplayer-list ol li .aplayer-list-title {
-      color: #c8baa8 !important;
-      font-family: var(--font) !important;
-      font-weight: 300 !important;
+      color: var(--ink) !important;
+      font-family: 'Nunito', sans-serif !important;
+      font-weight: 600 !important;
     }
-    .aplayer .aplayer-list ol li .aplayer-list-author { color: var(--text) !important; font-family: var(--font) !important; }
-    .aplayer .aplayer-pic { border-radius: 0 !important; }
+    .aplayer .aplayer-list ol li .aplayer-list-author { color: var(--faded) !important; }
+    .aplayer .aplayer-pic { border-radius: 4px !important; }
   </style>
 </head>
 <body>
@@ -322,16 +280,11 @@
 
 <div class="lamopad-canvas" id="lamopad-canvas"></div>
 
-<div class="clouds">
-  <div class="cloud cloud-1"></div>
-  <div class="cloud cloud-2"></div>
-  <div class="cloud cloud-3"></div>
-</div>
-
 <main class="page">
 
   <header class="header">
-    <h1>Треки <span class="label-inline">Ламопад</span></h1>
+    <h1>Треки</h1>
+    <p class="header-sub">Ламопад</p>
   </header>
 
   <div id="aplayer"></div>
@@ -431,13 +384,9 @@
 
 <script src="https://cdn.jsdelivr.net/npm/aplayer/dist/APlayer.min.js"></script>
 <script>
-/* ── плейлист ─────────────────────────────────────────────
-   Добавить трек — одна строка в массив:
-   { name: 'Название', artist: 'Ламопад', url: '/tracks/имя-файла.mp3' }
-   ──────────────────────────────────────────────────────── */
 new APlayer({
   container: document.getElementById('aplayer'),
-  theme: '#c8900a',
+  theme: '#c8281e',
   preload: 'none',
   listFolded: false,
   audio: [
@@ -459,11 +408,9 @@ new APlayer({
     });
   }
 
-  /* ── ламопад ─────────────────────────────────────── */
   if (reduced) return;
 
   const canvas = document.getElementById('lamopad-canvas');
-
   function rand(a, b) { return a + Math.random() * (b - a); }
 
   function spawnItem({ emoji, minSize, maxSize, minDur, maxDur, minOpacity, maxOpacity, filter }) {
@@ -471,10 +418,10 @@ new APlayer({
     el.className = 'lama';
     el.textContent = emoji;
 
-    const size    = rand(minSize, maxSize);
-    const dur     = rand(minDur, maxDur);      // seconds
-    const totalDist = window.innerHeight + 160; // px
-    const opacity = rand(minOpacity, maxOpacity);
+    const size      = rand(minSize, maxSize);
+    const dur       = rand(minDur, maxDur);
+    const totalDist = window.innerHeight + 160;
+    const opacity   = rand(minOpacity, maxOpacity);
 
     el.style.cssText = `
       left: ${rand(-2, 100)}vw;
@@ -490,27 +437,19 @@ new APlayer({
     canvas.appendChild(el);
     el.addEventListener('animationend', () => el.remove());
 
-    /* ── drag ───────────────────────────────────────────── */
-    const pxPerMs = totalDist / (dur * 1000); // скорость падения
-
-    let startMX, startMY, startEL, startET, fallAnim = null;
+    const pxPerMs = totalDist / (dur * 1000);
+    let startMX, startMY, startEL, startET, fallAnim = null, isDragging = false;
 
     function beginDrag(cx, cy) {
-      // Текущая визуальная позиция (с учётом transform от анимации)
       const rect = el.getBoundingClientRect();
-
-      // Останавливаем CSS-анимацию и переключаемся на прямые координаты
       el.style.animation = 'none';
       el.style.opacity   = opacity;
       el.style.transform = 'none';
       el.style.top       = rect.top  + 'px';
       el.style.left      = rect.left + 'px';
-
       if (fallAnim) { fallAnim.cancel(); fallAnim = null; }
-
-      startMX = cx;  startMY = cy;
-      startEL = rect.left;  startET = rect.top;
-
+      startMX = cx; startMY = cy;
+      startEL = rect.left; startET = rect.top;
       el.classList.add('dragging');
       document.body.style.userSelect = 'none';
     }
@@ -523,16 +462,13 @@ new APlayer({
     function endDrag() {
       el.classList.remove('dragging');
       document.body.style.userSelect = '';
-
-      const curTop  = parseFloat(el.style.top);
+      const curTop    = parseFloat(el.style.top);
       const remaining = window.innerHeight + 160 - curTop;
       if (remaining <= 0) { el.remove(); return; }
-
-      const remDur = remaining / pxPerMs; // ms
-
+      const remDur = remaining / pxPerMs;
       fallAnim = el.animate(
         [
-          { transform: 'translateY(0) rotate(0deg)',                        opacity: opacity },
+          { transform: 'translateY(0) rotate(0deg)', opacity: opacity },
           { transform: `translateY(${remaining}px) rotate(${rand(-200,200)}deg)`, opacity: 0 }
         ],
         { duration: remDur, easing: 'linear', fill: 'forwards' }
@@ -540,50 +476,39 @@ new APlayer({
       fallAnim.addEventListener('finish', () => el.remove());
     }
 
-    // Pointer Events — unified mouse + touch, setPointerCapture keeps
-    // events routed to this element even when pointer leaves it.
-    let isDragging = false;
-
     el.addEventListener('pointerdown', e => {
       e.preventDefault();
       el.setPointerCapture(e.pointerId);
       isDragging = true;
       beginDrag(e.clientX, e.clientY);
     });
-
     el.addEventListener('pointermove', e => {
       if (!isDragging) return;
       e.preventDefault();
       moveDrag(e.clientX, e.clientY);
     });
-
     el.addEventListener('pointerup',     () => { if (!isDragging) return; isDragging = false; endDrag(); });
     el.addEventListener('pointercancel', () => { if (!isDragging) return; isDragging = false; endDrag(); });
   }
 
   const lamaConfig = {
     emoji: '🦙', minSize: 18, maxSize: 40,
-    minDur: 6, maxDur: 14, minOpacity: 0.12, maxOpacity: 0.32,
+    minDur: 6, maxDur: 14, minOpacity: 0.10, maxOpacity: 0.22,
   };
-
-  /* 🎒 → красный: убираем синий канал, усиливаем красный через hue-rotate + saturate */
   const bagConfig = {
     emoji: '🎒', minSize: 14, maxSize: 30,
-    minDur: 7, maxDur: 16, minOpacity: 0.14, maxOpacity: 0.28,
+    minDur: 7, maxDur: 16, minOpacity: 0.10, maxOpacity: 0.20,
     filter: 'sepia(1) saturate(4) hue-rotate(300deg) brightness(0.85)',
   };
-
   const glassesConfig = {
     emoji: '🕶️', minSize: 12, maxSize: 26,
-    minDur: 8, maxDur: 18, minOpacity: 0.13, maxOpacity: 0.30,
+    minDur: 8, maxDur: 18, minOpacity: 0.09, maxOpacity: 0.18,
   };
 
-  /* initial burst */
   for (let i = 0; i < 2; i++) setTimeout(() => spawnItem(lamaConfig),   rand(0, 2000));
   setTimeout(() => spawnItem(bagConfig),    rand(500, 3000));
   setTimeout(() => spawnItem(glassesConfig),rand(1000, 3500));
 
-  /* steady drizzle */
   setInterval(() => spawnItem(lamaConfig),   2700);
   setInterval(() => spawnItem(bagConfig),    7500);
   setInterval(() => spawnItem(glassesConfig),10500);

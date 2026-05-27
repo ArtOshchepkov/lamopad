@@ -1,10 +1,212 @@
-<!doctype html>
+<!DOCTYPE html>
 <html lang="ru">
 <head>
-  <meta charset="utf-8">
-  <meta http-equiv="refresh" content="0; url=releases/samosval">
-  <script>window.location.replace('/tracks');</script>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
   <title>Ламопад</title>
+  <meta name="description" content="Ламопад — это как снегопад, но из лам. Авторская музыка про путешествия, интерактивные мини-игры и рассказы">
+  <meta name="author" content="Ламопад">
+  <meta name="robots" content="index, follow">
+  <link rel="canonical" href="https://lamopad.ru/">
+  <link rel="icon" href="/img/slon_32px.jpg" type="image/jpeg">
+
+  <meta property="og:type" content="website">
+  <meta property="og:title" content="Ламопад">
+  <meta property="og:description" content="Лёгкий рок, тяжёлое абсурдное техно. Про путешествия и поиск глубины.">
+  <meta property="og:url" content="https://lamopad.ru/">
+  <meta property="og:locale" content="ru_RU">
+  <meta property="og:site_name" content="Ламопад">
+
+  <style>
+    @import url('https://fonts.googleapis.com/css2?family=Cormorant+Garamond:ital,wght@0,300;0,400;0,600;1,300;1,400&family=IBM+Plex+Mono:wght@300;400;500&display=swap');
+
+    :root {
+      --bg:     #f5f4f0;
+      --text:   #1a1a1a;
+      --accent: #8B0000;
+      --muted:  #888880;
+      --serif:  'Cormorant Garamond', Georgia, serif;
+      --mono:   'IBM Plex Mono', 'Courier New', monospace;
+      --col:    62ch;
+    }
+
+    *, *::before, *::after { box-sizing: border-box; margin: 0; padding: 0; }
+
+    html { font-size: 18px; background: var(--bg); color: var(--text); }
+
+    body {
+      font-family: var(--serif);
+      font-weight: 300;
+      line-height: 1.7;
+      min-height: 100vh;
+      display: flex;
+      flex-direction: column;
+      align-items: center;
+      padding: 0 1.25rem;
+      cursor: url('/img/lamopad_cursor_48px.png'), auto;
+    }
+
+    /* ── HERO ── */
+    .hero {
+      width: 100%;
+      max-width: var(--col);
+      margin-top: 5rem;
+      margin-bottom: 4rem;
+    }
+
+    .logo {
+      font-family: var(--serif);
+      font-weight: 300;
+      font-size: clamp(3rem, 11vw, 5rem);
+      letter-spacing: 0.05em;
+      line-height: 1;
+    }
+
+    .tagline {
+      margin-top: 0.75rem;
+      font-family: var(--mono);
+      font-size: 0.58rem;
+      letter-spacing: 0.2em;
+      text-transform: uppercase;
+      color: var(--muted);
+    }
+
+    /* ── ABOUT ── */
+    .about {
+      width: 100%;
+      max-width: var(--col);
+      font-size: clamp(1.05rem, 3vw, 1.2rem);
+      line-height: 1.8;
+    }
+
+    .about p { margin-bottom: 1.35em; }
+
+    .about p:first-child {
+      font-size: clamp(1.15rem, 3.5vw, 1.35rem);
+    }
+
+    .about a {
+      color: inherit;
+      text-decoration: underline;
+      text-decoration-color: var(--accent);
+      text-underline-offset: 3px;
+      text-decoration-thickness: 1px;
+      transition: color 0.15s;
+    }
+
+    .about a:hover { color: var(--accent); }
+
+    /* ── SECTION GRID ── */
+    .sections {
+      width: 100%;
+      max-width: var(--col);
+      margin-top: 4.5rem;
+      display: grid;
+      grid-template-columns: 1fr 1fr;
+      border: 1px solid var(--muted);
+      gap: 1px;
+      background: var(--muted);
+    }
+
+    .section-card {
+      background: var(--bg);
+      padding: 1.6rem 1.5rem;
+      text-decoration: none;
+      color: var(--text);
+      display: block;
+      transition: background 0.15s, color 0.15s;
+    }
+
+    .section-card:hover {
+      background: var(--accent);
+      color: var(--bg);
+    }
+
+    .section-name {
+      font-family: var(--mono);
+      font-size: 0.72rem;
+      font-weight: 500;
+      letter-spacing: 0.16em;
+      text-transform: uppercase;
+      display: block;
+      margin-bottom: 0.35rem;
+    }
+
+    .section-hint {
+      font-family: var(--serif);
+      font-size: 0.88rem;
+      font-weight: 300;
+      color: var(--muted);
+      line-height: 1.35;
+      transition: color 0.15s;
+    }
+
+    .section-card:hover .section-hint {
+      color: rgba(245, 244, 240, 0.65);
+    }
+
+    /* ── FOOTER ── */
+    footer {
+      width: 100%;
+      max-width: var(--col);
+      margin-top: 4rem;
+      margin-bottom: 2rem;
+      font-family: var(--mono);
+      font-size: 0.55rem;
+      letter-spacing: 0.1em;
+      color: var(--muted);
+      opacity: 0.35;
+      text-align: center;
+    }
+
+    /* ── RESPONSIVE ── */
+    @media (max-width: 500px) {
+      .sections { grid-template-columns: 1fr; }
+      .hero { margin-top: 3.5rem; }
+    }
+
+    @media (min-width: 700px) {
+      body { padding: 0 2rem; }
+    }
+  </style>
 </head>
-<body></body>
+<body>
+
+  <div class="hero">
+    <h1 class="logo">Ламопад</h1>
+    <p class="tagline">свобода &nbsp;·&nbsp; путешествия &nbsp;·&nbsp;</p>
+  </div>
+
+  <section class="about" aria-label="О сайте">
+    <p>Привет! Добро пожаловать в Ламопад. Это как снегопад, но из лам. Возможно, тибетских.</p>
+
+    <p>Здесь можно <a href="/tracks/">послушать мои песни</a>. Пишу в стиле около лёгкого рока или тяжёлого абсурдного техно. Про путешествия и поиск глубины.</p>
+
+    <p>Можно поиграть в мини-игры! Например, мчаться на <a href="/samosval/game/">гипер-самосвале</a> сквозь ретро-космос или <a href="/agu/game/">поиграть в выгорание</a>.</p>
+
+    <p>Ещё есть <a href="/stories/">короткие рассказы</a>. Например, <a href="/stories/real/">как француженка с тиндера</a> соблазнила айтишника набить татуировку с QR-кодом.</p>
+  </section>
+
+  <nav class="sections" aria-label="Разделы сайта">
+    <a class="section-card" href="/tracks/">
+      <span class="section-name">Песни</span>
+      <span class="section-hint">тексты и треки</span>
+    </a>
+    <a class="section-card" href="/games/">
+      <span class="section-name">Игры</span>
+      <span class="section-hint">самосвал, выгорание</span>
+    </a>
+    <a class="section-card" href="/stories/">
+      <span class="section-name">Рассказы</span>
+      <span class="section-hint">короткая проза</span>
+    </a>
+    <a class="section-card" href="/notes/">
+      <span class="section-name">Заметки</span>
+      <span class="section-hint">записки с дороги</span>
+    </a>
+  </nav>
+
+  <footer>&copy; Ламопад &mdash; все права защищены</footer>
+
+</body>
 </html>

@@ -238,6 +238,21 @@
     }
     .aplayer .aplayer-list ol li .aplayer-list-author { color: var(--faded) !important; }
     .aplayer .aplayer-pic { border-radius: 4px !important; }
+
+    #track-download {
+      display: block;
+      margin-top: -36px;
+      margin-bottom: 48px;
+      text-align: right;
+      font-size: 12px;
+      letter-spacing: .18em;
+      text-transform: uppercase;
+      font-weight: 700;
+      color: var(--faded);
+      text-decoration: none;
+      transition: color .15s;
+    }
+    #track-download:hover { color: var(--red); }
   </style>
 </head>
 <body>
@@ -252,6 +267,7 @@
   </header>
 
   <div id="aplayer"></div>
+  <a id="track-download" href="#" download style="display:none"></a>
 
   <ol class="tracklist">
 
@@ -348,15 +364,27 @@
 
 <script src="https://cdn.jsdelivr.net/npm/aplayer/dist/APlayer.min.js"></script>
 <script>
-new APlayer({
+const ap = new APlayer({
   container: document.getElementById('aplayer'),
   theme: '#c8281e',
   preload: 'none',
   listFolded: false,
   audio: [
+    { name: 'Солнценаступательные очки', artist: 'Ламопад', url: '/tracks/sun-coming-glasses.mp3', cover: '/tracks/sun-coming-glasses-cover.jpg' },
     { name: 'Млечный Путь', artist: 'Ламопад', url: '/tracks/milky-way.mp3', cover: '/tracks/milky-way-cover.jpg' },
   ]
 });
+
+const dlLink = document.getElementById('track-download');
+function syncDownload() {
+  const audio = ap.list.audios[ap.list.index];
+  dlLink.href = audio.url;
+  dlLink.download = audio.name + '.mp3';
+  dlLink.textContent = '↓ скачать mp3';
+  dlLink.style.display = 'block';
+}
+ap.on('listswitch', syncDownload);
+syncDownload();
 </script>
 
 <script>

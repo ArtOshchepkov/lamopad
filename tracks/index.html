@@ -239,20 +239,6 @@
     .aplayer .aplayer-list ol li .aplayer-list-author { color: var(--faded) !important; }
     .aplayer .aplayer-pic { border-radius: 4px !important; }
 
-    #track-download {
-      display: block;
-      margin-top: -36px;
-      margin-bottom: 48px;
-      text-align: right;
-      font-size: 12px;
-      letter-spacing: .18em;
-      text-transform: uppercase;
-      font-weight: 700;
-      color: var(--faded);
-      text-decoration: none;
-      transition: color .15s;
-    }
-    #track-download:hover { color: var(--red); }
   </style>
 </head>
 <body>
@@ -267,7 +253,6 @@
   </header>
 
   <div id="aplayer"></div>
-  <a id="track-download" href="#" download style="display:none"></a>
 
   <ol class="tracklist">
 
@@ -353,6 +338,26 @@
       </div>
     </li>
 
+    <li class="track">
+      <span class="track-num">09</span>
+      <div class="track-body">
+        <span class="track-name">Солнценаступательные очки</span>
+        <div class="track-links">
+          <a class="track-link" href="/tracks/sun-coming-glasses.mp3" download>mp3</a>
+        </div>
+      </div>
+    </li>
+
+    <li class="track">
+      <span class="track-num">10</span>
+      <div class="track-body">
+        <span class="track-name">Млечный Путь</span>
+        <div class="track-links">
+          <a class="track-link" href="/tracks/milky-way.mp3" download>mp3</a>
+        </div>
+      </div>
+    </li>
+
   </ol>
 
   <footer class="footer">
@@ -375,16 +380,6 @@ const ap = new APlayer({
   ]
 });
 
-const dlLink = document.getElementById('track-download');
-function syncDownload() {
-  const audio = ap.list.audios[ap.list.index];
-  dlLink.href = audio.url;
-  dlLink.download = audio.name + '.mp3';
-  dlLink.textContent = '↓ скачать mp3';
-  dlLink.style.display = 'block';
-}
-ap.on('listswitch', syncDownload);
-syncDownload();
 </script>
 
 <script>

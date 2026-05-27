@@ -1,0 +1,251 @@
+<!DOCTYPE html>
+<html lang="ru">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>Рассказы — Ламопад</title>
+  <meta name="description" content="Короткие авторские рассказы Ламопада — про поезда, людей и вопросы без ответа.">
+  <meta name="author" content="Ламопад">
+  <meta name="robots" content="index, follow">
+  <link rel="canonical" href="https://lamopad.ru/stories/">
+  <link rel="icon" href="/img/slon_32px.jpg" type="image/jpeg">
+
+  <meta property="og:type" content="website">
+  <meta property="og:title" content="Рассказы — Ламопад">
+  <meta property="og:description" content="Короткие авторские рассказы Ламопада — про поезда, людей и вопросы без ответа.">
+  <meta property="og:url" content="https://lamopad.ru/stories/">
+  <meta property="og:locale" content="ru_RU">
+  <meta property="og:site_name" content="Ламопад">
+
+  <style>
+    @import url('https://fonts.googleapis.com/css2?family=IBM+Plex+Mono:ital,wght@0,300;0,400;0,500;1,300;1,400&display=swap');
+
+    :root {
+      --bg: #f5f4f0;
+      --text: #1a1a1a;
+      --accent: #8B0000;
+      --muted: #888880;
+      --col: 62ch;
+    }
+
+    *, *::before, *::after {
+      box-sizing: border-box;
+      margin: 0;
+      padding: 0;
+    }
+
+    html {
+      font-size: 18px;
+      background: var(--bg);
+      color: var(--text);
+    }
+
+    body {
+      font-family: 'IBM Plex Mono', 'Courier New', Courier, monospace;
+      font-weight: 400;
+      line-height: 1.75;
+      min-height: 100vh;
+      display: flex;
+      flex-direction: column;
+      align-items: center;
+      padding: 0 1.25rem;
+      cursor: url('/img/lamopad_cursor_48px.png'), auto;
+    }
+
+    /* ── BREADCRUMBS ── */
+    .breadcrumbs {
+      width: 100%;
+      max-width: var(--col);
+      margin-top: 2.5rem;
+      font-size: 0.62rem;
+      letter-spacing: 0.12em;
+      color: var(--muted);
+      text-transform: uppercase;
+    }
+
+    .breadcrumbs a {
+      color: var(--muted);
+      text-decoration: none;
+      transition: color 0.2s;
+    }
+
+    .breadcrumbs a:hover {
+      color: var(--accent);
+    }
+
+    .breadcrumbs .sep {
+      margin: 0 0.6ch;
+      opacity: 0.4;
+    }
+
+    /* ── HEADER ── */
+    .header {
+      width: 100%;
+      max-width: var(--col);
+      margin-top: 3.5rem;
+      margin-bottom: 3.5rem;
+    }
+
+    .title {
+      font-size: clamp(1.4rem, 5vw, 1.85rem);
+      font-weight: 500;
+      letter-spacing: 0.02em;
+    }
+
+    .subtitle {
+      margin-top: 0.6rem;
+      font-size: 0.6rem;
+      letter-spacing: 0.14em;
+      color: var(--muted);
+      text-transform: uppercase;
+    }
+
+    /* ── STORY LIST ── */
+    .story-list {
+      width: 100%;
+      max-width: var(--col);
+      list-style: none;
+    }
+
+    .story-list li {
+      border-top: 1px solid var(--muted);
+      padding: 1.75rem 0;
+      opacity: 0.9;
+      transition: opacity 0.2s;
+    }
+
+    .story-list li:last-child {
+      border-bottom: 1px solid var(--muted);
+    }
+
+    .story-list li:hover {
+      opacity: 1;
+    }
+
+    .story-link {
+      text-decoration: none;
+      color: inherit;
+      display: block;
+    }
+
+    .story-title {
+      font-size: 1.05rem;
+      font-weight: 500;
+      color: var(--text);
+      transition: color 0.2s;
+      margin-bottom: 0.4rem;
+    }
+
+    .story-link:hover .story-title {
+      color: var(--accent);
+    }
+
+    .story-desc {
+      font-size: 0.78rem;
+      color: var(--muted);
+      line-height: 1.6;
+      font-weight: 300;
+    }
+
+    .story-arrow {
+      display: inline-block;
+      margin-left: 0.5ch;
+      font-size: 0.8em;
+      opacity: 0;
+      transform: translateX(-4px);
+      transition: opacity 0.2s, transform 0.2s;
+    }
+
+    .story-link:hover .story-arrow {
+      opacity: 1;
+      transform: translateX(0);
+    }
+
+    /* ── TRACKS LINK ── */
+    .tracks-wrap {
+      width: 100%;
+      max-width: var(--col);
+      margin-top: 4rem;
+    }
+
+    .tracks-link {
+      display: block;
+      font-size: 1rem;
+      font-weight: 500;
+      letter-spacing: 0.04em;
+      color: var(--accent);
+      text-decoration: none;
+      padding: 0.75rem 1.25rem;
+      border: 1px solid var(--accent);
+      transition: background 0.2s, color 0.2s;
+      opacity: 0.85;
+    }
+
+    .tracks-link:hover {
+      background: var(--accent);
+      color: var(--bg);
+      opacity: 1;
+    }
+
+    /* ── FOOTER ── */
+    footer {
+      width: 100%;
+      max-width: var(--col);
+      margin-top: 3rem;
+      margin-bottom: 2rem;
+      font-size: 0.55rem;
+      letter-spacing: 0.1em;
+      color: var(--muted);
+      opacity: 0.35;
+      text-align: center;
+    }
+
+    /* ── RESPONSIVE ── */
+    @media (min-width: 700px) {
+      body { padding: 0 2rem; }
+      .breadcrumbs { margin-top: 3.5rem; }
+      .tracks-link { font-size: 1.05rem; }
+    }
+  </style>
+</head>
+<body>
+
+  <nav class="breadcrumbs" aria-label="Навигация">
+    <a href="/">Ламопад</a>
+    <span class="sep">/</span>
+    <span>Рассказы</span>
+  </nav>
+
+  <div class="header">
+    <h1 class="title">Рассказы</h1>
+    <p class="subtitle">короткая проза &nbsp;·&nbsp; Ламопад</p>
+  </div>
+
+  <ul class="story-list">
+
+    <li>
+      <a class="story-link" href="/stories/dva-bileta/">
+        <div class="story-title">Два билета<span class="story-arrow">→</span></div>
+        <div class="story-desc">Поезд Москва–Сочи. Дедушка протягивает проводнице два билета. Он ждёт старого друга.</div>
+      </a>
+    </li>
+
+    <li>
+      <a class="story-link" href="/stories/real/">
+        <div class="story-title">Кому верить<span class="story-arrow">→</span></div>
+        <div class="story-desc">Француженка с тиндера соблазнила айтишника набить татуировку с QR-кодом.</div>
+      </a>
+    </li>
+
+  </ul>
+
+  <div class="tracks-wrap">
+    <a class="tracks-link" href="/tracks/">Треки Ламопад →</a>
+  </div>
+
+  <footer>
+    &copy; Ламопад &mdash; все права защищены
+  </footer>
+
+</body>
+</html>

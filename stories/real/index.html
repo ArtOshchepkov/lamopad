@@ -4,14 +4,15 @@
   <meta charset="UTF-8">
   <meta name="viewport" content="width=device-width, initial-scale=1.0">
   <title>Кому верить — Ламопад</title>
-  <meta name="description" content="Короткий рассказ о тиндере, нейросетях и вопросе без ответа: кому верить, если не знаешь, кто настоящий.">
+  <meta name="description" content="Француженка с тиндера соблазнила айтишника набить татуировку с QR-кодом. Читать короткий рассказ">
   <meta name="author" content="Ламопад">
   <meta name="robots" content="index, follow">
   <link rel="canonical" href="https://lamopad.ru/stories/real/">
+  <link rel="icon" href="/img/slon_32px.jpg" type="image/jpg">
 
   <meta property="og:type" content="article">
   <meta property="og:title" content="Кому верить — Ламопад">
-  <meta property="og:description" content="Короткий рассказ о тиндере, нейросетях и вопросе без ответа: кому верить, если не знаешь, кто настоящий.">
+  <meta property="og:description" content="Француженка с тиндера соблазнила айтишника набить татуировку с QR-кодом. Короткий рассказ">
   <meta property="og:url" content="https://lamopad.ru/stories/real/">
   <meta property="og:locale" content="ru_RU">
   <meta property="og:site_name" content="Ламопад">
@@ -38,7 +39,7 @@
     }
 
     html {
-      font-size: 16px;
+      font-size: 18px;
       background: var(--bg);
       color: var(--text);
     }
@@ -52,6 +53,32 @@
       flex-direction: column;
       align-items: center;
       padding: 0 1.25rem;
+    }
+
+    /* ── BREADCRUMBS ── */
+    .breadcrumbs {
+      width: 100%;
+      max-width: var(--col);
+      margin-top: 2.5rem;
+      font-size: 0.62rem;
+      letter-spacing: 0.12em;
+      color: var(--muted);
+      text-transform: uppercase;
+    }
+
+    .breadcrumbs a {
+      color: var(--muted);
+      text-decoration: none;
+      transition: color 0.2s;
+    }
+
+    .breadcrumbs a:hover {
+      color: var(--accent);
+    }
+
+    .breadcrumbs .sep {
+      margin: 0 0.6ch;
+      opacity: 0.4;
     }
 
     /* ── DISCLAIMER ── */
@@ -135,19 +162,93 @@
       50%       { opacity: 0; }
     }
 
+    /* ── AFTER-STORY NAV ── */
+    .after-story {
+      width: 100%;
+      max-width: var(--col);
+      margin-top: 5rem;
+      border-top: 1px solid var(--muted);
+      padding-top: 2rem;
+    }
+
+    .after-story-label {
+      font-size: 0.6rem;
+      letter-spacing: 0.18em;
+      text-transform: uppercase;
+      color: var(--muted);
+      margin-bottom: 1.5rem;
+    }
+
+    .tracks-link {
+      display: block;
+      font-size: 1rem;
+      font-weight: 500;
+      letter-spacing: 0.04em;
+      color: var(--accent);
+      text-decoration: none;
+      padding: 0.75rem 1.25rem;
+      border: 1px solid var(--accent);
+      margin-bottom: 2rem;
+      transition: background 0.2s, color 0.2s;
+      opacity: 0.85;
+    }
+
+    .tracks-link:hover {
+      background: var(--accent);
+      color: var(--bg);
+      opacity: 1;
+    }
+
+    .stories-label {
+      font-size: 0.6rem;
+      letter-spacing: 0.18em;
+      text-transform: uppercase;
+      color: var(--muted);
+      margin-bottom: 1rem;
+    }
+
+    .stories-list {
+      list-style: none;
+      display: flex;
+      flex-direction: column;
+      gap: 0.6rem;
+    }
+
+    .stories-list a {
+      font-size: 0.9rem;
+      color: var(--text);
+      text-decoration: none;
+      opacity: 0.65;
+      transition: opacity 0.2s, color 0.2s;
+      display: flex;
+      align-items: baseline;
+      gap: 0.75ch;
+    }
+
+    .stories-list a::before {
+      content: '→';
+      color: var(--muted);
+      font-size: 0.75em;
+      opacity: 0.6;
+      flex-shrink: 0;
+    }
+
+    .stories-list a:hover {
+      opacity: 1;
+      color: var(--accent);
+    }
+
     /* ── FOOTER ── */
     footer {
       width: 100%;
       max-width: var(--col);
-      margin-top: 5rem;
-      margin-bottom: 2.5rem;
-      font-size: 0.6rem;
+      margin-top: 3rem;
+      margin-bottom: 2rem;
+      font-size: 0.55rem;
       letter-spacing: 0.1em;
-      text-transform: uppercase;
       color: var(--muted);
-      border-top: 1px solid currentColor;
-      padding-top: 0.5rem;
-      opacity: 0.5;
+      opacity: 0.35;
+      text-align: center;
     }
 
     /* ── DESKTOP REFINEMENTS ── */
@@ -236,7 +337,20 @@
 
   </div>
 
-  <footer>Ламопад &mdash; lamopad.ru &nbsp;&mdash;&nbsp; <a href="/tracks" style="color:inherit;text-decoration:underline;text-underline-offset:3px;">Треки</a></footer>
+  <nav class="after-story" aria-label="Ещё от Ламопада">
+    <p class="after-story-label">Ещё от Ламопада</p>
+
+    <a class="tracks-link" href="/tracks/">Треки Ламопад →</a>
+
+    <p class="stories-label">Другие рассказы</p>
+    <ul class="stories-list">
+      <li><a href="/stories/dva-bileta/">Два билета</a></li>
+    </ul>
+  </nav>
+
+  <footer>
+    &copy; Ламопад &mdash; все права защищены
+  </footer>
 
 </body>
 </html>

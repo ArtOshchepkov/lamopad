@@ -78,16 +78,20 @@
       z-index: 10;
       pointer-events: auto;
       cursor: pointer;
-      width: 28px;
-      height: 28px;
+      width: 52px;
+      height: 52px;
       display: flex;
       align-items: center;
       justify-content: center;
       animation: fall linear forwards;
-      filter: drop-shadow(0 0 6px #f5d78e);
-      font-size: 22px;
+      filter: drop-shadow(0 0 8px #f5d78e);
+      font-size: 28px;
       line-height: 1;
       user-select: none;
+      transition: filter 0.1s;
+    }
+    .fstar:hover {
+      filter: drop-shadow(0 0 18px #fff) drop-shadow(0 0 32px #f5d78e);
     }
     @keyframes fall {
       0%   { opacity: 0; transform: translate(0,0) rotate(0deg); }
@@ -426,6 +430,31 @@
     .platform-link img { width: 15px; height: 15px; filter: brightness(0) invert(0.5); transition: filter 0.15s; }
     .platform-link:hover img { filter: brightness(0) invert(0.75) sepia(1) saturate(3) hue-rotate(20deg); }
 
+    /* ── download button ── */
+    .download-btn {
+      display: flex;
+      align-items: center;
+      justify-content: center;
+      gap: 8px;
+      text-decoration: none;
+      color: var(--gold-dim);
+      font-family: 'Nunito', sans-serif;
+      font-size: clamp(13px, 2.4vw, 14px);
+      font-weight: 700;
+      letter-spacing: 0.06em;
+      padding: 10px 20px;
+      border: 1px solid rgba(245,215,142,0.25);
+      border-radius: 8px;
+      margin-bottom: 14px;
+      transition: color 0.15s, border-color 0.15s, background 0.15s;
+    }
+    .download-btn:hover {
+      color: var(--gold);
+      border-color: var(--gold-dim);
+      background: rgba(245,215,142,0.06);
+    }
+    .download-btn svg { flex-shrink: 0; }
+
     .or-divider {
       width: 100%;
       display: flex;
@@ -709,6 +738,13 @@
     </div>
     <audio id="audio" src="/tracks/milky-way.mp3" preload="none"></audio>
   </div>
+
+  <a class="download-btn" href="/tracks/milky-way.mp3" download="Ламопад — Млечный Путь.mp3">
+    <svg width="15" height="15" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5" stroke-linecap="round" stroke-linejoin="round">
+      <path d="M12 3v13M7 12l5 5 5-5M3 19h18"/>
+    </svg>
+    Скачать MP3
+  </a>
 
   <div class="or-divider">—или—</div>
   <!-- platform links -->

@@ -143,13 +143,49 @@
       color: #bbb;
     }
 
+    /* ── top nav ── */
+    .top-nav {
+      position: sticky;
+      top: 0;
+      z-index: 100;
+      background: var(--bg);
+      border-bottom: 1px solid rgba(0,0,0,0.08);
+      display: flex;
+      justify-content: center;
+      gap: 0;
+    }
+
+    .top-nav a {
+      font-family: 'Unbounded', sans-serif;
+      font-size: clamp(10px, 2.2vw, 13px);
+      font-weight: 900;
+      letter-spacing: .03em;
+      text-transform: lowercase;
+      color: var(--faded);
+      text-decoration: none;
+      padding: 14px clamp(12px, 3vw, 24px);
+      transition: color 0.15s;
+    }
+
+    .top-nav a:hover {
+      color: var(--red);
+    }
+
     @media (max-width: 400px) {
       .sections { grid-template-columns: 1fr; }
       .page { padding: 40px 18px 60px; }
+      .top-nav a { padding: 12px 10px; }
     }
   </style>
 </head>
 <body>
+
+<nav class="top-nav" aria-label="Главное меню">
+  <a href="/tracks/">треки</a>
+  <a href="/games/">игры</a>
+  <a href="/stories/">рассказы</a>
+  <a href="/notes/">заметки</a>
+</nav>
 
 <main class="page">
 

@@ -17,110 +17,78 @@
   <meta property="og:locale" content="ru_RU">
   <meta property="og:site_name" content="Ламопад">
 
+  <link rel="preconnect" href="https://fonts.googleapis.com">
+  <link href="https://fonts.googleapis.com/css2?family=Nunito:ital,wght@0,400;0,600;0,700;1,400&family=Unbounded:wght@900&display=swap" rel="stylesheet">
+
   <style>
-    @import url('https://fonts.googleapis.com/css2?family=IBM+Plex+Mono:ital,wght@0,300;0,400;0,500;1,300;1,400&display=swap');
+    *, *::before, *::after { box-sizing: border-box; margin: 0; padding: 0; }
 
     :root {
-      --bg: #f5f4f0;
-      --text: #1a1a1a;
-      --accent: #8B0000;
-      --muted: #888880;
-      --col: 62ch;
-    }
-
-    *, *::before, *::after {
-      box-sizing: border-box;
-      margin: 0;
-      padding: 0;
-    }
-
-    html {
-      font-size: 18px;
-      background: var(--bg);
-      color: var(--text);
+      --bg:    #f8f4ed;
+      --ink:   #1e1810;
+      --faded: #7a6e62;
+      --red:   #c8281e;
     }
 
     body {
-      font-family: 'IBM Plex Mono', 'Courier New', Courier, monospace;
-      font-weight: 400;
+      background: var(--bg);
+      color: var(--ink);
+      font-family: 'Nunito', sans-serif;
+      font-size: clamp(15px, 3vw, 18px);
       line-height: 1.75;
       min-height: 100vh;
-      display: flex;
-      flex-direction: column;
-      align-items: center;
-      padding: 0 1.25rem;
       cursor: url('/img/lamopad_cursor_48px.png'), auto;
     }
 
-    /* ── BREADCRUMBS ── */
-    .breadcrumbs {
-      width: 100%;
-      max-width: var(--col);
-      margin-top: 2.5rem;
-      font-size: 0.62rem;
-      letter-spacing: 0.12em;
-      color: var(--muted);
+    .page {
+      max-width: 600px;
+      margin: 0 auto;
+      padding: clamp(40px, 8vw, 80px) 24px clamp(60px, 10vw, 100px);
+    }
+
+    /* ── breadcrumbs ── */
+    .crumbs {
+      padding: 0.9rem 1.5rem 0;
+      font-size: 0.7rem;
+      letter-spacing: 0.1em;
       text-transform: uppercase;
+      color: var(--faded);
+      font-weight: 600;
+    }
+    .crumbs a { color: inherit; text-decoration: none; transition: color 0.15s; }
+    .crumbs a:hover { color: var(--red); }
+    .crumbs .sep { margin: 0 0.5ch; opacity: 0.35; }
+
+    /* ── header ── */
+    .header { margin-bottom: 48px; }
+
+    h1 {
+      font-family: 'Unbounded', sans-serif;
+      font-size: clamp(32px, 10vw, 56px);
+      font-weight: 900;
+      color: var(--red);
+      line-height: 1;
+      letter-spacing: .01em;
     }
 
-    .breadcrumbs a {
-      color: var(--muted);
-      text-decoration: none;
-      transition: color 0.2s;
-    }
-
-    .breadcrumbs a:hover {
-      color: var(--accent);
-    }
-
-    .breadcrumbs .sep {
-      margin: 0 0.6ch;
-      opacity: 0.4;
-    }
-
-    /* ── HEADER ── */
-    .header {
-      width: 100%;
-      max-width: var(--col);
-      margin-top: 3.5rem;
-      margin-bottom: 3.5rem;
-    }
-
-    .title {
-      font-size: clamp(1.4rem, 5vw, 1.85rem);
-      font-weight: 500;
-      letter-spacing: 0.02em;
-    }
-
-    .subtitle {
-      margin-top: 0.6rem;
-      font-size: 0.6rem;
-      letter-spacing: 0.14em;
-      color: var(--muted);
+    .header-sub {
+      margin-top: 10px;
+      font-size: 13px;
+      letter-spacing: .22em;
       text-transform: uppercase;
+      color: var(--faded);
+      font-weight: 700;
     }
 
-    /* ── STORY LIST ── */
-    .story-list {
-      width: 100%;
-      max-width: var(--col);
-      list-style: none;
-    }
+    /* ── story list ── */
+    .story-list { list-style: none; }
 
     .story-list li {
-      border-top: 1px solid var(--muted);
-      padding: 1.75rem 0;
-      opacity: 0.9;
-      transition: opacity 0.2s;
+      border-top: 1px solid rgba(0,0,0,0.08);
+      padding: 20px 0;
     }
 
-    .story-list li:last-child {
-      border-bottom: 1px solid var(--muted);
-    }
-
-    .story-list li:hover {
-      opacity: 1;
-    }
+    .story-list li:last-child { border-bottom: 1px solid rgba(0,0,0,0.08); }
 
     .story-link {
       text-decoration: none;
@@ -129,123 +97,107 @@
     }
 
     .story-title {
-      font-size: 1.05rem;
-      font-weight: 500;
-      color: var(--text);
-      transition: color 0.2s;
-      margin-bottom: 0.4rem;
+      font-family: 'Unbounded', sans-serif;
+      font-size: clamp(18px, 4.5vw, 26px);
+      font-weight: 900;
+      color: var(--ink);
+      transition: color 0.15s;
+      margin-bottom: 6px;
+      letter-spacing: .01em;
     }
 
-    .story-link:hover .story-title {
-      color: var(--accent);
-    }
+    .story-link:hover .story-title { color: var(--red); }
 
     .story-desc {
-      font-size: 0.78rem;
-      color: var(--muted);
+      font-size: clamp(13px, 2.5vw, 15px);
+      color: var(--faded);
       line-height: 1.6;
-      font-weight: 300;
+      font-weight: 400;
     }
 
     .story-arrow {
       display: inline-block;
       margin-left: 0.5ch;
-      font-size: 0.8em;
+      font-size: 0.85em;
       opacity: 0;
       transform: translateX(-4px);
-      transition: opacity 0.2s, transform 0.2s;
+      transition: opacity 0.15s, transform 0.15s;
+      font-family: 'Nunito', sans-serif;
+      font-weight: 400;
     }
 
-    .story-link:hover .story-arrow {
-      opacity: 1;
-      transform: translateX(0);
-    }
+    .story-link:hover .story-arrow { opacity: 1; transform: translateX(0); }
 
-    /* ── TRACKS LINK ── */
-    .tracks-wrap {
-      width: 100%;
-      max-width: var(--col);
-      margin-top: 4rem;
-    }
+    /* ── tracks link ── */
+    .tracks-wrap { margin-top: 48px; }
 
     .tracks-link {
-      display: block;
-      font-size: 1rem;
-      font-weight: 500;
-      letter-spacing: 0.04em;
-      color: var(--accent);
+      display: inline-block;
+      font-size: 13px;
+      font-weight: 700;
+      letter-spacing: .18em;
+      text-transform: uppercase;
+      color: var(--red);
       text-decoration: none;
-      padding: 0.75rem 1.25rem;
-      border: 1px solid var(--accent);
-      transition: background 0.2s, color 0.2s;
-      opacity: 0.85;
+      padding: 10px 20px;
+      border: 1px solid var(--red);
+      border-radius: 2px;
+      transition: background 0.15s, color 0.15s;
     }
 
-    .tracks-link:hover {
-      background: var(--accent);
-      color: var(--bg);
-      opacity: 1;
-    }
+    .tracks-link:hover { background: var(--red); color: var(--bg); }
 
-    /* ── FOOTER ── */
+    /* ── footer ── */
     footer {
-      width: 100%;
-      max-width: var(--col);
-      margin-top: 3rem;
-      margin-bottom: 2rem;
-      font-size: 0.55rem;
-      letter-spacing: 0.1em;
-      color: var(--muted);
-      opacity: 0.35;
-      text-align: center;
-    }
-
-    /* ── RESPONSIVE ── */
-    @media (min-width: 700px) {
-      body { padding: 0 2rem; }
-      .breadcrumbs { margin-top: 3.5rem; }
-      .tracks-link { font-size: 1.05rem; }
+      margin-top: 64px;
+      padding-top: 20px;
+      border-top: 1px solid rgba(0,0,0,0.10);
+      font-size: 12px;
+      letter-spacing: .08em;
+      color: #bbb;
     }
   </style>
 </head>
 <body>
 
-  <nav class="breadcrumbs" aria-label="Навигация">
+  <nav class="crumbs" aria-label="Навигация">
     <a href="/">Ламопад</a>
     <span class="sep">/</span>
     <span>Рассказы</span>
   </nav>
 
-  <div class="header">
-    <h1 class="title">Рассказы</h1>
-    <p class="subtitle">короткая проза &nbsp;·&nbsp; Ламопад</p>
-  </div>
+  <main class="page">
 
-  <ul class="story-list">
+    <div class="header">
+      <h1>Рассказы</h1>
+      <p class="header-sub">короткая проза &nbsp;·&nbsp; Ламопад</p>
+    </div>
 
-    <li>
-      <a class="story-link" href="/stories/dva-bileta/">
-        <div class="story-title">Два билета<span class="story-arrow">→</span></div>
-        <div class="story-desc">Поезд Москва–Сочи. Дедушка протягивает проводнице два билета. Он ждёт старого друга.</div>
-      </a>
-    </li>
+    <ul class="story-list">
 
-    <li>
-      <a class="story-link" href="/stories/real/">
-        <div class="story-title">Кому верить<span class="story-arrow">→</span></div>
-        <div class="story-desc">Француженка с тиндера соблазнила айтишника набить татуировку с QR-кодом.</div>
-      </a>
-    </li>
+      <li>
+        <a class="story-link" href="/stories/dva-bileta/">
+          <div class="story-title">Два билета<span class="story-arrow">→</span></div>
+          <div class="story-desc">Поезд Москва–Сочи. Дедушка протягивает проводнице два билета. Он ждёт старого друга.</div>
+        </a>
+      </li>
 
-  </ul>
+      <li>
+        <a class="story-link" href="/stories/real/">
+          <div class="story-title">Кому верить<span class="story-arrow">→</span></div>
+          <div class="story-desc">Француженка с тиндера соблазнила айтишника набить татуировку с QR-кодом.</div>
+        </a>
+      </li>
 
-  <div class="tracks-wrap">
-    <a class="tracks-link" href="/tracks/">Треки Ламопад →</a>
-  </div>
+    </ul>
 
-  <footer>
-    &copy; Ламопад &mdash; все права защищены
-  </footer>
+    <div class="tracks-wrap">
+      <a class="tracks-link" href="/tracks/">Треки Ламопад →</a>
+    </div>
+
+    <footer>&copy; Ламопад &mdash; все права защищены</footer>
+
+  </main>
 
 </body>
 </html>

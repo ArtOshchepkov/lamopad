@@ -85,7 +85,7 @@
     .disclaimer {
       width: 100%;
       max-width: var(--col);
-      margin-top: 2.5rem;
+      margin-top: 1.5rem;
       font-size: 0.6rem;
       letter-spacing: 0.12em;
       text-transform: uppercase;
@@ -257,8 +257,10 @@
         padding: 0 2rem;
       }
 
+      .breadcrumbs { margin-top: 3.5rem; }
+
       .disclaimer {
-        margin-top: 3.5rem;
+        margin-top: 1.5rem;
       }
 
       .story {
@@ -272,6 +274,14 @@
   </style>
 </head>
 <body>
+
+  <nav class="breadcrumbs" aria-label="Навигация">
+    <a href="/">Ламопад</a>
+    <span class="sep">/</span>
+    <a href="/stories/">Рассказы</a>
+    <span class="sep">/</span>
+    <span>Кому верить</span>
+  </nav>
 
   <p class="disclaimer">
     Настоящий материал произведён нейросетью либо касается деятельности нейросети.

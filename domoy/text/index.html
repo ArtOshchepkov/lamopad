@@ -175,9 +175,16 @@
       color: #bbb;
       letter-spacing: .08em;
     }
+
+    /* ── КРОШКИ ── */
+    .crumbs { position: relative; z-index: 100; padding: 0.9rem 1.5rem 0; font-size: 0.7rem; letter-spacing: 0.1em; text-transform: uppercase; color: var(--faded); }
+    .crumbs a { color: inherit; text-decoration: none; transition: color 0.15s; }
+    .crumbs a:hover { color: var(--warm); }
+    .crumbs .sep { margin: 0 0.5ch; opacity: 0.35; }
   </style>
 </head>
 <body>
+<nav class="crumbs" aria-label="Навигация"><a href="/">Ламопад</a><span class="sep">/</span><a href="/tracks/">Треки</a><span class="sep">/</span><span>Домой</span></nav>
 <main class="page">
 
   <header class="header">

@@ -291,9 +291,17 @@
       .title { animation: none; }
       html   { scroll-behavior: auto; }
     }
+
+    /* ── КРОШКИ ── */
+    .crumbs { position: relative; z-index: 100; padding: 0.9rem 1.5rem 0; font-family: 'Courier New', monospace; font-size: 0.7rem; letter-spacing: 0.1em; text-transform: uppercase; color: var(--dim); }
+    .crumbs a { color: inherit; text-decoration: none; transition: color 0.15s; }
+    .crumbs a:hover { color: var(--plite); }
+    .crumbs .sep { margin: 0 0.5ch; opacity: 0.35; }
   </style>
 </head>
 <body>
+
+<nav class="crumbs" aria-label="Навигация"><a href="/">Ламопад</a><span class="sep">/</span><a href="/tracks/">Треки</a><span class="sep">/</span><span>Самосвал</span></nav>
 
 <main class="page">
 

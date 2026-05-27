@@ -181,6 +181,39 @@
       font-style: italic;
     }
 
+    /* ── TRACK CTA ── */
+    .track-cta {
+      width: 100%;
+      max-width: var(--col);
+      margin-top: 4.5rem;
+      padding: 1.5rem 1.5rem 1.5rem 1.25rem;
+      border-left: 3px solid var(--accent);
+      background: rgba(139, 0, 0, 0.04);
+    }
+
+    .track-cta-note {
+      font-size: 0.92rem;
+      line-height: 1.75;
+      color: var(--text);
+      margin-bottom: 1.25rem;
+    }
+
+    .track-cta-link {
+      display: inline-block;
+      font-size: 0.88rem;
+      font-weight: 500;
+      letter-spacing: 0.06em;
+      color: var(--accent);
+      text-decoration: none;
+      border-bottom: 1px solid var(--accent);
+      padding-bottom: 2px;
+      transition: opacity 0.2s;
+    }
+
+    .track-cta-link:hover {
+      opacity: 0.65;
+    }
+
     /* ── AFTER-STORY NAV ── */
     .after-story {
       width: 100%;
@@ -354,6 +387,11 @@
     <p class="final">Дедушка вышел на следующей станции. Поезд ехал к морю.</p>
 
   </div>
+
+  <aside class="track-cta">
+    <p class="track-cta-note">Грустный дедушка южного поезда вдохновил этот рассказ. Тогда мы ехали увидеть море в первый раз — мы, с подругой. Спустя 5 лет мы записали трек про это путешествие. Послушайте:</p>
+    <a class="track-cta-link" href="/tracks/milky-way">Млечный Путь →</a>
+  </aside>
 
   <nav class="after-story" aria-label="Ещё от Ламопада">
     <p class="after-story-label">Ещё от Ламопада</p>

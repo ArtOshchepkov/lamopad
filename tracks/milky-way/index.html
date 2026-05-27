@@ -1,0 +1,1259 @@
+<!DOCTYPE html>
+<html lang="ru">
+<head>
+  <meta charset="utf-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1">
+  <title>Млечный Путь — текст и аккорды | Ламопад</title>
+  <meta name="description" content="Ламопад — «Млечный Путь». О первой дороге к морю. Повзрослевшие люди вспоминают автостоп, трассы, поезда. Меланхоличная, дрим-рок, гитара.">
+  <meta name="keywords" content="Ламопад, Млечный Путь, текст песни, аккорды, автостоп, дорога, море, дрим-рок, гитара">
+  <meta property="og:title" content="Млечный Путь — Ламопад">
+  <meta property="og:description" content="О первой дороге к морю. Повзрослевшие люди вспоминают автостоп, трассы, поезда. Меланхоличная, дрим-рок, гитара.">
+  <meta property="og:type" content="music.song">
+  <meta property="og:image" content="https://lamopad.ru/tracks/milky-way-cover.jpg">
+  <meta property="og:url" content="https://lamopad.ru/tracks/milky-way/">
+  <meta property="og:locale" content="ru_RU">
+  <meta property="og:site_name" content="Ламопад">
+  <meta name="twitter:card" content="summary_large_image">
+  <meta name="twitter:title" content="Млечный Путь — Ламопад">
+  <meta name="twitter:description" content="О первой дороге к морю. Меланхоличная, дрим-рок.">
+  <meta name="twitter:image" content="https://lamopad.ru/tracks/milky-way-cover.jpg">
+  <link rel="canonical" href="https://lamopad.ru/tracks/milky-way/">
+  <link rel="icon" href="/tracks/milky-way-cover.jpg">
+
+  <script type="application/ld+json">
+  {
+    "@context": "https://schema.org",
+    "@type": "MusicRecording",
+    "name": "Млечный Путь",
+    "byArtist": { "@type": "MusicGroup", "name": "Ламопад" },
+    "description": "О первой дороге к морю. Повзрослевшие люди вспоминают автостоп, трассы, поезда.",
+    "genre": ["Dream Rock", "Indie Folk"],
+    "url": "https://lamopad.ru/tracks/milky-way/"
+  }
+  </script>
+
+  <link rel="preconnect" href="https://fonts.googleapis.com">
+  <link href="https://fonts.googleapis.com/css2?family=Nunito:ital,wght@0,300;0,400;0,600;0,700;1,300;1,400&family=Unbounded:wght@700;900&display=swap" rel="stylesheet">
+
+  <style>
+    *, *::before, *::after { margin: 0; padding: 0; box-sizing: border-box; }
+
+    :root {
+      --bg:       #03000f;
+      --surface:  rgba(255,255,255,0.04);
+      --border:   rgba(255,255,255,0.10);
+      --gold:     #f5d78e;
+      --gold-dim: rgba(245,215,142,0.45);
+      --violet:   #9b87f5;
+      --teal:     #7fd4d0;
+      --text:     #d8d0f0;
+      --dim:      #7a7098;
+      --white:    #f0eeff;
+    }
+
+    html { scroll-behavior: smooth; }
+
+    body {
+      background: var(--bg);
+      color: var(--text);
+      font-family: 'Nunito', sans-serif;
+      font-size: clamp(16px, 3vw, 18px);
+      line-height: 1.8;
+      min-height: 100vh;
+      overflow-x: hidden;
+      cursor: url('/tracks/milky-way-cover.jpg') 0 0, auto;
+    }
+
+    /* ── background canvas ── */
+    #cosmos {
+      position: fixed;
+      inset: 0;
+      z-index: 0;
+      pointer-events: none;
+    }
+
+    /* ── falling star DOM elements ── */
+    .fstar {
+      position: fixed;
+      z-index: 10;
+      pointer-events: auto;
+      cursor: pointer;
+      width: 28px;
+      height: 28px;
+      display: flex;
+      align-items: center;
+      justify-content: center;
+      animation: fall linear forwards;
+      filter: drop-shadow(0 0 6px #f5d78e);
+      font-size: 22px;
+      line-height: 1;
+      user-select: none;
+    }
+    @keyframes fall {
+      0%   { opacity: 0; transform: translate(0,0) rotate(0deg); }
+      8%   { opacity: 1; }
+      90%  { opacity: 1; }
+      100% { opacity: 0; transform: translate(var(--dx), var(--dy)) rotate(360deg); }
+    }
+
+    /* ── hyperspace overlay ── */
+    #hyperspace {
+      display: none;
+      position: fixed;
+      inset: 0;
+      z-index: 900;
+      background: radial-gradient(ellipse at 50% 50%, #ffffff 0%, #b08fff 15%, #3311aa 40%, #000010 100%);
+      animation: warp 0.5s ease-out forwards;
+    }
+    #hyperspace canvas {
+      position: absolute;
+      inset: 0;
+      width: 100%;
+      height: 100%;
+    }
+    @keyframes warp {
+      0%   { opacity: 0; transform: scale(0.1); }
+      30%  { opacity: 1; transform: scale(1.05); }
+      100% { opacity: 1; transform: scale(1); }
+    }
+
+    /* ── wish modal ── */
+    #wish-modal {
+      display: none;
+      position: fixed;
+      inset: 0;
+      z-index: 950;
+      background: rgba(3,0,15,0.85);
+      backdrop-filter: blur(12px);
+      align-items: center;
+      justify-content: center;
+      padding: 20px;
+    }
+    #wish-modal.active { display: flex; }
+    .wish-box {
+      background: linear-gradient(135deg, rgba(30,10,60,0.98) 0%, rgba(10,0,30,0.98) 100%);
+      border: 1px solid var(--violet);
+      border-radius: 16px;
+      padding: clamp(28px, 6vw, 48px) clamp(24px, 6vw, 48px);
+      max-width: 420px;
+      width: 100%;
+      text-align: center;
+      box-shadow: 0 0 60px rgba(155,135,245,0.25), 0 0 120px rgba(155,135,245,0.10);
+      animation: modal-in 0.4s ease-out;
+    }
+    @keyframes modal-in {
+      from { opacity: 0; transform: translateY(20px) scale(0.96); }
+      to   { opacity: 1; transform: none; }
+    }
+    .wish-star {
+      font-size: 48px;
+      margin-bottom: 16px;
+      filter: drop-shadow(0 0 12px var(--gold));
+      animation: pulse-star 2s ease-in-out infinite;
+    }
+    @keyframes pulse-star {
+      0%,100% { transform: scale(1); }
+      50%      { transform: scale(1.15); }
+    }
+    .wish-title {
+      font-family: 'Unbounded', sans-serif;
+      font-size: clamp(16px, 4vw, 22px);
+      font-weight: 700;
+      color: var(--white);
+      margin-bottom: 8px;
+    }
+    .wish-sub {
+      font-size: 13px;
+      color: var(--dim);
+      margin-bottom: 24px;
+      letter-spacing: 0.06em;
+    }
+    .wish-input {
+      width: 100%;
+      background: rgba(255,255,255,0.06);
+      border: 1px solid var(--border);
+      border-radius: 8px;
+      color: var(--white);
+      font-family: 'Nunito', sans-serif;
+      font-size: 16px;
+      padding: 12px 16px;
+      outline: none;
+      transition: border-color 0.2s;
+      margin-bottom: 16px;
+    }
+    .wish-input:focus { border-color: var(--violet); }
+    .wish-input::placeholder { color: var(--dim); }
+    .wish-btn {
+      width: 100%;
+      padding: 13px 20px;
+      background: linear-gradient(135deg, #6b4fd0, #9b87f5);
+      border: none;
+      border-radius: 8px;
+      color: #fff;
+      font-family: 'Nunito', sans-serif;
+      font-size: 15px;
+      font-weight: 700;
+      cursor: pointer;
+      letter-spacing: 0.04em;
+      transition: opacity 0.2s, transform 0.15s;
+    }
+    .wish-btn:hover { opacity: 0.9; transform: translateY(-1px); }
+    .wish-btn:disabled { opacity: 0.5; cursor: default; transform: none; }
+    .wish-status {
+      margin-top: 16px;
+      font-size: 14px;
+      color: var(--gold);
+      min-height: 22px;
+      letter-spacing: 0.04em;
+      opacity: 0;
+      transition: opacity 0.5s;
+    }
+    .wish-status.visible { opacity: 1; }
+    .wish-close {
+      display: none;
+      margin-top: 20px;
+      background: none;
+      border: 1px solid var(--border);
+      border-radius: 6px;
+      color: var(--dim);
+      font-size: 13px;
+      padding: 8px 20px;
+      cursor: pointer;
+      font-family: 'Nunito', sans-serif;
+      transition: color 0.2s, border-color 0.2s;
+    }
+    .wish-close:hover { color: var(--white); border-color: var(--white); }
+
+    /* ── layout ── */
+    .page {
+      position: relative;
+      z-index: 2;
+      max-width: 640px;
+      margin: 0 auto;
+      padding: clamp(32px, 7vw, 64px) clamp(18px, 5vw, 32px) clamp(60px, 10vw, 100px);
+    }
+
+    /* ── breadcrumbs ── */
+    .crumbs {
+      position: relative;
+      z-index: 5;
+      padding: 1rem 1.5rem 0;
+      font-size: 0.68rem;
+      letter-spacing: 0.12em;
+      text-transform: uppercase;
+      color: var(--dim);
+      font-family: 'Nunito', sans-serif;
+      font-weight: 600;
+    }
+    .crumbs a { color: inherit; text-decoration: none; transition: color 0.15s; }
+    .crumbs a:hover { color: var(--gold); }
+    .crumbs .sep { margin: 0 0.5ch; opacity: 0.35; }
+
+    /* ── header ── */
+    .header {
+      display: flex;
+      gap: clamp(16px, 4vw, 28px);
+      align-items: flex-start;
+      margin-bottom: 36px;
+    }
+
+    .cover {
+      flex-shrink: 0;
+      width: clamp(80px, 22vw, 120px);
+      height: clamp(80px, 22vw, 120px);
+      object-fit: cover;
+      border-radius: 8px;
+      box-shadow: 0 0 30px rgba(155,135,245,0.3), 0 4px 16px rgba(0,0,0,0.5);
+    }
+
+    .header-text {
+      flex: 1;
+      padding-top: 4px;
+    }
+
+    .track-title {
+      font-family: 'Unbounded', sans-serif;
+      font-size: clamp(24px, 7vw, 42px);
+      font-weight: 900;
+      line-height: 1.1;
+      color: var(--white);
+      letter-spacing: -0.01em;
+      margin-bottom: 8px;
+    }
+    .track-title span { color: var(--gold); }
+
+    .artist-line {
+      font-size: 12px;
+      letter-spacing: 0.22em;
+      text-transform: uppercase;
+      color: var(--dim);
+      font-weight: 700;
+      margin-bottom: 12px;
+    }
+
+    .moods {
+      display: flex;
+      flex-wrap: wrap;
+      gap: 6px;
+    }
+    .mood {
+      font-size: 11px;
+      letter-spacing: 0.12em;
+      text-transform: uppercase;
+      padding: 4px 10px;
+      border-radius: 20px;
+      border: 1px solid var(--border);
+      color: var(--dim);
+      font-weight: 600;
+    }
+    .mood.m1 { border-color: rgba(155,135,245,0.4); color: var(--violet); }
+    .mood.m2 { border-color: rgba(127,212,208,0.4); color: var(--teal); }
+    .mood.m3 { border-color: rgba(245,215,142,0.35); color: var(--gold-dim); }
+
+    /* ── description ── */
+    .description {
+      background: var(--surface);
+      border: 1px solid var(--border);
+      border-radius: 10px;
+      padding: 18px 20px;
+      font-size: clamp(14px, 2.8vw, 16px);
+      color: var(--dim);
+      line-height: 1.7;
+      margin-bottom: 28px;
+      font-style: italic;
+    }
+
+    /* ── player ── */
+    .player-wrap {
+      background: rgba(255,255,255,0.04);
+      border: 1px solid var(--border);
+      border-radius: 12px;
+      padding: 20px;
+      margin-bottom: 20px;
+      box-shadow: 0 0 40px rgba(155,135,245,0.08);
+    }
+
+    .player-inner {
+      display: flex;
+      align-items: center;
+      gap: 16px;
+    }
+
+    .play-btn {
+      flex-shrink: 0;
+      width: 52px;
+      height: 52px;
+      border-radius: 50%;
+      background: linear-gradient(135deg, #6b4fd0, #9b87f5);
+      border: none;
+      cursor: pointer;
+      display: flex;
+      align-items: center;
+      justify-content: center;
+      transition: transform 0.15s, box-shadow 0.2s;
+      box-shadow: 0 0 20px rgba(155,135,245,0.4);
+    }
+    .play-btn:hover { transform: scale(1.07); box-shadow: 0 0 28px rgba(155,135,245,0.6); }
+    .play-btn svg { width: 22px; height: 22px; fill: #fff; }
+    .play-btn .icon-pause { display: none; }
+
+    .player-info { flex: 1; min-width: 0; }
+    .player-track { font-weight: 700; font-size: 15px; color: var(--white); margin-bottom: 2px; }
+    .player-artist { font-size: 12px; color: var(--dim); letter-spacing: 0.08em; }
+
+    .player-time { font-size: 12px; color: var(--dim); font-variant-numeric: tabular-nums; white-space: nowrap; }
+
+    .progress-wrap {
+      margin-top: 14px;
+      position: relative;
+      cursor: pointer;
+    }
+    .progress-bg {
+      width: 100%;
+      height: 3px;
+      background: rgba(255,255,255,0.10);
+      border-radius: 2px;
+      position: relative;
+      overflow: hidden;
+    }
+    .progress-fill {
+      height: 100%;
+      width: 0%;
+      background: linear-gradient(90deg, var(--violet), var(--gold));
+      border-radius: 2px;
+      transition: width 0.25s linear;
+      pointer-events: none;
+    }
+    .progress-bg::after {
+      content: '';
+      position: absolute;
+      left: var(--thumb, 0%);
+      top: 50%;
+      transform: translate(-50%, -50%);
+      width: 10px;
+      height: 10px;
+      border-radius: 50%;
+      background: var(--gold);
+      box-shadow: 0 0 6px var(--gold);
+      opacity: 0;
+      transition: opacity 0.2s;
+    }
+    .progress-wrap:hover .progress-bg::after { opacity: 1; }
+
+    /* ── platforms ── */
+    .platforms {
+      display: flex;
+      flex-wrap: wrap;
+      gap: 10px;
+      align-items: center;
+      margin-bottom: 12px;
+    }
+    .platform-link {
+      display: flex;
+      align-items: center;
+      gap: 6px;
+      text-decoration: none;
+      color: var(--dim);
+      font-size: clamp(12px, 2.4vw, 14px);
+      font-weight: 600;
+      letter-spacing: 0.04em;
+      padding: 7px 14px;
+      border: 1px solid var(--border);
+      border-radius: 6px;
+      transition: color 0.15s, border-color 0.15s, background 0.15s;
+    }
+    .platform-link:hover { color: var(--gold); border-color: var(--gold-dim); background: rgba(245,215,142,0.06); }
+    .platform-link img { width: 15px; height: 15px; filter: brightness(0) invert(0.5); transition: filter 0.15s; }
+    .platform-link:hover img { filter: brightness(0) invert(0.75) sepia(1) saturate(3) hue-rotate(20deg); }
+
+    .or-divider {
+      width: 100%;
+      display: flex;
+      align-items: center;
+      gap: 12px;
+      color: var(--dim);
+      font-size: 12px;
+      letter-spacing: 0.2em;
+      opacity: 0.55;
+      margin: 6px 0 4px;
+    }
+    .or-divider::before, .or-divider::after {
+      content: '';
+      flex: 1;
+      height: 1px;
+      background: var(--border);
+    }
+
+    /* ── falling stars section ── */
+    .starzone {
+      margin: 48px 0 40px;
+      text-align: center;
+    }
+    .starzone-hint {
+      font-size: clamp(15px, 3.2vw, 18px);
+      color: var(--text);
+      margin-bottom: 6px;
+      font-style: italic;
+    }
+    .starzone-sub {
+      font-size: 12px;
+      color: var(--dim);
+      letter-spacing: 0.12em;
+    }
+
+    /* ── links section ── */
+    .story-links {
+      display: flex;
+      flex-direction: column;
+      gap: 12px;
+      margin: 40px 0;
+    }
+    .story-link {
+      display: flex;
+      align-items: center;
+      gap: 12px;
+      text-decoration: none;
+      color: var(--text);
+      padding: 16px 20px;
+      background: var(--surface);
+      border: 1px solid var(--border);
+      border-radius: 10px;
+      transition: border-color 0.2s, background 0.2s;
+      font-size: clamp(14px, 2.8vw, 16px);
+    }
+    .story-link:hover { border-color: var(--violet); background: rgba(155,135,245,0.06); }
+    .story-link .link-icon { font-size: 22px; flex-shrink: 0; }
+    .link-text { flex: 1; }
+    .link-label { color: var(--white); font-weight: 600; line-height: 1.4; }
+    .link-meta { font-size: 11px; color: var(--dim); letter-spacing: 0.1em; text-transform: uppercase; margin-top: 2px; }
+    .link-arrow { color: var(--dim); font-size: 18px; flex-shrink: 0; transition: transform 0.2s; }
+    .story-link:hover .link-arrow { transform: translateX(4px); }
+
+    /* ── lyrics section ── */
+    .lyrics-section { margin-top: 48px; }
+
+    .lyrics-tabs {
+      display: flex;
+      gap: 4px;
+      margin-bottom: 28px;
+      background: rgba(255,255,255,0.04);
+      border-radius: 8px;
+      padding: 4px;
+    }
+    .tab-btn {
+      flex: 1;
+      padding: 10px 16px;
+      border: none;
+      background: none;
+      color: var(--dim);
+      font-family: 'Nunito', sans-serif;
+      font-size: 14px;
+      font-weight: 700;
+      letter-spacing: 0.12em;
+      text-transform: uppercase;
+      cursor: pointer;
+      border-radius: 6px;
+      transition: color 0.2s, background 0.2s;
+    }
+    .tab-btn.active {
+      background: rgba(155,135,245,0.18);
+      color: var(--violet);
+    }
+
+    .tab-pane { display: none; }
+    .tab-pane.active { display: block; }
+
+    .lyrics-body {
+      display: flex;
+      flex-direction: column;
+      gap: 36px;
+    }
+
+    .verse {
+      white-space: pre-line;
+      font-size: clamp(17px, 3.5vw, 20px);
+      line-height: 2;
+      color: var(--text);
+    }
+
+    .chorus {
+      white-space: pre-line;
+      font-size: clamp(17px, 3.5vw, 20px);
+      line-height: 2;
+      color: var(--white);
+      padding-left: 20px;
+      border-left: 2px solid rgba(155,135,245,0.45);
+      font-weight: 600;
+    }
+
+    .section-label {
+      font-size: 10px;
+      letter-spacing: 0.25em;
+      text-transform: uppercase;
+      color: var(--dim);
+      font-weight: 700;
+      margin-bottom: -24px;
+    }
+
+    /* chords view */
+    .chord-line {
+      display: block;
+      position: relative;
+      line-height: 2;
+      padding-top: 1.4em;
+    }
+    .chord {
+      position: absolute;
+      top: 0;
+      font-family: 'Unbounded', sans-serif;
+      font-size: 11px;
+      font-weight: 700;
+      color: var(--gold);
+      letter-spacing: 0.04em;
+      white-space: nowrap;
+    }
+
+    .lyrics-sep {
+      border: none;
+      border-top: 1px solid rgba(255,255,255,0.06);
+    }
+
+    /* ── footer ── */
+    .footer {
+      margin-top: 72px;
+      padding-top: 28px;
+      border-top: 1px solid var(--border);
+      display: flex;
+      flex-direction: column;
+      gap: 20px;
+    }
+
+    .footer-nav {
+      display: flex;
+      flex-wrap: wrap;
+      gap: 8px;
+    }
+    .footer-nav a {
+      display: inline-block;
+      font-size: 13px;
+      letter-spacing: 0.18em;
+      text-transform: uppercase;
+      color: var(--dim);
+      text-decoration: none;
+      font-weight: 700;
+      padding: 8px 16px;
+      border: 1px solid var(--border);
+      border-radius: 6px;
+      transition: color 0.15s, border-color 0.15s;
+    }
+    .footer-nav a:hover { color: var(--violet); border-color: var(--violet); }
+
+    .copyright {
+      font-size: 11px;
+      color: rgba(255,255,255,0.12);
+      letter-spacing: 0.10em;
+    }
+
+    /* ── mobile ── */
+    @media (max-width: 480px) {
+      .header { flex-direction: row; }
+      .story-links { gap: 10px; }
+    }
+
+    @media (prefers-reduced-motion: reduce) {
+      .fstar { animation: none !important; }
+    }
+  </style>
+</head>
+<body>
+
+<!-- background canvas -->
+<canvas id="cosmos"></canvas>
+
+<!-- falling stars (injected by JS) -->
+
+<!-- hyperspace overlay -->
+<div id="hyperspace"><canvas id="hyper-canvas"></canvas></div>
+
+<!-- wish modal -->
+<div id="wish-modal" role="dialog" aria-modal="true" aria-label="Загадай желание">
+  <div class="wish-box">
+    <div class="wish-star">⭐</div>
+    <h2 class="wish-title">Загадай желание</h2>
+    <p class="wish-sub">Поймал падающую звезду</p>
+    <input class="wish-input" id="wish-input" type="text" placeholder="Впиши своё желание..." maxlength="200" autocomplete="off">
+    <button class="wish-btn" id="wish-btn">Загадать</button>
+    <p class="wish-status" id="wish-status"></p>
+    <button class="wish-close" id="wish-close">Закрыть</button>
+  </div>
+</div>
+
+<nav class="crumbs" aria-label="Навигация">
+  <a href="/">Ламопад</a><span class="sep">/</span><a href="/tracks/">Треки</a><span class="sep">/</span><span>Млечный Путь</span>
+</nav>
+
+<main class="page">
+
+  <header class="header">
+    <img class="cover" src="/tracks/milky-way-cover.jpg" alt="Млечный Путь — Ламопад" width="120" height="120">
+    <div class="header-text">
+      <h1 class="track-title">Млечный <span>Путь</span></h1>
+      <p class="artist-line">Ламопад</p>
+      <div class="moods">
+        <span class="mood m1">Меланхоличная</span>
+        <span class="mood m2">Дрим-рок</span>
+        <span class="mood m3">Гитара</span>
+      </div>
+    </div>
+  </header>
+
+  <div class="description">
+    О первой дороге к морю. Повзрослевшие люди вспоминают автостоп, трассы, поезда. Мечты юных путешественников, которые объедут весь мир. Большие океаны станут маленькими лужами. Время прошло. Так много путешествий, что океаны поперёк горла. Слишком далеко разлетелись друзья.
+  </div>
+
+  <!-- player -->
+  <div class="player-wrap">
+    <div class="player-inner">
+      <button class="play-btn" id="play-btn" aria-label="Воспроизвести">
+        <svg class="icon-play" viewBox="0 0 24 24"><path d="M8 5v14l11-7z"/></svg>
+        <svg class="icon-pause" viewBox="0 0 24 24"><path d="M6 19h4V5H6v14zm8-14v14h4V5h-4z"/></svg>
+      </button>
+      <div class="player-info">
+        <div class="player-track">Млечный Путь</div>
+        <div class="player-artist">Ламопад</div>
+      </div>
+      <div class="player-time" id="player-time">0:00</div>
+    </div>
+    <div class="progress-wrap" id="progress-wrap">
+      <div class="progress-bg" id="progress-bg">
+        <div class="progress-fill" id="progress-fill"></div>
+      </div>
+    </div>
+    <audio id="audio" src="/tracks/milky-way.mp3" preload="none"></audio>
+  </div>
+
+  <!-- platform links -->
+  <div class="platforms">
+    <a class="platform-link" href="https://music.yandex.ru/artist/13432748" target="_blank" rel="noopener">
+      <img src="https://upload.wikimedia.org/wikipedia/commons/f/fa/Yandex_Music_icon_2023.svg" alt="Яндекс Музыка">
+      Яндекс Музыка
+    </a>
+    <a class="platform-link" href="https://vk.com/lamopad" target="_blank" rel="noopener">
+      <img src="https://cdn.simpleicons.org/vk/ffffff" alt="VK Музыка">
+      VK Музыка
+    </a>
+    <a class="platform-link" href="https://open.spotify.com/artist/lamopad" target="_blank" rel="noopener">
+      <img src="https://cdn.simpleicons.org/spotify/ffffff" alt="Spotify">
+      Spotify
+    </a>
+  </div>
+
+  <div class="or-divider">—или—</div>
+
+  <div class="platforms">
+    <a class="platform-link" href="https://music.apple.com/ru/artist/lamopad" target="_blank" rel="noopener">
+      <img src="https://cdn.simpleicons.org/applemusic/ffffff" alt="Apple Music">
+      Apple Music
+    </a>
+    <a class="platform-link" href="https://www.youtube.com/@lamopad" target="_blank" rel="noopener">
+      <img src="https://cdn.simpleicons.org/youtube/ffffff" alt="YouTube">
+      YouTube
+    </a>
+    <a class="platform-link" href="https://zvuk.com/artist/lamopad" target="_blank" rel="noopener">
+      Звук
+    </a>
+  </div>
+
+  <!-- falling stars teaser -->
+  <div class="starzone">
+    <p class="starzone-hint">А пока попробуй поймать падающую звезду.</p>
+    <p class="starzone-sub">кликай на звёзды</p>
+  </div>
+
+  <!-- story links -->
+  <div class="story-links">
+    <a class="story-link" href="/stories/dva-bileta/">
+      <span class="link-icon">🚂</span>
+      <div class="link-text">
+        <div class="link-label">Рассказ о дедушке, который ждал старого друга в поезде к Чёрному морю</div>
+        <div class="link-meta">рассказ · два билета</div>
+      </div>
+      <span class="link-arrow">→</span>
+    </a>
+    <a class="story-link" href="/tracks/sun-coming-glasses/">
+      <span class="link-icon">☀️</span>
+      <div class="link-text">
+        <div class="link-label">Песня о путешествии повеселее</div>
+        <div class="link-meta">трек · солнценаступательные очки</div>
+      </div>
+      <span class="link-arrow">→</span>
+    </a>
+  </div>
+
+  <!-- lyrics / chords -->
+  <section class="lyrics-section" itemscope itemtype="https://schema.org/MusicRecording">
+    <meta itemprop="name" content="Млечный Путь">
+    <span itemprop="byArtist" itemscope itemtype="https://schema.org/MusicGroup"><meta itemprop="name" content="Ламопад"></span>
+
+    <div class="lyrics-tabs" role="tablist">
+      <button class="tab-btn active" role="tab" aria-selected="true" data-tab="text">Текст</button>
+      <button class="tab-btn" role="tab" aria-selected="false" data-tab="chords">Аккорды</button>
+    </div>
+
+    <!-- TEXT TAB -->
+    <div class="tab-pane active" id="tab-text">
+      <div class="lyrics-body" itemprop="lyrics">
+
+        <p class="section-label">Куплет 1</p>
+        <p class="verse">Мне б как раньше
+Впервые к морю
+На попутках
+Вместе с тобой
+
+Снова прятать
+В карманах листья
+Автостраде
+Петь про прибой
+
+Вспомни: спится
+Тебе уютно
+Убаюканной
+Стуком колёс
+
+Мы ль не птицы?
+Летели к югу
+Направление
+Знали от звёзд</p>
+
+        <hr class="lyrics-sep">
+
+        <p class="section-label">Припев</p>
+        <p class="chorus">Океаны
+Нам будут лужами
+Звёзды
+Пятнами на холсте
+
+Меридианы — послушные нити
+Узорами вышьем
+По нашей орбите
+Играя юлою
+Млечного
+Пути</p>
+
+        <hr class="lyrics-sep">
+
+        <p class="section-label">Куплет 2</p>
+        <p class="verse">Что же ёжик
+Искал в тумане?
+Шёл с вареньем
+Вернулся с тоской
+
+Что мне море?
+Большая лужа
+Спросит: «Где ты?»
+Уставший прибой
+
+Что мне звёзды?
+Немые пятна
+Дырки света
+На старом холсте
+
+Расстоянье
+Нам отомстило
+Вот и лица
+В солёной воде</p>
+
+        <hr class="lyrics-sep">
+
+        <p class="section-label">Припев 2</p>
+        <p class="chorus">Океаны
+Нам стали лужами
+Звёзды — пятнами на холсте
+Меридианы — упрямые нити
+Узлами запутали
+В нашей орбите
+Играя юлою
+Млечного пути</p>
+
+      </div>
+    </div>
+
+    <!-- CHORDS TAB -->
+    <div class="tab-pane" id="tab-chords">
+      <div class="lyrics-body">
+
+        <p class="section-label">Куплет 1 · тональность D</p>
+        <p class="verse">
+<span class="chord-line"><span class="chord">D</span>Мне б как раньше</span>
+<span class="chord-line"><span class="chord" style="left:0">D/C#</span>Впервые к морю</span>
+<span class="chord-line"><span class="chord">G</span>На попутках</span>
+<span class="chord-line"><span class="chord">F#m11</span>Вместе с тобой</span>
+
+<span class="chord-line"><span class="chord">D</span>Снова прятать</span>
+<span class="chord-line"><span class="chord">D/C#</span>В карманах листья</span>
+<span class="chord-line"><span class="chord">G</span>Автостраде</span>
+<span class="chord-line"><span class="chord">F#m11</span>Петь про прибой</span>
+
+<span class="chord-line"><span class="chord">D</span>Вспомни: спится</span>
+<span class="chord-line"><span class="chord">D/C#</span>Тебе уютно</span>
+<span class="chord-line"><span class="chord">G</span>Убаюканной</span>
+<span class="chord-line"><span class="chord">F#m11</span>Стуком колёс</span>
+
+<span class="chord-line"><span class="chord">D</span>Мы ль не птицы?</span>
+<span class="chord-line"><span class="chord">D/C#</span>Летели к югу</span>
+<span class="chord-line"><span class="chord">G</span>Направление</span>
+<span class="chord-line"><span class="chord">F#m11  F#7</span>Знали от звёзд</span></p>
+
+        <hr class="lyrics-sep">
+
+        <p class="section-label">Припев</p>
+        <p class="chorus">
+<span class="chord-line"><span class="chord">Hm</span>Океаны нам будут</span>
+<span class="chord-line"><span class="chord">A</span>Лужами</span>
+<span class="chord-line"><span class="chord">G</span>Звёзды</span>
+<span class="chord-line"><span class="chord">A</span>Пятнами</span>
+<span class="chord-line"><span class="chord">D  D7</span>На холсте</span>
+
+<span class="chord-line"><span class="chord">G  G7</span>Меридианы — послушные нити</span>
+<span class="chord-line"><span class="chord">C  C7</span>Узорами вышьем по нашей орбите</span>
+<span class="chord-line"><span class="chord">A  A7</span>Играя юлою Млечного</span>
+<span class="chord-line"><span class="chord">D</span>Пути</span></p>
+
+        <hr class="lyrics-sep">
+
+        <p class="section-label">Куплет 2</p>
+        <p class="verse">
+<span class="chord-line"><span class="chord">D</span>Что же ёжик</span>
+<span class="chord-line"><span class="chord">D/C#</span>Искал в тумане?</span>
+<span class="chord-line"><span class="chord">G</span>Шёл с вареньем</span>
+<span class="chord-line"><span class="chord">F#m11</span>Вернулся с тоской</span>
+
+<span class="chord-line"><span class="chord">D</span>Что мне море?</span>
+<span class="chord-line"><span class="chord">D/C#</span>Большая лужа</span>
+<span class="chord-line"><span class="chord">G</span>Спросит: «Где ты?»</span>
+<span class="chord-line"><span class="chord">F#m11</span>Уставший прибой</span>
+
+<span class="chord-line"><span class="chord">D</span>Что мне звёзды?</span>
+<span class="chord-line"><span class="chord">D/C#</span>Немые пятна</span>
+<span class="chord-line"><span class="chord">G</span>Дырки света</span>
+<span class="chord-line"><span class="chord">F#m11</span>На старом холсте</span>
+
+<span class="chord-line"><span class="chord">D</span>Расстоянье</span>
+<span class="chord-line"><span class="chord">D/C#</span>Нам отомстило</span>
+<span class="chord-line"><span class="chord">G</span>Вот и лица</span>
+<span class="chord-line"><span class="chord">F#m11  F#7</span>В солёной воде</span></p>
+
+        <hr class="lyrics-sep">
+
+        <p class="section-label">Припев 2</p>
+        <p class="chorus">
+<span class="chord-line"><span class="chord">F#7</span>Океаны</span>
+<span class="chord-line"><span class="chord">Hm</span>Нам стали лужами</span>
+<span class="chord-line"><span class="chord">A</span>Звёзды — пятнами</span>
+<span class="chord-line"><span class="chord">G  D</span>На холсте</span>
+<span class="chord-line"><span class="chord">G  G7</span>Меридианы — упрямые нити</span>
+<span class="chord-line"><span class="chord">C  C7</span>Узлами запутали в нашей орбите</span>
+<span class="chord-line"><span class="chord">A  A7</span>Играя юлою</span>
+<span class="chord-line"><span class="chord">D</span>Млечного пути</span></p>
+
+      </div>
+    </div>
+
+  </section>
+
+  <!-- footer -->
+  <footer class="footer">
+    <nav class="footer-nav" aria-label="Навигация сайта">
+      <a href="/tracks/">Треки Ламопад</a>
+      <a href="/">lamopad.ru</a>
+    </nav>
+    <p class="copyright">© Ламопад — все права защищены</p>
+  </footer>
+
+</main>
+
+<script>
+// ── cosmos background: star field + rotating galaxy ──
+(function () {
+  const canvas = document.getElementById('cosmos');
+  const ctx = canvas.getContext('2d');
+  let W, H;
+
+  function resize() {
+    W = canvas.width = window.innerWidth;
+    H = canvas.height = window.innerHeight;
+  }
+  resize();
+  window.addEventListener('resize', resize);
+
+  // static stars
+  const stars = [];
+  for (let i = 0; i < 280; i++) {
+    stars.push({
+      x: Math.random(),
+      y: Math.random(),
+      r: Math.random() * 1.2 + 0.2,
+      a: 0.3 + Math.random() * 0.7,
+      twinkle: Math.random() * Math.PI * 2,
+      speed: 0.005 + Math.random() * 0.02,
+    });
+  }
+
+  let angle = 0;
+
+  function drawGalaxy(t) {
+    const cx = W * 0.72, cy = H * 0.22;
+    const maxR = Math.min(W, H) * 0.18;
+    const arms = 2;
+    ctx.save();
+    ctx.translate(cx, cy);
+    ctx.rotate(angle);
+
+    for (let arm = 0; arm < arms; arm++) {
+      const armOffset = (arm / arms) * Math.PI * 2;
+      for (let i = 0; i < 120; i++) {
+        const frac = i / 120;
+        const r = frac * maxR;
+        const theta = frac * Math.PI * 3.5 + armOffset;
+        const x = r * Math.cos(theta);
+        const y = r * Math.sin(theta) * 0.55;
+        const spread = r * 0.12 + 1;
+        const nx = x + (Math.random() - 0.5) * spread;
+        const ny = y + (Math.random() - 0.5) * spread;
+        const alpha = (1 - frac) * 0.35 * (0.5 + Math.random() * 0.5);
+        const size = (1 - frac) * 1.8 + 0.3;
+        ctx.beginPath();
+        ctx.arc(nx, ny, size, 0, Math.PI * 2);
+        ctx.fillStyle = `rgba(180,160,255,${alpha})`;
+        ctx.fill();
+      }
+    }
+    // core glow
+    const g = ctx.createRadialGradient(0, 0, 0, 0, 0, maxR * 0.35);
+    g.addColorStop(0, 'rgba(230,210,255,0.18)');
+    g.addColorStop(1, 'rgba(100,80,200,0)');
+    ctx.beginPath();
+    ctx.arc(0, 0, maxR * 0.35, 0, Math.PI * 2);
+    ctx.fillStyle = g;
+    ctx.fill();
+    ctx.restore();
+  }
+
+  function tick(t) {
+    ctx.clearRect(0, 0, W, H);
+
+    // static stars
+    for (const s of stars) {
+      s.twinkle += s.speed;
+      const a = s.a * (0.6 + 0.4 * Math.sin(s.twinkle));
+      ctx.beginPath();
+      ctx.arc(s.x * W, s.y * H, s.r, 0, Math.PI * 2);
+      ctx.fillStyle = `rgba(240,230,255,${a})`;
+      ctx.fill();
+    }
+
+    angle += 0.0004;
+    drawGalaxy(t);
+    requestAnimationFrame(tick);
+  }
+  requestAnimationFrame(tick);
+})();
+</script>
+
+<script>
+// ── audio player ──
+(function () {
+  const audio = document.getElementById('audio');
+  const playBtn = document.getElementById('play-btn');
+  const iconPlay = playBtn.querySelector('.icon-play');
+  const iconPause = playBtn.querySelector('.icon-pause');
+  const timeEl = document.getElementById('player-time');
+  const fillEl = document.getElementById('progress-fill');
+  const bgEl = document.getElementById('progress-bg');
+  const wrap = document.getElementById('progress-wrap');
+
+  function fmt(s) {
+    const m = Math.floor(s / 60);
+    const sec = Math.floor(s % 60);
+    return m + ':' + (sec < 10 ? '0' : '') + sec;
+  }
+
+  playBtn.addEventListener('click', function () {
+    if (audio.paused) {
+      audio.play();
+      iconPlay.style.display = 'none';
+      iconPause.style.display = 'block';
+    } else {
+      audio.pause();
+      iconPlay.style.display = 'block';
+      iconPause.style.display = 'none';
+    }
+  });
+
+  audio.addEventListener('timeupdate', function () {
+    if (!audio.duration) return;
+    const pct = (audio.currentTime / audio.duration) * 100;
+    fillEl.style.width = pct + '%';
+    bgEl.style.setProperty('--thumb', pct + '%');
+    timeEl.textContent = fmt(audio.currentTime) + ' / ' + fmt(audio.duration);
+  });
+
+  audio.addEventListener('ended', function () {
+    iconPlay.style.display = 'block';
+    iconPause.style.display = 'none';
+  });
+
+  wrap.addEventListener('click', function (e) {
+    if (!audio.duration) return;
+    const rect = wrap.getBoundingClientRect();
+    const pct = (e.clientX - rect.left) / rect.width;
+    audio.currentTime = pct * audio.duration;
+  });
+})();
+</script>
+
+<script>
+// ── tabs ──
+(function () {
+  const btns = document.querySelectorAll('.tab-btn');
+  const panes = document.querySelectorAll('.tab-pane');
+  btns.forEach(function (btn) {
+    btn.addEventListener('click', function () {
+      const target = btn.dataset.tab;
+      btns.forEach(function (b) { b.classList.remove('active'); b.setAttribute('aria-selected', 'false'); });
+      panes.forEach(function (p) { p.classList.remove('active'); });
+      btn.classList.add('active');
+      btn.setAttribute('aria-selected', 'true');
+      document.getElementById('tab-' + target).classList.add('active');
+    });
+  });
+})();
+</script>
+
+<script>
+// ── falling stars + wish ──
+(function () {
+  var modal = document.getElementById('wish-modal');
+  var wishInput = document.getElementById('wish-input');
+  var wishBtn = document.getElementById('wish-btn');
+  var wishStatus = document.getElementById('wish-status');
+  var wishClose = document.getElementById('wish-close');
+  var hyperspace = document.getElementById('hyperspace');
+  var hyperCanvas = document.getElementById('hyper-canvas');
+
+  function spawnStar() {
+    var star = document.createElement('div');
+    star.className = 'fstar';
+    star.textContent = '★';
+    star.title = 'кликай на звёзды';
+
+    var startX = Math.random() * (window.innerWidth - 40);
+    var startY = -30;
+    var angle = 30 + Math.random() * 40; // degrees from vertical
+    var dist = window.innerHeight * 1.1 + Math.random() * 200;
+    var dx = Math.sin((angle * Math.PI) / 180) * dist;
+    var dy = Math.cos((angle * Math.PI) / 180) * dist;
+    // randomize left/right
+    if (Math.random() < 0.5) dx = -dx;
+
+    star.style.left = startX + 'px';
+    star.style.top = startY + 'px';
+    star.style.setProperty('--dx', dx + 'px');
+    star.style.setProperty('--dy', dy + 'px');
+
+    var duration = 3500 + Math.random() * 3500;
+    star.style.animationDuration = duration + 'ms';
+    star.style.animationTimingFunction = 'linear';
+
+    document.body.appendChild(star);
+
+    star.addEventListener('click', function (e) {
+      e.stopPropagation();
+      star.style.animationPlayState = 'paused';
+      star.style.display = 'none';
+      launchHyperspace();
+    });
+
+    setTimeout(function () {
+      if (star.parentNode) star.parentNode.removeChild(star);
+    }, duration + 100);
+  }
+
+  function scheduleNext() {
+    // 3–10 s, sometimes two stars
+    var delay = 3000 + Math.random() * 7000;
+    setTimeout(function () {
+      spawnStar();
+      if (Math.random() < 0.25) {
+        setTimeout(spawnStar, 600 + Math.random() * 1200);
+      }
+      scheduleNext();
+    }, delay);
+  }
+
+  scheduleNext();
+
+  // hyperspace canvas
+  var hCtx = hyperCanvas.getContext('2d');
+  var hStreaks = [];
+  var hAnim;
+
+  function resizeH() {
+    hyperCanvas.width = window.innerWidth;
+    hyperCanvas.height = window.innerHeight;
+  }
+  window.addEventListener('resize', resizeH);
+
+  function HStreak() {
+    var angle = Math.random() * Math.PI * 2;
+    var r = 20 + Math.random() * 80;
+    this.cx = window.innerWidth / 2;
+    this.cy = window.innerHeight / 2;
+    this.x = this.cx + Math.cos(angle) * r;
+    this.y = this.cy + Math.sin(angle) * r;
+    this.vx = Math.cos(angle) * (4 + Math.random() * 8);
+    this.vy = Math.sin(angle) * (4 + Math.random() * 8);
+    this.len = 20 + Math.random() * 40;
+    this.a = 0.6 + Math.random() * 0.4;
+  }
+  HStreak.prototype.update = function () {
+    this.vx *= 1.06;
+    this.vy *= 1.06;
+    this.x += this.vx;
+    this.y += this.vy;
+    this.len *= 1.04;
+  };
+  HStreak.prototype.draw = function () {
+    hCtx.beginPath();
+    hCtx.moveTo(this.x, this.y);
+    hCtx.lineTo(this.x - this.vx * (this.len / (Math.abs(this.vx) + Math.abs(this.vy))),
+                this.y - this.vy * (this.len / (Math.abs(this.vx) + Math.abs(this.vy))));
+    hCtx.strokeStyle = 'rgba(255,240,180,' + this.a + ')';
+    hCtx.lineWidth = 1.2;
+    hCtx.stroke();
+  };
+
+  function hyperTick() {
+    hCtx.fillStyle = 'rgba(10,0,30,0.18)';
+    hCtx.fillRect(0, 0, hyperCanvas.width, hyperCanvas.height);
+    for (var s of hStreaks) { s.update(); s.draw(); }
+    // spawn
+    if (Math.random() < 0.4) hStreaks.push(new HStreak());
+    if (hStreaks.length > 200) hStreaks.splice(0, 20);
+    hAnim = requestAnimationFrame(hyperTick);
+  }
+
+  function launchHyperspace() {
+    resizeH();
+    hStreaks = [];
+    hyperspace.style.display = 'block';
+    hCtx.clearRect(0, 0, hyperCanvas.width, hyperCanvas.height);
+    hyperTick();
+
+    setTimeout(function () {
+      cancelAnimationFrame(hAnim);
+      hyperspace.style.display = 'none';
+      showWish();
+    }, 2200);
+  }
+
+  function showWish() {
+    wishInput.value = '';
+    wishStatus.textContent = '';
+    wishStatus.classList.remove('visible');
+    wishBtn.disabled = false;
+    wishBtn.textContent = 'Загадать';
+    wishClose.style.display = 'none';
+    modal.classList.add('active');
+    setTimeout(function () { wishInput.focus(); }, 100);
+  }
+
+  wishBtn.addEventListener('click', function () {
+    var wish = wishInput.value.trim();
+    if (!wish) { wishInput.focus(); return; }
+    wishBtn.disabled = true;
+    wishStatus.textContent = 'отправляю запрос во Вселенную...';
+    wishStatus.classList.add('visible');
+
+    setTimeout(function () {
+      wishStatus.textContent = 'Вселенная слышит, твоё желание обязательно сбудется!';
+      wishClose.style.display = 'inline-block';
+    }, 3000);
+  });
+
+  wishClose.addEventListener('click', function () {
+    modal.classList.remove('active');
+  });
+
+  modal.addEventListener('click', function (e) {
+    if (e.target === modal) modal.classList.remove('active');
+  });
+
+  document.addEventListener('keydown', function (e) {
+    if (e.key === 'Escape') modal.classList.remove('active');
+  });
+})();
+</script>
+
+</body>
+</html>

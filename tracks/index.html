@@ -10,6 +10,7 @@
 
   <link rel="preconnect" href="https://fonts.googleapis.com">
   <link href="https://fonts.googleapis.com/css2?family=Cormorant+Garamond:ital,wght@0,300;0,400;1,300;1,400&display=swap" rel="stylesheet">
+  <link rel="stylesheet" href="https://cdn.jsdelivr.net/npm/aplayer/dist/APlayer.min.css">
 
   <style>
     *, *::before, *::after { margin: 0; padding: 0; box-sizing: border-box; }
@@ -277,6 +278,42 @@
     .crumbs a { color: inherit; text-decoration: none; transition: color 0.15s; }
     .crumbs a:hover { color: var(--amber); }
     .crumbs .sep { margin: 0 0.5ch; opacity: 0.35; }
+
+    /* ── APlayer тёмный скин ─────────────────────────── */
+    .aplayer {
+      background: rgba(22, 40, 72, 0.35) !important;
+      border: 1px solid rgba(200, 144, 10, 0.15) !important;
+      border-radius: 0 !important;
+      box-shadow: none !important;
+      font-family: var(--font) !important;
+      margin-bottom: 56px;
+    }
+    .aplayer .aplayer-body { background: transparent !important; }
+    .aplayer .aplayer-info { background: transparent !important; }
+    .aplayer .aplayer-music .aplayer-title {
+      color: #c8baa8 !important;
+      font-family: var(--font) !important;
+      font-weight: 300 !important;
+      font-size: 20px !important;
+      letter-spacing: .02em !important;
+    }
+    .aplayer .aplayer-music .aplayer-author { color: var(--text) !important; font-family: var(--font) !important; }
+    .aplayer .aplayer-controller .aplayer-time { color: var(--text) !important; }
+    .aplayer .aplayer-controller .aplayer-time .aplayer-icon path { fill: var(--text) !important; }
+    .aplayer .aplayer-controller .aplayer-time .aplayer-icon:hover path { fill: var(--gold) !important; }
+    .aplayer .aplayer-bar-wrap .aplayer-bar .aplayer-loaded { background: rgba(200,144,10,0.18) !important; }
+    .aplayer .aplayer-list { background: rgba(11, 18, 32, 0.85) !important; }
+    .aplayer .aplayer-list ol li { border-top-color: rgba(200,144,10,0.07) !important; color: var(--text) !important; }
+    .aplayer .aplayer-list ol li:hover { background: rgba(200,144,10,0.07) !important; }
+    .aplayer .aplayer-list ol li.aplayer-list-light { background: rgba(200,144,10,0.12) !important; }
+    .aplayer .aplayer-list ol li .aplayer-list-index { color: var(--dim) !important; }
+    .aplayer .aplayer-list ol li .aplayer-list-title {
+      color: #c8baa8 !important;
+      font-family: var(--font) !important;
+      font-weight: 300 !important;
+    }
+    .aplayer .aplayer-list ol li .aplayer-list-author { color: var(--text) !important; font-family: var(--font) !important; }
+    .aplayer .aplayer-pic { border-radius: 0 !important; }
   </style>
 </head>
 <body>
@@ -296,6 +333,8 @@
   <header class="header">
     <h1>Треки <span class="label-inline">Ламопад</span></h1>
   </header>
+
+  <div id="aplayer"></div>
 
   <ol class="tracklist">
 
@@ -389,6 +428,23 @@
   </footer>
 
 </main>
+
+<script src="https://cdn.jsdelivr.net/npm/aplayer/dist/APlayer.min.js"></script>
+<script>
+/* ── плейлист ─────────────────────────────────────────────
+   Добавить трек — одна строка в массив:
+   { name: 'Название', artist: 'Ламопад', url: '/tracks/имя-файла.mp3' }
+   ──────────────────────────────────────────────────────── */
+new APlayer({
+  container: document.getElementById('aplayer'),
+  theme: '#c8900a',
+  preload: 'none',
+  listFolded: false,
+  audio: [
+    { name: 'Млечный Путь', artist: 'Ламопад', url: '/tracks/milky-way.mp3', cover: '/tracks/milky-way-cover.jpg' },
+  ]
+});
+</script>
 
 <script>
 (function () {

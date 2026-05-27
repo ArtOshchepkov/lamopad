@@ -36,36 +36,6 @@
       cursor: url('/img/lamopad_cursor_48px.png') 0 0, auto;
     }
 
-    /* ── falling items ── */
-    .lamopad-canvas {
-      position: fixed;
-      inset: 0;
-      pointer-events: none;
-      z-index: 0;
-      overflow: hidden;
-    }
-
-    .lama {
-      position: absolute;
-      top: -80px;
-      font-size: 32px;
-      line-height: 1;
-      user-select: none;
-      will-change: transform, opacity;
-      animation: lama-fall linear forwards;
-      pointer-events: auto;
-      cursor: grab;
-      touch-action: none;
-    }
-    .lama.dragging { cursor: grabbing; }
-
-    @keyframes lama-fall {
-      0%   { opacity: 0;              transform: translateY(0)               rotate(var(--rot-start)); }
-      8%   { opacity: var(--opacity);                                                                  }
-      88%  { opacity: var(--opacity);                                                                  }
-      100% { opacity: 0;              transform: translateY(var(--fall-dist)) rotate(var(--rot-end));  }
-    }
-
     /* ── layout ── */
     .page {
       position: relative;
@@ -214,10 +184,6 @@
       .track { gap: 10px; padding: 16px 0; }
     }
 
-    @media (prefers-reduced-motion: reduce) {
-      .lama { animation: none; }
-    }
-
     /* ── breadcrumbs ── */
     .crumbs {
       position: relative;
@@ -277,8 +243,6 @@
 <body>
 
 <nav class="crumbs" aria-label="Навигация"><a href="/">Ламопад</a><span class="sep">/</span><span>Треки</span></nav>
-
-<div class="lamopad-canvas" id="lamopad-canvas"></div>
 
 <main class="page">
 
@@ -397,123 +361,19 @@ new APlayer({
 
 <script>
 (function () {
-  /* staggered entrance */
   const tracks = document.querySelectorAll('.track');
   const reduced = window.matchMedia('(prefers-reduced-motion: reduce)').matches;
   if (reduced) {
-    tracks.forEach(t => t.classList.add('visible'));
+    tracks.forEach(function (t) { t.classList.add('visible'); });
   } else {
-    tracks.forEach((t, i) => {
-      setTimeout(() => t.classList.add('visible'), 80 + i * 90);
+    tracks.forEach(function (t, i) {
+      setTimeout(function () { t.classList.add('visible'); }, 80 + i * 90);
     });
   }
-
-  if (reduced) return;
-
-  const canvas = document.getElementById('lamopad-canvas');
-  function rand(a, b) { return a + Math.random() * (b - a); }
-
-  function spawnItem({ emoji, minSize, maxSize, minDur, maxDur, minOpacity, maxOpacity, filter }) {
-    const el = document.createElement('span');
-    el.className = 'lama';
-    el.textContent = emoji;
-
-    const size      = rand(minSize, maxSize);
-    const dur       = rand(minDur, maxDur);
-    const totalDist = window.innerHeight + 160;
-    const opacity   = rand(minOpacity, maxOpacity);
-
-    el.style.cssText = `
-      left: ${rand(-2, 100)}vw;
-      font-size: ${size}px;
-      animation-duration: ${dur}s;
-      --fall-dist: ${totalDist}px;
-      --rot-start: ${rand(-25, 25)}deg;
-      --rot-end: ${rand(-180, 180)}deg;
-      --opacity: ${opacity};
-      ${filter ? `filter: ${filter};` : ''}
-    `;
-
-    canvas.appendChild(el);
-    el.addEventListener('animationend', () => el.remove());
-
-    const pxPerMs = totalDist / (dur * 1000);
-    let startMX, startMY, startEL, startET, fallAnim = null, isDragging = false;
-
-    function beginDrag(cx, cy) {
-      const rect = el.getBoundingClientRect();
-      el.style.animation = 'none';
-      el.style.opacity   = opacity;
-      el.style.transform = 'none';
-      el.style.top       = rect.top  + 'px';
-      el.style.left      = rect.left + 'px';
-      if (fallAnim) { fallAnim.cancel(); fallAnim = null; }
-      startMX = cx; startMY = cy;
-      startEL = rect.left; startET = rect.top;
-      el.classList.add('dragging');
-      document.body.style.userSelect = 'none';
-    }
-
-    function moveDrag(cx, cy) {
-      el.style.left = (startEL + cx - startMX) + 'px';
-      el.style.top  = (startET + cy - startMY) + 'px';
-    }
-
-    function endDrag() {
-      el.classList.remove('dragging');
-      document.body.style.userSelect = '';
-      const curTop    = parseFloat(el.style.top);
-      const remaining = window.innerHeight + 160 - curTop;
-      if (remaining <= 0) { el.remove(); return; }
-      const remDur = remaining / pxPerMs;
-      fallAnim = el.animate(
-        [
-          { transform: 'translateY(0) rotate(0deg)', opacity: opacity },
-          { transform: `translateY(${remaining}px) rotate(${rand(-200,200)}deg)`, opacity: 0 }
-        ],
-        { duration: remDur, easing: 'linear', fill: 'forwards' }
-      );
-      fallAnim.addEventListener('finish', () => el.remove());
-    }
-
-    el.addEventListener('pointerdown', e => {
-      e.preventDefault();
-      el.setPointerCapture(e.pointerId);
-      isDragging = true;
-      beginDrag(e.clientX, e.clientY);
-    });
-    el.addEventListener('pointermove', e => {
-      if (!isDragging) return;
-      e.preventDefault();
-      moveDrag(e.clientX, e.clientY);
-    });
-    el.addEventListener('pointerup',     () => { if (!isDragging) return; isDragging = false; endDrag(); });
-    el.addEventListener('pointercancel', () => { if (!isDragging) return; isDragging = false; endDrag(); });
-  }
-
-  const lamaConfig = {
-    emoji: '🦙', minSize: 18, maxSize: 40,
-    minDur: 6, maxDur: 14, minOpacity: 0.10, maxOpacity: 0.22,
-  };
-  const bagConfig = {
-    emoji: '🎒', minSize: 14, maxSize: 30,
-    minDur: 7, maxDur: 16, minOpacity: 0.10, maxOpacity: 0.20,
-    filter: 'sepia(1) saturate(4) hue-rotate(300deg) brightness(0.85)',
-  };
-  const glassesConfig = {
-    emoji: '🕶️', minSize: 12, maxSize: 26,
-    minDur: 8, maxDur: 18, minOpacity: 0.09, maxOpacity: 0.18,
-  };
-
-  for (let i = 0; i < 2; i++) setTimeout(() => spawnItem(lamaConfig),   rand(0, 2000));
-  setTimeout(() => spawnItem(bagConfig),    rand(500, 3000));
-  setTimeout(() => spawnItem(glassesConfig),rand(1000, 3500));
-
-  setInterval(() => spawnItem(lamaConfig),   2700);
-  setInterval(() => spawnItem(bagConfig),    7500);
-  setInterval(() => spawnItem(glassesConfig),10500);
 })();
 </script>
+<script>window.lamopadFallConfig = 'full';</script>
+<script src="/js/lamopad-fall.js"></script>
 
 </body>
 </html>

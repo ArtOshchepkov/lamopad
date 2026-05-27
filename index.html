@@ -28,7 +28,6 @@
       --ink:   #1e1810;
       --faded: #7a6e62;
       --red:   #c8281e;
-      --ocean: #1c7a96;
     }
 
     html { scroll-behavior: smooth; }
@@ -44,15 +43,15 @@
     }
 
     .page {
+      position: relative;
+      z-index: 1;
       max-width: 600px;
       margin: 0 auto;
       padding: clamp(48px, 10vw, 96px) 24px clamp(64px, 12vw, 120px);
     }
 
     /* ── header ── */
-    .header {
-      margin-bottom: 56px;
-    }
+    .header { margin-bottom: 56px; }
 
     h1 {
       font-family: 'Unbounded', sans-serif;
@@ -125,7 +124,6 @@
       color: var(--red);
       display: block;
       margin-bottom: 4px;
-      transition: color 0.15s;
     }
 
     .section-hint {
@@ -145,50 +143,13 @@
       color: #bbb;
     }
 
-    /* ── falling items ── */
-    .lamopad-canvas {
-      position: fixed;
-      inset: 0;
-      pointer-events: none;
-      z-index: 0;
-      overflow: hidden;
-    }
-
-    .lama {
-      position: absolute;
-      top: -80px;
-      font-size: 14px;
-      line-height: 1;
-      user-select: none;
-      will-change: transform, opacity;
-      animation: lama-fall linear forwards;
-      pointer-events: auto;
-      cursor: grab;
-      touch-action: none;
-    }
-    .lama.dragging { cursor: grabbing; }
-
-    @keyframes lama-fall {
-      0%   { opacity: 0;              transform: translateY(0)               rotate(var(--rot-start)); }
-      8%   { opacity: var(--opacity);                                                                  }
-      88%  { opacity: var(--opacity);                                                                  }
-      100% { opacity: 0;              transform: translateY(var(--fall-dist)) rotate(var(--rot-end));  }
-    }
-
-    /* ── responsive ── */
     @media (max-width: 400px) {
       .sections { grid-template-columns: 1fr; }
       .page { padding: 40px 18px 60px; }
     }
-
-    @media (prefers-reduced-motion: reduce) {
-      .lama { animation: none; }
-    }
   </style>
 </head>
 <body>
-
-<div class="lamopad-canvas" id="lamopad-canvas"></div>
 
 <main class="page">
 
@@ -232,114 +193,6 @@
 
 </main>
 
-<script>
-(function () {
-  if (window.matchMedia('(prefers-reduced-motion: reduce)').matches) return;
-
-  const canvas = document.getElementById('lamopad-canvas');
-  function rand(a, b) { return a + Math.random() * (b - a); }
-
-  function spawnItem({ emoji, minSize, maxSize, minDur, maxDur, minOpacity, maxOpacity, filter }) {
-    const el = document.createElement('span');
-    el.className = 'lama';
-    el.textContent = emoji;
-
-    const size      = rand(minSize, maxSize);
-    const dur       = rand(minDur, maxDur);
-    const totalDist = window.innerHeight + 120;
-    const opacity   = rand(minOpacity, maxOpacity);
-
-    el.style.cssText = `
-      left: ${rand(-2, 100)}vw;
-      font-size: ${size}px;
-      animation-duration: ${dur}s;
-      --fall-dist: ${totalDist}px;
-      --rot-start: ${rand(-25, 25)}deg;
-      --rot-end: ${rand(-180, 180)}deg;
-      --opacity: ${opacity};
-      ${filter ? `filter: ${filter};` : ''}
-    `;
-
-    canvas.appendChild(el);
-    el.addEventListener('animationend', () => el.remove());
-
-    const pxPerMs = totalDist / (dur * 1000);
-    let startMX, startMY, startEL, startET, fallAnim = null, isDragging = false;
-
-    function beginDrag(cx, cy) {
-      const rect = el.getBoundingClientRect();
-      el.style.animation = 'none';
-      el.style.opacity   = opacity;
-      el.style.transform = 'none';
-      el.style.top       = rect.top  + 'px';
-      el.style.left      = rect.left + 'px';
-      if (fallAnim) { fallAnim.cancel(); fallAnim = null; }
-      startMX = cx; startMY = cy;
-      startEL = rect.left; startET = rect.top;
-      el.classList.add('dragging');
-      document.body.style.userSelect = 'none';
-    }
-
-    function moveDrag(cx, cy) {
-      el.style.left = (startEL + cx - startMX) + 'px';
-      el.style.top  = (startET + cy - startMY) + 'px';
-    }
-
-    function endDrag() {
-      el.classList.remove('dragging');
-      document.body.style.userSelect = '';
-      const curTop    = parseFloat(el.style.top);
-      const remaining = window.innerHeight + 120 - curTop;
-      if (remaining <= 0) { el.remove(); return; }
-      const remDur = remaining / pxPerMs;
-      fallAnim = el.animate(
-        [
-          { transform: 'translateY(0) rotate(0deg)', opacity: opacity },
-          { transform: `translateY(${remaining}px) rotate(${rand(-200,200)}deg)`, opacity: 0 }
-        ],
-        { duration: remDur, easing: 'linear', fill: 'forwards' }
-      );
-      fallAnim.addEventListener('finish', () => el.remove());
-    }
-
-    el.addEventListener('pointerdown', e => {
-      e.preventDefault();
-      el.setPointerCapture(e.pointerId);
-      isDragging = true;
-      beginDrag(e.clientX, e.clientY);
-    });
-    el.addEventListener('pointermove', e => {
-      if (!isDragging) return;
-      e.preventDefault();
-      moveDrag(e.clientX, e.clientY);
-    });
-    el.addEventListener('pointerup',     () => { if (!isDragging) return; isDragging = false; endDrag(); });
-    el.addEventListener('pointercancel', () => { if (!isDragging) return; isDragging = false; endDrag(); });
-  }
-
-  const lamaConfig = {
-    emoji: '🦙', minSize: 8, maxSize: 18,
-    minDur: 9, maxDur: 18, minOpacity: 0.06, maxOpacity: 0.16,
-  };
-  const bagConfig = {
-    emoji: '🎒', minSize: 7, maxSize: 14,
-    minDur: 10, maxDur: 20, minOpacity: 0.07, maxOpacity: 0.15,
-    filter: 'sepia(1) saturate(4) hue-rotate(300deg) brightness(0.85)',
-  };
-  const glassesConfig = {
-    emoji: '🕶️', minSize: 6, maxSize: 13,
-    minDur: 11, maxDur: 22, minOpacity: 0.05, maxOpacity: 0.13,
-  };
-
-  setTimeout(() => spawnItem(lamaConfig),    rand(500, 2500));
-  setTimeout(() => spawnItem(bagConfig),     rand(2000, 5000));
-  setTimeout(() => spawnItem(glassesConfig), rand(3000, 7000));
-
-  setInterval(() => spawnItem(lamaConfig),    6000);
-  setInterval(() => spawnItem(bagConfig),    17000);
-  setInterval(() => spawnItem(glassesConfig),24000);
-})();
-</script>
-
+<script src="/js/lamopad-fall.js"></script>
 </body>
 </html>

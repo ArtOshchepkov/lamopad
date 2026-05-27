@@ -35,20 +35,36 @@
     subtle: {
       items: [
         { emoji: '🦙', minSize: 8,  maxSize: 18, minDur: 9,  maxDur: 18, minOpacity: 0.06, maxOpacity: 0.16, interval: 6000,  initMin: 500,  initMax: 2500, initCount: 1 },
+
         { emoji: '🎒', minSize: 7,  maxSize: 14, minDur: 10, maxDur: 20, minOpacity: 0.07, maxOpacity: 0.15, interval: 17000, initMin: 2000, initMax: 5000, initCount: 1, filter: BAG_FILTER },
+
         { emoji: '🕶️', minSize: 6,  maxSize: 13, minDur: 11, maxDur: 22, minOpacity: 0.05, maxOpacity: 0.13, interval: 24000, initMin: 3000, initMax: 7000, initCount: 1 },
+
+        { emoji: '✈️', minSize: 8,  maxSize: 16, minDur: 10, maxDur: 20, minOpacity: 0.05, maxOpacity: 0.14, interval: 14000, initMin: 1500, initMax: 4500, initCount: 1 },
+
+        { emoji: '✨', minSize: 5,  maxSize: 12, minDur: 7,  maxDur: 16, minOpacity: 0.04, maxOpacity: 0.12, interval: 5000,  initMin: 0,    initMax: 3000, initCount: 2 },
+
+        { emoji: '🚂', minSize: 8,  maxSize: 15, minDur: 12, maxDur: 24, minOpacity: 0.05, maxOpacity: 0.13, interval: 21000, initMin: 2500, initMax: 6000, initCount: 1 },
       ],
     },
+
     full: {
       items: [
         { emoji: '🦙', minSize: 18, maxSize: 40, minDur: 6,  maxDur: 14, minOpacity: 0.10, maxOpacity: 0.22, interval: 2700,  initMin: 0,    initMax: 2000, initCount: 2 },
+
         { emoji: '🎒', minSize: 14, maxSize: 30, minDur: 7,  maxDur: 16, minOpacity: 0.10, maxOpacity: 0.20, interval: 7500,  initMin: 500,  initMax: 3000, initCount: 1, filter: BAG_FILTER },
+
         { emoji: '🕶️', minSize: 12, maxSize: 26, minDur: 8,  maxDur: 18, minOpacity: 0.09, maxOpacity: 0.18, interval: 10500, initMin: 1000, initMax: 3500, initCount: 1 },
+
+        { emoji: '✈️', minSize: 16, maxSize: 34, minDur: 6,  maxDur: 15, minOpacity: 0.08, maxOpacity: 0.18, interval: 5200,  initMin: 0,    initMax: 2500, initCount: 1 },
+
+        { emoji: '✨', minSize: 10, maxSize: 24, minDur: 5,  maxDur: 12, minOpacity: 0.07, maxOpacity: 0.16, interval: 2600,  initMin: 0,    initMax: 2000, initCount: 3 },
+
+        { emoji: '🚂', minSize: 14, maxSize: 30, minDur: 8,  maxDur: 18, minOpacity: 0.08, maxOpacity: 0.17, interval: 9000,  initMin: 1000, initMax: 4000, initCount: 1 },
       ],
     },
   };
-
-  const preset = PRESETS[window.lamopadFallConfig] || PRESETS.subtle;
+  const preset = PRESETS[window.lamopadFallConfig] || PRESETS.full;
 
   /* ── spawn ── */
   function spawnItem(cfg) {

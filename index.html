@@ -138,9 +138,53 @@
       margin-top: 72px;
       padding-top: 20px;
       border-top: 1px solid rgba(0,0,0,0.10);
-      font-size: 12px;
+      display: flex;
+      flex-direction: column;
+      gap: 16px;
+    }
+
+    .footer-social {
+      display: flex;
+      flex-wrap: wrap;
+      gap: 8px;
+    }
+
+    .footer-social a {
+      display: flex;
+      align-items: center;
+      gap: 6px;
+      text-decoration: none;
+      color: var(--faded);
+      font-size: 13px;
+      font-weight: 600;
+      letter-spacing: 0.04em;
+      padding: 7px 14px;
+      border: 1px solid rgba(0,0,0,0.12);
+      border-radius: 6px;
+      transition: color 0.15s, border-color 0.15s, background 0.15s;
+    }
+
+    .footer-social a:hover {
+      color: var(--red);
+      border-color: rgba(200,40,30,0.35);
+      background: rgba(200,40,30,0.04);
+    }
+
+    .footer-social a img {
+      width: 15px;
+      height: 15px;
+      filter: brightness(0) saturate(0) opacity(0.45);
+      transition: filter 0.15s;
+    }
+
+    .footer-social a:hover img {
+      filter: brightness(0) saturate(100%) invert(20%) sepia(80%) saturate(700%) hue-rotate(340deg);
+    }
+
+    .footer-copy {
+      font-size: 11px;
       letter-spacing: .10em;
-      color: #bbb;
+      color: rgba(0,0,0,0.2);
     }
 
     /* ── top nav ── */
@@ -224,7 +268,25 @@
   </nav>
 
   <footer class="footer">
-    <p>&copy; Ламопад &mdash; все права защищены</p>
+    <nav class="footer-social" aria-label="Социальные сети">
+      <a href="https://vk.com/lamopad" target="_blank" rel="noopener">
+        <img src="https://cdn.simpleicons.org/vk/000000" alt="">
+        ВКонтакте
+      </a>
+      <a href="https://www.youtube.com/@%D0%BB%D0%B0%D0%BC%D0%BE%D0%BF%D0%B0%D0%B4" target="_blank" rel="noopener">
+        <img src="https://cdn.simpleicons.org/youtube/000000" alt="">
+        YouTube
+      </a>
+      <a href="https://music.yandex.ru/artist/18806782" target="_blank" rel="noopener">
+        <img src="https://upload.wikimedia.org/wikipedia/commons/f/fa/Yandex_Music_icon_2023.svg" alt="">
+        Яндекс Музыка
+      </a>
+      <a href="https://open.spotify.com/artist/4ahWPeKBf7cm5KdzHqP5wB" target="_blank" rel="noopener">
+        <img src="https://cdn.simpleicons.org/spotify/000000" alt="">
+        Spotify
+      </a>
+    </nav>
+    <p class="footer-copy">&copy; Ламопад — все права защищены</p>
   </footer>
 
 </main>

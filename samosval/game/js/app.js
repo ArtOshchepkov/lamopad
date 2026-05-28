@@ -135,8 +135,27 @@ function reset() {
 }
 
 // ── Stop clicks on links from bubbling to switchLane ─────────────────────────
-['dead-cta', 'dead-dl'].forEach(id => {
+['dead-cta', 'dead-other-games', 'dead-share'].forEach(id => {
   document.getElementById(id).addEventListener('click', e => e.stopPropagation());
+});
+
+document.getElementById('dead-share').addEventListener('click', async () => {
+  const scoreVal = document.getElementById('final-score').textContent;
+  const url = window.location.href.split('?')[0];
+  const text = `Набрал ${scoreVal} экзистенса в игре Самосвал! Сыграй сам:`;
+  const btn = document.getElementById('dead-share');
+  if (navigator.share) {
+    try {
+      await navigator.share({ title: 'Ламопад — Самосвал', text, url });
+    } catch (_) {}
+  } else {
+    try {
+      await navigator.clipboard.writeText(url);
+      const orig = btn.textContent;
+      btn.textContent = 'ССЫЛКА СКОПИРОВАНА!';
+      setTimeout(() => { btn.textContent = orig; }, 1800);
+    } catch (_) {}
+  }
 });
 
 // ── Volume state (drawn on canvas) ────────────────────────────────────────────

@@ -952,9 +952,10 @@ class GameScene extends Phaser.Scene {
 
     // HTML-контейнер для подписей кнопок — вне canvas, без pixelated-рендеринга
     const lblContainer = document.createElement('div');
-    lblContainer.style.cssText = 'position:fixed;top:0;left:0;width:100%;height:100%;pointer-events:none;z-index:100;';
+    lblContainer.style.cssText = 'position:fixed;top:0;left:0;width:100%;height:100%;pointer-events:none;z-index:100;transition:opacity .6s ease;';
     document.body.appendChild(lblContainer);
-    this.events.once('destroy', () => lblContainer.remove());
+    this.events.once('shutdown', () => lblContainer.remove());
+    this._btnLblContainer = lblContainer;
 
     const mkBtn = (i, label, onDown, onUp) => {
       const by  = startY + i * (BH + GAP);
@@ -1001,7 +1002,7 @@ class GameScene extends Phaser.Scene {
       };
       positionLbl();
       window.addEventListener('resize', positionLbl);
-      this.events.once('destroy', () => window.removeEventListener('resize', positionLbl));
+      this.events.once('shutdown', () => window.removeEventListener('resize', positionLbl));
 
       const zone = this.add.zone(cx - BW / 2, by, BW, BH)
         .setOrigin(0, 0).setDepth(32).setInteractive();
@@ -1020,7 +1021,7 @@ class GameScene extends Phaser.Scene {
 
     // Социальная кнопка — надпись меняется после нажатия с вероятностью 70%
     const SOCIAL = [
-      'ПОВИДАТЬ ДРУЗЕЙ', 'ПОВИДАТЬ СЕМЬЮ',
+      'ПОВИДАТЬ ДРУЗЕЙ', 'ПОВИДАТЬ СЕМЬЮ', 'ВЫСПАТЬСЯ',
       'ПОЗВОНИТЬ БАБУШКЕ', 'УСТРОИТЬ СВИДАНИЕ', 'ВЫЙТИ НА ПРИРОДУ',
     ];
     let curSocial = Phaser.Math.RND.pick(SOCIAL);
@@ -1445,6 +1446,9 @@ class GameScene extends Phaser.Scene {
     overlay.fillRect(0, 0, W, H);
     this.tweens.add({ targets: overlay, alpha: 0.82, duration: 1400, ease: 'Sine.In' });
 
+    // Приглушить подписи основных кнопок
+    if (this._btnLblContainer) this._btnLblContainer.style.opacity = '0';
+
     this.time.delayedCall(700, () => {
       const DEPTH = 62;
       const res   = 8;
@@ -1463,17 +1467,17 @@ class GameScene extends Phaser.Scene {
       // ── Кнопки ──────────────────────────────────────────────────────────────
       const BTN_W = 200, BTN_H = 28, BTN_GAP = 10;
       const CTA_W = 244, CTA_H = 42;
-      // Порядок: ПРОДОЛЖИТЬ · [CTA] · НАЧАТЬ ЗАНОВО
-      // Всего высота блока: 28 + 10 + 42 + 10 + 28 = 118 → старт = cy - 59 + небольшой сдвиг вниз
       const btnY = [cy - 26, cy + 12, cy + 64];
 
-      const mkGoBtn = (idx, label, col, onClick, w = BTN_W, h = BTN_H, fs = '13px') => {
+      // HTML-контейнер для подписей кнопок экрана смерти
+      const deathLblContainer = document.createElement('div');
+      deathLblContainer.style.cssText = 'position:fixed;top:0;left:0;width:100%;height:100%;pointer-events:none;z-index:110;';
+      document.body.appendChild(deathLblContainer);
+      this.events.once('shutdown', () => deathLblContainer.remove());
+
+      const mkGoBtn = (idx, label, col, onClick, w = BTN_W, h = BTN_H, fs = 13) => {
         const by  = btnY[idx];
         const gfx = this.add.graphics().setDepth(DEPTH);
-        const lbl = this.add.text(cx, by + h / 2, label, {
-          fontSize: fs, fontFamily: 'Arial, sans-serif', fontStyle: 'bold',
-          color: '#ffffff', stroke: '#000000', strokeThickness: 3, align: 'center',
-        }).setOrigin(0.5).setDepth(DEPTH + 1).setResolution(res);
 
         const draw = (pressed) => {
           gfx.clear();
@@ -1484,13 +1488,42 @@ class GameScene extends Phaser.Scene {
         };
         draw(false);
 
+        // HTML-метка
+        const el = document.createElement('div');
+        el.textContent = label;
+        el.style.cssText = [
+          'position:absolute',
+          'transform:translate(-50%,-50%)',
+          'font-family:"Arial Black",Arial,sans-serif',
+          'font-weight:900',
+          'color:#fff',
+          'text-align:center',
+          'line-height:1.2',
+          'text-shadow:-1px -1px 0 #000,1px -1px 0 #000,-1px 1px 0 #000,1px 1px 0 #000,0 1px 0 #000,0 -1px 0 #000',
+          'pointer-events:none',
+        ].join(';');
+        deathLblContainer.appendChild(el);
+
+        const positionLbl = () => {
+          const rect = this.sys.game.canvas.getBoundingClientRect();
+          const sx = rect.width  / W;
+          const sy = rect.height / H;
+          el.style.left     = (rect.left + cx          * sx) + 'px';
+          el.style.top      = (rect.top  + (by + h/2)  * sy) + 'px';
+          el.style.fontSize = Math.round(fs * sx) + 'px';
+          el.style.maxWidth = Math.round(w  * sx) + 'px';
+        };
+        positionLbl();
+        window.addEventListener('resize', positionLbl);
+        this.events.once('shutdown', () => window.removeEventListener('resize', positionLbl));
+
         const zone = this.add.zone(cx - w / 2, by, w, h)
           .setOrigin(0, 0).setDepth(DEPTH + 2).setInteractive();
         zone.on('pointerdown', () => { draw(true);  onClick(); });
         zone.on('pointerup',   () => draw(false));
         zone.on('pointerout',  () => draw(false));
 
-        return { gfx, lbl };
+        return { gfx, lbl: { setText: (t) => { el.textContent = t; } } };
       };
 
       // Кнопка 1: ПРОДОЛЖИТЬ ИГРУ
@@ -1511,11 +1544,11 @@ class GameScene extends Phaser.Scene {
       // Кнопка 2 (CTA): ДОБАВИТЬ ТРЕК К СЕБЕ
       mkGoBtn(1, 'ДОБАВИТЬ ТРЕК К СЕБЕ', 0x3c1c5c, () => {
         window.location.href = 'https://example.com';
-      }, CTA_W, CTA_H, '16px');
+      }, CTA_W, CTA_H, 16);
 
-      // Кнопка 3: НАЧАТЬ ЗАНОВО
-      mkGoBtn(2, 'НАЧАТЬ ЗАНОВО', 0x1e3a5c, () => {
-        alert('НАЧАТЬ СНАЧАЛА НЕВОЗМОЖНО');
+      // Кнопка 3: ДРУГИЕ ИГРЫ
+      mkGoBtn(2, 'ДРУГИЕ ИГРЫ', 0x1c3c3c, () => {
+        window.location.href = '/games';
       });
     });
   }

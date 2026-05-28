@@ -50,17 +50,17 @@
 
     full: {
       items: [
-        { emoji: '🦙', minSize: 18, maxSize: 40, minDur: 6,  maxDur: 14, minOpacity: 0.10, maxOpacity: 0.22, interval: 2700,  initMin: 0,    initMax: 2000, initCount: 2 },
+        { emoji: '🦙', minSize: 18, maxSize: 40, minDur: 6,  maxDur: 14, minOpacity: 0.10, maxOpacity: 0.22, interval: 1800,  initMin: 0, initMax: 200, initCount: 5 },
 
-        { emoji: '🎒', minSize: 14, maxSize: 30, minDur: 7,  maxDur: 16, minOpacity: 0.10, maxOpacity: 0.20, interval: 7500,  initMin: 500,  initMax: 3000, initCount: 1, filter: BAG_FILTER },
+        { emoji: '🎒', minSize: 14, maxSize: 30, minDur: 7,  maxDur: 16, minOpacity: 0.10, maxOpacity: 0.20, interval: 4000,  initMin: 0, initMax: 200, initCount: 3, filter: BAG_FILTER },
 
-        { emoji: '🕶️', minSize: 12, maxSize: 26, minDur: 8,  maxDur: 18, minOpacity: 0.09, maxOpacity: 0.18, interval: 10500, initMin: 1000, initMax: 3500, initCount: 1 },
+        { emoji: '🕶️', minSize: 12, maxSize: 26, minDur: 8,  maxDur: 18, minOpacity: 0.09, maxOpacity: 0.18, interval: 5000,  initMin: 0, initMax: 200, initCount: 3 },
 
-        { emoji: '✈️', minSize: 16, maxSize: 34, minDur: 6,  maxDur: 15, minOpacity: 0.08, maxOpacity: 0.18, interval: 5200,  initMin: 0,    initMax: 2500, initCount: 1 },
+        { emoji: '✈️', minSize: 16, maxSize: 34, minDur: 6,  maxDur: 15, minOpacity: 0.08, maxOpacity: 0.18, interval: 3000,  initMin: 0, initMax: 200, initCount: 3 },
 
-        { emoji: '✨', minSize: 10, maxSize: 24, minDur: 5,  maxDur: 12, minOpacity: 0.07, maxOpacity: 0.16, interval: 2600,  initMin: 0,    initMax: 2000, initCount: 3 },
+        { emoji: '✨', minSize: 10, maxSize: 24, minDur: 5,  maxDur: 12, minOpacity: 0.07, maxOpacity: 0.16, interval: 1500,  initMin: 0, initMax: 200, initCount: 6 },
 
-        { emoji: '🚂', minSize: 14, maxSize: 30, minDur: 8,  maxDur: 18, minOpacity: 0.08, maxOpacity: 0.17, interval: 9000,  initMin: 1000, initMax: 4000, initCount: 1 },
+        { emoji: '🚂', minSize: 14, maxSize: 30, minDur: 8,  maxDur: 18, minOpacity: 0.08, maxOpacity: 0.17, interval: 5000,  initMin: 0, initMax: 200, initCount: 3 },
       ],
     },
   };

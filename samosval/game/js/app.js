@@ -962,18 +962,14 @@ function drawGlitch() {
 }
 
 // ── HUD overlay (drawn on canvas) ─────────────────────────────────────────────
-let hudW1 = null, hudW2 = null; // cached measureText widths
-
 function drawHUD() {
   ctx.save();
   ctx.textBaseline = 'middle';
 
   // Title: ЛАМОПАД — САМОСВАЛ
   ctx.font = '9px "Press Start 2P", monospace';
-  if (hudW1 === null) {
-    hudW1 = ctx.measureText('ЛАМОПАД').width;
-    hudW2 = ctx.measureText(' — ').width;
-  }
+  const hudW1 = ctx.measureText('ЛАМОПАД').width;
+  const hudW2 = ctx.measureText(' — ').width;
   ctx.textAlign = 'left';
   ctx.fillStyle = '#ff69b4';
   ctx.fillText('ЛАМОПАД', 12, 14);

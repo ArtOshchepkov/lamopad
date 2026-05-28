@@ -1564,6 +1564,28 @@ class GameScene extends Phaser.Scene {
     });
   }
 
+  _playCoin() {
+    try {
+      if (!this._audioCtx) this._audioCtx = new (window.AudioContext || window.webkitAudioContext)();
+      const ctx = this._audioCtx;
+      if (ctx.state === 'suspended') ctx.resume();
+      const t = ctx.currentTime;
+      [[880, 0, 0.15], [1320, 0.06, 0.20]].forEach(([freq, delay, dur]) => {
+        const osc = ctx.createOscillator();
+        const gain = ctx.createGain();
+        osc.connect(gain);
+        gain.connect(ctx.destination);
+        osc.type = 'triangle';
+        osc.frequency.value = freq;
+        gain.gain.setValueAtTime(0, t + delay);
+        gain.gain.linearRampToValueAtTime(0.22, t + delay + 0.008);
+        gain.gain.exponentialRampToValueAtTime(0.001, t + delay + dur);
+        osc.start(t + delay);
+        osc.stop(t + delay + dur + 0.01);
+      });
+    } catch (e) {}
+  }
+
   spawnBanknote() {
     const slot = this.banknotes[this.banknoteIdx];
     this.banknoteIdx = (this.banknoteIdx + 1) % this.banknotes.length;
@@ -1969,6 +1991,7 @@ class GameScene extends Phaser.Scene {
             },
           });
           this.state.money += bn.denomination;
+          this._playCoin();
           const t = this.add.text(hx, hy - 10, '+' + bn.denomination, {
             fontSize: '12px', fontFamily: 'Arial, sans-serif', fontStyle: 'bold',
             color: '#ffdd00', stroke: '#000000', strokeThickness: 3,

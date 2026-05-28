@@ -720,16 +720,16 @@ class GameScene extends Phaser.Scene {
     const BAR_W = 72, BAR_H = 6, BAR_GAP = 5, BAR_Y = 8;
     const BAR_RIGHT = W - 8;          // правый край полоски
     const BAR_X     = BAR_RIGHT - BAR_W;
-    const LBL_X     = BAR_X - 45;    // x надписи HP / $
+    const LBL_X     = BAR_X - 62;    // x надписи HP / $
     this.barGfx = this.add.graphics().setDepth(40);
-    this.add.text(LBL_X, BAR_Y - 1, 'ЗДОРОВЬЕ', {
-      fontSize: '9px', color: '#ff5555',
-      stroke: '#000000', strokeThickness: 1,
-    }).setDepth(41).setResolution(3);
-    this.add.text(LBL_X, BAR_Y + BAR_H + BAR_GAP - 1, 'ДЕНЬГИ', {
-      fontSize: '9px', fontFamily: 'Arial, sans-serif', color: '#44ee66',
-      stroke: '#000000', strokeThickness: 1,
-    }).setDepth(41).setResolution(2);
+    this.add.text(LBL_X, BAR_Y + BAR_H / 2, 'ЗДОРОВЬЕ', {
+      fontSize: '11px', fontFamily: 'Arial Black, Arial, sans-serif', fontStyle: 'bold',
+      color: '#ff6666', stroke: '#000000', strokeThickness: 3,
+    }).setOrigin(0, 0.5).setDepth(41).setResolution(3);
+    this.add.text(LBL_X, BAR_Y + BAR_H + BAR_GAP + BAR_H / 2, 'ДЕНЬГИ', {
+      fontSize: '11px', fontFamily: 'Arial Black, Arial, sans-serif', fontStyle: 'bold',
+      color: '#55ff77', stroke: '#000000', strokeThickness: 3,
+    }).setOrigin(0, 0.5).setDepth(41).setResolution(3);
     this.BAR_CFG = { x: BAR_X, y: BAR_Y, w: BAR_W, h: BAR_H, gap: BAR_GAP };
 
     // ── Таймеры состояния ─────────────────────────────────────────────────────
@@ -950,6 +950,12 @@ class GameScene extends Phaser.Scene {
     const cx = W - Math.round(BW / 2) - 6;
     const PALETTE = [0x1e3a5c, 0x5c1c1c, 0x1c4c2c, 0x1c2c5c, 0x3c1c5c];
 
+    // HTML-контейнер для подписей кнопок — вне canvas, без pixelated-рендеринга
+    const lblContainer = document.createElement('div');
+    lblContainer.style.cssText = 'position:fixed;top:0;left:0;width:100%;height:100%;pointer-events:none;z-index:100;';
+    document.body.appendChild(lblContainer);
+    this.events.once('destroy', () => lblContainer.remove());
+
     const mkBtn = (i, label, onDown, onUp) => {
       const by  = startY + i * (BH + GAP);
       const col = PALETTE[i];
@@ -969,14 +975,33 @@ class GameScene extends Phaser.Scene {
 
       draw(false);
 
-      const txt = this.add.text(cx, by + BH / 2, label, {
-        fontSize: '12px',
-        fontFamily: 'Arial, sans-serif',
-        color: '#ffffff',
-        stroke: '#000000',
-        strokeThickness: 3,
-        align: 'center',
-      }).setOrigin(0.5, 0.5).setDepth(31).setResolution(8);
+      // HTML-элемент для подписи — браузер рендерит с антиалиасингом
+      const lbl = document.createElement('div');
+      lbl.textContent = label;
+      lbl.style.cssText = [
+        'position:absolute',
+        'transform:translate(-50%,-50%)',
+        'font-family:"Arial Black",Arial,sans-serif',
+        'font-weight:900',
+        'color:#fff',
+        'text-align:center',
+        'line-height:1.2',
+        'text-shadow:-1px -1px 0 #000,1px -1px 0 #000,-1px 1px 0 #000,1px 1px 0 #000,0 1px 0 #000,0 -1px 0 #000',
+        'pointer-events:none',
+      ].join(';');
+      lblContainer.appendChild(lbl);
+
+      const positionLbl = () => {
+        const rect = this.sys.game.canvas.getBoundingClientRect();
+        const sx = rect.width  / W;
+        const sy = rect.height / H;
+        lbl.style.left     = (rect.left + cx              * sx) + 'px';
+        lbl.style.top      = (rect.top  + (by + BH / 2)  * sy) + 'px';
+        lbl.style.fontSize = Math.round(12 * sx) + 'px';
+      };
+      positionLbl();
+      window.addEventListener('resize', positionLbl);
+      this.events.once('destroy', () => window.removeEventListener('resize', positionLbl));
 
       const zone = this.add.zone(cx - BW / 2, by, BW, BH)
         .setOrigin(0, 0).setDepth(32).setInteractive();
@@ -984,7 +1009,7 @@ class GameScene extends Phaser.Scene {
       zone.on('pointerup',   () => { draw(false); onUp();   });
       zone.on('pointerout',  () => { draw(false); onUp();   });
 
-      return txt;
+      return { setText: (t) => { lbl.textContent = t; } };
     };
 
     mkBtn(0, 'ПРОГНУТЬСЯ',  () => { this.state.isBowing = true;  this.startBow(); },
@@ -1766,8 +1791,8 @@ class GameScene extends Phaser.Scene {
         const debt = Math.abs(Math.round(this.state.money));
         if (!this._debtTxt) {
           this._debtTxt = this.add.text(x + w + 3, my + h / 2, '', {
-            fontSize: '8px', fontFamily: 'Arial, sans-serif', fontStyle: 'bold',
-            color: '#ff3333', stroke: '#000000', strokeThickness: 1,
+            fontSize: '10px', fontFamily: 'Arial Black, Arial, sans-serif', fontStyle: 'bold',
+            color: '#ff4444', stroke: '#000000', strokeThickness: 3,
           }).setOrigin(0, 0.5).setDepth(41).setResolution(4);
         }
         this._debtTxt.setText('-' + debt.toLocaleString('ru') + '₽');

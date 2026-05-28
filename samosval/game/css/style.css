@@ -120,7 +120,7 @@ html, body {
 }
 
 #intro-sub {
-  font-size: clamp(6px, 1.4vw, 9px);
+  font-size: clamp(12px, 2.4vw, 18px);
   color: var(--pink-light);
   text-shadow: 0 0 10px var(--pink);
   animation: blink 1s step-end infinite;
@@ -139,7 +139,7 @@ html, body {
 }
 
 .hint-line {
-  font-size: clamp(5px, 1.1vw, 8px);
+  font-size: clamp(11px, 2vw, 15px);
   color: var(--purple-light);
   opacity: 0.75;
   letter-spacing: 0.05em;
@@ -175,7 +175,7 @@ html, body {
 }
 
 .warn-text {
-  font-size: clamp(7px, 1.5vw, 11px);
+  font-size: clamp(12px, 2.5vw, 18px);
   color: var(--text);
   line-height: 2.2;
   opacity: 0.85;
@@ -188,7 +188,7 @@ html, body {
 }
 
 #warn-ok {
-  font-size: clamp(6px, 1.3vw, 9px);
+  font-size: clamp(11px, 2.2vw, 16px);
   color: var(--purple-light);
   animation: blink 1s step-end infinite;
   margin-top: 4px;

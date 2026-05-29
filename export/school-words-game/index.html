@@ -1,0 +1,945 @@
+<!DOCTYPE html>
+<html lang="ru">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0, user-scalable=no">
+<title>Части речи — Космическая игра</title>
+<style>
+*,*::before,*::after{box-sizing:border-box;margin:0;padding:0}
+
+html,body{
+  width:100%;height:100%;
+  overflow:hidden;
+  background:#030814;
+  color:#e8f4ff;
+  font-family:'Segoe UI',system-ui,-apple-system,sans-serif;
+  touch-action:none;
+  user-select:none;
+  -webkit-user-select:none;
+}
+
+#stars-canvas{
+  position:fixed;inset:0;z-index:0;pointer-events:none;
+}
+
+/* ── SCREENS ── */
+.screen{
+  position:fixed;inset:0;z-index:10;
+  display:flex;flex-direction:column;
+  align-items:center;justify-content:center;
+  padding:20px;gap:16px;
+}
+.screen.hidden{display:none}
+
+/* ── LOADING ── */
+.spinner{
+  width:48px;height:48px;
+  border:3px solid rgba(100,200,255,.15);
+  border-top-color:rgba(100,200,255,.8);
+  border-radius:50%;
+  animation:spin 1s linear infinite;
+}
+@keyframes spin{to{transform:rotate(360deg)}}
+.loading-msg{color:rgba(200,220,255,.5);font-size:.9rem}
+
+/* ── TYPOGRAPHY ── */
+.cosmic-title{
+  font-size:clamp(1.4rem,5vw,2.2rem);font-weight:700;
+  text-align:center;letter-spacing:.04em;
+  text-shadow:0 0 20px rgba(100,200,255,.8),0 0 50px rgba(100,200,255,.3);
+}
+.cosmic-sub{
+  font-size:clamp(.85rem,2.5vw,1rem);
+  color:rgba(200,220,255,.5);text-align:center;
+}
+
+/* ── ERROR ── */
+.error-card{
+  background:rgba(40,10,10,.9);
+  border:1px solid rgba(255,100,100,.35);
+  border-radius:16px;padding:28px;
+  max-width:420px;width:100%;
+  text-align:center;
+  display:flex;flex-direction:column;gap:10px;
+}
+.error-icon{font-size:2.5rem}
+.error-title{font-size:1.1rem;font-weight:700;color:#ff9b9b}
+.error-msg{font-size:.85rem;color:rgba(255,200,200,.65);line-height:1.6;white-space:pre-line}
+
+/* ── BUTTONS ── */
+.btn{
+  background:linear-gradient(135deg,rgba(30,65,140,.9),rgba(50,105,190,.9));
+  border:1px solid rgba(100,200,255,.35);
+  border-radius:12px;color:#e8f4ff;
+  cursor:pointer;font-size:.95rem;font-weight:600;
+  padding:13px 26px;
+  transition:all .2s;
+  text-shadow:0 0 10px rgba(100,200,255,.4);
+  letter-spacing:.04em;white-space:nowrap;
+}
+.btn:hover,.btn:active{
+  background:linear-gradient(135deg,rgba(50,90,190,.9),rgba(70,140,255,.9));
+  box-shadow:0 0 18px rgba(100,200,255,.25);
+  transform:translateY(-1px);
+}
+.btn.ghost{
+  background:rgba(15,30,70,.7);
+  font-size:.85rem;padding:10px 20px;
+  border-color:rgba(100,200,255,.2);
+}
+
+/* ── NAME SCREEN ── */
+.name-form{display:flex;flex-direction:column;gap:10px;width:100%;max-width:340px}
+.cosmic-input{
+  background:rgba(15,30,70,.85);
+  border:1px solid rgba(100,200,255,.3);
+  border-radius:12px;color:#e8f4ff;
+  font-size:1.05rem;padding:13px 18px;
+  text-align:center;outline:none;
+  transition:border-color .25s,box-shadow .25s;width:100%;
+}
+.cosmic-input:focus{
+  border-color:rgba(100,200,255,.65);
+  box-shadow:0 0 18px rgba(100,200,255,.15);
+}
+.cosmic-input.err{
+  border-color:rgba(255,80,80,.65);
+  box-shadow:0 0 18px rgba(255,80,80,.15);
+}
+.input-err{color:#ff7070;font-size:.82rem;text-align:center;min-height:18px}
+
+/* ── SETS SCREEN ── */
+.greeting{font-size:1rem;color:rgba(200,220,255,.75);text-align:center}
+.greeting strong{color:#64c8ff}
+.sets-grid{
+  display:flex;flex-wrap:wrap;gap:14px;
+  justify-content:center;max-width:580px;
+}
+.set-card{
+  background:rgba(8,18,48,.85);
+  border:1px solid rgba(100,200,255,.2);
+  border-radius:16px;cursor:pointer;
+  padding:20px 24px;text-align:center;
+  transition:all .25s;min-width:140px;
+}
+.set-card:hover,.set-card:active{
+  border-color:rgba(100,200,255,.55);
+  box-shadow:0 0 24px rgba(100,200,255,.12);
+  transform:translateY(-2px);
+}
+.set-card-icon{font-size:2rem;margin-bottom:6px}
+.set-card-name{font-size:.95rem;font-weight:600;color:#c8e0ff}
+.set-card-count{font-size:.75rem;color:rgba(200,220,255,.4);margin-top:3px}
+.sets-footer{display:flex;flex-direction:column;align-items:center;gap:8px}
+
+/* ── HUD ── */
+#hud{
+  position:fixed;top:0;left:0;right:0;z-index:50;
+  display:flex;align-items:center;justify-content:space-between;
+  padding:0 14px;height:50px;
+  background:rgba(3,8,20,.88);backdrop-filter:blur(10px);
+  border-bottom:1px solid rgba(100,200,255,.12);gap:10px;
+}
+.hud-item{display:flex;align-items:center;gap:5px;font-size:.9rem}
+.hud-val{font-weight:700;font-size:1rem}
+.h-ok{color:#4dff9b}
+.h-err{color:#ff6b6b}
+.h-time{color:#64c8ff;min-width:38px;text-align:center;font-weight:700;font-size:1rem}
+.hud-set{
+  font-size:.72rem;color:rgba(200,220,255,.45);
+  max-width:120px;overflow:hidden;text-overflow:ellipsis;white-space:nowrap;
+}
+
+/* ── WORD SPACE ── */
+#word-space{
+  position:fixed;inset:0;z-index:20;
+  pointer-events:none;overflow:visible;
+}
+
+/* ── WORD CHIP ── */
+.word-chip{
+  position:absolute;pointer-events:auto;
+  background:rgba(8,22,58,.9);
+  border:1px solid rgba(100,200,255,.45);
+  border-radius:22px;color:#c8e8ff;
+  cursor:grab;
+  font-size:clamp(.82rem,2.2vw,.98rem);
+  font-weight:700;letter-spacing:.07em;
+  padding:8px 16px;
+  text-shadow:0 0 12px rgba(100,200,255,.7);
+  box-shadow:0 0 14px rgba(100,200,255,.18),0 0 28px rgba(100,200,255,.07);
+  white-space:nowrap;touch-action:none;
+  transition:box-shadow .2s,border-color .2s,opacity .35s,transform .35s;
+}
+.word-chip.floating{
+  animation:float-w var(--fd,11s) var(--fde,0s) ease-in-out infinite;
+}
+.word-chip.dragging{
+  animation:none!important;cursor:grabbing;z-index:200!important;
+  box-shadow:0 0 28px rgba(100,200,255,.6),0 0 55px rgba(100,200,255,.2)!important;
+  border-color:rgba(100,200,255,.9);transform:scale(1.07)!important;
+}
+.word-chip.gone{
+  opacity:0;transform:scale(.3)!important;pointer-events:none;
+}
+.word-chip.returning{
+  transition:left .4s cubic-bezier(.22,1,.36,1),top .4s cubic-bezier(.22,1,.36,1);
+}
+
+@keyframes float-w{
+  0%,100%{transform:translate(0,0) rotate(-.5deg)}
+  25%{transform:translate(var(--fx1,12px),var(--fy1,-9px)) rotate(.8deg)}
+  50%{transform:translate(var(--fx2,-9px),var(--fy2,7px)) rotate(-.4deg)}
+  75%{transform:translate(var(--fx3,7px),var(--fy3,-5px)) rotate(.3deg)}
+}
+
+/* ── PLANET DOCK ── */
+#planet-dock{
+  position:fixed;bottom:0;left:0;right:0;z-index:40;
+  display:flex;align-items:center;justify-content:center;
+  gap:clamp(8px,2vw,18px);
+  padding:8px 12px 12px;min-height:115px;
+  background:rgba(3,8,20,.75);backdrop-filter:blur(10px);
+  border-top:1px solid rgba(100,200,255,.1);
+  overflow-x:auto;-webkit-overflow-scrolling:touch;
+}
+#planet-dock::-webkit-scrollbar{height:3px}
+#planet-dock::-webkit-scrollbar-thumb{background:rgba(100,200,255,.25);border-radius:2px}
+
+.planet-wrap{display:flex;flex-direction:column;align-items:center;gap:5px;flex-shrink:0}
+.planet{
+  width:clamp(56px,11vw,72px);height:clamp(56px,11vw,72px);
+  border-radius:50%;
+  animation:planet-bob 3.5s ease-in-out infinite;
+  transition:transform .2s,filter .2s;
+  position:relative;
+}
+.planet::after{
+  content:'';position:absolute;inset:15%;border-radius:50%;
+  background:radial-gradient(circle at 30% 30%,rgba(255,255,255,.35),transparent 60%);
+}
+.planet.over{transform:scale(1.15)!important;filter:brightness(1.25)}
+
+@keyframes planet-bob{
+  0%,100%{transform:translateY(0)}
+  50%{transform:translateY(-5px)}
+}
+.planet-label{
+  font-size:clamp(.58rem,1.8vw,.72rem);
+  color:rgba(200,220,255,.75);text-align:center;
+  max-width:80px;line-height:1.2;
+}
+
+/* Planet skins */
+.p-cyan  {background:radial-gradient(circle at 35% 35%,#b0f0ff,#0090cc,#002855);box-shadow:0 0 18px rgba(0,180,255,.55),0 0 36px rgba(0,180,255,.2)}
+.p-red   {background:radial-gradient(circle at 35% 35%,#ffb888,#cc4400,#4a1200);box-shadow:0 0 18px rgba(255,90,20,.55),0 0 36px rgba(255,90,20,.2)}
+.p-green {background:radial-gradient(circle at 35% 35%,#a8ffb8,#18a838,#003810);box-shadow:0 0 18px rgba(20,190,70,.55),0 0 36px rgba(20,190,70,.2)}
+.p-yellow{background:radial-gradient(circle at 35% 35%,#fff5a0,#cca800,#4a3600);box-shadow:0 0 18px rgba(220,170,0,.55),0 0 36px rgba(220,170,0,.2)}
+.p-purple{background:radial-gradient(circle at 35% 35%,#d8a8ff,#7828cc,#28005a);box-shadow:0 0 18px rgba(140,50,220,.55),0 0 36px rgba(140,50,220,.2)}
+.p-orange{background:radial-gradient(circle at 35% 35%,#ffd8a0,#cc6e00,#4a2000);box-shadow:0 0 18px rgba(210,120,0,.55),0 0 36px rgba(210,120,0,.2)}
+.p-teal  {background:radial-gradient(circle at 35% 35%,#a0ffd8,#00a878,#002a28);box-shadow:0 0 18px rgba(0,185,140,.55),0 0 36px rgba(0,185,140,.2)}
+.p-pink  {background:radial-gradient(circle at 35% 35%,#ffa8d8,#cc1878,#480028);box-shadow:0 0 18px rgba(210,50,140,.55),0 0 36px rgba(210,50,140,.2)}
+.p-violet{background:radial-gradient(circle at 35% 35%,#dda8ff,#5800aa,#180048);box-shadow:0 0 18px rgba(120,10,195,.55),0 0 36px rgba(120,10,195,.2)}
+.p-brown {background:radial-gradient(circle at 35% 35%,#d8a878,#784018,#2a1005);box-shadow:0 0 18px rgba(140,70,20,.55),0 0 36px rgba(140,70,20,.2)}
+.p-gold  {background:radial-gradient(circle at 35% 35%,#fff0a0,#d8980a,#503800);box-shadow:0 0 18px rgba(215,170,0,.55),0 0 36px rgba(215,170,0,.2)}
+.p-silver{background:radial-gradient(circle at 35% 35%,#e0e8ff,#7888b0,#283050);box-shadow:0 0 18px rgba(140,160,205,.55),0 0 36px rgba(140,160,205,.2)}
+
+/* ── TOAST ── */
+#toasts{
+  position:fixed;top:58px;left:50%;
+  transform:translateX(-50%);z-index:300;
+  display:flex;flex-direction:column;gap:7px;
+  align-items:center;width:min(92vw,400px);
+  pointer-events:none;
+}
+.toast{
+  background:rgba(8,18,48,.95);
+  border-radius:12px;font-size:.88rem;font-weight:500;
+  line-height:1.45;padding:11px 18px;
+  text-align:center;white-space:pre-line;
+  animation:tin .28s ease-out forwards;max-width:100%;
+}
+.toast.t-ok {border:1px solid rgba(77,255,155,.55);box-shadow:0 0 16px rgba(77,255,155,.18);color:#a0ffc0}
+.toast.t-bad{border:1px solid rgba(255,100,100,.55);box-shadow:0 0 16px rgba(255,100,100,.18);color:#ffb0b0}
+.toast.t-inf{border:1px solid rgba(100,200,255,.55);box-shadow:0 0 16px rgba(100,200,255,.18);color:#a8d8ff}
+.toast.tout{animation:tout .35s ease-in forwards}
+
+@keyframes tin{from{opacity:0;transform:translateY(-16px) scale(.9)}to{opacity:1;transform:none}}
+@keyframes tout{from{opacity:1}to{opacity:0;transform:translateY(-8px) scale(.92)}}
+
+/* ── RESULTS ── */
+.results-card{
+  background:rgba(8,18,48,.88);
+  border:1px solid rgba(100,200,255,.22);
+  border-radius:20px;padding:26px;
+  width:min(100%,440px);
+  display:flex;flex-direction:column;gap:16px;
+}
+.stats-row{display:grid;grid-template-columns:1fr 1fr 1fr;gap:10px;text-align:center}
+.stat{display:flex;flex-direction:column;gap:3px}
+.stat-val{font-size:1.75rem;font-weight:700}
+.stat-lbl{font-size:.68rem;color:rgba(200,220,255,.45);text-transform:uppercase;letter-spacing:.1em}
+.s-ok{color:#4dff9b}.s-err{color:#ff6b6b}.s-time{color:#64c8ff}
+.res-msg{font-size:.95rem;color:rgba(200,220,255,.75);text-align:center;line-height:1.55}
+.share-box{
+  background:rgba(3,10,30,.9);
+  border:1px solid rgba(100,200,255,.18);
+  border-radius:8px;color:rgba(200,220,255,.5);
+  font-family:monospace;font-size:.68rem;
+  padding:8px 12px;word-break:break-all;line-height:1.5;
+}
+.res-btns{display:flex;gap:10px;flex-wrap:wrap;justify-content:center}
+
+.shared-banner{
+  background:rgba(18,52,90,.75);
+  border:1px solid rgba(100,200,255,.28);
+  border-radius:12px;padding:11px 20px;
+  font-size:.9rem;color:rgba(200,220,255,.75);
+  text-align:center;width:min(100%,440px);
+}
+</style>
+</head>
+<body>
+
+<canvas id="stars-canvas"></canvas>
+
+<!-- Loading -->
+<div id="screen-loading" class="screen">
+  <div class="spinner"></div>
+  <p class="loading-msg">Загружаем слова из таблицы…</p>
+</div>
+
+<!-- Error -->
+<div id="screen-error" class="screen hidden">
+  <div class="error-card">
+    <div class="error-icon">🛸</div>
+    <div class="error-title">Связь с базой потеряна</div>
+    <div class="error-msg" id="err-msg"></div>
+  </div>
+  <button class="btn" onclick="loadData()">Попробовать снова</button>
+</div>
+
+<!-- Name -->
+<div id="screen-name" class="screen hidden">
+  <div class="cosmic-title">🌌 Части речи</div>
+  <div class="cosmic-sub">Помести слова на их планеты</div>
+  <div class="name-form">
+    <input id="name-input" class="cosmic-input" type="text"
+      placeholder="Введи своё имя" maxlength="30" autocomplete="off"/>
+    <div class="input-err" id="name-err"></div>
+    <button class="btn" onclick="submitName()">Полетели! 🚀</button>
+  </div>
+</div>
+
+<!-- Sets -->
+<div id="screen-sets" class="screen hidden">
+  <div class="cosmic-title">Выбери галактику</div>
+  <div class="greeting" id="greeting"></div>
+  <div class="sets-grid" id="sets-grid"></div>
+  <div class="sets-footer">
+    <button class="btn ghost" onclick="copyGameLink()">🔗 Поделиться игрой</button>
+    <button class="btn ghost" onclick="changeName()">Сменить имя</button>
+  </div>
+</div>
+
+<!-- Game -->
+<div id="screen-game" class="screen hidden" style="padding:0;justify-content:flex-start">
+  <div id="hud">
+    <div class="hud-item">✓&thinsp;<span class="hud-val h-ok" id="h-ok">0</span></div>
+    <div class="hud-set" id="h-set"></div>
+    <div class="hud-item">✗&thinsp;<span class="hud-val h-err" id="h-err">0</span></div>
+    <div class="h-time" id="h-time">0:00</div>
+  </div>
+  <div id="word-space"></div>
+  <div id="planet-dock"></div>
+</div>
+
+<!-- Results -->
+<div id="screen-results" class="screen hidden">
+  <div class="shared-banner hidden" id="shared-banner"></div>
+  <div class="cosmic-title" id="res-title"></div>
+  <div class="results-card">
+    <div class="stats-row">
+      <div class="stat"><div class="stat-val s-ok"  id="r-ok">0</div><div class="stat-lbl">Верно</div></div>
+      <div class="stat"><div class="stat-val s-err" id="r-err">0</div><div class="stat-lbl">Ошибок</div></div>
+      <div class="stat"><div class="stat-val s-time" id="r-time">0:00</div><div class="stat-lbl">Время</div></div>
+    </div>
+    <div class="res-msg" id="res-msg"></div>
+    <div id="share-section">
+      <div class="share-box" id="share-box"></div>
+      <button class="btn" style="width:100%;margin-top:8px" onclick="copyResLink()">📋 Скопировать результат</button>
+    </div>
+  </div>
+  <div class="res-btns" id="res-btns"></div>
+</div>
+
+<div id="toasts"></div>
+
+<script>
+// ══════════════════════════════════════════
+// CONSTANTS
+// ══════════════════════════════════════════
+const CSV_URL = 'https://docs.google.com/spreadsheets/d/e/2PACX-1vRMg2AgG5Z3lpGANIO5Dsxw-N7aduPk0F9tCXDBhiiGp6FJwoofKPMVK7GyY2PmsmUxXB83ITv1ClhD/pub?output=csv';
+
+const PART_COLOR = {
+  'существительное':'cyan','глагол':'red','прилагательное':'green',
+  'наречие':'yellow','числительное':'purple','местоимение':'orange',
+  'причастие':'teal','деепричастие':'pink','предлог':'brown',
+  'союз':'violet','частица':'silver','междометие':'gold',
+};
+const COLOR_POOL  = ['cyan','red','green','yellow','purple','orange','teal','pink','violet','brown','gold','silver'];
+const SET_ICONS   = ['🌟','🪐','🌙','☄️','🌌','🛸','💫','🔭'];
+const PROFANITY   = ['хуй','хуи','пизд','ёбан','ебан','блядь','блядс','шлюх','пиздец','залупа','мудак','мудил','пидор','пидар'];
+
+// ══════════════════════════════════════════
+// STATE
+// ══════════════════════════════════════════
+let allWords=[], allSets=[], playerName='';
+let curSet='', gameWords=[], gamePlanets=[];
+let wordEls={}, wordOrigPos={};
+let correct=0, errors=0, total=0;
+let startTime=null, timerID=null, resShareUrl='';
+
+// ══════════════════════════════════════════
+// STARS
+// ══════════════════════════════════════════
+function initStars() {
+  const c = document.getElementById('stars-canvas');
+  const ctx = c.getContext('2d');
+  function draw() {
+    c.width=innerWidth; c.height=innerHeight;
+    const n = Math.floor(c.width*c.height/4800);
+    for (let i=0;i<n;i++){
+      const x=Math.random()*c.width, y=Math.random()*c.height;
+      const r=Math.random()*1.5, a=.2+Math.random()*.8;
+      ctx.beginPath(); ctx.arc(x,y,r,0,Math.PI*2);
+      ctx.fillStyle=`rgba(255,255,255,${a})`; ctx.fill();
+    }
+  }
+  draw();
+  window.addEventListener('resize', draw);
+}
+
+// ══════════════════════════════════════════
+// SCREENS
+// ══════════════════════════════════════════
+function show(id) {
+  document.querySelectorAll('.screen').forEach(s=>s.classList.add('hidden'));
+  document.getElementById('screen-'+id).classList.remove('hidden');
+}
+function showError(msg) {
+  document.getElementById('err-msg').textContent=msg;
+  show('error');
+}
+
+// ══════════════════════════════════════════
+// CSV LOADING & PARSING
+// ══════════════════════════════════════════
+function loadData() {
+  show('loading');
+  fetch(CSV_URL)
+    .then(r=>{ if(!r.ok) throw new Error(`HTTP ${r.status}`); return r.text(); })
+    .then(processCSV)
+    .catch(e=>showError(
+      `Не удалось загрузить таблицу из Google Sheets.\n\n`+
+      `Проверьте подключение к интернету и попробуйте снова.\n\n`+
+      `Детали: ${e.message}`
+    ));
+}
+
+function parseCSV(text) {
+  const rows=[]; let row=[], cur='', inQ=false;
+  for (let i=0;i<text.length;i++) {
+    const ch=text[i];
+    if (ch==='"') {
+      if (inQ && text[i+1]==='"') { cur+='"'; i++; }
+      else inQ=!inQ;
+    } else if (ch===',' && !inQ) {
+      row.push(cur.trim()); cur='';
+    } else if ((ch==='\n'||ch==='\r') && !inQ) {
+      if (ch==='\r' && text[i+1]==='\n') i++;
+      row.push(cur.trim()); cur='';
+      if (row.some(c=>c!=='')) rows.push(row);
+      row=[];
+    } else cur+=ch;
+  }
+  if (cur||row.length){ row.push(cur.trim()); if(row.some(c=>c!=='')) rows.push(row); }
+  return rows;
+}
+
+function processCSV(text) {
+  const rows = parseCSV(text);
+  if (rows.length<2) { showError('Таблица пустая или недоступна.'); return; }
+
+  const hdr = rows[0].map(h=>h.trim());
+
+  // Required columns
+  const iWord=hdr.indexOf('СЛОВО');
+  const iPart=hdr.indexOf('ЧАСТЬ РЕЧИ');
+  const iOk  =hdr.indexOf('КОММЕНТАРИЙ ЕСЛИ УГАДАЛ');
+  const iBad =hdr.indexOf('КОММЕНТАРИЙ ЕСЛИ НЕ УГАДАЛ');
+
+  const miss=[];
+  if (iWord<0) miss.push('СЛОВО');
+  if (iPart<0) miss.push('ЧАСТЬ РЕЧИ');
+  if (iOk<0)   miss.push('КОММЕНТАРИЙ ЕСЛИ УГАДАЛ');
+  if (iBad<0)  miss.push('КОММЕНТАРИЙ ЕСЛИ НЕ УГАДАЛ');
+  if (miss.length) {
+    showError(
+      `Отсутствуют обязательные столбцы:\n${miss.join(', ')}\n\n`+
+      `Проверьте заголовки таблицы — они должны совпадать точно.`
+    ); return;
+  }
+
+  // НАБОР columns
+  const setCols=[];
+  hdr.forEach((h,i)=>{
+    const m=h.match(/^НАБОР\s+(.+)/i);
+    if (m) setCols.push({name:m[1].trim(), idx:i});
+  });
+  if (!setCols.length) {
+    showError(
+      `Не найдено ни одного столбца НАБОР.\n\n`+
+      `Добавьте столбцы с заголовками вида:\nНАБОР пятый класс\nНАБОР шестой класс`
+    ); return;
+  }
+
+  // Parse data rows
+  const words=[]; const warns=[];
+  rows.slice(1).forEach((row,ri)=>{
+    const w=(row[iWord]||'').trim();
+    const p=(row[iPart]||'').trim();
+    if (!w&&!p) return;
+    if (!w) { warns.push(`Строка ${ri+2}: пустой СЛОВО`); return; }
+    if (!p) { warns.push(`Строка ${ri+2}: нет ЧАСТЬ РЕЧИ у «${w}»`); return; }
+    const parts=p.split('/').map(s=>s.trim().toLowerCase()).filter(Boolean);
+    if (!parts.length) { warns.push(`Строка ${ri+2}: непонятная часть речи «${p}»`); return; }
+    const sets={};
+    setCols.forEach(sc=>{ sets[sc.name]=(row[sc.idx]||'').trim().toLowerCase()==='да'; });
+    words.push({id:`w${ri}`, word:w, parts, ok:(row[iOk]||'').trim(), bad:(row[iBad]||'').trim(), sets});
+  });
+
+  if (warns.length) console.warn('[Игра] Предупреждения в таблице:\n'+warns.join('\n'));
+
+  const validSets=setCols.filter(sc=>words.some(w=>w.sets[sc.name]));
+  if (!validSets.length) {
+    showError(
+      `Ни один набор не содержит слов.\n\n`+
+      `В столбцах НАБОР напишите «Да» для слов, которые входят в этот набор.`
+    ); return;
+  }
+
+  allWords=words; allSets=validSets;
+
+  // Shared result from URL?
+  const params=new URLSearchParams(location.search);
+  if (params.get('share')==='1') { renderShared(params); return; }
+
+  const saved=localStorage.getItem('playerName');
+  if (saved) { playerName=saved; showSets(); } else show('name');
+}
+
+// ══════════════════════════════════════════
+// NAME
+// ══════════════════════════════════════════
+function validateName(v) {
+  if (!v||!v.trim()) return 'Введи своё имя';
+  const t=v.trim();
+  if (t.length<2)  return 'Слишком короткое имя';
+  if (t.length>30) return 'Имя не должно быть длиннее 30 символов';
+  if (!/^[а-яёА-ЯЁa-zA-Z\s\-\.]+$/u.test(t)) return 'Только буквы, пробел или дефис';
+  const lo=t.toLowerCase();
+  for (const w of PROFANITY) if (lo.includes(w)) return 'Пожалуйста, введи настоящее имя';
+  return null;
+}
+
+function submitName() {
+  const inp=document.getElementById('name-input');
+  const errEl=document.getElementById('name-err');
+  const e=validateName(inp.value);
+  if (e) { errEl.textContent=e; inp.classList.add('err'); return; }
+  errEl.textContent=''; inp.classList.remove('err');
+  playerName=inp.value.trim();
+  localStorage.setItem('playerName', playerName);
+  showSets();
+}
+
+function changeName() {
+  show('name');
+  const inp=document.getElementById('name-input');
+  inp.value=playerName; inp.focus();
+}
+
+document.getElementById('name-input').addEventListener('keydown', e=>{ if(e.key==='Enter') submitName(); });
+document.getElementById('name-input').addEventListener('input', ()=>{
+  document.getElementById('name-err').textContent='';
+  document.getElementById('name-input').classList.remove('err');
+});
+
+// ══════════════════════════════════════════
+// SETS SCREEN
+// ══════════════════════════════════════════
+function showSets() {
+  document.getElementById('greeting').innerHTML=
+    `Привет, <strong>${esc(playerName)}</strong>! Выбери галактику:`;
+  const grid=document.getElementById('sets-grid');
+  grid.innerHTML='';
+  allSets.forEach((s,i)=>{
+    const cnt=allWords.filter(w=>w.sets[s.name]).length;
+    const d=document.createElement('div');
+    d.className='set-card';
+    d.innerHTML=`<div class="set-card-icon">${SET_ICONS[i%SET_ICONS.length]}</div>`+
+      `<div class="set-card-name">${esc(s.name)}</div>`+
+      `<div class="set-card-count">${cnt} слов</div>`;
+    d.onclick=()=>startGame(s.name);
+    grid.appendChild(d);
+  });
+  show('sets');
+}
+
+function copyGameLink() {
+  const url=location.origin+location.pathname;
+  navigator.clipboard.writeText(url)
+    .then(()=>toast('Ссылка на игру скопирована!','inf'))
+    .catch(()=>toast('Скопируй адрес из строки браузера','inf'));
+}
+
+// ══════════════════════════════════════════
+// GAME START
+// ══════════════════════════════════════════
+function startGame(setName) {
+  clearInterval(timerID);
+  curSet=setName;
+  gameWords=allWords.filter(w=>w.sets[setName]);
+  if (!gameWords.length) { showError(`Набор «${setName}» пуст.`); return; }
+
+  const partsSet=new Set();
+  gameWords.forEach(w=>w.parts.forEach(p=>partsSet.add(p)));
+  gamePlanets=[...partsSet];
+
+  correct=0; errors=0; total=gameWords.length;
+  wordEls={}; wordOrigPos={};
+
+  document.getElementById('h-set').textContent=setName;
+  updateHUD();
+  renderPlanets();
+  renderWords();
+  show('game');
+  startTimer();
+}
+
+// ══════════════════════════════════════════
+// RENDER PLANETS
+// ══════════════════════════════════════════
+function renderPlanets() {
+  const dock=document.getElementById('planet-dock');
+  dock.innerHTML='';
+  const usedColors=new Set();
+  gamePlanets.forEach(part=>{
+    let color=PART_COLOR[part];
+    if (!color) {
+      color=COLOR_POOL.find(c=>!usedColors.has(c))||COLOR_POOL[0];
+    }
+    usedColors.add(color);
+
+    const wrap=document.createElement('div'); wrap.className='planet-wrap';
+    const p=document.createElement('div');
+    p.className=`planet p-${color}`;
+    p.dataset.part=part;
+    p.style.animationDelay=`${Math.random()*3}s`;
+    const lbl=document.createElement('div'); lbl.className='planet-label';
+    lbl.textContent=cap(part);
+    wrap.append(p,lbl);
+    dock.appendChild(wrap);
+  });
+}
+
+// ══════════════════════════════════════════
+// RENDER WORDS
+// ══════════════════════════════════════════
+function renderWords() {
+  const space=document.getElementById('word-space');
+  space.innerHTML='';
+
+  const top=58, bot=innerHeight-122, left=8, right=innerWidth-8;
+  const positions=shuffle(spreadPos(gameWords.length, left, top, right, bot));
+
+  gameWords.forEach((wd,i)=>{
+    const el=document.createElement('div');
+    el.className='word-chip floating';
+    el.textContent=wd.word;
+    el.dataset.id=wd.id;
+
+    const fd=8+Math.random()*8, fde=-Math.random()*16;
+    const r=()=>((Math.random()-.5)*32).toFixed(1);
+    el.style.setProperty('--fd',`${fd}s`);
+    el.style.setProperty('--fde',`${fde}s`);
+    el.style.setProperty('--fx1',`${r()}px`);
+    el.style.setProperty('--fy1',`${r()}px`);
+    el.style.setProperty('--fx2',`${r()}px`);
+    el.style.setProperty('--fy2',`${r()}px`);
+    el.style.setProperty('--fx3',`${r()}px`);
+    el.style.setProperty('--fy3',`${r()}px`);
+    el.style.left=positions[i].x+'px';
+    el.style.top =positions[i].y+'px';
+    el.style.zIndex=30+i;
+
+    wordOrigPos[wd.id]={x:positions[i].x, y:positions[i].y};
+    wordEls[wd.id]=el;
+    initDrag(el,wd);
+    space.appendChild(el);
+  });
+}
+
+function spreadPos(n, x0, y0, x1, y1) {
+  const W=x1-x0, H=y1-y0;
+  const cols=Math.max(1,Math.ceil(Math.sqrt(n*(W/Math.max(H,1)))));
+  const rows=Math.ceil(n/cols);
+  const cw=W/cols, ch=H/rows;
+  const pos=[];
+  for (let i=0;i<n;i++){
+    const c=i%cols, r=Math.floor(i/cols);
+    pos.push({
+      x: x0+c*cw+cw*.1+Math.random()*cw*.8,
+      y: y0+r*ch+ch*.1+Math.random()*ch*.8,
+    });
+  }
+  return pos;
+}
+
+// ══════════════════════════════════════════
+// DRAG & DROP
+// ══════════════════════════════════════════
+let drag=null, offX=0, offY=0;
+
+function initDrag(el, wd) {
+  el.addEventListener('pointerdown', e=>{
+    e.preventDefault();
+    el.setPointerCapture(e.pointerId);
+    drag={el,wd};
+    const rect=el.getBoundingClientRect();
+    offX=e.clientX-rect.left;
+    offY=e.clientY-rect.top;
+    el.classList.remove('floating','returning');
+    el.classList.add('dragging');
+    el.style.zIndex=200;
+  },{passive:false});
+
+  el.addEventListener('pointermove', e=>{
+    if (!drag||drag.el!==el) return;
+    e.preventDefault();
+    el.style.left=(e.clientX-offX)+'px';
+    el.style.top =(e.clientY-offY)+'px';
+    highlightPlanets(e.clientX, e.clientY);
+  },{passive:false});
+
+  el.addEventListener('pointerup', e=>{
+    if (!drag||drag.el!==el) return;
+    clearHighlight();
+    const planet=planetAt(e.clientX, e.clientY);
+    handleDrop(wd, planet, el);
+    drag=null;
+    el.style.zIndex=30;
+  });
+}
+
+function planetAt(x,y) {
+  for (const p of document.querySelectorAll('.planet')) {
+    const r=p.getBoundingClientRect();
+    if (x>=r.left&&x<=r.right&&y>=r.top&&y<=r.bottom) return p.dataset.part;
+  }
+  return null;
+}
+function highlightPlanets(x,y) {
+  document.querySelectorAll('.planet').forEach(p=>{
+    const r=p.getBoundingClientRect();
+    p.classList.toggle('over', x>=r.left&&x<=r.right&&y>=r.top&&y<=r.bottom);
+  });
+}
+function clearHighlight() {
+  document.querySelectorAll('.planet').forEach(p=>p.classList.remove('over'));
+}
+
+// ══════════════════════════════════════════
+// GAME LOGIC
+// ══════════════════════════════════════════
+function handleDrop(wd, planet, el) {
+  if (!planet) { returnChip(el, wd.id, false); return; }
+
+  if (wd.parts.includes(planet)) {
+    correct++; updateHUD();
+    const others=wd.parts.filter(p=>p!==planet);
+    let msg=wd.ok||'Верно!';
+    if (others.length) msg+=`\nА ещё «${wd.word}» — это ${others.map(cap).join(' и ')}!`;
+    toast(msg,'ok', others.length?4200:2600);
+
+    el.classList.remove('dragging','floating');
+    el.classList.add('gone');
+    setTimeout(()=>el.remove(), 380);
+
+    if (correct>=total) setTimeout(endGame, 700);
+  } else {
+    errors++; updateHUD();
+    toast(wd.bad||`«${wd.word}» — это не ${cap(planet)}.`,'bad');
+    returnChip(el, wd.id, true);
+  }
+}
+
+function returnChip(el, id, bounce) {
+  el.classList.remove('dragging','floating','gone');
+  const orig=wordOrigPos[id];
+  if (bounce) {
+    // Drift slightly so it doesn't feel stuck
+    const nx=clamp(orig.x+(Math.random()-.5)*50, 8, innerWidth-100);
+    const ny=clamp(orig.y+(Math.random()-.5)*40, 58, innerHeight-130);
+    wordOrigPos[id]={x:nx,y:ny};
+    el.classList.add('returning');
+    el.style.left=nx+'px'; el.style.top=ny+'px';
+  } else {
+    el.classList.add('returning');
+    el.style.left=orig.x+'px'; el.style.top=orig.y+'px';
+  }
+  setTimeout(()=>{ el.classList.remove('returning'); el.classList.add('floating'); }, 420);
+}
+
+function updateHUD() {
+  document.getElementById('h-ok').textContent=correct;
+  document.getElementById('h-err').textContent=errors;
+}
+
+// ══════════════════════════════════════════
+// TIMER
+// ══════════════════════════════════════════
+function startTimer() {
+  startTime=Date.now();
+  clearInterval(timerID);
+  timerID=setInterval(()=>{
+    document.getElementById('h-time').textContent=
+      fmt(Math.floor((Date.now()-startTime)/1000));
+  },1000);
+}
+function fmt(s){ return `${Math.floor(s/60)}:${String(s%60).padStart(2,'0')}`; }
+
+// ══════════════════════════════════════════
+// RESULTS
+// ══════════════════════════════════════════
+function endGame() {
+  clearInterval(timerID);
+  const elapsed=Math.floor((Date.now()-startTime)/1000);
+  renderResults({name:playerName,set:curSet,correct,errors,total,time:elapsed,shared:false});
+  show('results');
+}
+
+function renderResults({name,set,correct,errors,total,time,shared}) {
+  document.getElementById('r-ok').textContent=correct;
+  document.getElementById('r-err').textContent=errors;
+  document.getElementById('r-time').textContent=fmt(time);
+  const pct=total?Math.round(correct/total*100):0;
+
+  const banner=document.getElementById('shared-banner');
+  const shareSection=document.getElementById('share-section');
+
+  if (shared) {
+    document.getElementById('res-title').textContent=`Результат: ${name}`;
+    document.getElementById('res-msg').textContent=
+      `Набор: «${set}» · ${correct} из ${total} верно · ${errors} ошибок`;
+    banner.textContent=`Результат игрока ${name}`;
+    banner.classList.remove('hidden');
+    shareSection.style.display='none';
+  } else {
+    banner.classList.add('hidden');
+    shareSection.style.display='';
+    document.getElementById('res-title').textContent=
+      pct===100?'🏆 Отлично!':pct>=80?'🌟 Молодец!':pct>=60?'👍 Неплохо!':'💪 Давай ещё раз!';
+    document.getElementById('res-msg').textContent=resMsg(pct,name);
+    const url=buildShareUrl(name,set,correct,errors,total,time);
+    resShareUrl=url;
+    document.getElementById('share-box').textContent=url;
+  }
+
+  const btns=document.getElementById('res-btns');
+  btns.innerHTML='';
+  if (shared) {
+    addBtn(btns,'🚀 Играть самому',()=>{
+      history.replaceState({},'',location.pathname);
+      const s=localStorage.getItem('playerName');
+      if(s){playerName=s;showSets();}else show('name');
+    });
+  } else {
+    addBtn(btns,'🔄 Ещё раз',()=>startGame(curSet));
+    addBtn(btns,'🌌 Другой набор',showSets);
+  }
+}
+
+function buildShareUrl(name,set,correct,errors,total,time) {
+  const p=new URLSearchParams({share:'1',name,set,correct,errors,total,time});
+  return `${location.origin}${location.pathname}?${p}`;
+}
+
+function renderShared(params) {
+  renderResults({
+    name:   params.get('name')   ||'Игрок',
+    set:    params.get('set')    ||'',
+    correct:+(params.get('correct'))||0,
+    errors: +(params.get('errors')) ||0,
+    total:  +(params.get('total'))  ||0,
+    time:   +(params.get('time'))   ||0,
+    shared:true,
+  });
+  show('results');
+}
+
+function copyResLink() {
+  navigator.clipboard.writeText(resShareUrl)
+    .then(()=>toast('Ссылка скопирована!','inf'))
+    .catch(()=>toast('Скопируй ссылку выше вручную','inf'));
+}
+
+function resMsg(pct,name) {
+  if (pct===100) return `${name}, все слова нашли свои планеты! Космос покорён!`;
+  if (pct>=80)   return `${name}, отличная работа — почти всё верно!`;
+  if (pct>=60)   return `${name}, хорошее начало. Попробуй ещё раз!`;
+  return `${name}, части речи ждут тебя. Не сдавайся!`;
+}
+
+// ══════════════════════════════════════════
+// TOAST
+// ══════════════════════════════════════════
+function toast(msg, type='inf', ms=2700) {
+  const el=document.createElement('div');
+  el.className=`toast t-${type}`;
+  el.textContent=msg;
+  document.getElementById('toasts').appendChild(el);
+  setTimeout(()=>{
+    el.classList.add('tout');
+    setTimeout(()=>el.remove(),380);
+  }, ms);
+}
+
+// ══════════════════════════════════════════
+// HELPERS
+// ══════════════════════════════════════════
+function esc(s){ return s.replace(/&/g,'&amp;').replace(/</g,'&lt;').replace(/>/g,'&gt;'); }
+function cap(s){ return s.charAt(0).toUpperCase()+s.slice(1); }
+function clamp(v,a,b){ return Math.max(a,Math.min(b,v)); }
+function shuffle(a){
+  for(let i=a.length-1;i>0;i--){
+    const j=Math.floor(Math.random()*(i+1));
+    [a[i],a[j]]=[a[j],a[i]];
+  }
+  return a;
+}
+function addBtn(el,text,fn){
+  const b=document.createElement('button');
+  b.className='btn'; b.textContent=text; b.onclick=fn;
+  el.appendChild(b);
+}
+
+// ══════════════════════════════════════════
+// INIT
+// ══════════════════════════════════════════
+initStars();
+loadData();
+</script>
+</body>
+</html>

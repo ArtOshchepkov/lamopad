@@ -846,6 +846,10 @@ class GameScene extends Phaser.Scene {
     this.freeLlama = null;
     this._freeLlamaTimer = Phaser.Math.Between(25000, 50000);
 
+    // ── Корпоративные баннеры ────────────────────────────────────────────────
+    this.banners = [];
+    this._bannerTimer = Phaser.Math.Between(8000, 15000);
+
     for (let i = 0; i < 8; i++) {
       const sprite = this.add.image(0, 0, 'money1')
         .setOrigin(0.5, 0.5)
@@ -1712,6 +1716,47 @@ class GameScene extends Phaser.Scene {
     this.graffiti.push(txt);
   }
 
+  _spawnBanner() {
+    const SLOGANS = [
+      'МЫ СЕМЬЯ', 'РАБОТА — ЭТО СИЛА x РАССТОЯНИЕ',
+      'ОТПУСК — ЭТО СЛАБОСТЬ',
+      'ЭФФЕКТИВНОСТЬ. ЛОЯЛЬНОСТЬ. РОСТ.',
+      'СВЕРХУРОЧНЫЕ ЕСТЬ  ЛЮБОВЬ',
+      'ВСЕ ЛЮБЯТ БОЛЬШОЙ KPI',
+      'МЕСТО ДЛЯ ВАШЕЙ РЕКЛАМЫ',
+      'ЗАТО ПЕНСИЯ КОПИТСЯ!',
+      'ВМЕСТЕ СИЛЬНЕЕ! ЕДИНОРАЗОВО И ЕЖЕМЕСЯЧНО!',
+    ];
+    const W = this.scale.width;
+    const roadY = this.UPPER_ROAD_LINE;
+    const slogan = Phaser.Math.RND.pick(SLOGANS);
+
+    const postX = W + 40;
+    const signY = roadY - Phaser.Math.Between(18, 28);
+
+    const container = this.add.container(postX, 0).setDepth(1.5);
+
+    // столб
+    const post = this.add.graphics();
+    post.fillStyle(0x3a3838, 1);
+    post.fillRect(-1, signY + 8, 3, roadY - signY - 8);
+    container.add(post);
+
+    // щит
+    const txt = this.add.text(0, signY, slogan, {
+      fontSize: '7px',
+      fontFamily: 'Arial, sans-serif',
+      fontStyle: 'bold',
+      color: '#111111',
+      backgroundColor: '#c8c0b0',
+      padding: { x: 4, y: 3 },
+      align: 'center',
+    }).setOrigin(0.5, 0.5).setResolution(4);
+    container.add(txt);
+
+    this.banners.push(container);
+  }
+
   applyCharge(label, amount) {
     this.state.money -= amount;
     this.state.totalSpent += amount;
@@ -2191,6 +2236,20 @@ class GameScene extends Phaser.Scene {
       if (this.graffiti[i].x < -80) {
         this.graffiti[i].destroy();
         this.graffiti.splice(i, 1);
+      }
+    }
+
+    // ── Корпоративные баннеры ───────────────────────────────────────────────
+    this._bannerTimer -= delta;
+    if (this._bannerTimer <= 0) {
+      this._spawnBanner();
+      this._bannerTimer = Phaser.Math.Between(10000, 20000);
+    }
+    for (let i = this.banners.length - 1; i >= 0; i--) {
+      this.banners[i].x -= BASE_SPEED * 1.0 * effSpd * dt;
+      if (this.banners[i].x < -120) {
+        this.banners[i].destroy();
+        this.banners.splice(i, 1);
       }
     }
 

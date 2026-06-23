@@ -462,7 +462,7 @@ class GameScene extends Phaser.Scene {
 
     // ── Состояние ламы ────────────────────────────────────────────────────────
     this.state = {
-      health: 100, money: 50000, totalEarned: 0, totalSpent: 0, bowCount: 0, age: 0, speed: 1.0,
+      health: 100, money: 50000, totalEarned: 0, totalSpent: 0, bowCount: 0, achShown: {}, age: 0, speed: 1.0,
       isBowing: false, isSprinting: false, isCrying: false, isDead: false,
     };
 
@@ -769,6 +769,7 @@ class GameScene extends Phaser.Scene {
       { label: 'ПОДПИСКА НА МУЗЫКУ', min: 200,  max: 400 },
       { label: 'ОДЕЖДА',             min: 3000,  max: 18000 },
       { label: 'ТАКСИ',              min: 800,  max: 3000 },
+      { label: 'НАЛОГОВАЯ ПРОВЕРКА', min: 15000, max: 50000 },
     ];
     const scheduleRandom = () => {
       this.time.delayedCall(Phaser.Math.Between(2000, 10000), () => {
@@ -778,6 +779,32 @@ class GameScene extends Phaser.Scene {
       });
     };
     scheduleRandom();
+
+    // ── Позитивные случайные события ─────────────────────────────────────────
+    const RANDOM_GIFTS = [
+      { label: 'КОЛЛЕГА ПРИНЁС ТОРТ', type: 'health', min: 5, max: 15 },
+      { label: 'НАШЁЛ СОТКУ НА ДОРОГЕ', type: 'money', min: 100, max: 100 },
+      { label: 'БАБУШКА ПЕРЕВЕЛА', type: 'money', min: 500, max: 3000 },
+      { label: 'КЭШБЭК', type: 'money', min: 50, max: 150 },
+      { label: 'ПРЕМИЯ ЗА ПЕРЕРАБОТКУ', type: 'money', min: 10, max: 100 },
+    ];
+    const scheduleGift = () => {
+      this.time.delayedCall(Phaser.Math.Between(15000, 30000), () => {
+        if (this.state.isDead) return;
+        const item = Phaser.Math.RND.pick(RANDOM_GIFTS);
+        const val = Phaser.Math.Between(item.min, item.max);
+        if (item.type === 'health') {
+          this.state.health = Math.min(100, this.state.health + val);
+          this.showFloatingText(item.label + '\n+' + val + ' HP', '#44ff88');
+        } else {
+          this.state.money += val;
+          this.state.totalEarned += val;
+          this.showFloatingText(item.label + '\n+' + val + '₽', '#44ff88');
+        }
+        scheduleGift();
+      });
+    };
+    scheduleGift();
 
     // ── Физическое освещение (Phaser Light2D) ────────────────────────────────
     this.lights.enable().setAmbientColor(0x1a2e40);
@@ -1134,6 +1161,8 @@ class GameScene extends Phaser.Scene {
       moneyEl.addEventListener('mouseenter', startSlots);
       moneyEl.addEventListener('mouseleave', resetSlots);
     }
+    } // end if (!isRestart)
+
     // ── Кнопка звука (в игре) ──────────────────────────────────────────────────
     const muteBtn = document.createElement('div');
     muteBtn.style.cssText = [
@@ -1175,7 +1204,6 @@ class GameScene extends Phaser.Scene {
       muteBtn.remove();
     });
 
-    } // end if (!isRestart)
 
   }
 
@@ -1250,7 +1278,7 @@ class GameScene extends Phaser.Scene {
       return { setText: (t) => { lbl.textContent = t; } };
     };
 
-    mkBtn(0, 'ПРОГНУТЬСЯ',  () => { this.state.isBowing = true; this.state.bowCount++; this.startBow(); },
+    mkBtn(0, 'ПРОГНУТЬСЯ',  () => { this.state.isBowing = true; this.state.bowCount++; this._checkBowAch(); this.startBow(); },
                              () => { this.state.isBowing = false; this.endBow();   });
     mkBtn(1, 'ФИГАЧИТЬ',    () => { this.state.isSprinting = true;  }, () => { this.state.isSprinting = false; });
     mkBtn(2, 'ВЗЯТЬ ОТГУЛ', () => { this.requestDayOff(); }, () => {});
@@ -1260,10 +1288,22 @@ class GameScene extends Phaser.Scene {
     const SOCIAL = [
       'ПОВИДАТЬ ДРУЗЕЙ', 'ПОВИДАТЬ СЕМЬЮ', 'ВЫСПАТЬСЯ',
       'ПОЗВОНИТЬ БАБУШКЕ', 'УСТРОИТЬ СВИДАНИЕ', 'ВЫЙТИ НА ПРИРОДУ',
+      'ЗАНЯТЬСЯ КРИПТОЙ',
     ];
     let curSocial = Phaser.Math.RND.pick(SOCIAL);
     const socialTxt = mkBtn(4, curSocial, () => {
-      this.hangWithFriends();
+      if (curSocial === 'ЗАНЯТЬСЯ КРИПТОЙ') {
+        const lost = Math.max(0, Math.round(this.state.money));
+        if (lost > 0) {
+          this.state.totalSpent += lost;
+          this.state.money -= lost;
+          this.showFloatingText('КРИПТА\n-' + lost.toLocaleString('ru') + ' ₽', '#ff2244');
+        } else {
+          this.showFloatingText('НЕЧЕГО ТЕРЯТЬ', '#ff8800');
+        }
+      } else {
+        this.hangWithFriends();
+      }
       if (Math.random() < 0.70) {
         curSocial = Phaser.Math.RND.pick(SOCIAL.filter(s => s !== curSocial));
         socialTxt.setText(curSocial);
@@ -1825,6 +1865,56 @@ class GameScene extends Phaser.Scene {
     });
   }
 
+  _tryAch(key, title, sub) {
+    if (this.state.achShown[key]) return;
+    this.state.achShown[key] = true;
+    this.showAchievement(title, sub);
+  }
+
+  _checkBowAch() {
+    const n = this.state.bowCount;
+    if (n === 1)  this._tryAch('bow1',  'ВОТ ТЫ И ПРОГНУЛСЯ', 'Первый раз — не последний');
+    if (n === 5)  this._tryAch('bow5',  'ГИБКИЙ', 'Спина ещё терпит');
+    if (n === 10) this._tryAch('bow10', 'ПОЗВОНОЧНИК НЕ ЖАЛКО?', '10 прогибов');
+    if (n === 15) this._tryAch('bow15', 'ЙОГ КОРПОРАТИВНЫЙ', '15 прогибов');
+    if (n === 20) this._tryAch('bow20', 'БОСС ПРОГИБА', '20 прогибов');
+    if (n === 50) this._tryAch('bow50', 'ПОЛТОС', '50 прогибов');
+  }
+
+  _checkMoneyAch() {
+    const e = this.state.totalEarned;
+    const m = this.state.money;
+    if (e >= 100000) this._tryAch('earn100k', 'ВАУ, СТО ТЫЩЬ!', 'Заработал 100 000 ₽');
+    if (e >= 200000) this._tryAch('earn200k', 'УЖЕ 200К', 'Но на первый взнос не хватит');
+    if (e >= 1_000_000) this._tryAch('earn1m', 'МИЛЬОН!', 'Передай привет Маску!!!');
+    if (m < 0)       this._tryAch('debt',     'КРЕДИТНАЯ ИСТОРИЯ', 'Минус вайб (баланс отрицательный)');
+    if (m < -100000) this._tryAch('debt100k', 'ИПОТЕЧНИК', 'Долг превысил 100 000 ₽');
+  }
+
+  showAchievement(title, sub) {
+    const W = this.scale.width;
+    const el = document.createElement('div');
+    el.style.cssText = [
+      'position:fixed;top:8%;left:50%;transform:translateX(-50%) translateY(-30px);z-index:200',
+      'background:rgba(0,0,0,0.85);border:1px solid #ffd700;border-radius:6px',
+      'padding:8px 20px;text-align:center;pointer-events:none;opacity:0',
+      'font-family:"Arial Black",Arial,sans-serif',
+      'transition:opacity .4s,transform .4s',
+    ].join(';');
+    el.innerHTML = '<div style="color:#ffd700;font-size:13px;font-weight:900;letter-spacing:.08em">' + title + '</div>' +
+      '<div style="color:#aaa;font-size:10px;margin-top:2px">' + sub + '</div>';
+    document.body.appendChild(el);
+    requestAnimationFrame(() => requestAnimationFrame(() => {
+      el.style.opacity = '1';
+      el.style.transform = 'translateX(-50%) translateY(0)';
+    }));
+    setTimeout(() => {
+      el.style.opacity = '0';
+      el.style.transform = 'translateX(-50%) translateY(-20px)';
+      setTimeout(() => el.remove(), 500);
+    }, 2500);
+  }
+
   showFloatingText(msg, color) {
     const t = this.add.text(this.LX, this.GY - 65, msg, {
       fontSize: '14px', fontFamily: 'Arial, sans-serif', fontStyle: 'bold', color,
@@ -2128,6 +2218,8 @@ class GameScene extends Phaser.Scene {
         this._debtTxt.setText('');
       }
     }
+
+    this._checkMoneyAch();
 
     // Прожектор: обновляем позицию источника (следует за качанием корабля)
     this.spotLight.x = this.beamOBase.x + this.boatBob.x;

@@ -894,16 +894,14 @@ class GameScene extends Phaser.Scene {
     ].join(';');
 
     overlay.innerHTML = `
-      <div style="font-size:9vmin;font-weight:900;
-                 letter-spacing:.15em;margin-bottom:3vmin">
+      <div id="_agu_title" style="font-size:9vmin;font-weight:900;
+                 letter-spacing:.15em;margin-bottom:3vmin;cursor:default">
         <span style="color:#ee3333">Ⓐ</span><span style="color:#888; text-shadow: none">Т</span><span style="color:#ee3333">ГУ</span><span style="color:#888; text-shadow: none">Л</span>
       </div>
       <div id="_pb" style="font-size:4.2vmin;color:#fff;font-weight:900;
                   text-shadow:1px 1px 0 #000;margin-bottom:1vmin;padding-bottom:.8vmin"><span class="bl">П</span><span class="bl">Р</span><span class="bl">О</span><span class="bl">Г</span><span class="bl">И</span><span class="bl">Б</span><span class="bl">А</span><span class="bl">Й</span><span class="bl">С</span><span class="bl">Я</span><span class="bl">,</span></div>
-      <div style="font-size:3.6vmin;color:#ffdd44;font-weight:900;
-                  text-shadow:1px 1px 0 #000;margin-bottom:3vmin">
-        ЧТОБЫ СОБИРАТЬ ДЕНЬГИ
-      </div>
+      <div id="_agu_money" style="font-size:3.6vmin;color:#ffdd44;font-weight:900;
+                  text-shadow:1px 1px 0 #000;margin-bottom:3vmin;cursor:default"><span class="ml" style="--d:0">Ч</span><span class="ml" style="--d:1">Т</span><span class="ml" style="--d:2">О</span><span class="ml" style="--d:3">Б</span><span class="ml" style="--d:4">Ы</span><span class="ml" style="--d:5">&nbsp;</span><span class="ml" style="--d:6">С</span><span class="ml" style="--d:7">О</span><span class="ml" style="--d:8">Б</span><span class="ml" style="--d:9">И</span><span class="ml" style="--d:10">Р</span><span class="ml" style="--d:11">А</span><span class="ml" style="--d:12">Т</span><span class="ml" style="--d:13">Ь</span><span class="ml" style="--d:14">&nbsp;</span><span class="ml" style="--d:15">Д</span><span class="ml" style="--d:16">Е</span><span class="ml" style="--d:17">Н</span><span class="ml" style="--d:18">Ь</span><span class="ml" style="--d:19">Г</span><span class="ml" style="--d:20">И</span></div>
       <div style="font-size:1.8vmin;color:#777;letter-spacing:.05em;margin-bottom:1.5vmin">
         &#9835; В ИГРЕ ЗВУЧИТ МУЗЫКА
       </div>
@@ -923,6 +921,15 @@ class GameScene extends Phaser.Scene {
           user-select:none">
         ИГРАТЬ БЕЗ ЗВУКА
       </div>
+      <div style="position:absolute;bottom:2.5vmin;display:flex;flex-direction:column;align-items:center;gap:1vmin">
+        <a href="/games" style="font-size:1.6vmin;color:#444;font-family:Arial,sans-serif;
+            letter-spacing:.1em;text-decoration:none;transition:color .2s">
+          ДРУГИЕ ИГРЫ
+        </a>
+        <span style="font-size:1.3vmin;color:#2a2a2a;font-family:Arial,sans-serif;letter-spacing:.06em">
+          &#169; ЛАМОПАД 2026 — КОЕ-КАКИЕ ПРАВА ЗАЩИЩЕНЫ
+        </span>
+      </div>
       <div id="_agu_rotate" style="
         position:absolute;bottom:0;left:0;right:0;padding:3vmin;
         font-size:5.25vmin;color:#ffcc44;font-weight:900;
@@ -935,24 +942,174 @@ class GameScene extends Phaser.Scene {
       </div>
     `;
     document.head.insertAdjacentHTML('beforeend',
-      '<style>@keyframes _spin{from{transform:rotate(0deg)}to{transform:rotate(360deg)}}</style>'
+      '<style>@keyframes _spin{from{transform:rotate(0deg)}to{transform:rotate(360deg)}}' +
+      '@keyframes _strain{' +
+        '0%,100%{transform:translateX(0) skewY(0)}' +
+        '15%{transform:translateX(-2px) skewY(-1.5deg)}' +
+        '35%{transform:translateX(1px) skewY(0.8deg)}' +
+        '55%{transform:translateX(-1px) skewY(-0.6deg)}' +
+        '75%{transform:translateX(1px) skewY(0.3deg)}' +
+      '}' +
+      '#_agu_start_music{transition:background .15s,box-shadow .15s}' +
+      '#_agu_start_music:hover{background:rgba(238,51,51,1)!important;box-shadow:0 0 28px rgba(238,51,51,0.5),0 4px 0 rgba(0,0,0,0.3);animation:_strain .5s ease-in-out infinite}' +
+      '#_agu_start_music:active{transform:skewY(3deg) scale(0.97)!important;box-shadow:none;animation:none}' +
+      '@keyframes _burnout_btn{' +
+        '0%{color:#aaa;background:rgba(255,255,255,0.1)}' +
+        '30%{color:#c07840;background:rgba(160,88,32,0.15)}' +
+        '70%{color:#7a4828;background:rgba(90,40,0,0.1)}' +
+        '100%{color:#3a3532;background:rgba(255,255,255,0.04)}' +
+      '}' +
+      '#_agu_start_mute{transition:transform .15s}' +
+      '#_agu_start_mute:hover{animation:_burnout_btn 2.5s ease-in forwards}' +
+      '#_agu_start_mute:active{transform:scale(0.97)}' +
+      '#_agu_title ~ a{color:#444}#_agu_title ~ a:hover{color:#888}' +
+      '#_agu_title span{display:inline-block;transition:transform .2s}' +
+      '@keyframes _pull{' +
+        '0%,100%{transform:translateY(0) rotate(0)}' +
+        '25%{transform:translateY(-.4vmin) rotate(-4deg)}' +
+        '75%{transform:translateY(.2vmin) rotate(3deg)}' +
+      '}' +
+      '#_agu_title:hover span{animation:_pull .45s ease-in-out infinite}' +
+      '#_agu_title:hover span:nth-child(2){animation-delay:.08s}' +
+      '#_agu_title:hover span:nth-child(3){animation-delay:.16s}' +
+      '#_agu_title:hover span:nth-child(4){animation-delay:.24s}' +
+      '#_agu_money .ml{display:inline-block}' +
+      '#_agu_money .ml.spin{color:#44ff88;text-shadow:0 0 6px #22dd55,1px 1px 0 #000}' +
+      '#_agu_money .ml.done{color:#ffdd44;text-shadow:0 0 10px #ffd700,0 0 20px rgba(255,200,0,.4),1px 1px 0 #000;transition:text-shadow .8s,color .8s}' +
+      '</style>'
     );
     document.body.appendChild(overlay);
 
     const startGame = (withMusic) => {
       this._musicEnabled = withMusic;
-      this.gameStarted = true;
       window.removeEventListener('resize', checkOrientation);
+
       if (withMusic) {
         this._music.play().catch(() => {});
       } else {
         this._muteBtn.style.opacity = '0.3';
       }
-      this._muteBtn.style.display = 'flex';
-      document.body.removeChild(overlay);
+
+      overlay.style.pointerEvents = 'none';
+      const SHAKE_MS = 1800;
+      const t0 = performance.now();
+
+      const shakeFrame = () => {
+        const elapsed = performance.now() - t0;
+        if (elapsed > SHAKE_MS) { phase2(); return; }
+        const t = elapsed / SHAKE_MS;
+        const amp = t * t * 20;
+        const x = (Math.random() - 0.5) * 2 * amp;
+        const y = (Math.random() - 0.5) * 2 * amp;
+        const r = (Math.random() - 0.5) * amp * 0.4;
+        overlay.style.transform = `translate(${x}px,${y}px) rotate(${r}deg)`;
+        overlay.style.filter = `blur(${t * t * 4}px) brightness(${1 - t * 0.6})`;
+        requestAnimationFrame(shakeFrame);
+      };
+      requestAnimationFrame(shakeFrame);
+
+      const phase2 = () => {
+        overlay.style.transform = '';
+        overlay.style.filter = '';
+        overlay.style.background = '#fff';
+        overlay.innerHTML = '';
+        setTimeout(() => {
+          overlay.style.background = '#000';
+          setTimeout(phase3, 250);
+        }, 70);
+      };
+
+      const phase3 = () => {
+        document.body.removeChild(overlay);
+
+        const topBar = document.createElement('div');
+        const botBar = document.createElement('div');
+        topBar.style.cssText = 'position:fixed;top:0;left:0;right:0;height:50vh;background:#000;z-index:9998;transition:transform .8s cubic-bezier(.4,0,.2,1)';
+        botBar.style.cssText = 'position:fixed;bottom:0;left:0;right:0;height:50vh;background:#000;z-index:9998;transition:transform .8s cubic-bezier(.4,0,.2,1)';
+        document.body.appendChild(topBar);
+        document.body.appendChild(botBar);
+
+        this.gameStarted = true;
+        this._muteBtn.style.display = 'flex';
+
+        requestAnimationFrame(() => requestAnimationFrame(() => {
+          topBar.style.transform = 'translateY(-100%)';
+          botBar.style.transform = 'translateY(100%)';
+        }));
+
+        const blink = (delay, openPct, closeDur, openDur) => {
+          setTimeout(() => {
+            topBar.style.transition = `transform ${closeDur}ms ease-in`;
+            botBar.style.transition = `transform ${closeDur}ms ease-in`;
+            topBar.style.transform = `translateY(-${openPct}%)`;
+            botBar.style.transform = `translateY(${openPct}%)`;
+            setTimeout(() => {
+              topBar.style.transition = `transform ${openDur}ms ease-out`;
+              botBar.style.transition = `transform ${openDur}ms ease-out`;
+              topBar.style.transform = 'translateY(-100%)';
+              botBar.style.transform = 'translateY(100%)';
+            }, closeDur);
+          }, delay);
+        };
+
+        blink(1400,  2, 550, 1100);
+        blink(3500,  8, 450,  850);
+        blink(5500, 30, 350,  600);
+
+        setTimeout(() => { topBar.remove(); botBar.remove(); }, 7500);
+      };
     };
     overlay.querySelector('#_agu_start_music').addEventListener('pointerdown', () => startGame(true));
     overlay.querySelector('#_agu_start_mute').addEventListener('pointerdown', () => startGame(false));
+
+    // ── Слот-машина на «ЧТОБЫ СОБИРАТЬ ДЕНЬГИ» ────────────────────────────────
+    {
+      const ORIG = 'ЧТОБЫ СОБИРАТЬ ДЕНЬГИ';
+      const CHARS = '₽$¥€¢£₩₿₴₸♦♣♠♥♦♣♠♥₽$¥€¢£★₽$€¥£♦♠♣♥';
+      const moneyEl = overlay.querySelector('#_agu_money');
+      const spans = moneyEl.querySelectorAll('.ml');
+      let spinIds = [];
+      let stopTimer = null;
+
+      const startSlots = () => {
+        if (spinIds.length) return;
+        spans.forEach((s, i) => {
+          s.classList.remove('done');
+          s.classList.add('spin');
+          const id = setInterval(() => {
+            s.textContent = CHARS[Math.random() * CHARS.length | 0];
+          }, 90);
+          spinIds.push(id);
+        });
+        let idx = 0;
+        const stopNext = () => {
+          if (idx >= spans.length) { spinIds = []; return; }
+          const s = spans[idx];
+          const id = spinIds[idx];
+          clearInterval(id);
+          const orig = ORIG[idx] === ' ' ? ' ' : ORIG[idx];
+          s.textContent = orig;
+          s.classList.remove('spin');
+          s.classList.add('done');
+          idx++;
+          stopTimer = setTimeout(stopNext, 45 + Math.random() * 30);
+        };
+        stopTimer = setTimeout(stopNext, 300 + Math.random() * 150);
+      };
+
+      const resetSlots = () => {
+        if (stopTimer) { clearTimeout(stopTimer); stopTimer = null; }
+        spinIds.forEach(id => clearInterval(id));
+        spinIds = [];
+        spans.forEach((s, i) => {
+          s.classList.remove('spin', 'done');
+          s.textContent = ORIG[i] === ' ' ? ' ' : ORIG[i];
+        });
+      };
+
+      moneyEl.addEventListener('mouseenter', startSlots);
+      moneyEl.addEventListener('mouseleave', resetSlots);
+    }
 
     // ── Кнопка звука (в игре) ──────────────────────────────────────────────────
     const muteBtn = document.createElement('div');

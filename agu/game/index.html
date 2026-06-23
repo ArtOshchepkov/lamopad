@@ -462,7 +462,7 @@ class GameScene extends Phaser.Scene {
 
     // ── Состояние ламы ────────────────────────────────────────────────────────
     this.state = {
-      health: 100, money: 50000, age: 0, speed: 1.0,
+      health: 100, money: 50000, totalEarned: 0, totalSpent: 0, bowCount: 0, age: 0, speed: 1.0,
       isBowing: false, isSprinting: false, isCrying: false, isDead: false,
     };
 
@@ -862,14 +862,22 @@ class GameScene extends Phaser.Scene {
       if (this._cheatBuf.endsWith('dead')) { this.state.health = 0; this._cheatBuf = ''; }
     });
 
-    // ── Стартовый экран (HTML-оверлей поверх canvas) ──────────────────────────
-    this.gameStarted = false;
-
     // ── Музыка ─────────────────────────────────────────────────────────────────
-    this._musicEnabled = true;
-    this._music = new Audio('/tracks/Ламопад -- Атгул.mp3');
-    this._music.loop = true;
+    const isRestart = !!this.game._persistMusic;
+    if (isRestart) {
+      this._music = this.game._persistMusic;
+      this._musicEnabled = this.game._persistMusicEnabled;
+      delete this.game._persistMusic;
+      delete this.game._persistMusicEnabled;
+      this.gameStarted = true;
+    } else {
+      this._musicEnabled = true;
+      this._music = new Audio('/tracks/Ламопад -- Атгул.mp3');
+      this._music.loop = true;
+      this.gameStarted = false;
+    }
 
+    if (!isRestart) {
     // CSS для hover-изгиба надписи ПРОГИБАЙСЯ
     const bendStyle = document.createElement('style');
     bendStyle.textContent = `
@@ -987,6 +995,14 @@ class GameScene extends Phaser.Scene {
       '</style>'
     );
     document.body.appendChild(overlay);
+
+    // Подсказка о повороте
+    const rotateEl = overlay.querySelector('#_agu_rotate');
+    const checkOrientation = () => {
+      rotateEl.style.display = window.innerHeight > window.innerWidth ? 'block' : 'none';
+    };
+    checkOrientation();
+    window.addEventListener('resize', checkOrientation);
 
     const startGame = (withMusic) => {
       this._musicEnabled = withMusic;
@@ -1118,7 +1134,6 @@ class GameScene extends Phaser.Scene {
       moneyEl.addEventListener('mouseenter', startSlots);
       moneyEl.addEventListener('mouseleave', resetSlots);
     }
-
     // ── Кнопка звука (в игре) ──────────────────────────────────────────────────
     const muteBtn = document.createElement('div');
     muteBtn.style.cssText = [
@@ -1150,18 +1165,17 @@ class GameScene extends Phaser.Scene {
     });
     document.body.appendChild(muteBtn);
     this._muteBtn = muteBtn;
+    if (isRestart) {
+      muteBtn.style.display = 'flex';
+      if (!this._musicEnabled) { muteBtn.style.opacity = '0.3'; muteBtnLabel.textContent = 'ВЫКЛ'; }
+    }
     this.events.once('shutdown', () => {
-      if (this._music) { this._music.pause(); this._music.currentTime = 0; }
+      this.game._persistMusic = this._music;
+      this.game._persistMusicEnabled = this._musicEnabled;
       muteBtn.remove();
     });
 
-    // Подсказка о повороте
-    const rotateEl = overlay.querySelector('#_agu_rotate');
-    const checkOrientation = () => {
-      rotateEl.style.display = window.innerHeight > window.innerWidth ? 'block' : 'none';
-    };
-    checkOrientation();
-    window.addEventListener('resize', checkOrientation);
+    } // end if (!isRestart)
 
   }
 
@@ -1236,7 +1250,7 @@ class GameScene extends Phaser.Scene {
       return { setText: (t) => { lbl.textContent = t; } };
     };
 
-    mkBtn(0, 'ПРОГНУТЬСЯ',  () => { this.state.isBowing = true;  this.startBow(); },
+    mkBtn(0, 'ПРОГНУТЬСЯ',  () => { this.state.isBowing = true; this.state.bowCount++; this.startBow(); },
                              () => { this.state.isBowing = false; this.endBow();   });
     mkBtn(1, 'ФИГАЧИТЬ',    () => { this.state.isSprinting = true;  }, () => { this.state.isSprinting = false; });
     mkBtn(2, 'ВЗЯТЬ ОТГУЛ', () => { this.requestDayOff(); }, () => {});
@@ -1557,7 +1571,7 @@ class GameScene extends Phaser.Scene {
 
   _spawnGraffiti() {
     const WORDS   = ['ЗАЧЕМ?', 'АХМАТОВА СИЛА', 'В КРАСИВОМ ПАЛЬТО', '***', '*****', 'ПЕРЕМЕН!', 'ХОЧУ ОТГУЛ', 'СКУЧАЮ',
-      'ВЕРНИ СТЕНУ'];
+      'ВЕРНИ СТЕНУ', 'СТАВКИ НА СПОРТ'];
     const COLORS  = ['#e03030', '#000000', '#7a7a7a', '#2060d0', '#c020c0', '#20b0b0'];
     const word    = Phaser.Math.RND.pick(WORDS);
     const color   = Phaser.Math.RND.pick(COLORS);
@@ -1579,6 +1593,7 @@ class GameScene extends Phaser.Scene {
 
   applyCharge(label, amount) {
     this.state.money -= amount;
+    this.state.totalSpent += amount;
     const x = this.LX + Phaser.Math.Between(-50, 50);
     const y = this.GY - 60 + Phaser.Math.Between(-15, 15);
     const t = this.add.text(x, y, label + '\n-' + amount + '₽', {
@@ -1678,20 +1693,15 @@ class GameScene extends Phaser.Scene {
       const res   = 8;
 
       // Заголовок
-      this.add.text(cx, cy - 68, 'ИГРА ОКОНЧЕНА', {
+      this.add.text(cx, cy - 90, 'ИГРА ОКОНЧЕНА', {
         fontSize: '22px', fontFamily: 'Arial Black, Arial, sans-serif', fontStyle: 'bold',
         color: '#ff2222', stroke: '#000000', strokeThickness: 5, align: 'center',
       }).setOrigin(0.5).setDepth(DEPTH).setResolution(res);
 
-      this.add.text(cx, cy - 46, 'ЛАМА УПАЛА. ОНА УСТАЛА.', {
-        fontSize: '10px', fontFamily: 'Arial, sans-serif',
-        color: '#888888', stroke: '#000000', strokeThickness: 2, align: 'center',
-      }).setOrigin(0.5).setDepth(DEPTH).setResolution(res);
-
       // ── Кнопки ──────────────────────────────────────────────────────────────
-      const BTN_W = 200, BTN_H = 28, BTN_GAP = 10;
-      const CTA_W = 244, CTA_H = 42;
-      const btnY = [cy - 26, cy + 12, cy + 64];
+      const BTN_W = 100, BTN_H = 16, BTN_GAP = 6;
+      const CTA_W = 122, CTA_H = 22;
+      const btnY = [cy + 20, cy + 44, cy + 74];
 
       // HTML-контейнер для подписей кнопок экрана смерти
       const deathLblContainer = document.createElement('div');
@@ -1699,7 +1709,45 @@ class GameScene extends Phaser.Scene {
       document.body.appendChild(deathLblContainer);
       this.events.once('shutdown', () => deathLblContainer.remove());
 
-      const mkGoBtn = (idx, label, col, onClick, w = BTN_W, h = BTN_H, fs = 13) => {
+      const fmt = (v) => Math.round(v).toLocaleString('ru') + ' ₽';
+      const balance = Math.round(this.state.money);
+      const bows = this.state.bowCount;
+      const statsEl = document.createElement('div');
+      statsEl.innerHTML =
+        '<span style="color:#ccc">ВЫ ПРОГНУЛИСЬ </span>' +
+        '<span style="color:#ffdd44">' + bows + ' РАЗ</span>' +
+        '<span style="color:#ccc"> И ЗАРАБОТАЛИ </span>' +
+        '<span style="color:#55ff77">' + fmt(this.state.totalEarned) + '</span>' +
+        '<br>' +
+        '<span style="color:#ccc">ПОТРАТИЛИ </span>' +
+        '<span style="color:#ff6666">' + fmt(this.state.totalSpent) + '</span>' +
+        '<span style="color:#ccc">, ИТОГО В НАСЛЕДСТВО ОСТАЛОСЬ ЦЕЛЫХ </span>' +
+        '<span style="color:' + (balance >= 0 ? '#ffdd44' : '#ff4444') + '">' + fmt(balance) + '</span>';
+      statsEl.style.cssText = [
+        'position:absolute',
+        'transform:translate(-50%,-50%)',
+        'font-family:"Arial Black",Arial,sans-serif',
+        'font-weight:900',
+        'text-align:center',
+        'line-height:1.6',
+        'text-shadow:-1px -1px 0 #000,1px -1px 0 #000,-1px 1px 0 #000,1px 1px 0 #000,0 1px 0 #000,0 -1px 0 #000',
+        'pointer-events:none',
+      ].join(';');
+      deathLblContainer.appendChild(statsEl);
+      const posStats = () => {
+        const rect = this.sys.game.canvas.getBoundingClientRect();
+        const sx = rect.width / W;
+        const sy = rect.height / H;
+        statsEl.style.left = (rect.left + cx * sx) + 'px';
+        statsEl.style.top = (rect.top + (cy - 30) * sy) + 'px';
+        statsEl.style.maxWidth = Math.round(400 * sx) + 'px';
+        statsEl.style.fontSize = Math.round(10 * sx) + 'px';
+      };
+      posStats();
+      window.addEventListener('resize', posStats);
+      this.events.once('shutdown', () => window.removeEventListener('resize', posStats));
+
+      const mkGoBtn = (idx, label, col, onClick, w = BTN_W, h = BTN_H, fs = 7) => {
         const by  = btnY[idx];
         const gfx = this.add.graphics().setDepth(DEPTH);
 
@@ -1767,8 +1815,8 @@ class GameScene extends Phaser.Scene {
 
       // Кнопка 2 (CTA): ДОБАВИТЬ ТРЕК К СЕБЕ
       mkGoBtn(1, 'ДОБАВИТЬ ТРЕК К СЕБЕ', 0x3c1c5c, () => {
-        window.location.href = 'https://example.com';
-      }, CTA_W, CTA_H, 16);
+        alert('Здесь будет пресейв');
+      }, CTA_W, CTA_H, 8);
 
       // Кнопка 3: ДРУГИЕ ИГРЫ
       mkGoBtn(2, 'ДРУГИЕ ИГРЫ', 0x1c3c3c, () => {
@@ -2215,6 +2263,7 @@ class GameScene extends Phaser.Scene {
             },
           });
           this.state.money += bn.denomination;
+          this.state.totalEarned += bn.denomination;
           this._playCoin();
           const t = this.add.text(hx, hy - 10, '+' + bn.denomination, {
             fontSize: '12px', fontFamily: 'Arial, sans-serif', fontStyle: 'bold',
@@ -2307,6 +2356,7 @@ class GameScene extends Phaser.Scene {
           bn.state = 'idle';
           bn.sprite.setAngle(0).setVisible(false);
           this.state.money += 5;
+          this.state.totalEarned += 5;
           continue;
         }
         // Позиция Y повторяет волновую формулу waveGfx

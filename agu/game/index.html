@@ -857,6 +857,11 @@ class GameScene extends Phaser.Scene {
     // ── Стартовый экран (HTML-оверлей поверх canvas) ──────────────────────────
     this.gameStarted = false;
 
+    // ── Музыка ─────────────────────────────────────────────────────────────────
+    this._musicEnabled = true;
+    this._music = new Audio('/tracks/Ламопад -- Атгул.mp3');
+    this._music.loop = true;
+
     // CSS для hover-изгиба надписи ПРОГИБАЙСЯ
     const bendStyle = document.createElement('style');
     bendStyle.textContent = `
@@ -896,12 +901,27 @@ class GameScene extends Phaser.Scene {
       <div id="_pb" style="font-size:4.2vmin;color:#fff;font-weight:900;
                   text-shadow:1px 1px 0 #000;margin-bottom:1vmin;padding-bottom:.8vmin"><span class="bl">П</span><span class="bl">Р</span><span class="bl">О</span><span class="bl">Г</span><span class="bl">И</span><span class="bl">Б</span><span class="bl">А</span><span class="bl">Й</span><span class="bl">С</span><span class="bl">Я</span><span class="bl">,</span></div>
       <div style="font-size:3.6vmin;color:#ffdd44;font-weight:900;
-                  text-shadow:1px 1px 0 #000;margin-bottom:5vmin">
+                  text-shadow:1px 1px 0 #000;margin-bottom:3vmin">
         ЧТОБЫ СОБИРАТЬ ДЕНЬГИ
       </div>
-      <div id="_agu_hint" style="font-size:2.4vmin;color:#666;font-weight:normal;
-                                  font-family:Arial,sans-serif">
-        НАЖМИ ЧТОБЫ НАЧАТЬ
+      <div style="font-size:1.8vmin;color:#777;letter-spacing:.05em;margin-bottom:1.5vmin">
+        &#9835; В ИГРЕ ЗВУЧИТ МУЗЫКА
+      </div>
+      <div id="_agu_start_music" style="font-size:3vmin;color:#fff;cursor:pointer;
+          padding:1.8vmin 6vmin;margin-bottom:2.5vmin;
+          background:rgba(238,51,51,0.85);border-radius:4px;
+          font-family:'Arial Black',Arial,sans-serif;font-weight:900;
+          letter-spacing:.08em;text-shadow:1px 1px 0 rgba(0,0,0,0.5);
+          user-select:none">
+        &#9654; ИГРАТЬ
+      </div>
+      <div id="_agu_start_mute" style="font-size:2vmin;color:#aaa;cursor:pointer;
+          padding:1.2vmin 4vmin;
+          background:rgba(255,255,255,0.1);border-radius:4px;
+          font-family:'Arial Black',Arial,sans-serif;font-weight:900;
+          letter-spacing:.08em;text-shadow:1px 1px 0 rgba(0,0,0,0.5);
+          user-select:none">
+        ИГРАТЬ БЕЗ ЗВУКА
       </div>
       <div id="_agu_rotate" style="
         position:absolute;bottom:0;left:0;right:0;padding:3vmin;
@@ -919,6 +939,57 @@ class GameScene extends Phaser.Scene {
     );
     document.body.appendChild(overlay);
 
+    const startGame = (withMusic) => {
+      this._musicEnabled = withMusic;
+      this.gameStarted = true;
+      window.removeEventListener('resize', checkOrientation);
+      if (withMusic) {
+        this._music.play().catch(() => {});
+      } else {
+        this._muteBtn.style.opacity = '0.3';
+      }
+      this._muteBtn.style.display = 'flex';
+      document.body.removeChild(overlay);
+    };
+    overlay.querySelector('#_agu_start_music').addEventListener('pointerdown', () => startGame(true));
+    overlay.querySelector('#_agu_start_mute').addEventListener('pointerdown', () => startGame(false));
+
+    // ── Кнопка звука (в игре) ──────────────────────────────────────────────────
+    const muteBtn = document.createElement('div');
+    muteBtn.style.cssText = [
+      'position:fixed;top:10px;left:10px;z-index:100;cursor:pointer',
+      'display:none;align-items:center;gap:6px;padding:5px 10px 5px 8px',
+      'background:rgba(0,0,0,0.6);border:1px solid rgba(255,255,255,0.2)',
+      'border-radius:6px;user-select:none;color:#fff',
+      'font-family:Arial,sans-serif;transition:opacity .15s',
+    ].join(';');
+    const muteBtnIcon = document.createElement('span');
+    muteBtnIcon.textContent = '♫';
+    muteBtnIcon.style.cssText = 'font-size:24px;line-height:1';
+    const muteBtnLabel = document.createElement('span');
+    muteBtnLabel.style.cssText = 'font-size:11px;font-weight:700;letter-spacing:.06em;opacity:.8';
+    muteBtnLabel.textContent = 'ВКЛ';
+    muteBtn.append(muteBtnIcon, muteBtnLabel);
+    muteBtn.addEventListener('pointerdown', (e) => {
+      e.stopPropagation();
+      this._musicEnabled = !this._musicEnabled;
+      if (this._musicEnabled) {
+        this._music.play().catch(() => {});
+        muteBtn.style.opacity = '1';
+        muteBtnLabel.textContent = 'ВКЛ';
+      } else {
+        this._music.pause();
+        muteBtn.style.opacity = '0.3';
+        muteBtnLabel.textContent = 'ВЫКЛ';
+      }
+    });
+    document.body.appendChild(muteBtn);
+    this._muteBtn = muteBtn;
+    this.events.once('shutdown', () => {
+      if (this._music) { this._music.pause(); this._music.currentTime = 0; }
+      muteBtn.remove();
+    });
+
     // Подсказка о повороте
     const rotateEl = overlay.querySelector('#_agu_rotate');
     const checkOrientation = () => {
@@ -927,20 +998,6 @@ class GameScene extends Phaser.Scene {
     checkOrientation();
     window.addEventListener('resize', checkOrientation);
 
-    // Мигание подсказки
-    const hintEl = overlay.querySelector('#_agu_hint');
-    let blinkOn = true;
-    const blinkId = setInterval(() => {
-      blinkOn = !blinkOn;
-      hintEl.style.opacity = blinkOn ? '1' : '0.15';
-    }, 600);
-
-    overlay.addEventListener('pointerdown', () => {
-      this.gameStarted = true;
-      clearInterval(blinkId);
-      window.removeEventListener('resize', checkOrientation);
-      document.body.removeChild(overlay);
-    });
   }
 
   createButtons() {

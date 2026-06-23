@@ -1276,8 +1276,10 @@ class GameScene extends Phaser.Scene {
         lbl.style.fontSize = Math.round(12 * sx) + 'px';
       };
       positionLbl();
-      window.addEventListener('resize', positionLbl);
-      this.events.once('shutdown', () => window.removeEventListener('resize', positionLbl));
+      let _lblResizeId;
+      const onLblResize = () => { clearTimeout(_lblResizeId); _lblResizeId = setTimeout(positionLbl, 100); };
+      window.addEventListener('resize', onLblResize);
+      this.events.once('shutdown', () => window.removeEventListener('resize', onLblResize));
 
       const zone = this.add.zone(cx - BW / 2, by, BW, BH)
         .setOrigin(0, 0).setDepth(32).setInteractive();

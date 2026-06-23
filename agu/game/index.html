@@ -1814,10 +1814,25 @@ class GameScene extends Phaser.Scene {
       const res   = 8;
 
       // Заголовок
-      this.add.text(cx, cy - 90, 'ИГРА ОКОНЧЕНА', {
-        fontSize: '22px', fontFamily: 'Arial Black, Arial, sans-serif', fontStyle: 'bold',
-        color: '#ff2222', stroke: '#000000', strokeThickness: 5, align: 'center',
-      }).setOrigin(0.5).setDepth(DEPTH).setResolution(res);
+      if (this.state.bowCount === 0) {
+        this.add.text(cx, cy - 100, 'ВЫ НИ РАЗУ НЕ ПРОГНУЛИСЬ', {
+          fontSize: '16px', fontFamily: 'Arial Black, Arial, sans-serif', fontStyle: 'bold',
+          color: '#ffd700', stroke: '#000000', strokeThickness: 5, align: 'center',
+        }).setOrigin(0.5).setDepth(DEPTH).setResolution(res);
+        this.add.text(cx, cy - 78, 'И УМЕРЛИ В НИЩЕТЕ!', {
+          fontSize: '16px', fontFamily: 'Arial Black, Arial, sans-serif', fontStyle: 'bold',
+          color: '#ffd700', stroke: '#000000', strokeThickness: 5, align: 'center',
+        }).setOrigin(0.5).setDepth(DEPTH).setResolution(res);
+        this.add.text(cx, cy - 58, 'ПОЗДРАВЛЯЮ!', {
+          fontSize: '22px', fontFamily: 'Arial Black, Arial, sans-serif', fontStyle: 'bold',
+          color: '#44ff88', stroke: '#000000', strokeThickness: 5, align: 'center',
+        }).setOrigin(0.5).setDepth(DEPTH).setResolution(res);
+      } else {
+        this.add.text(cx, cy - 90, 'ИГРА ОКОНЧЕНА', {
+          fontSize: '22px', fontFamily: 'Arial Black, Arial, sans-serif', fontStyle: 'bold',
+          color: '#ff2222', stroke: '#000000', strokeThickness: 5, align: 'center',
+        }).setOrigin(0.5).setDepth(DEPTH).setResolution(res);
+      }
 
       // ── Кнопки ──────────────────────────────────────────────────────────────
       const BTN_W = 100, BTN_H = 16, BTN_GAP = 6;
@@ -1830,43 +1845,45 @@ class GameScene extends Phaser.Scene {
       document.body.appendChild(deathLblContainer);
       this.events.once('shutdown', () => deathLblContainer.remove());
 
-      const fmt = (v) => Math.round(v).toLocaleString('ru') + ' ₽';
-      const balance = Math.round(this.state.money);
-      const bows = this.state.bowCount;
-      const statsEl = document.createElement('div');
-      statsEl.innerHTML =
-        '<span style="color:#ccc">ВЫ ПРОГНУЛИСЬ </span>' +
-        '<span style="color:#ffdd44">' + bows + ' РАЗ</span>' +
-        '<span style="color:#ccc"> И ЗАРАБОТАЛИ </span>' +
-        '<span style="color:#55ff77">' + fmt(this.state.totalEarned) + '</span>' +
-        '<br>' +
-        '<span style="color:#ccc">ПОТРАТИЛИ </span>' +
-        '<span style="color:#ff6666">' + fmt(this.state.totalSpent) + '</span>' +
-        '<span style="color:#ccc">, ИТОГО В НАСЛЕДСТВО ОСТАЛОСЬ ЦЕЛЫХ </span>' +
-        '<span style="color:' + (balance >= 0 ? '#ffdd44' : '#ff4444') + '">' + fmt(balance) + '</span>';
-      statsEl.style.cssText = [
-        'position:absolute',
-        'transform:translate(-50%,-50%)',
-        'font-family:"Arial Black",Arial,sans-serif',
-        'font-weight:900',
-        'text-align:center',
-        'line-height:1.6',
-        'text-shadow:-1px -1px 0 #000,1px -1px 0 #000,-1px 1px 0 #000,1px 1px 0 #000,0 1px 0 #000,0 -1px 0 #000',
-        'pointer-events:none',
-      ].join(';');
-      deathLblContainer.appendChild(statsEl);
-      const posStats = () => {
-        const rect = this.sys.game.canvas.getBoundingClientRect();
-        const sx = rect.width / W;
-        const sy = rect.height / H;
-        statsEl.style.left = (rect.left + cx * sx) + 'px';
-        statsEl.style.top = (rect.top + (cy - 30) * sy) + 'px';
-        statsEl.style.maxWidth = Math.round(400 * sx) + 'px';
-        statsEl.style.fontSize = Math.round(10 * sx) + 'px';
-      };
-      posStats();
-      window.addEventListener('resize', posStats);
-      this.events.once('shutdown', () => window.removeEventListener('resize', posStats));
+      if (this.state.bowCount > 0) {
+        const fmt = (v) => Math.round(v).toLocaleString('ru') + ' ₽';
+        const balance = Math.round(this.state.money);
+        const bows = this.state.bowCount;
+        const statsEl = document.createElement('div');
+        statsEl.innerHTML =
+          '<span style="color:#ccc">ВЫ ПРОГНУЛИСЬ </span>' +
+          '<span style="color:#ffdd44">' + bows + ' РАЗ</span>' +
+          '<span style="color:#ccc"> И ЗАРАБОТАЛИ </span>' +
+          '<span style="color:#55ff77">' + fmt(this.state.totalEarned) + '</span>' +
+          '<br>' +
+          '<span style="color:#ccc">ПОТРАТИЛИ </span>' +
+          '<span style="color:#ff6666">' + fmt(this.state.totalSpent) + '</span>' +
+          '<span style="color:#ccc">, ИТОГО В НАСЛЕДСТВО ОСТАЛОСЬ ЦЕЛЫХ </span>' +
+          '<span style="color:' + (balance >= 0 ? '#ffdd44' : '#ff4444') + '">' + fmt(balance) + '</span>';
+        statsEl.style.cssText = [
+          'position:absolute',
+          'transform:translate(-50%,-50%)',
+          'font-family:"Arial Black",Arial,sans-serif',
+          'font-weight:900',
+          'text-align:center',
+          'line-height:1.6',
+          'text-shadow:-1px -1px 0 #000,1px -1px 0 #000,-1px 1px 0 #000,1px 1px 0 #000,0 1px 0 #000,0 -1px 0 #000',
+          'pointer-events:none',
+        ].join(';');
+        deathLblContainer.appendChild(statsEl);
+        const posStats = () => {
+          const rect = this.sys.game.canvas.getBoundingClientRect();
+          const sx = rect.width / W;
+          const sy = rect.height / H;
+          statsEl.style.left = (rect.left + cx * sx) + 'px';
+          statsEl.style.top = (rect.top + (cy - 30) * sy) + 'px';
+          statsEl.style.maxWidth = Math.round(400 * sx) + 'px';
+          statsEl.style.fontSize = Math.round(10 * sx) + 'px';
+        };
+        posStats();
+        window.addEventListener('resize', posStats);
+        this.events.once('shutdown', () => window.removeEventListener('resize', posStats));
+      }
 
       const mkGoBtn = (idx, label, col, onClick, w = BTN_W, h = BTN_H, fs = 7) => {
         const by  = btnY[idx];

@@ -1321,6 +1321,7 @@ class GameScene extends Phaser.Scene {
 
         this.gameStarted = true;
         this._muteBtn.style.display = 'flex';
+        if (this._helpBtn) this._helpBtn.style.display = 'flex';
 
         requestAnimationFrame(() => requestAnimationFrame(() => {
           topBar.style.transform = 'translateY(-100%)';
@@ -1406,7 +1407,7 @@ class GameScene extends Phaser.Scene {
     const muteBtn = document.createElement('div');
     muteBtn.style.cssText = [
       'position:fixed;top:10px;left:10px;z-index:100;cursor:pointer',
-      'display:none;align-items:center;gap:6px;padding:5px 10px 5px 8px',
+      'display:none;align-items:center;gap:6px;padding:5px 10px 5px 8px;height:34px;box-sizing:border-box',
       'background:rgba(0,0,0,0.6);border:1px solid rgba(255,255,255,0.2)',
       'border-radius:6px;user-select:none;color:#fff',
       'font-family:Arial,sans-serif;transition:opacity .15s',
@@ -1435,12 +1436,59 @@ class GameScene extends Phaser.Scene {
     this._muteBtn = muteBtn;
     if (isRestart) {
       muteBtn.style.display = 'flex';
+      helpBtn.style.display = 'flex';
       if (!this._musicEnabled) { muteBtn.style.opacity = '0.3'; muteBtnLabel.textContent = 'ВЫКЛ'; }
     }
+    // ── Кнопка помощи ─────────────────────────────────────────────────────────
+    const helpBtn = document.createElement('div');
+    helpBtn.textContent = '?';
+    helpBtn.style.cssText = [
+      'position:fixed;top:10px;left:90px;z-index:100;cursor:pointer',
+      'display:none;align-items:center;justify-content:center',
+      'width:34px;height:34px;box-sizing:border-box',
+      'background:rgba(0,0,0,0.6);border:1px solid rgba(255,255,255,0.2)',
+      'border-radius:6px;user-select:none;color:#fff',
+      'font-family:"Arial Black",Arial,sans-serif;font-size:16px;font-weight:900',
+      'transition:opacity .15s',
+    ].join(';');
+    const helpOverlay = document.createElement('div');
+    helpOverlay.style.cssText = [
+      'position:fixed;inset:0;z-index:9998;display:none',
+      'align-items:center;justify-content:center',
+      'background:rgba(0,0,0,0.88)',
+    ].join(';');
+    helpOverlay.innerHTML = `
+      <div style="max-width:600px;padding:32px 40px;text-align:center;font-family:'Arial Black',Arial,sans-serif;color:#fff;line-height:1.8">
+        <div style="font-size:36px;font-weight:900;color:#ee3333;margin-bottom:16px">КАК ИГРАТЬ</div>
+        <div style="font-size:26px;color:#ccc;margin-bottom:20px">
+          Купюры летят с корабля и плывут по воде.<br>
+          Жми <span style="color:#ffdd44">ПРОГНУТЬСЯ</span> (верхняя кнопка),<br>
+          чтобы собрать их головой, пока не уплыли!
+        </div>
+        <div style="font-size:24px;color:#888;margin-bottom:20px">
+          Остальные кнопки разгадывай сам.<br>
+          <span style="color:#aaa">Не бойся кликать везде на мир, исследуй!</span><br>
+        </div>
+        <div style="font-size:22px;color:#555;border-top:1px solid #333;padding-top:16px">
+          Игра по треку <span style="color:#ee3333">Ламопад</span> — <span style="color:#888">АТГУЛ</span>
+        </div>
+      </div>
+    `;
+    helpOverlay.addEventListener('pointerdown', () => { helpOverlay.style.display = 'none'; });
+    helpBtn.addEventListener('pointerdown', (e) => {
+      e.stopPropagation();
+      helpOverlay.style.display = helpOverlay.style.display === 'flex' ? 'none' : 'flex';
+    });
+    document.body.appendChild(helpBtn);
+    document.body.appendChild(helpOverlay);
+    this._helpBtn = helpBtn;
+
     this.events.once('shutdown', () => {
       this.game._persistMusic = this._music;
       this.game._persistMusicEnabled = this._musicEnabled;
       muteBtn.remove();
+      helpBtn.remove();
+      helpOverlay.remove();
     });
 
 
@@ -3277,7 +3325,7 @@ class GameScene extends Phaser.Scene {
           bn.floatPhase = bn.x * 0.04;
           if (this._firstBanknote > 0) {
             this._firstBanknote--;
-            const hint = this.add.text(0, 0, 'ПРОГНИСЬ! ↑\n(жми верхнюю кнопку)', {
+            const hint = this.add.text(0, 0, 'ПРОГНИСЬ!\n(жми верхнюю кнопку)', {
               fontSize: '9px', fontFamily: 'Arial, sans-serif', fontStyle: 'bold',
               color: '#ffffff', stroke: '#000000', strokeThickness: 3, align: 'center',
             }).setOrigin(0.5, 1).setDepth(21).setAlpha(0).setResolution(8);

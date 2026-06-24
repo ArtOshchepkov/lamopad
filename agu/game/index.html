@@ -696,6 +696,8 @@ class GameScene extends Phaser.Scene {
     this.ropeBoat = { x: KNECHT_X, y: KNECHT_Y };         // кнехт корабля (обновляется в update)
     this.knechtBase  = { x: KNECHT_X, y: KNECHT_Y };       // базовые координаты без покачивания
     this.shipEdgeX   = BOW_DECK_X + FACE_W + 4;           // правый край корпуса + запас
+    this._shipTopX   = BOW_DECK_X + FACE_W;               // правый край носа у палубы (y=0)
+    this._shipBotX   = BOW_WL_X;                           // правый край носа у ватерлинии
 
 
 
@@ -879,10 +881,62 @@ class GameScene extends Phaser.Scene {
       this.rainDrops.push(this._spawnRainDrop(true));
     }
 
+    // ── Царапины на корабле ────────────────────────────────────────────────
+    this._scratchGfx = this.add.graphics().setDepth(8.1);
+    this._isScratchingShip = false;
+    this._lastScratchPos = null;
+    this._scratchAudio = new Audio('skrezhet-metalla.mp3');
+    this._scratchAudio.loop = true;
+    this._scratchAudio.volume = 0.6;
+    this.events.once('shutdown', () => { this._scratchAudio.pause(); this._scratchAudio.src = ''; });
+
+    const _shipHit = (px, py) => {
+      if (py < 0 || py >= this.waterY) return false;
+      const edgeX = this._shipTopX - (this._shipTopX - this._shipBotX) * (py / this.waterY);
+      return px < edgeX;
+    };
+
+    this.input.on('pointerdown', (pointer) => {
+      if (this.state.isDead || !this.gameStarted) return;
+      const px = pointer.x - this.boatBob.x;
+      const py = pointer.y - this.boatBob.y;
+      if (_shipHit(px, py)) {
+        this._isScratchingShip = true;
+        this._lastScratchPos = { x: px, y: py };
+        this._scratchAudio.currentTime = 0;
+        this._scratchAudio.play().catch(() => {});
+      }
+    });
+    this.input.on('pointermove', (pointer) => {
+      if (!this._isScratchingShip || !pointer.isDown) { this._isScratchingShip = false; this._scratchAudio.pause(); return; }
+      const px = pointer.x - this.boatBob.x;
+      const py = pointer.y - this.boatBob.y;
+      if (_shipHit(px, py) && this._lastScratchPos) {
+        const col = Phaser.Math.RND.pick([0xc8d8e8, 0xb0c0d0, 0xe0e8f0, 0x90a8b8]);
+        this._scratchGfx.lineStyle(1, col, 0.4 + Math.random() * 0.3);
+        this._scratchGfx.lineBetween(this._lastScratchPos.x, this._lastScratchPos.y, px, py);
+        for (let i = 0; i < 3; i++) {
+          this.particles.push({
+            x: pointer.x, y: pointer.y,
+            vx: Phaser.Math.FloatBetween(-50, 50),
+            vy: Phaser.Math.FloatBetween(-70, -10),
+            life: 1.0,
+            col: Phaser.Math.RND.pick([0xffdd44, 0xff8800, 0xffff88]),
+          });
+        }
+      }
+      this._lastScratchPos = { x: px, y: py };
+    });
+    this.input.on('pointerup', () => {
+      this._isScratchingShip = false;
+      this._lastScratchPos = null;
+      this._scratchAudio.pause();
+    });
+
     // Все видимые объекты → Light2D pipeline
     [
       this.tl4, this.tl3, this.tl2, this.tl1,
-      this.boatGfx, this.llamaBody, this.neckGfx, this.llamaHead, this.harnessGfx,
+      this.boatGfx, this._scratchGfx, this.llamaBody, this.neckGfx, this.llamaHead, this.harnessGfx,
       this.legBL, this.legBR, this.legFL, this.legFR,
       this.ropeGfx, this.waveGfx, this.lampBodyGfx, this.snakeImg,
       this.particleGfx, this.caneGfx, this.eyeGfx, this.soskaImg,
@@ -2542,8 +2596,10 @@ class GameScene extends Phaser.Scene {
     if (this.walkTween2f) this.walkTween2f.timeScale = effSpd;
 
     // Корабль и пушка покачиваются вместе
-    this.boatGfx.x  = this.boatBob.x;
-    this.boatGfx.y  = this.boatBob.y;
+    this.boatGfx.x      = this.boatBob.x;
+    this.boatGfx.y      = this.boatBob.y;
+    this._scratchGfx.x  = this.boatBob.x;
+    this._scratchGfx.y  = this.boatBob.y;
     this.snakeImg.x = this.snakeBase.x + this.boatBob.x;
     this.snakeImg.y = this.snakeBase.y + this.boatBob.y;
     this.eyeLight.x = this.eyeBase.x + this.boatBob.x;

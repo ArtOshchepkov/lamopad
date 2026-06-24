@@ -1243,6 +1243,14 @@ class GameScene extends Phaser.Scene {
       this._musicEnabled = withMusic;
       window.removeEventListener('resize', checkOrientation);
 
+      // Попытка залочить горизонтальную ориентацию на мобилке
+      try {
+        const el = document.documentElement;
+        const fs = el.requestFullscreen || el.webkitRequestFullscreen || el.msRequestFullscreen;
+        if (fs) fs.call(el).then(() => { screen.orientation.lock('landscape').catch(() => {}); }).catch(() => {});
+        else screen.orientation.lock('landscape').catch(() => {});
+      } catch(e) {}
+
       if (withMusic) {
         this._music.play().catch(() => {});
       } else {

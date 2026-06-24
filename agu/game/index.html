@@ -927,8 +927,14 @@ class GameScene extends Phaser.Scene {
         }
       }
     });
+    this._hoveredWin = null;
     this.input.on('pointermove', (pointer) => {
-      if (!this._isScratchingShip || !pointer.isDown) { this._isScratchingShip = false; this._scratchAudio.pause(); return; }
+      if (!this._isScratchingShip || !pointer.isDown) {
+        this._isScratchingShip = false; this._scratchAudio.pause();
+        this._hoveredWin = this._findPanelkaWindow(pointer.x, pointer.y);
+        return;
+      }
+      this._hoveredWin = null;
       const px = pointer.x - this.boatBob.x;
       const py = pointer.y - this.boatBob.y;
       if (_shipHit(px, py) && this._lastScratchPos) {
@@ -2542,6 +2548,16 @@ class GameScene extends Phaser.Scene {
           const sy = this.scale.height - this.h3 + tw.ty;
           this.blinkGfx.fillStyle(tw.lit ? 0xd4a020 : 0x111c24, tw.lit ? 0.9 : 1);
           this.blinkGfx.fillRect(sx, sy, tw.w, tw.h);
+        }
+      }
+      if (this._hoveredWin) {
+        const hw = this._hoveredWin;
+        for (let rep = -1; rep <= 2; rep++) {
+          const sx = startX + hw.tx + rep * BLINK_TILE_W;
+          if (sx > sceneW || sx + hw.w < 0) continue;
+          const sy = this.scale.height - this.h3 + hw.ty;
+          this.blinkGfx.fillStyle(0xd4a020, 0.15);
+          this.blinkGfx.fillRect(sx, sy, hw.w, hw.h);
         }
       }
     }

@@ -444,6 +444,20 @@ class GameScene extends Phaser.Scene {
       { tx: 291, ty: 59, w: 15, h: 8, on: false, timer: Phaser.Math.Between(10000, UPPER_BLINK_INTERVAL) },
     ];
 
+    // Сетка окон для обработки кликов
+    this._panelkaDefs = [
+      { x: 0, w: 88, h: 120, floors: 9, cols: 4 },
+      { x: 91, w: 118, h: 140, floors: 12, cols: 6 },
+      { x: 212, w: 105, h: 130, floors: 10, cols: 5 },
+    ].map(b => {
+      const PX = 7, PT = 7, PB = 14, GX = 3, GY = 3;
+      return { ...b, top: h3 - b.h,
+        winW: Math.max(4, Math.floor((b.w - 2*PX - (b.cols-1)*GX) / b.cols)),
+        winH: Math.max(4, Math.floor((b.h - PT - PB - (b.floors-1)*GY) / b.floors)),
+        PX, PT, GX, GY };
+    });
+    this._toggledWins = new Map();
+
     // дорога: y = H - h1 - h2 (прямо над рекой)
     this.tl2 = this.add.tileSprite(0, H - h1 - h2, W, h2, 'layer2').setOrigin(0, 0).setDepth(1);
 
@@ -905,6 +919,12 @@ class GameScene extends Phaser.Scene {
         this._lastScratchPos = { x: px, y: py };
         this._scratchAudio.currentTime = 0;
         this._scratchAudio.play().catch(() => {});
+      } else {
+        const win = this._findPanelkaWindow(pointer.x, pointer.y);
+        if (win) {
+          if (this._toggledWins.has(win.key)) this._toggledWins.delete(win.key);
+          else this._toggledWins.set(win.key, { tx: win.tx, ty: win.ty, w: win.w, h: win.h, lit: !win.origLit });
+        }
       }
     });
     this.input.on('pointermove', (pointer) => {
@@ -1737,6 +1757,29 @@ class GameScene extends Phaser.Scene {
     g.fillRect(x + 30, y - 1, 7, 1);
   }
 
+  _findPanelkaWindow(sx, sy) {
+    const tileY0 = this.scale.height - this.h3;
+    const ty = sy - tileY0;
+    if (ty < 0 || sy >= this.UPPER_ROAD_LINE) return null;
+    const tx = ((sx + this.tl3.tilePositionX) % 320 + 320) % 320;
+    for (let bi = 0; bi < this._panelkaDefs.length; bi++) {
+      const b = this._panelkaDefs[bi];
+      const relX = tx - b.x - b.PX;
+      const relY = ty - b.top - b.PT;
+      if (relX < 0 || relY < 0) continue;
+      const c = Math.floor(relX / (b.winW + b.GX));
+      const r = Math.floor(relY / (b.winH + b.GY));
+      if (c >= b.cols || r >= b.floors) continue;
+      if (relX - c * (b.winW + b.GX) >= b.winW) continue;
+      if (relY - r * (b.winH + b.GY) >= b.winH) continue;
+      const wx = b.x + b.PX + c * (b.winW + b.GX);
+      const wy = b.top + b.PT + r * (b.winH + b.GY);
+      const seed = ((r * 17 + c * 11 + b.x) * 3) % 100;
+      return { key: bi + '_' + r + '_' + c, tx: wx, ty: wy, w: b.winW, h: b.winH, origLit: seed < 6 };
+    }
+    return null;
+  }
+
   _spawnFgBuilding() {
     const W = this.scale.width;
     const scale = Phaser.Math.Between(60, 80) / 100;
@@ -2490,6 +2533,15 @@ class GameScene extends Phaser.Scene {
           const sy = this.scale.height - this.h3 + bw.ty;
           this.blinkGfx.fillStyle(0xd4a020, 0.9);
           this.blinkGfx.fillRect(sx, sy, bw.w, bw.h);
+        }
+      }
+      for (const tw of this._toggledWins.values()) {
+        for (let rep = -1; rep <= 2; rep++) {
+          const sx = startX + tw.tx + rep * BLINK_TILE_W;
+          if (sx > sceneW || sx + tw.w < 0) continue;
+          const sy = this.scale.height - this.h3 + tw.ty;
+          this.blinkGfx.fillStyle(tw.lit ? 0xd4a020 : 0x111c24, tw.lit ? 0.9 : 1);
+          this.blinkGfx.fillRect(sx, sy, tw.w, tw.h);
         }
       }
     }

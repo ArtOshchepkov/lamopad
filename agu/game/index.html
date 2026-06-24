@@ -1087,15 +1087,36 @@ class GameScene extends Phaser.Scene {
       ...this.banknotes.map(b => b.sprite),
     ].forEach(obj => obj.setPipeline('Light2D'));
 
-    // ── Чит-коды ──────────────────────────────────────────────────────────────
+    // ── Клавиатура: горячие клавиши + чит-коды ─────────────────────────────
     this._cheatBuf = '';
+    this._keysDown = {};
     this.input.keyboard.on('keydown', (e) => {
+      // Чит-коды
       this._cheatBuf += e.key.toLowerCase();
       if (this._cheatBuf.length > 10) this._cheatBuf = this._cheatBuf.slice(-10);
       if (this._cheatBuf.endsWith('dead')) { this.state.health = 0; this._cheatBuf = ''; }
       if (this._cheatBuf.endsWith('lama')) { this.freeLlama = { x: this.scale.width + 50, y: this.GY, t: 0 }; this._cheatBuf = ''; }
       if (this._cheatBuf.endsWith('star')) { this._spawnStar(); this._cheatBuf = ''; }
+      // Горячие клавиши
+      if (this._keysDown[e.code]) return;
+      this._keysDown[e.code] = true;
+      if (e.code === 'Space') { e.preventDefault(); this.state.isBowing = true; this.state.bowCount++; this._checkBowAch(); this.startBow(); }
+      if (e.code === 'ShiftLeft' || e.code === 'ShiftRight' || e.code === 'KeyW') { this.state.isSprinting = true; }
+      if (e.code === 'KeyS') { this.requestDayOff(); }
+      if (e.code === 'KeyA') { this.startCrying(); }
+      if (e.code === 'KeyD' && this._socialAction) { this._socialAction(); }
     });
+    this.input.keyboard.on('keyup', (e) => {
+      this._keysDown[e.code] = false;
+      if (e.code === 'Space') { this.state.isBowing = false; this.endBow(); }
+      if (e.code === 'ShiftLeft' || e.code === 'ShiftRight' || e.code === 'KeyW') { this.state.isSprinting = false; }
+    });
+
+    // ── Пульсация экрана при критическом здоровье ────────────────────────────
+    this._critOverlay = document.createElement('div');
+    this._critOverlay.style.cssText = 'position:fixed;inset:0;pointer-events:none;z-index:49;background:radial-gradient(ellipse at 50% 50%, transparent 30%, rgba(180,0,0,0.35) 100%);opacity:0;transition:opacity .15s';
+    document.body.appendChild(this._critOverlay);
+    this.events.once('shutdown', () => this._critOverlay.remove());
 
     // ── Музыка ─────────────────────────────────────────────────────────────────
     const isRestart = !!this.game._persistMusic;
@@ -1512,7 +1533,7 @@ class GameScene extends Phaser.Scene {
       'УВОЛИТЬСЯ',
     ];
     let curSocial = Phaser.Math.RND.pick(SOCIAL);
-    const socialTxt = mkBtn(4, curSocial, () => {
+    this._socialAction = () => {
       if (curSocial === 'УВОЛИТЬСЯ') {
         this.showFloatingText('А ЕСТЬ НА ЧТО?', '#ff8800');
       } else if (curSocial === 'ЗАНЯТЬСЯ КРИПТОЙ') {
@@ -1531,7 +1552,8 @@ class GameScene extends Phaser.Scene {
         curSocial = Phaser.Math.RND.pick(SOCIAL.filter(s => s !== curSocial));
         socialTxt.setText(curSocial);
       }
-    }, () => {});
+    };
+    const socialTxt = mkBtn(4, curSocial, () => { this._socialAction(); }, () => {});
   }
 
   _redrawLlama(age) {
@@ -2963,6 +2985,14 @@ class GameScene extends Phaser.Scene {
     }
 
     this._checkMoneyAch();
+
+    // Пульсация при критическом здоровье (< 20%)
+    if (this.state.health < 20) {
+      const pulse = 0.5 + 0.5 * Math.sin(this.time.now * 0.005);
+      this._critOverlay.style.opacity = String(pulse);
+    } else {
+      this._critOverlay.style.opacity = '0';
+    }
 
     // Прожектор: обновляем позицию источника (следует за качанием корабля)
     this.spotLight.x = this.beamOBase.x + this.boatBob.x;

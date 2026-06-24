@@ -919,6 +919,20 @@ class GameScene extends Phaser.Scene {
         this._lastScratchPos = { x: px, y: py };
         this._scratchAudio.currentTime = 0;
         this._scratchAudio.play().catch(() => {});
+      } else if (pointer.y >= this.waterY && pointer.y < this.scale.height) {
+        this._waterRipples.push({ x: pointer.x, amp: 1.5, freq: 0.18, t: 0, decay: 1.8 });
+        this._playBulk();
+        const sg = this.add.graphics().setDepth(19).setAlpha(0.6);
+        sg.fillStyle(0xb8d4e4, 1);
+        sg.fillEllipse(0, 0, 14, 6);
+        sg.x = pointer.x; sg.y = pointer.y;
+        this.tweens.add({ targets: sg, scaleX: 3, scaleY: 2, alpha: 0, duration: 500, ease: 'Quad.Out', onComplete: () => sg.destroy() });
+        if (Math.random() < 0.10) {
+          const fish = Phaser.Math.RND.pick(['КАРПА', 'ОКУНЯ', 'КАРАСЯ']);
+          this.state.money += 30;
+          this.state.totalEarned += 30;
+          this.showFloatingText('ВЫ ПОЙМАЛИ ' + fish + '!\n+30 ₽', '#44ff88');
+        }
       } else {
         const win = this._findPanelkaWindow(pointer.x, pointer.y);
         if (win) {
@@ -927,11 +941,17 @@ class GameScene extends Phaser.Scene {
         }
       }
     });
+    // ── Взаимодействие с водой ──────────────────────────────────────────────
+    this._waterRipples = [];
+
     this._hoveredWin = null;
     this.input.on('pointermove', (pointer) => {
       if (!this._isScratchingShip || !pointer.isDown) {
         this._isScratchingShip = false; this._scratchAudio.pause();
         this._hoveredWin = this._findPanelkaWindow(pointer.x, pointer.y);
+        if (pointer.y >= this.waterY && pointer.y < this.scale.height) {
+          this._waterRipples.push({ x: pointer.x, amp: 0.6, freq: 0.12, t: 0, decay: 2.5 });
+        }
         return;
       }
       this._hoveredWin = null;
@@ -1316,16 +1336,17 @@ class GameScene extends Phaser.Scene {
       const by  = startY + i * (BH + GAP);
       const col = PALETTE[i];
       const gfx = this.add.graphics().setDepth(30);
+      let hovered = false;
 
       const draw = (pressed) => {
         gfx.clear();
-        gfx.fillStyle(col, pressed ? 0.95 : 0.70);
+        gfx.fillStyle(col, pressed ? 0.95 : hovered ? 0.80 : 0.70);
         gfx.fillRoundedRect(cx - BW / 2, by, BW, BH, 4);
         if (pressed) {
           gfx.fillStyle(0x000000, 0.20);
           gfx.fillRoundedRect(cx - BW / 2, by, BW, BH, 4);
         }
-        gfx.lineStyle(1, 0xffffff, pressed ? 0.55 : 0.18);
+        gfx.lineStyle(1, 0xffffff, pressed ? 0.55 : hovered ? 0.30 : 0.18);
         gfx.strokeRoundedRect(cx - BW / 2, by, BW, BH, 4);
       };
 
@@ -1363,9 +1384,10 @@ class GameScene extends Phaser.Scene {
 
       const zone = this.add.zone(cx - BW / 2, by, BW, BH)
         .setOrigin(0, 0).setDepth(32).setInteractive();
+      zone.on('pointerover', () => { hovered = true;  draw(false); });
       zone.on('pointerdown', () => { draw(true);  onDown(); });
       zone.on('pointerup',   () => { draw(false); onUp();   });
-      zone.on('pointerout',  () => { draw(false); onUp();   });
+      zone.on('pointerout',  () => { hovered = false; draw(false); onUp(); });
 
       return { setText: (t) => { lbl.textContent = t; } };
     };
@@ -2262,6 +2284,26 @@ class GameScene extends Phaser.Scene {
     } catch (e) {}
   }
 
+  _playBulk() {
+    try {
+      if (!this._audioCtx) this._audioCtx = new (window.AudioContext || window.webkitAudioContext)();
+      const ctx = this._audioCtx;
+      if (ctx.state === 'suspended') ctx.resume();
+      const t = ctx.currentTime;
+      const osc = ctx.createOscillator();
+      const gain = ctx.createGain();
+      osc.connect(gain);
+      gain.connect(ctx.destination);
+      osc.type = 'sine';
+      osc.frequency.setValueAtTime(220, t);
+      osc.frequency.exponentialRampToValueAtTime(80, t + 0.15);
+      gain.gain.setValueAtTime(0.18, t);
+      gain.gain.exponentialRampToValueAtTime(0.001, t + 0.25);
+      osc.start(t);
+      osc.stop(t + 0.26);
+    } catch (e) {}
+  }
+
   spawnBanknote() {
     const slot = this.banknotes[this.banknoteIdx];
     this.banknoteIdx = (this.banknoteIdx + 1) % this.banknotes.length;
@@ -2452,11 +2494,25 @@ class GameScene extends Phaser.Scene {
     const C_WATER = 0x183f5c;
     const C_ROAD  = 0x282826;
 
+    // Ripple decay
+    for (let i = this._waterRipples.length - 1; i >= 0; i--) {
+      this._waterRipples[i].t += dt;
+      if (this._waterRipples[i].t * this._waterRipples[i].decay > 1) this._waterRipples.splice(i, 1);
+    }
+
     this.waveGfx.clear();
     for (let x = 0; x < sceneW; x++) {
+      let ripple = 0;
+      for (const r of this._waterRipples) {
+        const dx = x - r.x;
+        const env = Math.max(0, 1 - r.t * r.decay);
+        const spread = 30 + r.t * 80;
+        ripple += r.amp * env * Math.sin(dx * r.freq - r.t * 12) * Math.exp(-(dx * dx) / (spread * spread));
+      }
       const dy = Math.round(
         AMP * Math.sin(x * FREQ1 + wt * SPD1) +
-        (AMP * 0.5) * Math.sin(x * FREQ2 - wt * SPD2),
+        (AMP * 0.5) * Math.sin(x * FREQ2 - wt * SPD2) +
+        ripple,
       );
       const edgeY = baseY + dy;
       if (dy < 0) {

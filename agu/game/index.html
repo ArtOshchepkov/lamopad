@@ -462,7 +462,7 @@ class GameScene extends Phaser.Scene {
 
     // ── Состояние ламы ────────────────────────────────────────────────────────
     this.state = {
-      health: 100, money: 50000, totalEarned: 0, totalSpent: 0, bowCount: 0, achShown: {}, age: 0, speed: 1.0,
+      health: 100, money: 50000, totalEarned: 0, totalSpent: 0, bowCount: 0, achShown: {}, age: 0, speed: 1.0, gameTime: 0,
       isBowing: false, isSprinting: false, isCrying: false, isDead: false,
     };
 
@@ -1837,6 +1837,21 @@ class GameScene extends Phaser.Scene {
     if (this.state.isDead) return;
     this.state.isDead = true;
     this.state.speed  = 0;
+
+    // ── Рекорды (localStorage) ──────────────────────────────────────────────
+    const _rec = JSON.parse(localStorage.getItem('agu_records') || '{}');
+    if (!_rec.gamesPlayed) _rec.gamesPlayed = 0;
+    _rec.gamesPlayed++;
+    this._newRec = [];
+    const _chk = (k, v) => {
+      if (_rec[k] !== undefined && v > _rec[k]) this._newRec.push(k);
+      if (_rec[k] === undefined || v > _rec[k]) _rec[k] = v;
+    };
+    _chk('bestEarned', this.state.totalEarned);
+    _chk('bestBows', this.state.bowCount);
+    _chk('bestTime', Math.round(this.state.gameTime));
+    this._records = _rec;
+    try { localStorage.setItem('agu_records', JSON.stringify(_rec)); } catch(e) {}
     this.walkTween1.stop();
     this.walkTween2.stop();
     if (this.walkTween1f) this.walkTween1f.stop();
@@ -1884,7 +1899,7 @@ class GameScene extends Phaser.Scene {
       // ── Кнопки ──────────────────────────────────────────────────────────────
       const BTN_W = 100, BTN_H = 16, BTN_GAP = 6;
       const CTA_W = 122, CTA_H = 22;
-      const btnY = [cy + 20, cy + 44, cy + 74];
+      const btnY = [cy + 34, cy + 56, cy + 84];
 
       // HTML-контейнер для подписей кнопок экрана смерти
       const deathLblContainer = document.createElement('div');
@@ -1924,12 +1939,63 @@ class GameScene extends Phaser.Scene {
           const sy = rect.height / H;
           statsEl.style.left = (rect.left + cx * sx) + 'px';
           statsEl.style.top = (rect.top + (cy - 30) * sy) + 'px';
-          statsEl.style.maxWidth = Math.round(400 * sx) + 'px';
+          statsEl.style.maxWidth = Math.round(600 * sx) + 'px';
           statsEl.style.fontSize = Math.round(10 * sx) + 'px';
         };
         posStats();
         window.addEventListener('resize', posStats);
         this.events.once('shutdown', () => window.removeEventListener('resize', posStats));
+      }
+
+      // ── Рекорды ──────────────────────────────────────────────────────────────
+      {
+        const rec = this._records;
+        const nr = this._newRec;
+        const fmtR = (v) => Math.round(v).toLocaleString('ru');
+        const fmtTime = (s) => {
+          const m = Math.floor(s / 60);
+          const sec = s % 60;
+          return m > 0 ? m + 'м ' + sec + 'с' : sec + 'с';
+        };
+        const recEl = document.createElement('div');
+        let rHtml = '<span style="color:#666">ИГРА #' + rec.gamesPlayed + '</span>';
+        if (rec.gamesPlayed > 1) {
+          rHtml += '&nbsp;&nbsp;<span style="color:#888">РЕКОРД: </span>' +
+            '<span style="color:#ffcc44">' + fmtR(rec.bestEarned) + ' ₽</span>' +
+            '<span style="color:#555"> · </span>' +
+            '<span style="color:#ffcc44">' + rec.bestBows + ' прогибов</span>' +
+            '<span style="color:#555"> · </span>' +
+            '<span style="color:#ffcc44">' + fmtTime(rec.bestTime) + '</span>';
+        }
+        if (nr.length > 0) {
+          const labels = { bestEarned: 'ЗАРАБОТОК', bestBows: 'ПРОГИБЫ', bestTime: 'ВРЕМЯ' };
+          const which = nr.map(k => labels[k]).join(', ');
+          rHtml += '<br><span style="color:#ffd700;text-shadow:0 0 8px #ffa500,0 0 16px #ff8800,1px 1px 0 #000">★ НОВЫЙ РЕКОРД: ' + which + '! ★</span>';
+        }
+        recEl.innerHTML = rHtml;
+        recEl.style.cssText = [
+          'position:absolute',
+          'transform:translate(-50%,-50%)',
+          'font-family:"Arial Black",Arial,sans-serif',
+          'font-weight:900',
+          'text-align:center',
+          'line-height:1.6',
+          'text-shadow:-1px -1px 0 #000,1px -1px 0 #000,-1px 1px 0 #000,1px 1px 0 #000,0 1px 0 #000,0 -1px 0 #000',
+          'pointer-events:none',
+        ].join(';');
+        deathLblContainer.appendChild(recEl);
+        const posRec = () => {
+          const rect = this.sys.game.canvas.getBoundingClientRect();
+          const sx = rect.width / W;
+          const sy = rect.height / H;
+          recEl.style.left = (rect.left + cx * sx) + 'px';
+          recEl.style.top = (rect.top + (cy + 10) * sy) + 'px';
+          recEl.style.maxWidth = Math.round(440 * sx) + 'px';
+          recEl.style.fontSize = Math.round(8 * sx) + 'px';
+        };
+        posRec();
+        window.addEventListener('resize', posRec);
+        this.events.once('shutdown', () => window.removeEventListener('resize', posRec));
       }
 
       const mkGoBtn = (idx, label, col, onClick, w = BTN_W, h = BTN_H, fs = 7) => {
@@ -2127,6 +2193,7 @@ class GameScene extends Phaser.Scene {
     const age = getAge(this.state.health);
     this.state.age   = age;
     this.state.speed = AGE_SPEED[age];
+    this.state.gameTime += dt;
     if (age !== this._prevAge) {
       this._redrawLlama(age);
       if (this._prevAge >= 0) this._flashAgeTrans();

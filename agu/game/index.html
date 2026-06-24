@@ -501,10 +501,13 @@ class GameScene extends Phaser.Scene {
 
     lb.fillStyle(WOOL, 1);
     lb.fillRect( 0, -16, 40, 16);   // тело
-    lb.fillRect(-1, -22,  6,  6);   // хвост — основание
-    lb.fillStyle(WOOL2, 1);
-    lb.fillRect( 0, -26,  4,  4);   // хвост — кончик
     // шея рисуется динамически в update() через neckGfx
+
+    // Хвост — отдельный Graphics для анимации виляния
+    this._tailPivot = { x: -1, y: -16 };
+    this._tailWag = { angle: 0 };
+    this._tailGfx = this.add.graphics().setDepth(10);
+    this._redrawTail(0);
 
     // Шея — динамически перерисовывается каждый кадр, depth 10 (между телом и головой)
     this.neckGfx = this.add.graphics().setDepth(10);
@@ -920,6 +923,9 @@ class GameScene extends Phaser.Scene {
         this._lastScratchPos = { x: px, y: py };
         this._scratchAudio.currentTime = 0;
         this._scratchAudio.play().catch(() => {});
+      } else if (Math.abs(pointer.x - this.LX) < 30 && pointer.y > this.GY - 60 && pointer.y <= this.GY) {
+        this._tailWag.angle = 0;
+        this.tweens.add({ targets: this._tailWag, angle: 0.35, duration: 100, yoyo: true, repeat: 5, ease: 'Sine.InOut' });
       } else if (pointer.y >= this.waterY && pointer.y < this.scale.height) {
         this._waterRipples.push({ x: pointer.x, amp: 1.5, freq: 0.18, t: 0, decay: 1.8 });
         this._playBulk();
@@ -939,6 +945,7 @@ class GameScene extends Phaser.Scene {
         if (win) {
           if (this._toggledWins.has(win.key)) this._toggledWins.delete(win.key);
           else this._toggledWins.set(win.key, { tx: win.tx, ty: win.ty, w: win.w, h: win.h, lit: !win.origLit });
+          if (Math.random() < 0.15) this.applyCharge('ЖАЛОБА ОТ СОСЕДЕЙ', 3000);
         }
       }
     });
@@ -991,7 +998,7 @@ class GameScene extends Phaser.Scene {
     // Все видимые объекты → Light2D pipeline
     [
       this.tl4, this.tl3, this.tl2, this.tl1,
-      this.boatGfx, this._scratchGfx, this.llamaBody, this.neckGfx, this.llamaHead, this.harnessGfx,
+      this.boatGfx, this._scratchGfx, this.llamaBody, this._tailGfx, this.neckGfx, this.llamaHead, this.harnessGfx,
       this.legBL, this.legBR, this.legFL, this.legFR,
       this.ropeGfx, this.waveGfx, this.lampBodyGfx, this.snakeImg,
       this.particleGfx, this.caneGfx, this.eyeGfx, this.soskaImg,
@@ -1455,7 +1462,6 @@ class GameScene extends Phaser.Scene {
       lb.lineBetween(38, -12, 38, -2);          // грудина (стернум)
       lb.strokeCircle(3,  -7,  4);              // тазовая кость
       lb.strokeCircle(37, -11, 3);              // плечевая кость
-      lb.lineBetween(2, -16, 1, -22);           // хвостовые позвонки
     } else if (age >= 4) {
       // ── ДРЯБЛАЯ: обвисшая шерсть и жир ──────────────────────────────────────
       lb.fillStyle(WOOL, 1);
@@ -1466,18 +1472,11 @@ class GameScene extends Phaser.Scene {
       lb.fillRect(32,  1,   8,  3);             // правый бок (у шеи)
       lb.fillStyle(0xcab888, 1);
       lb.fillRect(34, -18, 7,  6);
-      // Хвост обвис — короче и ниже
-      lb.fillStyle(0xd8c090, 1);
-      lb.fillRect(-1, -20,  6,  5);
-      lb.fillStyle(0xcab888, 1);
-      lb.fillRect( 0, -23,  4,  3);
     } else {
       lb.fillStyle(WOOL, 1);
       lb.fillRect(0, -16, 40, 16);
-      lb.fillRect(-1, -22,  6,  6);             // хвост — основание
-      lb.fillStyle(WOOL2, 1);
-      lb.fillRect( 0, -26,  4,  4);             // хвост — кончик
     }
+    this._redrawTail(age);
 
     // ── Голова ─────────────────────────────────────────────────────────────────
     const lh = this.llamaHead;
@@ -1792,6 +1791,25 @@ class GameScene extends Phaser.Scene {
     g.fillStyle(0xeeeeee, 1);
     g.fillRect(x + 23, y - 1, 7, 1);
     g.fillRect(x + 30, y - 1, 7, 1);
+  }
+
+  _redrawTail(age) {
+    const g = this._tailGfx;
+    g.clear();
+    if (age >= 5) {
+      g.lineStyle(1, 0xe8e8e8, 1);
+      g.lineBetween(3, 0, 2, -6);
+    } else if (age >= 4) {
+      g.fillStyle(0xd8c090, 1);
+      g.fillRect(0, -4, 6, 5);
+      g.fillStyle(0xcab888, 1);
+      g.fillRect(1, -7, 4, 3);
+    } else {
+      g.fillStyle(0xf0e8d0, 1);
+      g.fillRect(0, -6, 6, 6);
+      g.fillStyle(0xd8c9a8, 1);
+      g.fillRect(1, -10, 4, 4);
+    }
   }
 
   _findPanelkaWindow(sx, sy) {
@@ -2359,6 +2377,16 @@ class GameScene extends Phaser.Scene {
       const tilt = AGE_TILT[age];
       this.llamaBody.angle  = tilt;
       this.harnessGfx.angle = tilt;
+    }
+
+    // ── Хвост следует за телом ───────────────────────────────────────────────
+    {
+      const r = this.llamaBody.rotation;
+      const c = Math.cos(r), s = Math.sin(r);
+      const tp = this._tailPivot;
+      this._tailGfx.x = this.llamaBody.x + tp.x * c - tp.y * s;
+      this._tailGfx.y = this.llamaBody.y + tp.x * s + tp.y * c;
+      this._tailGfx.rotation = r + this._tailWag.angle;
     }
 
     // ── Цвет глаза ламы зависит от здоровья ──────────────────────────────────

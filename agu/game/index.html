@@ -826,7 +826,7 @@ class GameScene extends Phaser.Scene {
     scheduleGift();
 
     // ── Физическое освещение (Phaser Light2D) ────────────────────────────────
-    this.lights.enable().setAmbientColor(0x1a2e40);
+    this.lights.enable().setAmbientColor(0x254059);
 
     // Точечный свет глаза змеи — янтарное тление, двигается с корпусом
     this.eyeLight = this.lights.addLight(
@@ -907,6 +907,10 @@ class GameScene extends Phaser.Scene {
     this._scratchAudio.volume = 0.6;
     this.events.once('shutdown', () => { this._scratchAudio.pause(); this._scratchAudio.src = ''; });
 
+    this._snakeCooldown = false;
+    this._lampFlickers = {};
+    this._ropeSlack = false;
+
     const _shipHit = (px, py) => {
       if (py < 0 || py >= this.waterY) return false;
       const edgeX = this._shipTopX - (this._shipTopX - this._shipBotX) * (py / this.waterY);
@@ -917,15 +921,63 @@ class GameScene extends Phaser.Scene {
       if (this.state.isDead || !this.gameStarted) return;
       const px = pointer.x - this.boatBob.x;
       const py = pointer.y - this.boatBob.y;
-      if (_shipHit(px, py)) {
+
+      // ── Змея на корабле ──────────────────────────────────────────────────
+      if (px > 140 && px < 195 && py > -35 && py < 5 && !this._snakeCooldown) {
+        this._snakeCooldown = true;
+        this.time.delayedCall(1500, () => { this._snakeCooldown = false; });
+        this._playHiss();
+        if (Math.random() < 0.5) {
+          this.spawnBanknote();
+          this.showFloatingText('ЗМЕЯ ВЫПЛЮНУЛА КУПЮРУ', '#ffdd44');
+        } else {
+          this.state.health = Math.max(0, this.state.health - 5);
+          this.showFloatingText('УКУС ЗМЕИ\n-5 HP', '#ff2244');
+        }
+
+      // ── Царапины корабля ─────────────────────────────────────────────────
+      } else if (_shipHit(px, py)) {
         this._isScratchingShip = true;
         this._scratchStart = this.time.now;
         this._lastScratchPos = { x: px, y: py };
         this._scratchAudio.currentTime = 0;
         this._scratchAudio.play().catch(() => {});
+
+      // ── Лама — виляние хвостом ───────────────────────────────────────────
       } else if (Math.abs(pointer.x - this.LX) < 30 && pointer.y > this.GY - 60 && pointer.y <= this.GY) {
         this._tailWag.angle = 0;
         this.tweens.add({ targets: this._tailWag, angle: 0.35, duration: 100, yoyo: true, repeat: 5, ease: 'Sine.InOut' });
+
+      // ── Верёвка ──────────────────────────────────────────────────────────
+      } else if (this._hitRope(pointer.x, pointer.y)) {
+        this._playTension();
+        this.tweens.add({ targets: this.ropeSag, v: -15, duration: 80, yoyo: true, ease: 'Sine.Out' });
+        if (Math.random() < 0.20) {
+          const ev = Phaser.Math.Between(0, 3);
+          if (ev === 0 && !this._ropeSlack) {
+            this._ropeSlack = true;
+            this.showFloatingText('ВЕРЁВКА ОСЛАБЛА', '#44ff88');
+            this.time.delayedCall(3000, () => { this._ropeSlack = false; });
+          } else if (ev === 1) {
+            this.applyCharge('ПЕРЕДЁРГИВАНИЕ', 690);
+          } else if (ev === 2) {
+            this.applyCharge('ПОРЧА ЧАСТНОГО ИМУЩЕСТВА', 1000);
+          } else {
+            this.applyCharge('ПСИХОЛОГ (ОСОЗНАНИЕ)', 4000);
+            this.showFloatingText('ТИПА БУРЛАК', '#ff88cc');
+          }
+        }
+
+      // ── Фонарь ───────────────────────────────────────────────────────────
+      } else if (this._hitLamp(pointer.x, pointer.y) >= 0) {
+        const li = this._hitLamp(pointer.x, pointer.y);
+        this._lampFlickers[li] = { timer: 3.0, phase: Math.random() * 100 };
+
+      // ── Баннер ───────────────────────────────────────────────────────────
+      } else if (this._hitBanner(pointer.x, pointer.y)) {
+        // handled inside _hitBanner
+
+      // ── Вода ─────────────────────────────────────────────────────────────
       } else if (pointer.y >= this.waterY && pointer.y < this.scale.height) {
         this._waterRipples.push({ x: pointer.x, amp: 1.5, freq: 0.18, t: 0, decay: 1.8 });
         this._playBulk();
@@ -940,6 +992,8 @@ class GameScene extends Phaser.Scene {
           this.state.totalEarned += 30;
           this.showFloatingText('ВЫ ПОЙМАЛИ ' + fish + '!\n+30 ₽', '#44ff88');
         }
+
+      // ── Окна в панельках ─────────────────────────────────────────────────
       } else {
         const win = this._findPanelkaWindow(pointer.x, pointer.y);
         if (win) {
@@ -1793,6 +1847,43 @@ class GameScene extends Phaser.Scene {
     g.fillRect(x + 30, y - 1, 7, 1);
   }
 
+  _hitRope(sx, sy) {
+    const { x: nx, y: ny } = this.ropeNeck;
+    const { x: bx, y: by } = this.ropeBoat;
+    if (bx === nx) return false;
+    const t = (sx - nx) / (bx - nx);
+    if (t < 0 || t > 1) return false;
+    const mt = 1 - t;
+    const cpy = (ny + by) / 2 + this.ropeSag.v;
+    const ropeY = mt * mt * ny + 2 * mt * t * cpy + t * t * by;
+    return Math.abs(sy - ropeY) < 12;
+  }
+
+  _hitLamp(sx, sy) {
+    const TILE_W = 336, LX_TILE = 112;
+    const tp = this.tl2.tilePositionX;
+    const startX = ((LX_TILE - tp % TILE_W) % TILE_W + TILE_W) % TILE_W;
+    const hy = this.UPPER_ROAD_LINE - 26;
+    for (let i = 0; i < this.lampLights.length; i++) {
+      const lx = startX - TILE_W + i * TILE_W;
+      if (Math.abs(sx - lx) < 8 && Math.abs(sy - hy) < 15) return Math.round((lx + tp) / TILE_W);
+    }
+    return -1;
+  }
+
+  _hitBanner(sx, sy) {
+    for (let i = this.banners.length - 1; i >= 0; i--) {
+      const b = this.banners[i];
+      if (Math.abs(sx - b.x) < 40 && sy > this.UPPER_ROAD_LINE - 38 && sy < this.UPPER_ROAD_LINE) {
+        this.banners.splice(i, 1);
+        this.tweens.add({ targets: b, y: 200, angle: Phaser.Math.Between(-45, 45), alpha: 0, duration: 900, ease: 'Quad.In', onComplete: () => b.destroy() });
+        this.applyCharge('ВАНДАЛИЗМ', 5000);
+        return true;
+      }
+    }
+    return false;
+  }
+
   _redrawTail(age) {
     const g = this._tailGfx;
     g.clear();
@@ -2331,6 +2422,51 @@ class GameScene extends Phaser.Scene {
     } catch (e) {}
   }
 
+  _playHiss() {
+    try {
+      if (!this._audioCtx) this._audioCtx = new (window.AudioContext || window.webkitAudioContext)();
+      const ctx = this._audioCtx;
+      if (ctx.state === 'suspended') ctx.resume();
+      const t = ctx.currentTime;
+      const buf = ctx.createBuffer(1, ctx.sampleRate * 0.3, ctx.sampleRate);
+      const d = buf.getChannelData(0);
+      for (let i = 0; i < d.length; i++) d[i] = Math.random() * 2 - 1;
+      const src = ctx.createBufferSource();
+      src.buffer = buf;
+      const flt = ctx.createBiquadFilter();
+      flt.type = 'highpass';
+      flt.frequency.value = 3000;
+      const gain = ctx.createGain();
+      src.connect(flt);
+      flt.connect(gain);
+      gain.connect(ctx.destination);
+      gain.gain.setValueAtTime(0.15, t);
+      gain.gain.exponentialRampToValueAtTime(0.001, t + 0.3);
+      src.start(t);
+      src.stop(t + 0.31);
+    } catch (e) {}
+  }
+
+  _playTension() {
+    try {
+      if (!this._audioCtx) this._audioCtx = new (window.AudioContext || window.webkitAudioContext)();
+      const ctx = this._audioCtx;
+      if (ctx.state === 'suspended') ctx.resume();
+      const t = ctx.currentTime;
+      const osc = ctx.createOscillator();
+      const gain = ctx.createGain();
+      osc.connect(gain);
+      gain.connect(ctx.destination);
+      osc.type = 'sawtooth';
+      osc.frequency.setValueAtTime(120, t);
+      osc.frequency.exponentialRampToValueAtTime(50, t + 0.2);
+      gain.gain.setValueAtTime(0.1, t);
+      gain.gain.exponentialRampToValueAtTime(0.001, t + 0.3);
+      osc.start(t);
+      osc.stop(t + 0.31);
+    } catch (e) {}
+  }
+
   spawnBanknote() {
     const slot = this.banknotes[this.banknoteIdx];
     this.banknoteIdx = (this.banknoteIdx + 1) % this.banknotes.length;
@@ -2435,7 +2571,7 @@ class GameScene extends Phaser.Scene {
 
     const spd       = this.state.speed;
     const bowFactor = this.state.isBowing ? 0.4 : 1;
-    const effSpd    = this._dayOffActive ? 0 : (this.state.isSprinting ? spd * 2 : spd) * bowFactor;
+    const effSpd    = this._dayOffActive ? 0 : (this.state.isSprinting ? spd * 2 : spd) * bowFactor * (this._ropeSlack ? 0.5 : 1);
 
     // Спринт: дополнительный расход здоровья
     if (this.state.isSprinting) {
@@ -2608,8 +2744,23 @@ class GameScene extends Phaser.Scene {
           this.waterLampLights[i].x = lx;
           this.waterLampLights[i].intensity = 0.7;
         }
+        // Мерцание конкретного фонаря (по мировому ID)
+        const lampId = Math.round((lx + tilePos) / TILE_W);
+        const fl = this._lampFlickers[lampId];
+        if (fl) {
+          const ft = fl.phase + (3.0 - fl.timer) * 5;
+          const flick = 0.55 + 0.25 * Math.sin(ft * 4.7) + 0.20 * Math.sin(ft * 2.3);
+          const base = this.lampLights[i].intensity;
+          this.lampLights[i].intensity = base * flick;
+          this.waterLampLights[i].intensity = base * flick * 0.28;
+        }
         this.lampLights[i].y = headY;
         this.waterLampLights[i].y = this.waterY;
+      }
+      const dt_ = delta / 1000;
+      for (const k in this._lampFlickers) {
+        this._lampFlickers[k].timer -= dt_;
+        if (this._lampFlickers[k].timer <= 0) delete this._lampFlickers[k];
       }
     }
 

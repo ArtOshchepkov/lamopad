@@ -1434,11 +1434,6 @@ class GameScene extends Phaser.Scene {
     });
     document.body.appendChild(muteBtn);
     this._muteBtn = muteBtn;
-    if (isRestart) {
-      muteBtn.style.display = 'flex';
-      helpBtn.style.display = 'flex';
-      if (!this._musicEnabled) { muteBtn.style.opacity = '0.3'; muteBtnLabel.textContent = 'ВЫКЛ'; }
-    }
     // ── Кнопка помощи ─────────────────────────────────────────────────────────
     const helpBtn = document.createElement('div');
     helpBtn.textContent = '?';
@@ -1458,18 +1453,18 @@ class GameScene extends Phaser.Scene {
       'background:rgba(0,0,0,0.88)',
     ].join(';');
     helpOverlay.innerHTML = `
-      <div style="max-width:600px;padding:32px 40px;text-align:center;font-family:'Arial Black',Arial,sans-serif;color:#fff;line-height:1.8">
-        <div style="font-size:36px;font-weight:900;color:#ee3333;margin-bottom:16px">КАК ИГРАТЬ</div>
-        <div style="font-size:26px;color:#ccc;margin-bottom:20px">
+      <div style="max-width:90vw;padding:3vmin 4vmin;text-align:center;font-family:'Arial Black',Arial,sans-serif;color:#fff;line-height:1.8">
+        <div style="font-size:5vmin;font-weight:900;color:#ee3333;margin-bottom:2vmin">КАК ИГРАТЬ</div>
+        <div style="font-size:3.2vmin;color:#ccc;margin-bottom:2.5vmin">
           Купюры летят с корабля и плывут по воде.<br>
           Жми <span style="color:#ffdd44">ПРОГНУТЬСЯ</span> (верхняя кнопка),<br>
           чтобы собрать их головой, пока не уплыли!
         </div>
-        <div style="font-size:24px;color:#888;margin-bottom:20px">
-          Остальные кнопки разгадывай сам.<br>
-          <span style="color:#aaa">Не бойся кликать везде на мир, исследуй!</span><br>
+        <div style="font-size:2.8vmin;color:#888;margin-bottom:2.5vmin">
+          Остальные кнопки — разгадывай сам.<br>
+          <span style="color:#aaa">Не бойся кликать везде на мир, исследуй!</span>
         </div>
-        <div style="font-size:22px;color:#555;border-top:1px solid #333;padding-top:16px">
+        <div style="font-size:2.4vmin;color:#555;border-top:1px solid #333;padding-top:2vmin">
           Игра по треку <span style="color:#ee3333">Ламопад</span> — <span style="color:#888">АТГУЛ</span>
         </div>
       </div>
@@ -1483,6 +1478,12 @@ class GameScene extends Phaser.Scene {
     document.body.appendChild(helpOverlay);
     this._helpBtn = helpBtn;
 
+    if (isRestart) {
+      muteBtn.style.display = 'flex';
+      helpBtn.style.display = 'flex';
+      if (!this._musicEnabled) { muteBtn.style.opacity = '0.3'; muteBtnLabel.textContent = 'ВЫКЛ'; }
+    }
+
     this.events.once('shutdown', () => {
       this.game._persistMusic = this._music;
       this.game._persistMusicEnabled = this._musicEnabled;
@@ -1491,15 +1492,14 @@ class GameScene extends Phaser.Scene {
       helpOverlay.remove();
     });
 
-
   }
 
   createButtons() {
     const W = this.scale.width, H = this.scale.height;
-    const BW = 140, BH = 36, GAP = 4;
+    const BW = 120, BH = 36, GAP = 4;
     const totalH = 5 * BH + 4 * GAP;
     const startY = Math.round((H - totalH) / 2);
-    const cx = W - Math.round(BW / 2) - 6;
+    const cx = W - Math.round(BW / 2) - 10;
     const PALETTE = [0x1e3a5c, 0x5c1c1c, 0x1c4c2c, 0x1c2c5c, 0x3c1c5c];
 
     // HTML-контейнер для подписей кнопок — вне canvas, без pixelated-рендеринга
@@ -2258,46 +2258,46 @@ class GameScene extends Phaser.Scene {
       // Заголовок
       if (this._survivedShift) {
         this.add.text(cx, cy - 100, 'ВЫ ДОЖИЛИ ДО', {
-          fontSize: '18px', fontFamily: 'Arial Black, Arial, sans-serif', fontStyle: 'bold',
-          color: '#44ff88', stroke: '#000000', strokeThickness: 5, align: 'center',
-        }).setOrigin(0.5).setDepth(DEPTH).setResolution(res);
-        this.add.text(cx, cy - 76, 'КОНЦА СМЕНЫ!', {
-          fontSize: '22px', fontFamily: 'Arial Black, Arial, sans-serif', fontStyle: 'bold',
-          color: '#44ff88', stroke: '#000000', strokeThickness: 5, align: 'center',
-        }).setOrigin(0.5).setDepth(DEPTH).setResolution(res);
-        this.add.text(cx, cy - 52, 'ТЕПЕРЬ МОЖНО ЖИТЬ', {
           fontSize: '14px', fontFamily: 'Arial Black, Arial, sans-serif', fontStyle: 'bold',
-          color: '#ffd700', stroke: '#000000', strokeThickness: 5, align: 'center',
+          color: '#44ff88', stroke: '#000000', strokeThickness: 4, align: 'center',
+        }).setOrigin(0.5).setDepth(DEPTH).setResolution(res);
+        this.add.text(cx, cy - 82, 'КОНЦА СМЕНЫ!', {
+          fontSize: '18px', fontFamily: 'Arial Black, Arial, sans-serif', fontStyle: 'bold',
+          color: '#44ff88', stroke: '#000000', strokeThickness: 4, align: 'center',
+        }).setOrigin(0.5).setDepth(DEPTH).setResolution(res);
+        this.add.text(cx, cy - 64, 'ТЕПЕРЬ МОЖНО ЖИТЬ', {
+          fontSize: '11px', fontFamily: 'Arial Black, Arial, sans-serif', fontStyle: 'bold',
+          color: '#ffd700', stroke: '#000000', strokeThickness: 4, align: 'center',
         }).setOrigin(0.5).setDepth(DEPTH).setResolution(res);
       } else if (this._drowned) {
         this.add.text(cx, cy - 90, 'ВЫ УТОНУЛИ В СЛЕЗАХ', {
-          fontSize: '20px', fontFamily: 'Arial Black, Arial, sans-serif', fontStyle: 'bold',
-          color: '#4488ff', stroke: '#000000', strokeThickness: 5, align: 'center',
+          fontSize: '16px', fontFamily: 'Arial Black, Arial, sans-serif', fontStyle: 'bold',
+          color: '#4488ff', stroke: '#000000', strokeThickness: 4, align: 'center',
         }).setOrigin(0.5).setDepth(DEPTH).setResolution(res);
       } else if (this.state.bowCount === 0) {
         this.add.text(cx, cy - 100, 'ВЫ НИ РАЗУ НЕ ПРОГНУЛИСЬ', {
-          fontSize: '16px', fontFamily: 'Arial Black, Arial, sans-serif', fontStyle: 'bold',
-          color: '#ffd700', stroke: '#000000', strokeThickness: 5, align: 'center',
+          fontSize: '12px', fontFamily: 'Arial Black, Arial, sans-serif', fontStyle: 'bold',
+          color: '#ffd700', stroke: '#000000', strokeThickness: 4, align: 'center',
         }).setOrigin(0.5).setDepth(DEPTH).setResolution(res);
-        this.add.text(cx, cy - 78, 'И УМЕРЛИ В НИЩЕТЕ!', {
-          fontSize: '16px', fontFamily: 'Arial Black, Arial, sans-serif', fontStyle: 'bold',
-          color: '#ffd700', stroke: '#000000', strokeThickness: 5, align: 'center',
+        this.add.text(cx, cy - 84, 'И УМЕРЛИ В НИЩЕТЕ!', {
+          fontSize: '12px', fontFamily: 'Arial Black, Arial, sans-serif', fontStyle: 'bold',
+          color: '#ffd700', stroke: '#000000', strokeThickness: 4, align: 'center',
         }).setOrigin(0.5).setDepth(DEPTH).setResolution(res);
-        this.add.text(cx, cy - 58, 'ПОЗДРАВЛЯЮ!', {
-          fontSize: '22px', fontFamily: 'Arial Black, Arial, sans-serif', fontStyle: 'bold',
-          color: '#44ff88', stroke: '#000000', strokeThickness: 5, align: 'center',
+        this.add.text(cx, cy - 68, 'ПОЗДРАВЛЯЮ!', {
+          fontSize: '16px', fontFamily: 'Arial Black, Arial, sans-serif', fontStyle: 'bold',
+          color: '#44ff88', stroke: '#000000', strokeThickness: 4, align: 'center',
         }).setOrigin(0.5).setDepth(DEPTH).setResolution(res);
       } else {
         this.add.text(cx, cy - 90, 'ИГРА ОКОНЧЕНА', {
-          fontSize: '22px', fontFamily: 'Arial Black, Arial, sans-serif', fontStyle: 'bold',
-          color: '#ff2222', stroke: '#000000', strokeThickness: 5, align: 'center',
+          fontSize: '18px', fontFamily: 'Arial Black, Arial, sans-serif', fontStyle: 'bold',
+          color: '#ff2222', stroke: '#000000', strokeThickness: 4, align: 'center',
         }).setOrigin(0.5).setDepth(DEPTH).setResolution(res);
       }
 
       // ── Кнопки ──────────────────────────────────────────────────────────────
-      const BTN_W = 100, BTN_H = 16, BTN_GAP = 6;
-      const CTA_W = 122, CTA_H = 22;
-      const btnY = [cy + 30, cy + 50, cy + 74, cy + 94];
+      const BTN_W = 90, BTN_H = 14, BTN_GAP = 4;
+      const CTA_W = 110, CTA_H = 18;
+      const btnY = [cy + 24, cy + 46, cy + 70, cy + 90];
 
       // HTML-контейнер для подписей кнопок экрана смерти
       const deathLblContainer = document.createElement('div');
@@ -2337,9 +2337,9 @@ class GameScene extends Phaser.Scene {
           const sx = rect.width / W;
           const sy = rect.height / H;
           statsEl.style.left = (rect.left + cx * sx) + 'px';
-          statsEl.style.top = (rect.top + (cy - 30) * sy) + 'px';
+          statsEl.style.top = (rect.top + (cy - 40) * sy) + 'px';
           statsEl.style.maxWidth = Math.round(600 * sx) + 'px';
-          statsEl.style.fontSize = Math.round(10 * sx) + 'px';
+          statsEl.style.fontSize = Math.round(8 * sx) + 'px';
         };
         posStats();
         window.addEventListener('resize', posStats);
@@ -2391,9 +2391,9 @@ class GameScene extends Phaser.Scene {
           const sx = rect.width / W;
           const sy = rect.height / H;
           recEl.style.left = (rect.left + cx * sx) + 'px';
-          recEl.style.top = (rect.top + (cy + 10) * sy) + 'px';
+          recEl.style.top = (rect.top + (cy + 8) * sy) + 'px';
           recEl.style.maxWidth = Math.round(440 * sx) + 'px';
-          recEl.style.fontSize = Math.round(8 * sx) + 'px';
+          recEl.style.fontSize = Math.round(7 * sx) + 'px';
         };
         posRec();
         window.addEventListener('resize', posRec);
@@ -2403,12 +2403,13 @@ class GameScene extends Phaser.Scene {
       const mkGoBtn = (idx, label, col, onClick, w = BTN_W, h = BTN_H, fs = 7) => {
         const by  = btnY[idx];
         const gfx = this.add.graphics().setDepth(DEPTH);
+        let hov = false;
 
         const draw = (pressed) => {
           gfx.clear();
-          gfx.fillStyle(col, pressed ? 0.95 : 0.75);
+          gfx.fillStyle(col, pressed ? 0.95 : hov ? 0.88 : 0.75);
           gfx.fillRoundedRect(cx - w / 2, by, w, h, 5);
-          gfx.lineStyle(pressed ? 1 : 2, 0xffffff, pressed ? 0.5 : 0.45);
+          gfx.lineStyle(pressed ? 1 : 2, 0xffffff, pressed ? 0.5 : hov ? 0.7 : 0.45);
           gfx.strokeRoundedRect(cx - w / 2, by, w, h, 5);
         };
         draw(false);
@@ -2444,9 +2445,10 @@ class GameScene extends Phaser.Scene {
 
         const zone = this.add.zone(cx - w / 2, by, w, h)
           .setOrigin(0, 0).setDepth(DEPTH + 2).setInteractive();
+        zone.on('pointerover', () => { hov = true;  draw(false); });
         zone.on('pointerdown', () => { draw(true);  onClick(); });
-        zone.on('pointerup',   () => draw(false));
-        zone.on('pointerout',  () => draw(false));
+        zone.on('pointerup',   () => { draw(false); });
+        zone.on('pointerout',  () => { hov = false; draw(false); });
 
         return { gfx, lbl: { setText: (t) => { el.textContent = t; } } };
       };

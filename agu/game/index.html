@@ -953,6 +953,7 @@ class GameScene extends Phaser.Scene {
         } else {
           this.state.health = Math.max(0, this.state.health - 5);
           this.showFloatingText('УКУС ЗМЕИ\n-5 HP', '#ff2244');
+          this._vibrate([50, 30, 80]);
         }
 
       // ── Царапины корабля ─────────────────────────────────────────────────
@@ -2165,6 +2166,7 @@ class GameScene extends Phaser.Scene {
     if (this.state.isDead) return;
     this.state.isDead = true;
     this.state.speed  = 0;
+    this._vibrate([100, 50, 100, 50, 200]);
 
     // ── Рекорды (localStorage) ──────────────────────────────────────────────
     const _rec = JSON.parse(localStorage.getItem('agu_records') || '{}');
@@ -2204,7 +2206,20 @@ class GameScene extends Phaser.Scene {
       const res   = 8;
 
       // Заголовок
-      if (this._drowned) {
+      if (this._survivedShift) {
+        this.add.text(cx, cy - 100, 'ВЫ ДОЖИЛИ ДО', {
+          fontSize: '18px', fontFamily: 'Arial Black, Arial, sans-serif', fontStyle: 'bold',
+          color: '#44ff88', stroke: '#000000', strokeThickness: 5, align: 'center',
+        }).setOrigin(0.5).setDepth(DEPTH).setResolution(res);
+        this.add.text(cx, cy - 76, 'КОНЦА СМЕНЫ!', {
+          fontSize: '22px', fontFamily: 'Arial Black, Arial, sans-serif', fontStyle: 'bold',
+          color: '#44ff88', stroke: '#000000', strokeThickness: 5, align: 'center',
+        }).setOrigin(0.5).setDepth(DEPTH).setResolution(res);
+        this.add.text(cx, cy - 52, 'ТЕПЕРЬ МОЖНО ЖИТЬ', {
+          fontSize: '14px', fontFamily: 'Arial Black, Arial, sans-serif', fontStyle: 'bold',
+          color: '#ffd700', stroke: '#000000', strokeThickness: 5, align: 'center',
+        }).setOrigin(0.5).setDepth(DEPTH).setResolution(res);
+      } else if (this._drowned) {
         this.add.text(cx, cy - 90, 'ВЫ УТОНУЛИ В СЛЕЗАХ', {
           fontSize: '20px', fontFamily: 'Arial Black, Arial, sans-serif', fontStyle: 'bold',
           color: '#4488ff', stroke: '#000000', strokeThickness: 5, align: 'center',
@@ -2232,7 +2247,7 @@ class GameScene extends Phaser.Scene {
       // ── Кнопки ──────────────────────────────────────────────────────────────
       const BTN_W = 100, BTN_H = 16, BTN_GAP = 6;
       const CTA_W = 122, CTA_H = 22;
-      const btnY = [cy + 34, cy + 56, cy + 84];
+      const btnY = [cy + 30, cy + 50, cy + 74, cy + 94];
 
       // HTML-контейнер для подписей кнопок экрана смерти
       const deathLblContainer = document.createElement('div');
@@ -2410,6 +2425,26 @@ class GameScene extends Phaser.Scene {
       mkGoBtn(2, 'ДРУГИЕ ИГРЫ', 0x1c3c3c, () => {
         window.location.href = '/games';
       });
+
+      // Кнопка 4: ПОДЕЛИТЬСЯ
+      const shareBtn = mkGoBtn(3, 'ПОДЕЛИТЬСЯ', 0x1c4c4c, () => {
+        const stars = this.state.starsCaught > 0 ? ' ★ Звёзд: ' + this.state.starsCaught : '';
+        const ending = this._drowned ? 'Утонул в слезах!' : this.state.bowCount === 0 ? 'Ни разу не прогнулся!' : '';
+        const text = 'АТГУЛ — Ламопад\n' +
+          'Прогнулся ' + this.state.bowCount + ' раз\n' +
+          'Заработал ' + Math.round(this.state.totalEarned).toLocaleString('ru') + ' ₽\n' +
+          'Время: ' + Math.floor(this.state.gameTime / 60) + 'м ' + Math.round(this.state.gameTime % 60) + 'с' +
+          stars + (ending ? '\n' + ending : '') +
+          '\n\nИграть: ' + window.location.href;
+        if (navigator.share) {
+          navigator.share({ text }).catch(() => {});
+        } else {
+          navigator.clipboard.writeText(text).then(() => {
+            shareBtn.lbl.setText('СКОПИРОВАНО!');
+            setTimeout(() => shareBtn.lbl.setText('ПОДЕЛИТЬСЯ'), 2000);
+          }).catch(() => {});
+        }
+      });
     });
   }
 
@@ -2498,6 +2533,10 @@ class GameScene extends Phaser.Scene {
       targets: t, y: t.y - 22, alpha: 0, duration: 1700,
       ease: 'Sine.Out', onComplete: () => t.destroy(),
     });
+  }
+
+  _vibrate(ms) {
+    try { navigator.vibrate(ms); } catch(e) {}
   }
 
   _playCoin() {
@@ -2616,6 +2655,13 @@ class GameScene extends Phaser.Scene {
     if (!this.gameStarted) return;
 
     if (this.state.health <= 0) { this.triggerGameOver(); return; }
+    if (this.state.gameTime >= 177 && !this._shiftEnded) {
+      this._shiftEnded = true;
+      this.state.health = 0;
+      this._survivedShift = true;
+      this.triggerGameOver();
+      return;
+    }
 
     const dt  = delta / 1000;
     const age = getAge(this.state.health);
@@ -2624,7 +2670,7 @@ class GameScene extends Phaser.Scene {
     this.state.gameTime += dt;
     if (age !== this._prevAge) {
       this._redrawLlama(age);
-      if (this._prevAge >= 0) this._flashAgeTrans();
+      if (this._prevAge >= 0) { this._flashAgeTrans(); this._vibrate(60); }
       this._prevAge = age;
     }
 
@@ -3147,6 +3193,7 @@ class GameScene extends Phaser.Scene {
           this.state.money += bn.denomination;
           this.state.totalEarned += bn.denomination;
           this._playCoin();
+          this._vibrate(30);
           const t = this.add.text(hx, hy - 10, '+' + bn.denomination, {
             fontSize: '12px', fontFamily: 'Arial, sans-serif', fontStyle: 'bold',
             color: '#ffdd00', stroke: '#000000', strokeThickness: 3,

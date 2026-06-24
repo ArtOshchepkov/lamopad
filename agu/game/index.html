@@ -859,7 +859,8 @@ class GameScene extends Phaser.Scene {
     this.banknotes    = [];
     this.banknoteIdx  = 0;          // round-robin: следующий слот
     this.bnTimer      = 0;
-    this.bnDelay      = Phaser.Math.Between(12000, 18000);
+    this.bnDelay      = Phaser.Math.Between(3000, 4000);
+    this._firstBanknote = 2;
 
     // ── Граффити на стенах ────────────────────────────────────────────────────
     this.graffiti = [];
@@ -1521,7 +1522,7 @@ class GameScene extends Phaser.Scene {
     };
 
     mkBtn(0, 'ПРОГНУТЬСЯ',  () => { this.state.isBowing = true; this.state.bowCount++; this._checkBowAch(); this.startBow(); },
-                             () => { this.state.isBowing = false; this.endBow();   });
+                             () => { this.state.isBowing = false; this.endBow(); });
     mkBtn(1, 'ФИГАЧИТЬ',    () => { this.state.isSprinting = true;  }, () => { this.state.isSprinting = false; });
     mkBtn(2, 'ВЗЯТЬ ОТГУЛ', () => { this.requestDayOff(); }, () => {});
     mkBtn(3, 'ПОПЛАКАТЬ',   () => { this.startCrying();   }, () => {});
@@ -2167,6 +2168,7 @@ class GameScene extends Phaser.Scene {
     this.state.isDead = true;
     this.state.speed  = 0;
     this._vibrate([100, 50, 100, 50, 200]);
+    if (this._critOverlay) this._critOverlay.style.opacity = '0';
 
     // ── Рекорды (localStorage) ──────────────────────────────────────────────
     const _rec = JSON.parse(localStorage.getItem('agu_records') || '{}');
@@ -3180,6 +3182,7 @@ class GameScene extends Phaser.Scene {
         const dx = bn.x - hx, dy = bn.y - hy;
         if (dx * dx + dy * dy < 12 * 12) {
           bn.state = 'idle';
+          if (bn._hint) { bn._hint.destroy(); bn._hint = null; }
           this.tweens.add({
             targets: [bn.sprite], scaleX: 0, scaleY: 0, duration: 150,
             onComplete: () => {
@@ -3272,6 +3275,15 @@ class GameScene extends Phaser.Scene {
           bn.vx = 0;
           bn.state = 'floating';
           bn.floatPhase = bn.x * 0.04;
+          if (this._firstBanknote > 0) {
+            this._firstBanknote--;
+            const hint = this.add.text(0, 0, 'ПРОГНИСЬ! ↑\n(жми верхнюю кнопку)', {
+              fontSize: '9px', fontFamily: 'Arial, sans-serif', fontStyle: 'bold',
+              color: '#ffffff', stroke: '#000000', strokeThickness: 3, align: 'center',
+            }).setOrigin(0.5, 1).setDepth(21).setAlpha(0).setResolution(8);
+            this.tweens.add({ targets: hint, alpha: 0.85, duration: 400 });
+            bn._hint = hint;
+          }
         }
 
       } else {
@@ -3280,6 +3292,7 @@ class GameScene extends Phaser.Scene {
         if (bn.x < -40) {
           bn.state = 'idle';
           bn.sprite.setAngle(0).setVisible(false);
+          if (bn._hint) { bn._hint.destroy(); bn._hint = null; }
           this.state.money += 5;
           this.state.totalEarned += 5;
           continue;
@@ -3295,6 +3308,7 @@ class GameScene extends Phaser.Scene {
 
       bn.sprite.x = Math.round(bn.x);
       bn.sprite.y = Math.round(bn.y);
+      if (bn._hint) { bn._hint.x = Math.round(bn.x); bn._hint.y = Math.round(bn.y) - 12; }
     }
 
     // Дождь

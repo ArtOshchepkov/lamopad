@@ -2084,7 +2084,7 @@ class GameScene extends Phaser.Scene {
 
   _checkBowAch() {
     const n = this.state.bowCount;
-    if (n === 1)  this._tryAch('bow1',  'ВОТ ТЫ И ПРОГНУЛСЯ', 'Первый раз — не последний');
+    if (n === 1)  this._tryAch('bow1',  'ВОТ ТЫ И ПРОГНУЛСЯ', 'Один раз — не ');
     if (n === 5)  this._tryAch('bow5',  'ГИБКИЙ', 'Спина ещё терпит');
     if (n === 10) this._tryAch('bow10', 'ПОЗВОНОЧНИК НЕ ЖАЛКО?', '10 прогибов');
     if (n === 15) this._tryAch('bow15', 'ЙОГ КОРПОРАТИВНЫЙ', '15 прогибов');
@@ -2394,11 +2394,25 @@ class GameScene extends Phaser.Scene {
       }
 
       // Обновляем позиции точечных источников (включая заэкранные)
+      // Если фонарь за кораблём — прижимаем источник к краю корпуса
+      // и плавно гасим, чтобы свет не проходил сквозь корабль
+      const shipRight = this.shipEdgeX + this.boatBob.x;
       for (let i = 0; i < this.lampLights.length; i++) {
-        this.lampLights[i].x = startX - TILE_W + i * TILE_W;
+        const lx = startX - TILE_W + i * TILE_W;
+        if (lx < shipRight) {
+          const dist = Math.max(0, shipRight - lx - 40);
+          const fade = Math.max(0, 1 - dist / 200);
+          this.lampLights[i].x = shipRight;
+          this.lampLights[i].intensity = 2.5 * fade;
+          this.waterLampLights[i].x = shipRight;
+          this.waterLampLights[i].intensity = 0.7 * fade;
+        } else {
+          this.lampLights[i].x = lx;
+          this.lampLights[i].intensity = 2.5;
+          this.waterLampLights[i].x = lx;
+          this.waterLampLights[i].intensity = 0.7;
+        }
         this.lampLights[i].y = headY;
-        // Отражение на воде — тот же x, у ватерлинии
-        this.waterLampLights[i].x = startX - TILE_W + i * TILE_W;
         this.waterLampLights[i].y = this.waterY;
       }
     }

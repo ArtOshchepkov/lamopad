@@ -3,7 +3,7 @@
 <head>
   <meta charset="utf-8" />
   <meta name="viewport" content="width=device-width, initial-scale=1, user-scalable=no, viewport-fit=cover" />
-  <title>АГУ — Ламопад</title>
+  <title>АТГУЛ — Ламопад</title>
   <link rel="icon" href="/tracks/agu_favicon_32px.jpg">
   <style>
     *, *::before, *::after { margin: 0; padding: 0; box-sizing: border-box; }
@@ -473,6 +473,11 @@ class GameScene extends Phaser.Scene {
     this.waveGfx  = this.add.graphics().setDepth(16);
     this.waveTime = 0;
     this.waterY   = H - h1;   // номинальная y ватерлинии
+    this._baseWaterY = this.waterY;
+    this._cryTime = 0;
+    this._cryFineNext = 1;
+    this._waterRise = 0;
+    this._firstCry = true;
 
     // ── Состояние ламы ────────────────────────────────────────────────────────
     this.state = {
@@ -942,6 +947,13 @@ class GameScene extends Phaser.Scene {
         this._lastScratchPos = { x: px, y: py };
         this._scratchAudio.currentTime = 0;
         this._scratchAudio.play().catch(() => {});
+
+      // ── Свободная лама — вдохновение ─────────────────────────────────────
+      } else if (this.freeLlama && Math.abs(pointer.x - this.freeLlama.x) < 30 && pointer.y > this.GY - 65 && pointer.y <= this.GY) {
+        this.state.health = Math.min(100, this.state.health + 10);
+        this.showFloatingText('ВДОХНОВЕНИЕ\n+10 HP', '#ff88cc');
+        this.freeLlama = null;
+        this.freeLlamaGfx.clear();
 
       // ── Лама — виляние хвостом ───────────────────────────────────────────
       } else if (Math.abs(pointer.x - this.LX) < 30 && pointer.y > this.GY - 60 && pointer.y <= this.GY) {
@@ -1971,6 +1983,7 @@ class GameScene extends Phaser.Scene {
       'МЕСТО ДЛЯ ВАШЕЙ РЕКЛАМЫ',
       'ЗАТО ПЕНСИЯ КОПИТСЯ!',
       'ВМЕСТЕ СИЛЬНЕЕ! ЕДИНОРАЗОВО И ЕЖЕМЕСЯЧНО!',
+      'НЕТ ВРЕМЕНИ НА РАСКАЧКУ!',
     ];
     const W = this.scale.width;
     const roadY = this.UPPER_ROAD_LINE;
@@ -2049,6 +2062,18 @@ class GameScene extends Phaser.Scene {
   startCrying() {
     if (this.state.isCrying) return;
     this.state.isCrying = true;
+    if (Math.random() < 0.5) {
+      const msg = Phaser.Math.RND.pick([
+        'НОЙ НЕ НЫЛ,\nИ ТЫ НЕ НОЙ',
+        'ТЕРПИ, КАЗАК —\nАТАМАНОМ СТАНЕШЬ',
+        'НЕ НОЙ, ТЫ СМОЖЕШЬ',
+        'НАДО ЕЩЁ ЧУТОК\nПОТЕРПЕТЬ',
+        'НЕ БУДЬ СЛАБАКОМ',
+        'СЛЕЗАМИ ДЕЛУ\nНЕ ПОМОЖЕШЬ',
+      ]);
+      this.showFloatingText(msg, '#aaaaff');
+    }
+    if (this._cryTime >= 1 && Math.random() < 0.25) this.applyCharge('НЫТЬЁ', 500);
     this.time.delayedCall(4000, () => { this.state.isCrying = false; });
   }
 
@@ -2119,7 +2144,12 @@ class GameScene extends Phaser.Scene {
       const res   = 8;
 
       // Заголовок
-      if (this.state.bowCount === 0) {
+      if (this._drowned) {
+        this.add.text(cx, cy - 90, 'ВЫ УТОНУЛИ В СЛЕЗАХ', {
+          fontSize: '20px', fontFamily: 'Arial Black, Arial, sans-serif', fontStyle: 'bold',
+          color: '#4488ff', stroke: '#000000', strokeThickness: 5, align: 'center',
+        }).setOrigin(0.5).setDepth(DEPTH).setResolution(res);
+      } else if (this.state.bowCount === 0) {
         this.add.text(cx, cy - 100, 'ВЫ НИ РАЗУ НЕ ПРОГНУЛИСЬ', {
           fontSize: '16px', fontFamily: 'Arial Black, Arial, sans-serif', fontStyle: 'bold',
           color: '#ffd700', stroke: '#000000', strokeThickness: 5, align: 'center',
@@ -2327,12 +2357,31 @@ class GameScene extends Phaser.Scene {
 
   _checkBowAch() {
     const n = this.state.bowCount;
-    if (n === 1)  this._tryAch('bow1',  'ВОТ ТЫ И ПРОГНУЛСЯ', 'Один раз — не ');
-    if (n === 5)  this._tryAch('bow5',  'ГИБКИЙ', 'Спина ещё терпит');
+    if (n === 1)  this._tryAch('bow1',  'ВОТ ТЫ И ПРОГНУЛСЯ', 'Один раз не красноглаз');
+    if (n === 2)  this._tryAch('bow2',  'Это нормально', 'не ты один !');
+    if (n === 3)  this._tryAch('bow3',  'ГИБКИЙ', 'Спина ещё терпит');
+    if (n === 4)  this._tryAch('bow4',  'ДЕНЬГИ САМИ СЕБЯ НЕ ЗАРАБОТАЮТ', 'нужно ещё');
+    if (n === 5)  this._tryAch('bow5',  'Шея..', 'Как-то около плеч побаливает');
+    if (n === 8)  this._tryAch('bow8',  'ПРОГИБ НА ЛОПАТКИ', 'Твоя борьба!');
+    if (n === 9)  this._tryAch('bow9',  'ВИШНЁВАЯ ДЕВЯТКА', 'Уже хочется съездить на балтику?');
     if (n === 10) this._tryAch('bow10', 'ПОЗВОНОЧНИК НЕ ЖАЛКО?', '10 прогибов');
+    if (n === 11) this._tryAch('bow11', 'ВОТ-ВОТ ПОВЫСЯТ!', 'Прогнись ещё немного!');
+    if (n === 13) this._tryAch('bow13', 'ПОВЫШЕНИЕ!', 'Шутка. Фигачь больше.');
     if (n === 15) this._tryAch('bow15', 'ЙОГ КОРПОРАТИВНЫЙ', '15 прогибов');
-    if (n === 20) this._tryAch('bow20', 'БОСС ПРОГИБА', '20 прогибов');
+    if (n === 18) this._tryAch('bow18', 'КОГДА-ТО ТЕБЕ БЫЛО 18', 'А сейчас столько прогибов');
+    if (n === 20) this._tryAch('bow20', 'БОСС-ПРОГИБОС', '20 прогибов');
+    if (n === 25) this._tryAch('bow25', 'ПРОГИБОВ 25', 'СОТРУДНИК ПРИБЫЛЬНЫЙ ОПЯТЬ');
+    if (n === 27) this._tryAch('bow25', '27 прогибов', 'поздно становиться рок-звездой');
+    if (n === 30) this._tryAch('bow30', '30 прогибов', 'да и лет уже около того');
+    if (n === 35) this._tryAch('bow30', 'Мечтал открыть бизнес?', 'ну и где оно?');
+    if (n === 42) this._tryAch('bow42', '42 прогиба', 'вопрос Жизни, Вселенной и Всего Такого');
     if (n === 50) this._tryAch('bow50', 'ПОЛТОС', '50 прогибов');
+    if (n === 60) this._tryAch('bow60', 'сейчас бы на 😍пенсию😍', '60 прогибов');
+    if (n === 67) this._tryAch('bow67', 'СИКС СЕВЕН!!!', 'хахахахаха 67 прогибов хахахаха');
+    if (n === 69) this._tryAch('bow69', '69', 'из плюшек -- печенько))');
+    if (n === 100) this._tryAch('bow100', '100 прогибов', 'Вряд ли доживёшь до ста');
+    if (n === 200) this._tryAch('bow200', 'ГРУЗ 200', 'Отбалабанено 200 прогибов');
+    if (n === 300) this._tryAch('bow200', 'ТРИСТА', 'ДАУНШИФТНИСЬ В ТРАКТОРИСТА');
   }
 
   _checkMoneyAch() {
@@ -2864,6 +2913,21 @@ class GameScene extends Phaser.Scene {
         vx: Phaser.Math.FloatBetween(-2, 2), vy: 10,
         life: 1.0, col: 0x3366ff,
       });
+    }
+    // ── Нытьё: штрафы и подъём воды ──────────────────────────────────────────
+    if (this.state.isCrying) {
+      this._cryTime += dt;
+      const rise = Math.floor(this._cryTime / 3) * 4;
+      if (rise > this._waterRise) {
+        this._waterRise = rise;
+        this.waterY = this._baseWaterY - this._waterRise;
+        this.tl1.y = this.waterY;
+        this.tl1.height = this.scale.height - this.waterY;
+      }
+      if (this.waterY <= this.GY - 40) {
+        this.state.health = 0;
+        this._drowned = true;
+      }
     }
     this.particleGfx.clear();
     for (let i = this.particles.length - 1; i >= 0; i--) {

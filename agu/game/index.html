@@ -481,7 +481,7 @@ class GameScene extends Phaser.Scene {
 
     // ── Состояние ламы ────────────────────────────────────────────────────────
     this.state = {
-      health: 100, money: 50000, totalEarned: 0, totalSpent: 0, bowCount: 0, achShown: {}, age: 0, speed: 1.0, gameTime: 0,
+      health: 100, money: 50000, totalEarned: 0, totalSpent: 0, bowCount: 0, starsCaught: 0, achShown: {}, age: 0, speed: 1.0, gameTime: 0,
       isBowing: false, isSprinting: false, isCrying: false, isDead: false,
     };
 
@@ -870,6 +870,11 @@ class GameScene extends Phaser.Scene {
     this.freeLlama = null;
     this._freeLlamaTimer = Phaser.Math.Between(25000, 50000);
 
+    // ── Падающая звезда ────────────────────────────────────────────────────
+    this._starGfx = this.add.graphics().setDepth(-0.5);
+    this._star = null;
+    this._starTimer = Phaser.Math.Between(40000, 60000);
+
     // ── Корпоративные баннеры ────────────────────────────────────────────────
     this.banners = [];
     this._bannerTimer = Phaser.Math.Between(8000, 15000);
@@ -927,8 +932,18 @@ class GameScene extends Phaser.Scene {
       const px = pointer.x - this.boatBob.x;
       const py = pointer.y - this.boatBob.y;
 
+      // ── Падающая звезда ─────────────────────────────────────────────────
+      if (this._star && Math.abs(pointer.x - this._star.x) < 15 && Math.abs(pointer.y - this._star.y) < 15) {
+        this.state.money += 1_000_000;
+        this.state.totalEarned += 1_000_000;
+        this.state.starsCaught++;
+        this.showFloatingText('ВЫ ПОЙМАЛИ\nЗВЕЗДУ С НЕБА!\n+1 000 000 ₽', '#ffd700');
+        this._checkStarAch();
+        this._star = null;
+        this._starGfx.clear();
+
       // ── Змея на корабле ──────────────────────────────────────────────────
-      if (px > 140 && px < 195 && py > -35 && py < 5 && !this._snakeCooldown) {
+      } else if (px > 140 && px < 195 && py > -35 && py < 5 && !this._snakeCooldown) {
         this._snakeCooldown = true;
         this.time.delayedCall(1500, () => { this._snakeCooldown = false; });
         this._playHiss();
@@ -1079,6 +1094,7 @@ class GameScene extends Phaser.Scene {
       if (this._cheatBuf.length > 10) this._cheatBuf = this._cheatBuf.slice(-10);
       if (this._cheatBuf.endsWith('dead')) { this.state.health = 0; this._cheatBuf = ''; }
       if (this._cheatBuf.endsWith('lama')) { this.freeLlama = { x: this.scale.width + 50, y: this.GY, t: 0 }; this._cheatBuf = ''; }
+      if (this._cheatBuf.endsWith('star')) { this._spawnStar(); this._cheatBuf = ''; }
     });
 
     // ── Музыка ─────────────────────────────────────────────────────────────────
@@ -1862,6 +1878,17 @@ class GameScene extends Phaser.Scene {
     g.fillRect(x + 30, y - 1, 7, 1);
   }
 
+  _spawnStar() {
+    const W = this.scale.width;
+    this._star = {
+      x: Phaser.Math.Between(Math.round(W * 0.3), Math.round(W * 0.9)),
+      y: -5,
+      vx: Phaser.Math.FloatBetween(-90, -45),
+      vy: Phaser.Math.FloatBetween(60, 105),
+      trail: [],
+    };
+  }
+
   _hitRope(sx, sy) {
     const { x: nx, y: ny } = this.ropeNeck;
     const { x: bx, y: by } = this.ropeBoat;
@@ -2197,7 +2224,8 @@ class GameScene extends Phaser.Scene {
           '<span style="color:#ccc">ПОТРАТИЛИ </span>' +
           '<span style="color:#ff6666">' + fmt(this.state.totalSpent) + '</span>' +
           '<span style="color:#ccc">, ИТОГО В НАСЛЕДСТВО ОСТАЛОСЬ ЦЕЛЫХ </span>' +
-          '<span style="color:' + (balance >= 0 ? '#ffdd44' : '#ff4444') + '">' + fmt(balance) + '</span>';
+          '<span style="color:' + (balance >= 0 ? '#ffdd44' : '#ff4444') + '">' + fmt(balance) + '</span>' +
+          '';
         statsEl.style.cssText = [
           'position:absolute',
           'transform:translate(-50%,-50%)',
@@ -2242,6 +2270,9 @@ class GameScene extends Phaser.Scene {
             '<span style="color:#ffcc44">' + rec.bestBows + ' прогибов</span>' +
             '<span style="color:#555"> · </span>' +
             '<span style="color:#ffcc44">' + fmtTime(rec.bestTime) + '</span>';
+        }
+        if (this.state.starsCaught > 0) {
+          rHtml += '<br><span style="color:#ffd700">★ ПОЙМАНО ЗВЁЗД: ' + this.state.starsCaught + '</span>';
         }
         if (nr.length > 0) {
           const labels = { bestEarned: 'ЗАРАБОТОК', bestBows: 'ПРОГИБЫ', bestTime: 'ВРЕМЯ' };
@@ -2395,6 +2426,13 @@ class GameScene extends Phaser.Scene {
     if (e >= 1_000_000) this._tryAch('earn1m', 'МИЛЬОН!', 'Передай привет Маску!!!');
     if (m < 0)       this._tryAch('debt',     'КРЕДИТНАЯ ИСТОРИЯ', 'Минус вайб (баланс отрицательный)');
     if (m < -100000) this._tryAch('debt100k', 'ИПОТЕЧНИК', 'Долг превысил 100 000 ₽');
+  }
+
+  _checkStarAch() {
+    const n = this.state.starsCaught;
+    if (n === 1) this._tryAch('star1', 'ЗВЕЗДОЧЁТ', 'Поймал первую звезду');
+    if (n === 3) this._tryAch('star3', 'АСТРОНОМ', '3 звезды с неба');
+    if (n === 5) this._tryAch('star5', 'ПОВЕЛИТЕЛЬ ЗВЁЗД', '5 звёзд — это уже созвездие');
   }
 
   showAchievement(title, sub) {
@@ -2704,6 +2742,31 @@ class GameScene extends Phaser.Scene {
       this.freeLlama.t += dt;
       this._drawFreeLlama(this.freeLlamaGfx, Math.round(this.freeLlama.x), this.freeLlama.y, this.freeLlama.t);
       if (this.freeLlama.x < -60) this.freeLlama = null;
+    }
+
+    // ── Падающая звезда ────────────────────────────────────────────────────────
+    this._starGfx.clear();
+    this._starTimer -= delta;
+    if (!this._star && this._starTimer <= 0) {
+      this._spawnStar();
+      this._starTimer = Phaser.Math.Between(40000, 60000);
+    }
+    if (this._star) {
+      const s = this._star;
+      s.x += s.vx * dt;
+      s.y += s.vy * dt;
+      s.trail.push({ x: s.x, y: s.y, life: 1.0 });
+      for (let i = s.trail.length - 1; i >= 0; i--) {
+        s.trail[i].life -= dt * 3;
+        if (s.trail[i].life <= 0) { s.trail.splice(i, 1); continue; }
+        const tp = s.trail[i];
+        this._starGfx.fillStyle(0xffeedd, tp.life * 0.5);
+        this._starGfx.fillRect(Math.round(tp.x), Math.round(tp.y), 1, 1);
+      }
+      this._starGfx.fillStyle(0xffffff, 1);
+      this._starGfx.fillRect(Math.round(s.x) - 1, Math.round(s.y), 3, 1);
+      this._starGfx.fillRect(Math.round(s.x), Math.round(s.y) - 1, 1, 3);
+      if (s.y > this.UPPER_ROAD_LINE || s.x < -20) this._star = null;
     }
 
     // Синусоидная граница воды

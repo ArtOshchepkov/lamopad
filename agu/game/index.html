@@ -916,6 +916,7 @@ class GameScene extends Phaser.Scene {
       const py = pointer.y - this.boatBob.y;
       if (_shipHit(px, py)) {
         this._isScratchingShip = true;
+        this._scratchStart = this.time.now;
         this._lastScratchPos = { x: px, y: py };
         this._scratchAudio.currentTime = 0;
         this._scratchAudio.play().catch(() => {});
@@ -974,6 +975,14 @@ class GameScene extends Phaser.Scene {
       this._lastScratchPos = { x: px, y: py };
     });
     this.input.on('pointerup', () => {
+      if (this._isScratchingShip && this._scratchStart) {
+        const dur = (this.time.now - this._scratchStart) / 1000;
+        if (dur >= 10) {
+          this.applyCharge('ПОРЧА КОРАБЛЯ', 1_000_000);
+        } else if (dur >= 1) {
+          this.applyCharge('ЦАРАПАНЬЕ КОРАБЛЯ', 50_000);
+        }
+      }
       this._isScratchingShip = false;
       this._lastScratchPos = null;
       this._scratchAudio.pause();

@@ -1485,10 +1485,13 @@ class GameScene extends Phaser.Scene {
       'ПОВИДАТЬ ДРУЗЕЙ', 'ПОВИДАТЬ СЕМЬЮ', 'ВЫСПАТЬСЯ',
       'ПОЗВОНИТЬ БАБУШКЕ', 'УСТРОИТЬ СВИДАНИЕ', 'ВЫЙТИ НА ПРИРОДУ',
       'ЗАНЯТЬСЯ КРИПТОЙ',
+      'УВОЛИТЬСЯ',
     ];
     let curSocial = Phaser.Math.RND.pick(SOCIAL);
     const socialTxt = mkBtn(4, curSocial, () => {
-      if (curSocial === 'ЗАНЯТЬСЯ КРИПТОЙ') {
+      if (curSocial === 'УВОЛИТЬСЯ') {
+        this.showFloatingText('А ЕСТЬ НА ЧТО?', '#ff8800');
+      } else if (curSocial === 'ЗАНЯТЬСЯ КРИПТОЙ') {
         const lost = Math.max(0, Math.round(this.state.money));
         if (lost > 0) {
           this.state.totalSpent += lost;
@@ -2424,7 +2427,7 @@ class GameScene extends Phaser.Scene {
       stroke: '#000000', strokeThickness: 4, align: 'center',
     }).setOrigin(0.5, 1).setDepth(50).setResolution(8);
     this.tweens.add({
-      targets: t, y: t.y - 22, alpha: 0, duration: 1200,
+      targets: t, y: t.y - 22, alpha: 0, duration: 1700,
       ease: 'Sine.Out', onComplete: () => t.destroy(),
     });
   }

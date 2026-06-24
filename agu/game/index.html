@@ -1145,27 +1145,27 @@ class GameScene extends Phaser.Scene {
     ].join(';');
 
     overlay.innerHTML = `
-      <div id="_agu_title" style="font-size:9vmin;font-weight:900;
+      <div id="_agu_title" style="font-size:11vmin;font-weight:900;
                  letter-spacing:.15em;margin-bottom:3vmin;cursor:default">
         <span style="color:#ee3333">Ⓐ</span><span style="color:#888; text-shadow: none">Т</span><span style="color:#ee3333">ГУ</span><span style="color:#888; text-shadow: none">Л</span>
       </div>
-      <div id="_pb" style="font-size:4.2vmin;color:#fff;font-weight:900;
+      <div id="_pb" style="font-size:5.2vmin;color:#fff;font-weight:900;
                   text-shadow:1px 1px 0 #000;margin-bottom:1vmin;padding-bottom:.8vmin"><span class="bl">П</span><span class="bl">Р</span><span class="bl">О</span><span class="bl">Г</span><span class="bl">И</span><span class="bl">Б</span><span class="bl">А</span><span class="bl">Й</span><span class="bl">С</span><span class="bl">Я</span><span class="bl">,</span></div>
-      <div id="_agu_money" style="font-size:3.6vmin;color:#ffdd44;font-weight:900;
-                  text-shadow:1px 1px 0 #000;margin-bottom:3vmin;cursor:default"><span class="ml" style="--d:0">Ч</span><span class="ml" style="--d:1">Т</span><span class="ml" style="--d:2">О</span><span class="ml" style="--d:3">Б</span><span class="ml" style="--d:4">Ы</span><span class="ml" style="--d:5">&nbsp;</span><span class="ml" style="--d:6">С</span><span class="ml" style="--d:7">О</span><span class="ml" style="--d:8">Б</span><span class="ml" style="--d:9">И</span><span class="ml" style="--d:10">Р</span><span class="ml" style="--d:11">А</span><span class="ml" style="--d:12">Т</span><span class="ml" style="--d:13">Ь</span><span class="ml" style="--d:14">&nbsp;</span><span class="ml" style="--d:15">Д</span><span class="ml" style="--d:16">Е</span><span class="ml" style="--d:17">Н</span><span class="ml" style="--d:18">Ь</span><span class="ml" style="--d:19">Г</span><span class="ml" style="--d:20">И</span></div>
-      <div style="font-size:1.8vmin;color:#777;letter-spacing:.05em;margin-bottom:1.5vmin">
+      <div id="_agu_money" style="font-size:4.4vmin;color:#ffdd44;font-weight:900;
+                  text-shadow:1px 1px 0 #000;margin-bottom:3vmin;cursor:default"><span class="ml" style="--d:0">Ч</span><span class="ml" style="--d:1">Т</span><span class="ml" style="--d:2">О</span><span class="ml" style="--d:3">Б</span><span class="ml" style="--d:4">Ы</span><span class="ml" style="--d:5">&nbsp;</span><span class="ml" style="--d:6">З</span><span class="ml" style="--d:7">А</span><span class="ml" style="--d:8">Р</span><span class="ml" style="--d:9">А</span><span class="ml" style="--d:10">Б</span><span class="ml" style="--d:11">А</span><span class="ml" style="--d:12">Т</span><span class="ml" style="--d:13">Ы</span><span class="ml" style="--d:14">В</span><span class="ml" style="--d:15">А</span><span class="ml" style="--d:16">Т</span><span class="ml" style="--d:17">Ь</span><span class="ml" style="--d:18">&nbsp;</span><span class="ml" style="--d:19">Д</span><span class="ml" style="--d:20">Е</span><span class="ml" style="--d:21">Н</span><span class="ml" style="--d:22">Ь</span><span class="ml" style="--d:23">Г</span><span class="ml" style="--d:24">И</span></div>
+      <div style="font-size:2.2vmin;color:#777;letter-spacing:.05em;margin-bottom:1.5vmin">
         &#9835; В ИГРЕ ЗВУЧИТ МУЗЫКА &#9835;
       </div>
-      <div id="_agu_start_music" style="font-size:3vmin;color:#fff;cursor:pointer;
-          padding:1.8vmin 6vmin;margin-bottom:2.5vmin;
+      <div id="_agu_start_music" style="font-size:3.8vmin;color:#fff;cursor:pointer;
+          padding:2vmin 7vmin;margin-bottom:2.5vmin;
           background:rgba(238,51,51,0.85);border-radius:4px;
           font-family:'Arial Black',Arial,sans-serif;font-weight:900;
           letter-spacing:.08em;text-shadow:1px 1px 0 rgba(0,0,0,0.5);
           user-select:none">
         &#9654; ИГРАТЬ
       </div>
-      <div id="_agu_start_mute" style="font-size:2vmin;color:#aaa;cursor:pointer;
-          padding:1.2vmin 4vmin;
+      <div id="_agu_start_mute" style="font-size:2.6vmin;color:#aaa;cursor:pointer;
+          padding:1.4vmin 5vmin;
           background:rgba(255,255,255,0.1);border-radius:4px;
           font-family:'Arial Black',Arial,sans-serif;font-weight:900;
           letter-spacing:.08em;text-shadow:1px 1px 0 rgba(0,0,0,0.5);
@@ -1173,11 +1173,11 @@ class GameScene extends Phaser.Scene {
         ИГРАТЬ БЕЗ ЗВУКА
       </div>
       <div style="position:absolute;bottom:2.5vmin;display:flex;flex-direction:column;align-items:center;gap:1vmin">
-        <a href="/games" style="font-size:1.6vmin;color:#444;font-family:Arial,sans-serif;
+        <a href="/games" style="font-size:2vmin;color:#444;font-family:Arial,sans-serif;
             letter-spacing:.1em;text-decoration:none;transition:color .2s">
           ДРУГИЕ ИГРЫ
         </a>
-        <span style="font-size:1.3vmin;color:#2a2a2a;font-family:Arial,sans-serif;letter-spacing:.06em">
+        <span style="font-size:1.6vmin;color:#2a2a2a;font-family:Arial,sans-serif;letter-spacing:.06em">
           &#169; ЛАМОПАД 2026 — КОЕ-КАКИЕ ПРАВА ЗАЩИЩЕНЫ
         </span>
       </div>
@@ -1321,9 +1321,9 @@ class GameScene extends Phaser.Scene {
     overlay.querySelector('#_agu_start_music').addEventListener('pointerdown', () => startGame(true));
     overlay.querySelector('#_agu_start_mute').addEventListener('pointerdown', () => startGame(false));
 
-    // ── Слот-машина на «ЧТОБЫ СОБИРАТЬ ДЕНЬГИ» ────────────────────────────────
+    // ── Слот-машина на «ЧТОБЫ ЗАРАБАТЫВАТЬ ДЕНЬГИ» ─────────────────────────────
     {
-      const ORIG = 'ЧТОБЫ СОБИРАТЬ ДЕНЬГИ';
+      const ORIG = 'ЧТОБЫ ЗАРАБАТЫВАТЬ ДЕНЬГИ';
       const CHARS = '₽$¥€¢£₩₿₴₸♦♣♠♥♦♣♠♥₽$¥€¢£★₽$€¥£♦♠♣♥';
       const moneyEl = overlay.querySelector('#_agu_money');
       const spans = moneyEl.querySelectorAll('.ml');

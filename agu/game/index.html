@@ -2428,14 +2428,10 @@ class GameScene extends Phaser.Scene {
 
       // Кнопка 4: ПОДЕЛИТЬСЯ
       const shareBtn = mkGoBtn(3, 'ПОДЕЛИТЬСЯ', 0x1c4c4c, () => {
-        const stars = this.state.starsCaught > 0 ? ' ★ Звёзд: ' + this.state.starsCaught : '';
-        const ending = this._drowned ? 'Утонул в слезах!' : this.state.bowCount === 0 ? 'Ни разу не прогнулся!' : '';
-        const text = 'АТГУЛ — Ламопад\n' +
-          'Прогнулся ' + this.state.bowCount + ' раз\n' +
-          'Заработал ' + Math.round(this.state.totalEarned).toLocaleString('ru') + ' ₽\n' +
-          'Время: ' + Math.floor(this.state.gameTime / 60) + 'м ' + Math.round(this.state.gameTime % 60) + 'с' +
-          stars + (ending ? '\n' + ending : '') +
-          '\n\nИграть: ' + window.location.href;
+        const text = 'Прогибайся, чтобы заработать онлайн.' +
+          '\nЯ прогнулся ' + this.state.bowCount + ' раз ' +
+          'и заработал ' + Math.round(this.state.totalEarned).toLocaleString('ru') + ' ₽\n' +
+          '\nИграть: ' + window.location.href;
         if (navigator.share) {
           navigator.share({ text }).catch(() => {});
         } else {

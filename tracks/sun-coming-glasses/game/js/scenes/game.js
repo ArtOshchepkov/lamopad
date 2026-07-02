@@ -249,6 +249,8 @@ export class GameScene extends Phaser.Scene {
   becomeShroom() {
     if (this.isShroom) return;
     this.isShroom = true;
+    // мир наводняется марио — уже бесполезными — на ближайшие 1500 м
+    this.field.marioFeverUntilM = this.maxM + CONF.mario.feverLengthM;
     this.player.sprite.setTexture('shroom');
     this.field.shout({ x: this.player.x, y: this.player.y - 26 }, 'ГРИБОК!');
     // разноцветные споры превращения

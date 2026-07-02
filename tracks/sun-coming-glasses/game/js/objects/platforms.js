@@ -11,6 +11,7 @@ export class PlatformField {
     this.active = [];   // платформы в мире
     this.pool = [];     // спрайты на переиспользование
     this.lastY = 0;     // отметка последнего спавна (мир, вверх = минус)
+    this.marioFeverUntilM = 0; // лихорадка: марио повсюду до этой высоты
     this.spawnTutorial();
   }
 
@@ -57,8 +58,11 @@ export class PlatformField {
         const enemy = Phaser.Utils.Array.GetRandom(CONF.enemy.types);
         this.place(enemy, this.apartX(x), this.lastY - R(4, 16));
       }
-      // мега-редкий блок «?» — тоже добавка
-      if (m > CONF.mario.fromM && Math.random() < CONF.mario.chance) {
+      // мега-редкий Марио — тоже добавка. После превращения игрока в грибка
+      // Марио заполоняют небо на feverLengthM метров, хотя толку от них никакого
+      const marioChance = m < this.marioFeverUntilM
+        ? CONF.mario.feverChance : CONF.mario.chance;
+      if (m > CONF.mario.fromM && Math.random() < marioChance) {
         this.place('mario', this.apartX(x), this.lastY - R(20, 50));
       }
     }

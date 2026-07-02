@@ -329,18 +329,36 @@ export class BootScene extends Phaser.Scene {
       g.beginPath(); g.moveTo(7, 4); g.lineTo(10, 6); g.strokePath();
     });
 
-    // Блок «?» из супермарио: золотой, с заклёпками
-    this.tex('p-mario', 44, 34, (g) => {
-      g.fillStyle(0x8a5a10); g.fillRoundedRect(0, 0, 44, 34, 5);   // кант
-      g.fillStyle(0xffb322); g.fillRoundedRect(2, 2, 40, 30, 4);   // тело
-      g.fillStyle(0xffd93b); g.fillRoundedRect(4, 4, 36, 12, 3);   // блик сверху
-      g.fillStyle(0x8a5a10);                                       // заклёпки
-      g.fillCircle(7, 7, 2); g.fillCircle(37, 7, 2); g.fillCircle(7, 27, 2); g.fillCircle(37, 27, 2);
-      // «?» из дуги, ножки и точки
-      g.lineStyle(4, 0xfff2d0);
-      g.beginPath(); g.arc(22, 12, 6, Math.PI * 0.9, Math.PI * 2.15); g.strokePath();
-      g.beginPath(); g.moveTo(23, 17); g.lineTo(22, 21); g.strokePath();
-      g.fillStyle(0xfff2d0); g.fillCircle(22, 26, 2.4);
+    // Сам СУПЕР МАРИО — мега-редкая платформа
+    this.tex('p-mario', 44, 48, (g) => {
+      // ботинки
+      g.fillStyle(0x5e3a1e); g.fillEllipse(13, 44, 15, 8); g.fillEllipse(31, 44, 15, 8);
+      // комбинезон
+      g.fillStyle(0x2a52c8); g.fillRoundedRect(12, 29, 20, 13, 4);
+      // рубашка и руки
+      g.fillStyle(0xd42222); g.fillRoundedRect(8, 23, 28, 10, 4);
+      // перчатки
+      g.fillStyle(0xffffff); g.fillCircle(7, 31, 3.5); g.fillCircle(37, 31, 3.5);
+      // нагрудник комбинезона с пуговицами
+      g.fillStyle(0x2a52c8); g.fillRect(16, 25, 12, 9);
+      g.fillStyle(0xffd93b); g.fillCircle(18, 27, 1.6); g.fillCircle(26, 27, 1.6);
+      // голова
+      g.fillStyle(0xffcc99); g.fillCircle(22, 15, 9);
+      // бакенбарды и уши
+      g.fillStyle(0x4a2c14); g.fillEllipse(14, 16, 4, 6); g.fillEllipse(30, 16, 4, 6);
+      // нос — крупный, фирменный
+      g.fillStyle(0xffbb88); g.fillEllipse(22, 18, 8, 5.5);
+      // усы
+      g.fillStyle(0x4a2c14); g.fillEllipse(22, 21.5, 13, 4);
+      // глаза
+      g.fillStyle(0x2a2a3a); g.fillEllipse(18.5, 14, 2.5, 3.5); g.fillEllipse(25.5, 14, 2.5, 3.5);
+      // кепка с козырьком и эмблемой
+      g.fillStyle(0xd42222);
+      g.fillEllipse(22, 8, 20, 9);
+      g.fillEllipse(22, 10.5, 26, 5); // козырёк
+      g.fillStyle(0xffffff); g.fillCircle(22, 6.5, 3.2);
+      g.fillStyle(0xd42222); // буква M — две ножки
+      g.fillRect(20.6, 4.8, 1.2, 3.6); g.fillRect(22.4, 4.8, 1.2, 3.6);
     });
 
     // ГРИБОК: герой после блока «?» (холст и ступни — как у очков)

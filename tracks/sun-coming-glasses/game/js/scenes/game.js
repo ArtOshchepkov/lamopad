@@ -287,11 +287,11 @@ export class GameScene extends Phaser.Scene {
     this.add.rectangle(W / 2, 2, W, 4, 0x2e2e36).setDepth(-2.9);      // плинтус
 
     const props = this.add.graphics().setDepth(-2.9);
-    // часы — вечные 10:10
+    // часы — показывают настоящее время (обновляются раз в полминуты)
+    this.clockGfx = this.add.graphics().setDepth(-2.88);
+    this.drawClock();
+    this.time.addEvent({ delay: 30000, loop: true, callback: () => this.drawClock() });
     props.fillStyle(0xd8d4dc); props.fillCircle(70, -180, 16);
-    props.lineStyle(2, 0x44444e);
-    props.beginPath(); props.moveTo(70, -180); props.lineTo(63, -187); props.strokePath();
-    props.beginPath(); props.moveTo(70, -180); props.lineTo(77, -187); props.strokePath();
     // доска, обклеенная стикерами-тасками
     props.fillStyle(0x55505c); props.fillRoundedRect(310, -205, 110, 74, 4);
     props.fillStyle(0xffd94b);
@@ -319,6 +319,23 @@ export class GameScene extends Phaser.Scene {
       );
       cx += w;
     }
+  }
+
+  /** Стрелки офисных часов — по настоящему времени. */
+  drawClock() {
+    const cx = 70, cy = -180;
+    const now = new Date();
+    const mA = (now.getMinutes() / 60) * Math.PI * 2;
+    const hA = (((now.getHours() % 12) + now.getMinutes() / 60) / 12) * Math.PI * 2;
+    const g = this.clockGfx;
+    g.clear();
+    g.lineStyle(2, 0x44444e);
+    g.beginPath(); g.moveTo(cx, cy); // минутная
+    g.lineTo(cx + Math.sin(mA) * 12, cy - Math.cos(mA) * 12); g.strokePath();
+    g.lineStyle(3, 0x44444e);
+    g.beginPath(); g.moveTo(cx, cy); // часовая
+    g.lineTo(cx + Math.sin(hA) * 8, cy - Math.cos(hA) * 8); g.strokePath();
+    g.fillStyle(0x44444e); g.fillCircle(cx, cy, 2);
   }
 
   /** Первый рывок вверх: плиты разлетаются, в пролом бьёт тёплый свет. */

@@ -89,6 +89,34 @@ export class Background {
     // ── светлячки: сгустки мерцающих искр, разлетаются от игрока ──
     this.fireflies = [];
     this.nextFireM = 140;
+
+    // ── дождь: пояс задаёт game-сцена через this.rainBand ──
+    this.rainBand = null;
+    this.drops = [];
+    const dropCount = lowGfx ? 22 : 42;
+    for (let i = 0; i < dropCount; i++) {
+      const d = scene.add.image(
+        Phaser.Math.Between(0, CONF.width),
+        Phaser.Math.Between(-CONF.height, CONF.height),
+        'raindrop',
+      ).setScrollFactor(0).setDepth(41)
+       .setTint(0xaaccee).setAngle(-8).setAlpha(0);
+      d.vy = Phaser.Math.Between(760, 1150);
+      this.drops.push(d);
+    }
+    // сумрак ливня
+    this.rainDim = scene.add.rectangle(
+      CONF.width / 2, CONF.height / 2, CONF.width, CONF.height, 0x1a2238,
+    ).setScrollFactor(0).setDepth(40).setAlpha(0);
+  }
+
+  /** 0..1 — насколько мы внутри дождевого пояса (с плавными краями). */
+  rainIntensity(curM) {
+    if (!this.rainBand) return 0;
+    const { from, to } = this.rainBand;
+    if (curM < from || curM > to) return 0;
+    return Phaser.Math.Clamp(
+      Math.min(curM - from, to - curM) / CONF.rain.edgeM, 0, 1);
   }
 
   /** Сгусток светлячков. inView — прямо на экране (для чит-кода). */
@@ -281,8 +309,22 @@ export class Background {
     c.x = Phaser.Math.Between(30, CONF.width - 30);
   }
 
-  update(curM, maxM, player) {
+  update(curM, maxM, player, dt = 0.016) {
     const cam = this.scene.cameras.main;
+
+    // дождь: капли летят, пока мы в поясе
+    const rain = this.rainIntensity(curM);
+    this.rainDim.setAlpha(rain * 0.34); // мрачно, как перед настоящей грозой
+    for (const d of this.drops) {
+      if (rain <= 0.01) { if (d.alpha !== 0) d.setAlpha(0); continue; }
+      d.setAlpha(rain * 0.55);
+      d.y += d.vy * dt;
+      d.x -= d.vy * 0.14 * dt; // лёгкий косой снос
+      if (d.y > CONF.height + 16) {
+        d.y = -16;
+        d.x = Phaser.Math.Between(0, CONF.width + 60);
+      }
+    }
 
     // светлячки: спавн по высоте, разлёт от игрока, чистка внизу
     if (maxM >= this.nextFireM && maxM < 8000) {

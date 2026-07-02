@@ -36,6 +36,12 @@ export class GameScene extends Phaser.Scene {
     this.isShroom = false; // ГРИБОК после блока «?»
     this.buildOffice();    // серое утро, из которого мы сбежим
 
+    // дождевой пояс: случайное начало, километр ливня и грозовых туч
+    const rainFrom = Phaser.Math.Between(CONF.rain.minStartM, CONF.rain.maxStartM);
+    this.rainBand = { from: rainFrom, to: rainFrom + CONF.rain.lengthM };
+    this.field.rainBand = this.rainBand;
+    this.bg.rainBand = this.rainBand;
+
     // ворчание засиженного облака и причина смерти
     this.lastPlat = null;
     this.samePlatCount = 0;
@@ -78,6 +84,13 @@ export class GameScene extends Phaser.Scene {
           this.cheatBuf = '';
         }
         else if (this.cheatBuf.endsWith('jet')) { this.spawnJetOnCloud(); this.cheatBuf = ''; }
+        else if (this.cheatBuf.endsWith('rain')) {
+          // ливень прямо здесь и на километр вверх
+          const curM = Math.max(0, Math.round(-this.player.y / CONF.pxPerM));
+          this.rainBand.from = Math.max(0, curM - CONF.rain.edgeM);
+          this.rainBand.to = curM + CONF.rain.lengthM;
+          this.cheatBuf = '';
+        }
         else if (this.cheatBuf.endsWith('bubble')) {
           this.spawnBubble(this.cameras.main.scrollY + 200);
           this.cheatBuf = '';
@@ -156,7 +169,7 @@ export class GameScene extends Phaser.Scene {
     const dt = Math.min(deltaMs / 1000, CONF.physics.maxDt);
     const cam = this.cameras.main;
     const curM = Math.max(0, Math.round(-this.player.y / CONF.pxPerM));
-    this.bg.update(curM, this.maxM, this.player);
+    this.bg.update(curM, this.maxM, this.player, dt);
     if (this.state !== 'run') return;
 
     this.player.update(dt, this.inputDir());

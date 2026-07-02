@@ -12,6 +12,7 @@ export class PlatformField {
     this.pool = [];     // спрайты на переиспользование
     this.lastY = 0;     // отметка последнего спавна (мир, вверх = минус)
     this.marioFeverUntilM = 0; // лихорадка: марио повсюду до этой высоты
+    this.rainBand = null;      // дождевой пояс задаёт game-сцена
     this.spawnTutorial();
   }
 
@@ -30,12 +31,12 @@ export class PlatformField {
     return z;
   }
 
-  pickType(zone) {
+  pickType(types) {
     let total = 0;
-    for (const t in zone.types) total += zone.types[t];
+    for (const t in types) total += types[t];
     let roll = Math.random() * total;
-    for (const t in zone.types) {
-      roll -= zone.types[t];
+    for (const t in types) {
+      roll -= types[t];
       if (roll <= 0) return t;
     }
     return 'cloud';
@@ -47,7 +48,10 @@ export class PlatformField {
       const m = -this.lastY / CONF.pxPerM;
       const zone = this.zoneFor(m);
       this.lastY -= R(zone.gap[0], zone.gap[1]);
-      const type = this.pickType(zone);
+      // в дождевом поясе грозовых туч гораздо больше
+      const inRain = this.rainBand && m >= this.rainBand.from && m <= this.rainBand.to;
+      const types = inRain ? { ...zone.types, storm: CONF.rain.stormWeight } : zone.types;
+      const type = this.pickType(types);
       const x = this.randX(type);
       this.place(type, x, this.lastY);
       // чемодан — ловушка: на той же высоте всегда есть честная опора

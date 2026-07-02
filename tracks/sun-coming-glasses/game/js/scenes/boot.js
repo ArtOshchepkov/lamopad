@@ -435,6 +435,11 @@ export class BootScene extends Phaser.Scene {
       g.beginPath(); g.moveTo(36, 2); g.lineTo(36, 42); g.strokePath();
     });
 
+    // Капля дождя: тонкий штрих
+    this.tex('raindrop', 3, 14, (g) => {
+      g.fillStyle(0xffffff, 0.95); g.fillRect(1, 0, 1.8, 12);
+    });
+
     // Светлячок: почти пиксель
     this.tex('spark', 3, 3, (g) => {
       g.fillStyle(0xffffff); g.fillCircle(1.5, 1.5, 1.2);

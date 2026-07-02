@@ -61,6 +61,11 @@ export class GameScene extends Phaser.Scene {
           this.cheatBuf = '';
         }
         else if (this.cheatBuf.endsWith('jet')) { this.spawnJetOnCloud(); this.cheatBuf = ''; }
+        else if (this.cheatBuf.endsWith('light')) {
+          this.field.place('storm',
+            Phaser.Math.Between(80, CONF.width - 80), this.cameras.main.scrollY + 200);
+          this.cheatBuf = '';
+        }
         else if (this.cheatBuf.endsWith('mario')) {
           this.field.place('mario',
             Phaser.Math.Between(70, CONF.width - 70), this.cameras.main.scrollY + 180);
@@ -209,6 +214,11 @@ export class GameScene extends Phaser.Scene {
         this.player.bounce(P.springVy * 0.95, 0.3);
         this.field.react(plat);
         this.becomeShroom();
+        break;
+      case 'storm':
+        this.player.bounce(P.bounceVy * 0.95, 0.2);
+        this.field.react(plat);
+        this.field.strikeLightning(plat);
         break;
       default: // облака
         this.player.bounce(P.bounceVy);

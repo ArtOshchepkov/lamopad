@@ -117,6 +117,22 @@ export class BootScene extends Phaser.Scene {
       g.fillEllipse(20, 4, 12, 5); g.fillEllipse(46, 3, 13, 5);
     });
 
+    // Грозовая туча: тёмная, набухшая — при прыжке бьёт молнией
+    this.tex('p-storm', 90, 36, (g) => {
+      g.translateCanvas(0, 6);
+      g.fillStyle(0x140a28, 0.5); g.fillEllipse(46, 27, 60, 6);   // тень
+      g.fillStyle(0x3a2c52);                                       // тёмное брюхо
+      g.fillCircle(17, 19, 9); g.fillCircle(34, 20, 10);
+      g.fillCircle(52, 20, 9); g.fillCircle(68, 18, 8); g.fillCircle(80, 16, 6);
+      g.fillStyle(0x5a4878);                                       // тело
+      g.fillCircle(19, 12, 10); g.fillCircle(37, 10, 13);
+      g.fillCircle(56, 10, 12); g.fillCircle(73, 12, 9); g.fillCircle(82, 14, 6);
+      g.fillStyle(0x7a68a0, 0.9);                                  // хмурый блик
+      g.fillEllipse(40, 4, 20, 6); g.fillEllipse(62, 5, 14, 5);
+      g.fillStyle(0xffd93b, 0.9);                                  // искорка внутри
+      g.fillTriangle(46, 22, 42, 28, 45, 27);
+    });
+
     // Стесняшка-закатик: тёплое румяное облачко
     this.tex('p-sunset', 86, 38, (g) => {
       g.translateCanvas(0, 6);

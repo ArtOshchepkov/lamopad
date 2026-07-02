@@ -328,6 +328,48 @@ export class PlatformField {
     });
   }
 
+  /** Туча бьёт молнией вниз: зигзаг, вспышка, дрожь камеры. */
+  strikeLightning(p) {
+    const scene = this.scene;
+    // туча вспыхивает белым изнутри
+    p.sprite.setTintFill(0xffffff);
+    scene.time.delayedCall(70, () => { if (p.sprite.active) p.sprite.clearTint(); });
+
+    // зигзаг молнии от брюха тучи вниз
+    const g = scene.add.graphics().setDepth(8);
+    const pts = [{ x: p.x, y: p.y + p.h / 2 - 4 }];
+    let x = p.x, y = pts[0].y;
+    const segs = R(5, 7);
+    for (let i = 0; i < segs; i++) {
+      x += R(-26, 26);
+      y += R(38, 58);
+      pts.push({ x, y });
+    }
+    const draw = (width, color, alpha) => {
+      g.lineStyle(width, color, alpha);
+      g.beginPath();
+      g.moveTo(pts[0].x, pts[0].y);
+      for (let i = 1; i < pts.length; i++) g.lineTo(pts[i].x, pts[i].y);
+      g.strokePath();
+    };
+    draw(8, 0x9fc8ff, 0.35); // ореол
+    draw(3, 0xffffff, 1);    // ядро
+    scene.tweens.add({
+      targets: g, alpha: 0, duration: 380, ease: 'Cubic.easeIn',
+      onComplete: () => g.destroy(),
+    });
+
+    // вспышка на весь экран и дрожь
+    const flash = scene.add.rectangle(
+      CONF.width / 2, CONF.height / 2, CONF.width, CONF.height, 0xffffff, 0.4,
+    ).setScrollFactor(0).setDepth(60);
+    scene.tweens.add({
+      targets: flash, alpha: 0, duration: 200,
+      onComplete: () => flash.destroy(),
+    });
+    scene.cameras.main.shake(140, 0.0045);
+  }
+
   /** Хищник делает выпад к добыче. */
   lunge(p, px, cry, tint) {
     if (!p.deco) return;

@@ -123,6 +123,16 @@
 
     .track-name .r { color: var(--red); }
 
+    /* тёплое «Солнце» — как на странице трека */
+    .track-name .sun {
+      background: linear-gradient(105deg, #ffb322, #ff7d1e 70%, #ff5a1c);
+      -webkit-background-clip: text;
+      background-clip: text;
+      color: #ff8a1e;
+      -webkit-text-fill-color: transparent;
+      text-shadow: 0 0 18px rgba(255,179,34,0.35);
+    }
+
     .track:hover .track-name {
       color: var(--red);
     }
@@ -343,8 +353,10 @@
     <li class="track">
       <span class="track-num">09</span>
       <div class="track-body">
-        <span class="track-name">Солнценаступательные очки</span>
+        <a class="track-name" href="/tracks/sun-coming-glasses/"><span class="sun">Солнце</span>наступательные очки</a>
         <div class="track-links">
+          <a class="track-link" href="/tracks/sun-coming-glasses/">текст</a>
+          <a class="track-link" href="https://www.youtube.com/watch?v=0NDie-CCm_o&amp;list=RD0NDie-CCm_o&amp;start_radio=1" target="_blank" rel="noopener">караоке</a>
           <a class="track-link" href="/tracks/sun-coming-glasses.mp3" download>mp3</a>
         </div>
       </div>

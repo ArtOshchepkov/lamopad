@@ -1,0 +1,1333 @@
+<!DOCTYPE html>
+<html lang="ru">
+<head>
+  <meta charset="utf-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1">
+  <title>Солнценаступательные очки — текст песни и аккорды | Ламопад</title>
+  <meta name="description" content="Ламопад — «Солнценаступательные очки»: текст песни, аккорды, слушать онлайн и скачать MP3. Задорный гимн против закисания: рюкзак, билет и краснеющий закат. Там хорошо!">
+  <meta name="keywords" content="Ламопад, Солнценаступательные очки, текст песни, аккорды, слушать, скачать mp3, путешествия, рюкзак, закат, инди-рок">
+  <meta property="og:title" content="Солнценаступательные очки — Ламопад">
+  <meta property="og:description" content="Что закис, мой друг? Тащи солнценаступательные очки! Текст, аккорды, слушать онлайн.">
+  <meta property="og:type" content="music.song">
+  <meta property="og:image" content="https://lamopad.ru/tracks/sun-coming-glasses-cover.jpg">
+  <meta property="og:url" content="https://lamopad.ru/tracks/sun-coming-glasses/">
+  <meta property="og:locale" content="ru_RU">
+  <meta property="og:site_name" content="Ламопад">
+  <meta name="twitter:card" content="summary_large_image">
+  <meta name="twitter:title" content="Солнценаступательные очки — Ламопад">
+  <meta name="twitter:description" content="Что закис, мой друг? Тащи солнценаступательные очки! Там хорошо!">
+  <meta name="twitter:image" content="https://lamopad.ru/tracks/sun-coming-glasses-cover.jpg">
+  <link rel="canonical" href="https://lamopad.ru/tracks/sun-coming-glasses/">
+  <link rel="icon" href="/tracks/sun-coming-glasses-cover.jpg">
+
+  <script type="application/ld+json">
+  {
+    "@context": "https://schema.org",
+    "@type": "MusicRecording",
+    "name": "Солнценаступательные очки",
+    "byArtist": { "@type": "MusicGroup", "name": "Ламопад" },
+    "inAlbum": { "@type": "MusicAlbum", "name": "Солнценаступательные очки" },
+    "description": "Задорный гимн против закисания: рюкзак, радость-образующий билет и краснеющий закат. Там хорошо!",
+    "genre": ["Indie Rock"],
+    "image": "https://lamopad.ru/tracks/sun-coming-glasses-cover.jpg",
+    "url": "https://lamopad.ru/tracks/sun-coming-glasses/"
+  }
+  </script>
+
+  <link rel="preconnect" href="https://fonts.googleapis.com">
+  <link href="https://fonts.googleapis.com/css2?family=Nunito:ital,wght@0,300;0,400;0,600;0,700;1,300;1,400&family=Unbounded:wght@700;900&display=swap" rel="stylesheet">
+
+  <style>
+    *, *::before, *::after { margin: 0; padding: 0; box-sizing: border-box; }
+
+    :root {
+      --sky1:    #241058;
+      --sky2:    #71178f;
+      --sky3:    #c81653;
+      --sky4:    #ff4d1c;
+      --sun:     #ffd93b;
+      --gold:    #ffcf3f;
+      --gold-dim:rgba(255,207,63,0.55);
+      --red:     #ff3b2d;
+      --pink:    #ffb8dd;
+      --surface: rgba(26,5,46,0.72);
+      --border:  rgba(255,255,255,0.18);
+      --text:    #ffe7d2;
+      --dim:     rgba(255,214,190,0.62);
+      --white:   #fff6ec;
+    }
+
+    html { scroll-behavior: smooth; }
+
+    body {
+      background: var(--sky1);
+      color: var(--text);
+      font-family: 'Nunito', sans-serif;
+      font-size: clamp(16px, 3vw, 18px);
+      line-height: 1.8;
+      min-height: 100vh;
+      overflow-x: hidden;
+    }
+
+    /* ── fixed sunset backdrop ── */
+    #sky {
+      position: fixed;
+      inset: 0;
+      z-index: 0;
+      background: linear-gradient(180deg,
+        var(--sky1) 0%,
+        var(--sky2) 32%,
+        var(--sky3) 62%,
+        var(--sky4) 100%);
+      pointer-events: none;
+    }
+
+    /* rotating sun rays */
+    #rays {
+      position: fixed;
+      left: 50%;
+      bottom: -80vmin;
+      width: 170vmin;
+      height: 170vmin;
+      margin-left: -85vmin;
+      z-index: 0;
+      border-radius: 50%;
+      background: repeating-conic-gradient(
+        rgba(255,225,110,0.13) 0deg 7deg,
+        rgba(255,225,110,0) 7deg 16deg);
+      -webkit-mask-image: radial-gradient(circle, #000 0%, transparent 68%);
+      mask-image: radial-gradient(circle, #000 0%, transparent 68%);
+      animation: rays-spin 90s linear infinite;
+      pointer-events: none;
+    }
+    @keyframes rays-spin { to { transform: rotate(360deg); } }
+
+    /* the sun itself */
+    #sun {
+      position: fixed;
+      left: 50%;
+      bottom: -36vmin;
+      width: 66vmin;
+      height: 66vmin;
+      margin-left: -33vmin;
+      z-index: 1;
+      border-radius: 50%;
+      background: radial-gradient(circle at 50% 36%,
+        #fff8c9 0%, #ffe14d 36%, #ffb322 68%, #ff7d1e 100%);
+      box-shadow:
+        0 0 10vmin rgba(255,214,70,0.85),
+        0 0 32vmin rgba(255,120,30,0.55);
+      animation: sun-breathe 6s ease-in-out infinite;
+      transition: transform 1.6s cubic-bezier(.22,1,.36,1);
+      pointer-events: none;
+    }
+    @keyframes sun-breathe {
+      0%, 100% { box-shadow: 0 0 10vmin rgba(255,214,70,0.85), 0 0 32vmin rgba(255,120,30,0.55); }
+      50%      { box-shadow: 0 0 14vmin rgba(255,214,70,1),   0 0 40vmin rgba(255,120,30,0.7); }
+    }
+    body.sunmode #sun { transform: translateY(-14vh) scale(1.12); }
+
+    /* ── palms, leaning from the edges to the top-center (like on the cover) ── */
+    .palm {
+      position: fixed;
+      bottom: -5vh;
+      z-index: 4;
+      width: clamp(150px, 34vmin, 380px);
+      cursor: pointer;
+      -webkit-tap-highlight-color: transparent;
+      filter: drop-shadow(0 0 18px rgba(60,0,50,0.35));
+    }
+    .palm-left  { left: -6vw; }
+    .palm-right { right: -6vw; transform: scaleX(-1); }
+
+    /* second layer, top half, leaning toward the center */
+    .palm-top {
+      bottom: auto;
+      top: 0;
+      z-index: 2;
+      width: clamp(110px, 26vmin, 300px);
+      filter: drop-shadow(0 0 14px rgba(60,0,50,0.3)) brightness(0.88);
+    }
+    .palm-top-left  { left: -7vw;  transform: rotate(17deg); }
+    .palm-top-right { right: -7vw; transform: scaleX(-1) rotate(17deg); }
+    .palm svg {
+      display: block;
+      width: 100%;
+      height: auto;
+      overflow: visible;
+      transform-origin: 25% 100%;
+      animation: palm-sway 7s ease-in-out infinite alternate;
+    }
+    .palm-right svg { animation-duration: 8.5s; }
+    @keyframes palm-sway {
+      from { transform: rotate(-1.3deg); }
+      to   { transform: rotate(1.3deg); }
+    }
+
+    /* shake on click: rotate the palm art around the trunk base */
+    .palm.shake svg > g,
+    .palm.shake svg > use {
+      animation: palm-shake 0.65s ease both;
+      transform-box: view-box;
+      transform-origin: 20% 95%;
+    }
+    @keyframes palm-shake {
+      0%, 100% { transform: rotate(0deg); }
+      12% { transform: rotate(-5deg); }
+      28% { transform: rotate(4.5deg); }
+      44% { transform: rotate(-3.5deg); }
+      60% { transform: rotate(2.5deg); }
+      76% { transform: rotate(-1.5deg); }
+      90% { transform: rotate(0.8deg); }
+    }
+
+    /* llama knocked out of the palm */
+    .fall-llama {
+      position: fixed;
+      z-index: 44;
+      font-size: clamp(26px, 5vw, 40px);
+      line-height: 1;
+      pointer-events: none;
+      user-select: none;
+      filter: drop-shadow(0 4px 6px rgba(90,0,40,0.4));
+      animation: llama-fall cubic-bezier(.45,.05,.85,.4) forwards;
+    }
+    @keyframes llama-fall {
+      0%   { transform: translate(0, 0) rotate(0deg); opacity: 0; }
+      10%  { opacity: 1; }
+      100% { transform: translate(var(--dx), var(--dy)) rotate(var(--rot)); opacity: 1; }
+    }
+    @media (max-width: 720px) {
+      .palm { width: clamp(120px, 38vw, 220px); bottom: -3vh; }
+      .palm-left  { left: -10vw; }
+      .palm-right { right: -10vw; }
+      .palm-top { width: clamp(90px, 30vw, 160px); bottom: auto; top: -2vh; }
+      .palm-top-left  { left: -12vw; }
+      .palm-top-right { right: -12vw; }
+    }
+
+    /* warm flash overlay for sun mode */
+    #warm {
+      position: fixed;
+      inset: 0;
+      z-index: 5;
+      background: radial-gradient(circle at 50% 92%,
+        rgba(255,205,60,0.55) 0%,
+        rgba(255,100,40,0.28) 48%,
+        transparent 78%);
+      mix-blend-mode: screen;
+      opacity: 0;
+      transition: opacity 1.2s ease;
+      pointer-events: none;
+    }
+    body.sunmode #warm { opacity: 1; }
+
+    /* big «Там хорошо!» */
+    #tamgood {
+      position: fixed;
+      left: 50%;
+      top: 38%;
+      transform: translate(-50%, -50%) scale(0.4);
+      z-index: 60;
+      font-family: 'Unbounded', sans-serif;
+      font-weight: 900;
+      font-size: clamp(26px, 8vw, 64px);
+      color: var(--gold);
+      text-shadow: 0 0 18px rgba(255,180,40,0.9), 0 0 60px rgba(255,120,30,0.7), 3px 3px 0 rgba(120,10,60,0.55);
+      white-space: nowrap;
+      opacity: 0;
+      pointer-events: none;
+      text-align: center;
+    }
+    #tamgood.pop { animation: tam-pop 2.6s cubic-bezier(.22,1.4,.36,1) forwards; }
+    @keyframes tam-pop {
+      0%   { opacity: 0; transform: translate(-50%,-50%) scale(0.4) rotate(-6deg); }
+      18%  { opacity: 1; transform: translate(-50%,-50%) scale(1.06) rotate(2deg); }
+      30%  { transform: translate(-50%,-50%) scale(1) rotate(0deg); }
+      78%  { opacity: 1; }
+      100% { opacity: 0; transform: translate(-50%,-56%) scale(1.05); }
+    }
+
+    /* ── walking sunglasses ── */
+    #walker {
+      position: fixed;
+      left: 0;
+      bottom: 1.5vh;
+      z-index: 45;
+      cursor: pointer;
+      animation: walker-cross 36s linear infinite;
+      -webkit-tap-highlight-color: transparent;
+      filter: drop-shadow(0 6px 10px rgba(90,0,40,0.45));
+    }
+    @keyframes walker-cross {
+      from { transform: translateX(-160px); }
+      to   { transform: translateX(calc(100vw + 160px)); }
+    }
+    #walker svg { display: block; width: clamp(88px, 16vw, 130px); height: auto; overflow: visible; }
+    #walker .gl-body { animation: gl-bob 0.55s ease-in-out infinite alternate; transform-origin: 68px 40px; }
+    @keyframes gl-bob {
+      from { transform: translateY(0) rotate(-2deg); }
+      to   { transform: translateY(-4px) rotate(2deg); }
+    }
+    #walker .leg { animation: gl-step 0.55s ease-in-out infinite alternate; }
+    #walker .leg-l { transform-origin: 52px 52px; }
+    #walker .leg-r { transform-origin: 88px 50px; animation-direction: alternate-reverse; }
+    @keyframes gl-step {
+      from { transform: rotate(17deg); }
+      to   { transform: rotate(-17deg); }
+    }
+    #walker.jump .gl-all { animation: gl-jump 0.7s cubic-bezier(.22,1.6,.36,1); }
+    @keyframes gl-jump {
+      0%   { transform: translateY(0); }
+      40%  { transform: translateY(-46px) rotate(-8deg); }
+      100% { transform: translateY(0); }
+    }
+
+    /* ── llamas ── */
+    .llama {
+      position: fixed;
+      bottom: 3vh;
+      left: 0;
+      z-index: 40;
+      font-size: clamp(28px, 6vw, 44px);
+      line-height: 1;
+      cursor: pointer;
+      user-select: none;
+      -webkit-tap-highlight-color: transparent;
+      animation: llama-run linear forwards;
+      filter: drop-shadow(0 4px 6px rgba(90,0,40,0.4));
+    }
+    @keyframes llama-run {
+      from { transform: translateX(calc(100vw + 60px)); }
+      to   { transform: translateX(-90px); }
+    }
+    .llama > span {
+      display: inline-block;
+      animation: llama-hop 0.5s cubic-bezier(.36,0,.64,1) infinite alternate;
+    }
+    @keyframes llama-hop {
+      from { transform: translateY(0) rotate(4deg); }
+      to   { transform: translateY(-26px) rotate(-6deg); }
+    }
+    .llama.boing > span { animation: llama-boing 0.8s ease-out; }
+    @keyframes llama-boing {
+      0%   { transform: translateY(0) rotate(0); }
+      45%  { transform: translateY(-70px) rotate(360deg); }
+      100% { transform: translateY(0) rotate(360deg); }
+    }
+    .llama-bubble {
+      position: fixed;
+      z-index: 61;
+      font-family: 'Unbounded', sans-serif;
+      font-size: 13px;
+      font-weight: 700;
+      color: var(--white);
+      background: rgba(120,10,60,0.85);
+      border: 1px solid var(--gold-dim);
+      border-radius: 14px;
+      padding: 4px 12px;
+      pointer-events: none;
+      animation: bubble-up 1.6s ease-out forwards;
+      white-space: nowrap;
+    }
+    @keyframes bubble-up {
+      0%   { opacity: 0; transform: translateY(6px); }
+      15%  { opacity: 1; }
+      75%  { opacity: 1; }
+      100% { opacity: 0; transform: translateY(-34px); }
+    }
+
+    /* ── layout ── */
+    .page {
+      position: relative;
+      z-index: 10;
+      max-width: 860px;
+      margin: 0 auto;
+      padding: clamp(24px, 5vw, 48px) clamp(16px, 4vw, 32px) clamp(80px, 14vh, 140px);
+    }
+    .page-card {
+      background: var(--surface);
+      backdrop-filter: blur(8px);
+      -webkit-backdrop-filter: blur(8px);
+      border: 1px solid rgba(255,255,255,0.10);
+      border-radius: 20px;
+      padding: clamp(22px, 5vw, 44px) clamp(18px, 5vw, 40px);
+    }
+
+    /* ── breadcrumbs ── */
+    .crumbs {
+      position: relative;
+      z-index: 11;
+      padding: 1rem 1.5rem 0;
+      font-size: 0.68rem;
+      letter-spacing: 0.12em;
+      text-transform: uppercase;
+      color: var(--dim);
+      font-weight: 600;
+    }
+    .crumbs a { color: inherit; text-decoration: none; transition: color 0.15s; }
+    .crumbs a:hover { color: var(--gold); }
+    .crumbs .sep { margin: 0 0.5ch; opacity: 0.4; }
+
+    /* ── header ── */
+    .header {
+      display: flex;
+      gap: clamp(16px, 4vw, 28px);
+      align-items: flex-start;
+      margin-bottom: 32px;
+    }
+    .cover {
+      flex-shrink: 0;
+      width: clamp(84px, 24vw, 132px);
+      height: clamp(84px, 24vw, 132px);
+      object-fit: cover;
+      border-radius: 10px;
+      box-shadow: 0 0 26px rgba(255,150,40,0.45), 0 6px 18px rgba(60,0,40,0.55);
+      cursor: pointer;
+      transition: transform 0.25s cubic-bezier(.22,1.4,.36,1), box-shadow 0.25s;
+    }
+    .cover:hover {
+      transform: rotate(-3deg) scale(1.05);
+      box-shadow: 0 0 40px rgba(255,180,60,0.7), 0 8px 22px rgba(60,0,40,0.6);
+    }
+    .header-text { flex: 1; min-width: 0; padding-top: 2px; }
+
+    .track-title {
+      font-family: 'Unbounded', sans-serif;
+      font-size: clamp(16px, 4.2vw, 32px);
+      font-weight: 900;
+      line-height: 1.15;
+      color: var(--white);
+      letter-spacing: -0.01em;
+      margin-bottom: 8px;
+      overflow-wrap: break-word;
+    }
+    .track-title .sun-word { color: var(--gold); text-shadow: 0 0 16px rgba(255,190,50,0.55); }
+
+    .artist-line {
+      font-size: 12px;
+      letter-spacing: 0.22em;
+      text-transform: uppercase;
+      color: var(--dim);
+      font-weight: 700;
+      margin-bottom: 12px;
+    }
+
+    .moods { display: flex; flex-wrap: wrap; gap: 6px; }
+    .mood {
+      font-size: 11px;
+      letter-spacing: 0.12em;
+      text-transform: uppercase;
+      padding: 4px 10px;
+      border-radius: 20px;
+      border: 1px solid var(--border);
+      font-weight: 600;
+    }
+    .mood.m1 { border-color: rgba(255,207,63,0.5);  color: var(--gold); }
+    .mood.m2 { border-color: rgba(255,140,80,0.5);  color: #ffb08a; }
+    .mood.m3 { border-color: rgba(255,184,221,0.5); color: var(--pink); }
+
+    /* ── description ── */
+    .description {
+      background: rgba(255,255,255,0.05);
+      border: 1px solid var(--border);
+      border-radius: 10px;
+      padding: 18px 20px;
+      font-size: clamp(14px, 2.8vw, 16px);
+      color: var(--dim);
+      line-height: 1.7;
+      margin-bottom: 28px;
+      font-style: italic;
+    }
+    .description b { color: var(--text); font-weight: 700; }
+
+    /* ── player ── */
+    .player-wrap {
+      background: rgba(255,255,255,0.05);
+      border: 1px solid var(--border);
+      border-radius: 12px;
+      padding: 20px;
+      margin-bottom: 20px;
+      box-shadow: 0 0 40px rgba(255,140,40,0.10);
+    }
+    .player-inner { display: flex; align-items: center; gap: 16px; }
+    .play-btn {
+      flex-shrink: 0;
+      width: 52px;
+      height: 52px;
+      border-radius: 50%;
+      background: linear-gradient(135deg, #ff8a1e, #ffce3a);
+      border: none;
+      cursor: pointer;
+      display: flex;
+      align-items: center;
+      justify-content: center;
+      transition: transform 0.15s, box-shadow 0.2s;
+      box-shadow: 0 0 20px rgba(255,180,50,0.5);
+    }
+    .play-btn:hover { transform: scale(1.07); box-shadow: 0 0 30px rgba(255,190,60,0.75); }
+    .play-btn svg { width: 22px; height: 22px; fill: #5a1400; }
+    .play-btn .icon-pause { display: none; }
+
+    .player-info { flex: 1; min-width: 0; }
+    .player-track { font-weight: 700; font-size: 15px; color: var(--white); margin-bottom: 2px; }
+    .player-artist { font-size: 12px; color: var(--dim); letter-spacing: 0.08em; }
+    .player-time { font-size: 12px; color: var(--dim); font-variant-numeric: tabular-nums; white-space: nowrap; }
+
+    .progress-wrap { margin-top: 14px; position: relative; cursor: pointer; }
+    .progress-bg {
+      width: 100%;
+      height: 3px;
+      background: rgba(255,255,255,0.14);
+      border-radius: 2px;
+      position: relative;
+      overflow: hidden;
+    }
+    .progress-fill {
+      height: 100%;
+      width: 0%;
+      background: linear-gradient(90deg, var(--red), var(--gold));
+      border-radius: 2px;
+      transition: width 0.25s linear;
+      pointer-events: none;
+    }
+    .progress-bg::after {
+      content: '';
+      position: absolute;
+      left: var(--thumb, 0%);
+      top: 50%;
+      transform: translate(-50%, -50%);
+      width: 10px;
+      height: 10px;
+      border-radius: 50%;
+      background: var(--gold);
+      box-shadow: 0 0 6px var(--gold);
+      opacity: 0;
+      transition: opacity 0.2s;
+    }
+    .progress-wrap:hover .progress-bg::after { opacity: 1; }
+
+    /* ── download / platforms ── */
+    .download-btn {
+      display: flex;
+      align-items: center;
+      justify-content: center;
+      gap: 8px;
+      text-decoration: none;
+      color: var(--gold-dim);
+      font-size: clamp(13px, 2.4vw, 14px);
+      font-weight: 700;
+      letter-spacing: 0.06em;
+      padding: 10px 20px;
+      border: 1px solid rgba(255,207,63,0.3);
+      border-radius: 8px;
+      margin-bottom: 14px;
+      transition: color 0.15s, border-color 0.15s, background 0.15s;
+    }
+    .download-btn:hover { color: var(--gold); border-color: var(--gold-dim); background: rgba(255,207,63,0.08); }
+    .download-btn svg { flex-shrink: 0; }
+
+    .or-divider {
+      width: 100%;
+      display: flex;
+      align-items: center;
+      gap: 12px;
+      color: var(--dim);
+      font-size: 12px;
+      letter-spacing: 0.2em;
+      opacity: 0.6;
+      margin: 6px 0 10px;
+    }
+    .or-divider::before, .or-divider::after {
+      content: '';
+      flex: 1;
+      height: 1px;
+      background: var(--border);
+    }
+
+    .platforms {
+      display: flex;
+      flex-wrap: wrap;
+      gap: 10px;
+      align-items: center;
+      margin-bottom: 12px;
+    }
+    .platform-link {
+      display: flex;
+      align-items: center;
+      gap: 6px;
+      text-decoration: none;
+      color: var(--dim);
+      font-size: clamp(12px, 2.4vw, 14px);
+      font-weight: 600;
+      letter-spacing: 0.04em;
+      padding: 7px 14px;
+      border: 1px solid var(--border);
+      border-radius: 6px;
+      transition: color 0.15s, border-color 0.15s, background 0.15s;
+    }
+    .platform-link:hover { color: var(--gold); border-color: var(--gold-dim); background: rgba(255,207,63,0.08); }
+    .platform-link img { width: 15px; height: 15px; filter: brightness(0) invert(0.75); transition: filter 0.15s; }
+    .platform-link:hover img { filter: brightness(0) invert(0.85) sepia(1) saturate(4) hue-rotate(-8deg); }
+
+    /* ── story links ── */
+    .story-links {
+      display: flex;
+      flex-direction: column;
+      gap: 12px;
+      margin: 40px 0;
+    }
+    .story-link {
+      display: flex;
+      align-items: center;
+      gap: 12px;
+      text-decoration: none;
+      color: var(--text);
+      padding: 16px 20px;
+      background: rgba(255,255,255,0.05);
+      border: 1px solid var(--border);
+      border-radius: 10px;
+      transition: border-color 0.2s, background 0.2s;
+      font-size: clamp(14px, 2.8vw, 16px);
+    }
+    .story-link:hover { border-color: var(--gold-dim); background: rgba(255,207,63,0.07); }
+    .story-link .link-icon { font-size: 22px; flex-shrink: 0; }
+    .link-text { flex: 1; }
+    .link-label { color: var(--white); font-weight: 600; line-height: 1.4; }
+    .link-meta { font-size: 11px; color: var(--dim); letter-spacing: 0.1em; text-transform: uppercase; margin-top: 2px; }
+    .link-arrow { color: var(--dim); font-size: 18px; flex-shrink: 0; transition: transform 0.2s; }
+    .story-link:hover .link-arrow { transform: translateX(4px); }
+
+    /* ── lyrics ── */
+    .lyrics-section { margin-top: 48px; }
+
+    .lyrics-tabs {
+      display: flex;
+      gap: 4px;
+      margin-bottom: 28px;
+      background: rgba(255,255,255,0.05);
+      border-radius: 8px;
+      padding: 4px;
+    }
+    .tab-btn {
+      flex: 1;
+      padding: 10px 16px;
+      border: none;
+      background: none;
+      color: var(--dim);
+      font-family: 'Nunito', sans-serif;
+      font-size: 14px;
+      font-weight: 700;
+      letter-spacing: 0.12em;
+      text-transform: uppercase;
+      cursor: pointer;
+      border-radius: 6px;
+      transition: color 0.2s, background 0.2s;
+    }
+    .tab-btn.active { background: rgba(255,190,60,0.18); color: var(--gold); }
+
+    .tab-pane { display: none; }
+    .tab-pane.active { display: block; }
+
+    .lyrics-body { display: flex; flex-direction: column; gap: 36px; }
+
+    .verse {
+      white-space: pre-line;
+      font-size: clamp(17px, 3.5vw, 20px);
+      line-height: 2;
+      color: var(--text);
+    }
+    .chorus {
+      white-space: pre-line;
+      font-size: clamp(17px, 3.5vw, 20px);
+      line-height: 2;
+      color: var(--white);
+      padding-left: 20px;
+      border-left: 2px solid rgba(255,190,60,0.55);
+      font-weight: 600;
+    }
+    .chorus .tam { color: var(--gold); font-weight: 700; }
+
+    .section-label {
+      font-size: 10px;
+      letter-spacing: 0.25em;
+      text-transform: uppercase;
+      color: var(--dim);
+      font-weight: 700;
+      margin-bottom: -24px;
+    }
+
+    .key-note {
+      font-size: 13px;
+      color: var(--dim);
+      border: 1px dashed rgba(255,207,63,0.3);
+      border-radius: 8px;
+      padding: 10px 16px;
+      line-height: 1.6;
+    }
+    .key-note b { color: var(--gold); font-weight: 700; }
+
+    .chord-line {
+      display: block;
+      position: relative;
+      line-height: 2;
+      padding-top: 1.4em;
+    }
+    .chord {
+      position: absolute;
+      top: 0;
+      font-family: 'Unbounded', sans-serif;
+      font-size: 11px;
+      font-weight: 700;
+      color: var(--gold);
+      letter-spacing: 0.04em;
+      white-space: nowrap;
+    }
+
+    .lyrics-sep { border: none; border-top: 1px solid rgba(255,255,255,0.10); }
+
+    /* ── footer ── */
+    .footer {
+      margin-top: 72px;
+      padding-top: 28px;
+      border-top: 1px solid var(--border);
+      display: flex;
+      flex-direction: column;
+      gap: 20px;
+    }
+    .footer-nav { display: flex; flex-wrap: wrap; gap: 8px; }
+    .footer-nav a {
+      display: inline-block;
+      font-size: 13px;
+      letter-spacing: 0.18em;
+      text-transform: uppercase;
+      color: var(--dim);
+      text-decoration: none;
+      font-weight: 700;
+      padding: 8px 16px;
+      border: 1px solid var(--border);
+      border-radius: 6px;
+      transition: color 0.15s, border-color 0.15s;
+    }
+    .footer-nav a:hover { color: var(--gold); border-color: var(--gold-dim); }
+    .copyright { font-size: 11px; color: rgba(255,255,255,0.25); letter-spacing: 0.10em; }
+
+    /* ── mobile ── */
+    @media (max-width: 480px) {
+      .header { gap: 14px; }
+      .story-links { gap: 10px; }
+      #walker { bottom: 1vh; }
+    }
+
+    @media (prefers-reduced-motion: reduce) {
+      #walker, .llama, .fall-llama { display: none !important; }
+      #rays, #sun, .palm svg { animation: none !important; }
+      #tamgood.pop { animation: none; opacity: 1; transform: translate(-50%,-50%); transition: opacity 0.4s; }
+    }
+  </style>
+</head>
+<body>
+
+<!-- fixed sunset scene -->
+<div id="sky"></div>
+<div id="rays"></div>
+<div id="sun"></div>
+
+<!-- palms leaning to the top-center, like on the cover -->
+<div class="palm palm-left" aria-hidden="true">
+  <svg viewBox="0 0 460 640" xmlns="http://www.w3.org/2000/svg">
+    <g id="palm-art">
+    <!-- trunk: starts off-screen bottom, leans diagonally to top-center -->
+    <path d="M-50 680 C 90 520, 180 380, 268 190 L 302 210 C 225 385, 140 525, 15 700 Z"
+          fill="#8d6b53" stroke="#35202c" stroke-width="6" stroke-linejoin="round"/>
+    <path d="M120 500 q 34 22 60 16" fill="none" stroke="#5d4436" stroke-width="7" stroke-linecap="round"/>
+    <path d="M165 430 q 32 20 56 15" fill="none" stroke="#5d4436" stroke-width="7" stroke-linecap="round"/>
+    <path d="M207 360 q 30 19 52 14" fill="none" stroke="#5d4436" stroke-width="7" stroke-linecap="round"/>
+    <path d="M243 292 q 28 17 48 13" fill="none" stroke="#5d4436" stroke-width="6" stroke-linecap="round"/>
+    <g class="palm-crown">
+      <!-- fronds -->
+      <path d="M290 190 C 328 88, 398 56, 456 78 C 400 96, 348 142, 300 202 Z"
+            fill="#2e4d28" stroke="#1c2f18" stroke-width="5" stroke-linejoin="round"/>
+      <path d="M295 195 C 372 158, 432 168, 462 210 C 410 204, 350 214, 300 226 Z"
+            fill="#365a2e" stroke="#1c2f18" stroke-width="5" stroke-linejoin="round"/>
+      <path d="M285 190 C 250 88, 188 58, 128 84 C 190 100, 240 146, 275 206 Z"
+            fill="#2e4d28" stroke="#1c2f18" stroke-width="5" stroke-linejoin="round"/>
+      <path d="M280 200 C 208 164, 138 174, 102 216 C 160 210, 226 220, 278 229 Z"
+            fill="#365a2e" stroke="#1c2f18" stroke-width="5" stroke-linejoin="round"/>
+      <path d="M296 206 C 352 240, 392 292, 396 344 C 354 296, 314 260, 286 236 Z"
+            fill="#27411f" stroke="#1c2f18" stroke-width="5" stroke-linejoin="round"/>
+      <path d="M280 210 C 234 246, 204 296, 204 348 C 240 300, 270 262, 292 236 Z"
+            fill="#27411f" stroke="#1c2f18" stroke-width="5" stroke-linejoin="round"/>
+      <!-- yellow glints, cover-style -->
+      <ellipse cx="398" cy="88" rx="11" ry="5" fill="#ffd000" opacity="0.9" transform="rotate(-22 398 88)"/>
+      <ellipse cx="152" cy="96" rx="10" ry="5" fill="#ffd000" opacity="0.9" transform="rotate(24 152 96)"/>
+      <ellipse cx="432" cy="196" rx="9" ry="4" fill="#ffd000" opacity="0.85" transform="rotate(8 432 196)"/>
+      <ellipse cx="372" cy="300" rx="7" ry="4" fill="#ffd000" opacity="0.8" transform="rotate(48 372 300)"/>
+      <ellipse cx="226" cy="316" rx="7" ry="4" fill="#ffd000" opacity="0.8" transform="rotate(-48 226 316)"/>
+      <!-- coconuts -->
+      <circle cx="278" cy="212" r="11" fill="#ffd000" stroke="#35202c" stroke-width="4"/>
+      <circle cx="300" cy="222" r="9" fill="#ffb322" stroke="#35202c" stroke-width="4"/>
+    </g>
+    </g>
+  </svg>
+</div>
+<div class="palm palm-right" aria-hidden="true">
+  <svg viewBox="0 0 460 640" xmlns="http://www.w3.org/2000/svg"><use href="#palm-art"/></svg>
+</div>
+
+<!-- second layer: palms hanging in the top half, leaning to the center (cover-style) -->
+<div class="palm palm-top palm-top-left" aria-hidden="true">
+  <svg viewBox="0 0 460 640" xmlns="http://www.w3.org/2000/svg"><use href="#palm-art"/></svg>
+</div>
+<div class="palm palm-top palm-top-right" aria-hidden="true">
+  <svg viewBox="0 0 460 640" xmlns="http://www.w3.org/2000/svg"><use href="#palm-art"/></svg>
+</div>
+
+<div id="warm"></div>
+<div id="tamgood" aria-hidden="true">Там хорошо!</div>
+
+<!-- walking sunglasses from the cover -->
+<div id="walker" role="button" tabindex="0" aria-label="Солнценаступательные очки идут — нажми на них!" title="Жми!">
+  <svg viewBox="0 0 140 110" xmlns="http://www.w3.org/2000/svg">
+    <g class="gl-all">
+      <g class="gl-body">
+        <!-- legs (temples walking, like on the cover) -->
+        <g class="leg leg-l">
+          <path d="M52 52 L43 73 L57 92" fill="none" stroke="#ff2f23" stroke-width="6.5" stroke-linecap="round" stroke-linejoin="round"/>
+          <path d="M52 52 L43 73 L57 92" fill="none" stroke="#ffd000" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" opacity="0.65" transform="translate(1.5,-1.5)"/>
+        </g>
+        <g class="leg leg-r">
+          <path d="M88 50 L99 71 L84 92" fill="none" stroke="#ff2f23" stroke-width="6.5" stroke-linecap="round" stroke-linejoin="round"/>
+          <path d="M88 50 L99 71 L84 92" fill="none" stroke="#ffd000" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" opacity="0.65" transform="translate(1.5,-1.5)"/>
+        </g>
+        <!-- bridge -->
+        <path d="M56 35 Q68 24 76 30" fill="none" stroke="#ff2f23" stroke-width="7" stroke-linecap="round"/>
+        <!-- left lens (smaller, with a star) -->
+        <circle cx="40" cy="41" r="17" fill="#4a0f1d" stroke="#ff2f23" stroke-width="7"/>
+        <ellipse cx="34" cy="36" rx="6" ry="4" fill="#ffffff" opacity="0.92" transform="rotate(-18 34 36)"/>
+        <path d="M21 26 L25 34 L34 36 L26 40 L23 49 L18 40 L9 38 L18 34 Z" fill="#ffd000" stroke="#ff2f23" stroke-width="2" stroke-linejoin="round"/>
+        <!-- right lens (bigger, tilted up) -->
+        <circle cx="97" cy="33" r="21" fill="#4a0f1d" stroke="#ff2f23" stroke-width="7"/>
+        <ellipse cx="89" cy="26" rx="8" ry="5" fill="#ffffff" opacity="0.95" transform="rotate(-16 89 26)"/>
+        <ellipse cx="104" cy="40" rx="4" ry="2.5" fill="#ffffff" opacity="0.55"/>
+      </g>
+    </g>
+  </svg>
+</div>
+
+<nav class="crumbs" aria-label="Навигация">
+  <a href="/">Ламопад</a><span class="sep">/</span><a href="/tracks/">Треки</a><span class="sep">/</span><span>Солнценаступательные очки</span>
+</nav>
+
+<main class="page">
+  <div class="page-card">
+
+    <header class="header">
+      <img class="cover" id="cover" src="/tracks/sun-coming-glasses-cover.jpg" alt="Солнценаступательные очки — обложка: красные очки наступают на солнце, ламы на пальмах" width="132" height="132" title="Жми!">
+      <div class="header-text">
+        <h1 class="track-title"><span class="sun-word">Солнце-</span><br>наступательные<br>очки</h1>
+        <p class="artist-line">Ламопад</p>
+        <div class="moods">
+          <span class="mood m1">Солнечная</span>
+          <span class="mood m2">Задорная</span>
+          <span class="mood m3">Рок</span>
+        </div>
+      </div>
+    </header>
+
+    <div class="description">
+      <b>Посвящается всем закисшим.</b><br>
+      Раскисать и откисать — это разные вещи. Рюкзак на плечи, радость-образующий
+      билет в карман — и туда, где стесняется и ждёт краснеющий закат.
+    </div>
+
+    <!-- player -->
+    <div class="player-wrap">
+      <div class="player-inner">
+        <button class="play-btn" id="play-btn" aria-label="Воспроизвести">
+          <svg class="icon-play" viewBox="0 0 24 24"><path d="M8 5v14l11-7z"/></svg>
+          <svg class="icon-pause" viewBox="0 0 24 24"><path d="M6 19h4V5H6v14zm8-14v14h4V5h-4z"/></svg>
+        </button>
+        <div class="player-info">
+          <div class="player-track">Солнценаступательные очки</div>
+          <div class="player-artist">Ламопад</div>
+        </div>
+        <div class="player-time" id="player-time">0:00</div>
+      </div>
+      <div class="progress-wrap" id="progress-wrap">
+        <div class="progress-bg" id="progress-bg">
+          <div class="progress-fill" id="progress-fill"></div>
+        </div>
+      </div>
+      <audio id="audio" src="/tracks/sun-coming-glasses.mp3" preload="none"></audio>
+    </div>
+
+    <a class="download-btn" href="/tracks/sun-coming-glasses.mp3" download="Ламопад — Солнценаступательные очки.mp3">
+      <svg width="15" height="15" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5" stroke-linecap="round" stroke-linejoin="round">
+        <path d="M12 3v13M7 12l5 5 5-5M3 19h18"/>
+      </svg>
+      Скачать MP3
+    </a>
+
+    <div class="or-divider">—или—</div>
+
+    <!-- platform links -->
+    <div class="platforms">
+      <a class="platform-link" href="https://music.yandex.ru/album/38663792" target="_blank" rel="noopener">
+        <img src="https://upload.wikimedia.org/wikipedia/commons/f/fa/Yandex_Music_icon_2023.svg" alt="Яндекс Музыка">
+        Яндекс Музыка
+      </a>
+      <a class="platform-link" href="https://music.vk.com/link/6TBTq" target="_blank" rel="noopener">
+        <img src="https://cdn.simpleicons.org/vk/ffffff" alt="VK Музыка">
+        VK Музыка
+      </a>
+      <a class="platform-link" href="https://open.spotify.com/album/6zImZch7GqXizMoUXIq0Jl" target="_blank" rel="noopener">
+        <img src="https://cdn.simpleicons.org/spotify/ffffff" alt="Spotify">
+        Spotify
+      </a>
+      <a class="platform-link" href="https://music.apple.com/ru/album/1850991276?mt=1&at=1000lqjf&ct=bq&app=music" target="_blank" rel="noopener">
+        <img src="https://cdn.simpleicons.org/applemusic/ffffff" alt="Apple Music">
+        Apple Music
+      </a>
+      <a class="platform-link" href="https://www.youtube.com/watch?v=A0mOHyGgVPA&amp;list=RDA0mOHyGgVPA&amp;start_radio=1&amp;pp=ygVB0LvQsNC80L7Qv9Cw0LQg0YHQvtC70L3RhtC10L3QsNGB0YLRg9C_0LDRgtC10LvRjNC90YvQtSDQvtGH0LrQuCCgBwHSBwkJTAsBhyohjO8%3D" target="_blank" rel="noopener">
+        <img src="https://cdn.simpleicons.org/youtube/ffffff" alt="YouTube">
+        YouTube
+      </a>
+    </div>
+
+    <div class="platforms">
+      <a class="platform-link" href="https://www.youtube.com/watch?v=0NDie-CCm_o&amp;list=RD0NDie-CCm_o&amp;start_radio=1" target="_blank" rel="noopener">
+        🎤 Караоке
+      </a>
+      <a class="platform-link" href="https://zvuk.com/release/42745333" target="_blank" rel="noopener">Звук</a>
+      <a class="platform-link" href="https://www.deezer.com/album/850473442" target="_blank" rel="noopener">
+        <img src="https://cdn.simpleicons.org/deezer/ffffff" alt="Deezer">
+        Deezer
+      </a>
+      <a class="platform-link" href="https://music.mts.ru/album/38663792" target="_blank" rel="noopener">КИОН Музыка</a>
+      <a class="platform-link" href="https://music.wink.ru/release/42745333" target="_blank" rel="noopener">Wink Music</a>
+    </div>
+
+    <!-- lyrics / chords -->
+    <section class="lyrics-section" itemscope itemtype="https://schema.org/MusicRecording">
+      <meta itemprop="name" content="Солнценаступательные очки">
+      <span itemprop="byArtist" itemscope itemtype="https://schema.org/MusicGroup"><meta itemprop="name" content="Ламопад"></span>
+
+      <div class="lyrics-tabs" role="tablist">
+        <button class="tab-btn active" role="tab" aria-selected="true" data-tab="text">Текст</button>
+        <button class="tab-btn" role="tab" aria-selected="false" data-tab="chords">Аккорды</button>
+      </div>
+
+      <!-- TEXT TAB -->
+      <div class="tab-pane active" id="tab-text">
+        <div class="lyrics-body" itemprop="lyrics">
+
+          <p class="section-label">Припев</p>
+          <p class="chorus">Что закис, мой друг? Тащи
+Солнценаступательные очки
+Радость-образующий билет, рюкзак
+Стесняется, но ждёт нас
+Краснеющий закат
+
+<span class="tam">Там хорошо!
+Там хорошо!
+Здесь хорошо
+Но там хорошо!</span></p>
+
+          <hr class="lyrics-sep">
+
+          <p class="section-label">Куплет 1</p>
+          <p class="verse">Страны существуют
+Те, что видел сам
+К чёрту чемоданы
+Рюкзачок-вокзал!
+
+Скоро через горы
+На попутках-облаках
+Сонный, но довольный
+Ты придёшь туда</p>
+
+          <hr class="lyrics-sep">
+
+          <p class="section-label">Бридж</p>
+          <p class="verse">Работа, задачи
+Нехай повисит!
+Стесняшка-закатик
+Так ждёт твой визит!
+
+Всё начинается
+С этой окрашенной недоумением
+Скуки</p>
+
+          <hr class="lyrics-sep">
+
+          <p class="section-label">Припев</p>
+          <p class="chorus">Что закис, мой друг? Тащи
+Солнценаступательные очки
+Радость-образующий билет, рюкзак
+Стесняется, но ждёт нас
+Краснеющий закат
+
+<span class="tam">Там хорошо!
+Там хорошо!
+Здесь хорошо
+Но там хорошо!</span></p>
+
+          <hr class="lyrics-sep">
+
+          <p class="section-label">Куплет 2</p>
+          <p class="verse">Пассивное фейк-дао
+Не решенье, а дано
+Ответом будет слово
+Сам, а не само!
+
+Свободу на поруки
+Ноги в руки и вперёд
+Рождённый самокруткой
+Человек идёт!</p>
+
+          <hr class="lyrics-sep">
+
+          <p class="section-label">Бридж</p>
+          <p class="verse">Свободен, касатик
+Пташка летит
+Стесняшка-закатик
+Так ждёт твой визит</p>
+
+          <hr class="lyrics-sep">
+
+          <p class="section-label">Припев</p>
+          <p class="chorus">Что закис, мой друг? Тащи
+Солнценаступательные очки
+Радость-образующий билет, рюкзак
+Стесняется, но ждёт нас
+Краснеющий закат
+
+<span class="tam">Там хорошо!
+Там хорошо!
+Здесь хорошо
+Но там хорошо!
+
+Но там хорошо!</span></p>
+
+        </div>
+      </div>
+
+      <!-- CHORDS TAB -->
+      <div class="tab-pane" id="tab-chords">
+        <div class="lyrics-body">
+
+          <p class="key-note">
+            Тональность <b>C</b>. Куплет: <b>C · H</b> (в конце <b>H7</b>) ·
+            припев-вступление: <b>A7 · D · G · G7</b> ·
+            распев: <b>C G D E Am C D C</b> — аккорд <b>E</b> уводит в Am и возвращается в C ·
+            бридж: <b>A7 · D</b>
+          </p>
+
+          <p class="section-label">Припев · вступление</p>
+          <p class="chorus">
+<span class="chord-line"><span class="chord">A7</span>Ну что закис, мой друг? Тащи</span>
+<span class="chord-line"><span class="chord">D</span>Солнценаступательные очки</span>
+<span class="chord-line"><span class="chord">A7&#8195;&#8195;&#8195;&#8195;&#8195;&#8195;&#8195;&#8195;D</span>Радость-образующий билет, рюкзак</span>
+<span class="chord-line"><span class="chord">G&#8195;&#8195;&#8195;&#8195;&#8195;&#8195;&#8195;&#8195;&#8195;G7</span>Стесняется, но ждёт нас, краснеющий закат</span></p>
+
+          <p class="section-label">Припев · распев</p>
+          <p class="chorus">
+<span class="chord-line"><span class="chord">C&#8195;G</span>Там хорошо!</span>
+<span class="chord-line"><span class="chord">D&#8195;E</span>Там хорошо!</span>
+<span class="chord-line"><span class="chord">Am&#8195;G</span>Здесь хорошо,</span>
+<span class="chord-line"><span class="chord">D&#8195;C</span>Но там хорошо!</span></p>
+
+          <hr class="lyrics-sep">
+
+          <p class="section-label">Куплет 1</p>
+          <p class="verse">
+<span class="chord-line"><span class="chord">C</span>Страны существуют</span>
+<span class="chord-line"><span class="chord">H</span>Те, что видел сам</span>
+<span class="chord-line"><span class="chord">C</span>К чёрту чемоданы</span>
+<span class="chord-line"><span class="chord">H</span>Рюкзачок-вокзал!</span>
+
+<span class="chord-line"><span class="chord">C</span>Скоро через горы</span>
+<span class="chord-line"><span class="chord">H</span>На попутках-облаках</span>
+<span class="chord-line"><span class="chord">C</span>Сонный, но довольный</span>
+<span class="chord-line"><span class="chord">H7</span>Ты придёшь туда</span></p>
+
+          <hr class="lyrics-sep">
+
+          <p class="section-label">Бридж</p>
+          <p class="verse">
+<span class="chord-line"><span class="chord">A7</span>Работа, задачи</span>
+<span class="chord-line"><span class="chord">D</span>Нехай повисит!</span>
+<span class="chord-line"><span class="chord">A7</span>Стесняшка-закатик</span>
+<span class="chord-line"><span class="chord">D</span>Так ждёт твой визит!</span></p>
+
+          <hr class="lyrics-sep">
+
+          <p class="section-label">Куплет 2</p>
+          <p class="verse">
+<span class="chord-line"><span class="chord">C</span>Пассивное фейк-дао</span>
+<span class="chord-line"><span class="chord">H</span>Не решенье, а дано</span>
+<span class="chord-line"><span class="chord">C</span>Ответом будет слово</span>
+<span class="chord-line"><span class="chord">H</span>Сам, а не само!</span>
+
+<span class="chord-line"><span class="chord">C</span>Свободу на поруки</span>
+<span class="chord-line"><span class="chord">H</span>Ноги в руки и вперёд</span>
+<span class="chord-line"><span class="chord">C</span>Рождённый самокруткой</span>
+<span class="chord-line"><span class="chord">H7</span>Человек идёт!</span></p>
+
+          <hr class="lyrics-sep">
+
+          <p class="section-label">Бридж</p>
+          <p class="verse">
+<span class="chord-line"><span class="chord">A7</span>Свободен, касатик</span>
+<span class="chord-line"><span class="chord">D</span>Пташка летит</span>
+<span class="chord-line"><span class="chord">A7</span>Стесняшка-закатик</span>
+<span class="chord-line"><span class="chord">D</span>Так ждёт твой визит</span></p>
+
+        </div>
+      </div>
+
+    </section>
+
+    <!-- story links -->
+    <div class="story-links">
+      <a class="story-link" href="https://www.youtube.com/watch?v=A0mOHyGgVPA&amp;list=RDA0mOHyGgVPA&amp;start_radio=1&amp;pp=ygVB0LvQsNC80L7Qv9Cw0LQg0YHQvtC70L3RhtC10L3QsNGB0YLRg9C_0LDRgtC10LvRjNC90YvQtSDQvtGH0LrQuCCgBwHSBwkJTAsBhyohjO8%3D" target="_blank" rel="noopener">
+        <span class="link-icon">🎬</span>
+        <div class="link-text">
+          <div class="link-label">Клип «Солнценаступательные очки»</div>
+          <div class="link-meta">видео · youtube</div>
+        </div>
+        <span class="link-arrow">→</span>
+      </a>
+      <a class="story-link" href="/tracks/milky-way/">
+        <span class="link-icon">🌌</span>
+        <div class="link-text">
+          <div class="link-label">Песня о дороге к морю — помедленнее и поглубже</div>
+          <div class="link-meta">трек · млечный путь</div>
+        </div>
+        <span class="link-arrow">→</span>
+      </a>
+      <a class="story-link" href="/backpack/text/">
+        <span class="link-icon">🎒</span>
+        <div class="link-text">
+          <div class="link-label">Ещё одна песня про рюкзак и дальние страны</div>
+          <div class="link-meta">трек · ранец-иностранец</div>
+        </div>
+        <span class="link-arrow">→</span>
+      </a>
+    </div>
+
+    <!-- footer -->
+    <footer class="footer">
+      <nav class="footer-nav" aria-label="Навигация сайта">
+        <a href="/tracks/">Треки Ламопад</a>
+        <a href="/">lamopad.ru</a>
+      </nav>
+      <p class="copyright">© Ламопад — все права защищены</p>
+    </footer>
+
+  </div>
+</main>
+
+<script>
+// ── audio player ──
+(function () {
+  var audio = document.getElementById('audio');
+  var playBtn = document.getElementById('play-btn');
+  var iconPlay = playBtn.querySelector('.icon-play');
+  var iconPause = playBtn.querySelector('.icon-pause');
+  var timeEl = document.getElementById('player-time');
+  var fillEl = document.getElementById('progress-fill');
+  var bgEl = document.getElementById('progress-bg');
+  var wrap = document.getElementById('progress-wrap');
+
+  function fmt(s) {
+    var m = Math.floor(s / 60);
+    var sec = Math.floor(s % 60);
+    return m + ':' + (sec < 10 ? '0' : '') + sec;
+  }
+
+  playBtn.addEventListener('click', function () {
+    if (audio.paused) {
+      audio.play();
+      iconPlay.style.display = 'none';
+      iconPause.style.display = 'block';
+    } else {
+      audio.pause();
+      iconPlay.style.display = 'block';
+      iconPause.style.display = 'none';
+    }
+  });
+
+  audio.addEventListener('timeupdate', function () {
+    if (!audio.duration) return;
+    var pct = (audio.currentTime / audio.duration) * 100;
+    fillEl.style.width = pct + '%';
+    bgEl.style.setProperty('--thumb', pct + '%');
+    timeEl.textContent = fmt(audio.currentTime) + ' / ' + fmt(audio.duration);
+  });
+
+  audio.addEventListener('ended', function () {
+    iconPlay.style.display = 'block';
+    iconPause.style.display = 'none';
+  });
+
+  wrap.addEventListener('click', function (e) {
+    if (!audio.duration) return;
+    var rect = wrap.getBoundingClientRect();
+    var pct = (e.clientX - rect.left) / rect.width;
+    audio.currentTime = pct * audio.duration;
+  });
+})();
+</script>
+
+<script>
+// ── tabs ──
+(function () {
+  var btns = document.querySelectorAll('.tab-btn');
+  var panes = document.querySelectorAll('.tab-pane');
+  btns.forEach(function (btn) {
+    btn.addEventListener('click', function () {
+      var target = btn.dataset.tab;
+      btns.forEach(function (b) { b.classList.remove('active'); b.setAttribute('aria-selected', 'false'); });
+      panes.forEach(function (p) { p.classList.remove('active'); });
+      btn.classList.add('active');
+      btn.setAttribute('aria-selected', 'true');
+      document.getElementById('tab-' + target).classList.add('active');
+    });
+  });
+})();
+</script>
+
+<script>
+// ── sun mode: очки надеты, «Там хорошо!» ──
+(function () {
+  var body = document.body;
+  var walker = document.getElementById('walker');
+  var cover = document.getElementById('cover');
+  var tamgood = document.getElementById('tamgood');
+  var reduced = window.matchMedia('(prefers-reduced-motion: reduce)').matches;
+
+  var messages = [
+    'Там хорошо!',
+    'Там хорошо!!',
+    'Здесь хорошо. Но ТАМ хорошо!',
+    'Сам, а не само!',
+    'Что закис, мой друг?'
+  ];
+  var msgIndex = 0;
+  var offTimer = null;
+
+  function spawnLlama() {
+    if (reduced) return;
+    var el = document.createElement('div');
+    el.className = 'llama';
+    el.innerHTML = '<span>🦙</span>';
+    el.style.bottom = (2 + Math.random() * 9) + 'vh';
+    var duration = 3800 + Math.random() * 3200;
+    el.style.animationDuration = duration + 'ms';
+    el.querySelector('span').style.animationDelay = (Math.random() * 0.4) + 's';
+
+    el.addEventListener('click', function (e) {
+      e.stopPropagation();
+      el.classList.remove('boing');
+      void el.offsetWidth; // restart animation
+      el.classList.add('boing');
+      var rect = el.getBoundingClientRect();
+      var bubble = document.createElement('div');
+      bubble.className = 'llama-bubble';
+      bubble.textContent = 'Там хорошо!';
+      bubble.style.left = Math.max(8, Math.min(window.innerWidth - 140, rect.left - 20)) + 'px';
+      bubble.style.top = (rect.top - 34) + 'px';
+      document.body.appendChild(bubble);
+      setTimeout(function () { bubble.remove(); }, 1700);
+    });
+
+    document.body.appendChild(el);
+    setTimeout(function () { el.remove(); }, duration + 200);
+  }
+
+  function showMessage() {
+    tamgood.textContent = messages[msgIndex % messages.length];
+    msgIndex++;
+    tamgood.classList.remove('pop');
+    void tamgood.offsetWidth;
+    tamgood.classList.add('pop');
+  }
+
+  function sunMode() {
+    body.classList.add('sunmode');
+    showMessage();
+
+    // llama parade
+    var count = 5 + Math.floor(Math.random() * 4);
+    for (var i = 0; i < count; i++) {
+      setTimeout(spawnLlama, i * (450 + Math.random() * 500));
+    }
+
+    clearTimeout(offTimer);
+    offTimer = setTimeout(function () {
+      body.classList.remove('sunmode');
+      tamgood.classList.remove('pop');
+    }, 8000);
+  }
+
+  function walkerJump() {
+    walker.classList.remove('jump');
+    void walker.offsetWidth;
+    walker.classList.add('jump');
+    sunMode();
+  }
+
+  walker.addEventListener('click', walkerJump);
+  walker.addEventListener('keydown', function (e) {
+    if (e.key === 'Enter' || e.key === ' ') { e.preventDefault(); walkerJump(); }
+  });
+  cover.addEventListener('click', sunMode);
+
+  // потряси пальму — из неё выпадет лама
+  function dropLlama(x, y) {
+    var el = document.createElement('div');
+    el.className = 'fall-llama';
+    el.textContent = '🦙';
+    el.style.left = (x - 18) + 'px';
+    el.style.top = y + 'px';
+    el.style.setProperty('--dx', (Math.random() * 140 - 70) + 'px');
+    el.style.setProperty('--dy', (window.innerHeight - y + 90) + 'px');
+    el.style.setProperty('--rot', ((Math.random() < 0.5 ? -1 : 1) * (420 + Math.random() * 360)) + 'deg');
+    var dur = 1100 + Math.random() * 500;
+    el.style.animationDuration = dur + 'ms';
+    document.body.appendChild(el);
+    setTimeout(function () { el.remove(); }, dur + 100);
+  }
+
+  document.querySelectorAll('.palm').forEach(function (palm) {
+    palm.addEventListener('click', function () {
+      palm.classList.remove('shake');
+      void palm.offsetWidth; // restart animation
+      palm.classList.add('shake');
+      if (reduced) return;
+      var rect = palm.getBoundingClientRect();
+      var mirrored = palm.className.indexOf('right') !== -1;
+      var crownX = rect.left + rect.width * (mirrored ? 0.37 : 0.63);
+      var crownY = rect.top + rect.height * 0.28;
+      setTimeout(function () { dropLlama(crownX, crownY); }, 130);
+      if (Math.random() < 0.25) {
+        setTimeout(function () { dropLlama(crownX + 24, crownY + 10); }, 320);
+      }
+    });
+  });
+
+  // ambient llama: одинокая лама пробегает изредка и без очков
+  function ambientLlama() {
+    setTimeout(function () {
+      if (!body.classList.contains('sunmode')) spawnLlama();
+      ambientLlama();
+    }, 12000 + Math.random() * 14000);
+  }
+  if (!reduced) ambientLlama();
+})();
+</script>
+
+</body>
+</html>

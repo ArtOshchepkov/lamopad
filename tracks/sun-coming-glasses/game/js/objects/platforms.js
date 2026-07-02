@@ -57,6 +57,10 @@ export class PlatformField {
         const enemy = Phaser.Utils.Array.GetRandom(CONF.enemy.types);
         this.place(enemy, this.apartX(x), this.lastY - R(4, 16));
       }
+      // мега-редкий блок «?» — тоже добавка
+      if (m > CONF.mario.fromM && Math.random() < CONF.mario.chance) {
+        this.place('mario', this.apartX(x), this.lastY - R(20, 50));
+      }
     }
   }
 
@@ -272,6 +276,10 @@ export class PlatformField {
       case 'bird':
         this.flutter(p);
         this.puff(p, 0xfff6ec, 5);
+        break;
+      case 'mario': // блок подпрыгивает, как в оригинале
+        this.hop(p);
+        this.puff(p, 0xffd93b, 9);
         break;
       default: // облака: продавливаются и пыхают
         this.squash(p, 1.18, 0.66);

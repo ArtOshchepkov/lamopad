@@ -329,6 +329,40 @@ export class BootScene extends Phaser.Scene {
       g.beginPath(); g.moveTo(7, 4); g.lineTo(10, 6); g.strokePath();
     });
 
+    // Блок «?» из супермарио: золотой, с заклёпками
+    this.tex('p-mario', 44, 34, (g) => {
+      g.fillStyle(0x8a5a10); g.fillRoundedRect(0, 0, 44, 34, 5);   // кант
+      g.fillStyle(0xffb322); g.fillRoundedRect(2, 2, 40, 30, 4);   // тело
+      g.fillStyle(0xffd93b); g.fillRoundedRect(4, 4, 36, 12, 3);   // блик сверху
+      g.fillStyle(0x8a5a10);                                       // заклёпки
+      g.fillCircle(7, 7, 2); g.fillCircle(37, 7, 2); g.fillCircle(7, 27, 2); g.fillCircle(37, 27, 2);
+      // «?» из дуги, ножки и точки
+      g.lineStyle(4, 0xfff2d0);
+      g.beginPath(); g.arc(22, 12, 6, Math.PI * 0.9, Math.PI * 2.15); g.strokePath();
+      g.beginPath(); g.moveTo(23, 17); g.lineTo(22, 21); g.strokePath();
+      g.fillStyle(0xfff2d0); g.fillCircle(22, 26, 2.4);
+    });
+
+    // ГРИБОК: герой после блока «?» (холст и ступни — как у очков)
+    this.tex('shroom', CONF.player.texW, CONF.player.texH, (g) => {
+      const DARK = 0x5e0d12;
+      // ножки-ботиночки
+      g.fillStyle(DARK); g.fillEllipse(25, 62, 15, 8); g.fillEllipse(43, 62, 15, 8);
+      g.fillStyle(0xffffff); g.fillEllipse(24, 63, 10, 4); g.fillEllipse(42, 63, 10, 4);
+      // ножка гриба
+      g.fillStyle(0xffe9d2); g.fillRoundedRect(21, 32, 26, 28, 9);
+      g.lineStyle(3, DARK); g.strokeRoundedRect(21, 32, 26, 28, 9);
+      // глазки и румянец
+      g.fillStyle(0x3a2a2a); g.fillEllipse(29, 44, 4, 7); g.fillEllipse(39, 44, 4, 7);
+      g.fillStyle(0xffb8dd, 0.9); g.fillEllipse(24, 50, 6, 4); g.fillEllipse(44, 50, 6, 4);
+      // шляпка
+      g.fillStyle(DARK); g.fillEllipse(34, 22, 54, 34);            // кант
+      g.fillStyle(0xd42222); g.fillEllipse(34, 21, 50, 30);
+      g.fillStyle(0xffffff);                                       // белые пятна
+      g.fillCircle(20, 17, 6); g.fillCircle(38, 11, 7); g.fillCircle(48, 22, 5);
+      g.fillEllipse(34, 34, 46, 6);                                // нижняя кромка шляпки
+    });
+
     // Реактивный ранец: красный рюкзак с соплами и ручкой-петлёй сверху
     this.tex('jetpack', 48, 68, (g) => {
       g.translateCanvas(0, 6); // место под ручку над корпусом

@@ -33,6 +33,8 @@ export class GameScene extends Phaser.Scene {
     }));
     this.flagIdx = 0;
 
+    this.isShroom = false; // ГРИБОК после блока «?»
+
     // реактивные ранцы
     this.jets = [];
     this.nextJetM = CONF.jet.fromM;
@@ -59,6 +61,11 @@ export class GameScene extends Phaser.Scene {
           this.cheatBuf = '';
         }
         else if (this.cheatBuf.endsWith('jet')) { this.spawnJetOnCloud(); this.cheatBuf = ''; }
+        else if (this.cheatBuf.endsWith('mario')) {
+          this.field.place('mario',
+            Phaser.Math.Between(70, CONF.width - 70), this.cameras.main.scrollY + 180);
+          this.cheatBuf = '';
+        }
       }
     });
 
@@ -198,6 +205,11 @@ export class GameScene extends Phaser.Scene {
       case 'snake':
         this.eaten(plat);
         break;
+      case 'mario':
+        this.player.bounce(P.springVy * 0.95, 0.3);
+        this.field.react(plat);
+        this.becomeShroom();
+        break;
       default: // облака
         this.player.bounce(P.bounceVy);
         this.field.react(plat);
@@ -230,6 +242,30 @@ export class GameScene extends Phaser.Scene {
         fontFamily: 'Unbounded, sans-serif', fontSize: '12px', fontStyle: '700',
         color: CONF.colors.gold, stroke: '#3a0d18', strokeThickness: 4,
       }).setOrigin(mk.left ? 0 : 1, 0.5).setDepth(2).setAlpha(0.9).setResolution(this.dpr());
+    }
+  }
+
+  /** Прыжок на блок «?»: герой становится ГРИБКОМ до конца забега. */
+  becomeShroom() {
+    if (this.isShroom) return;
+    this.isShroom = true;
+    this.player.sprite.setTexture('shroom');
+    this.field.shout({ x: this.player.x, y: this.player.y - 26 }, 'ГРИБОК!');
+    // разноцветные споры превращения
+    for (let i = 0; i < 12; i++) {
+      const d = this.add.image(this.player.x, this.player.y, 'dot').setDepth(11)
+        .setTint(Phaser.Utils.Array.GetRandom([0xd42222, 0xffffff, 0xffd93b, 0xffb8dd]))
+        .setScale(Phaser.Math.FloatBetween(1.2, 2.4));
+      const a = Math.random() * Math.PI * 2;
+      this.tweens.add({
+        targets: d,
+        x: d.x + Math.cos(a) * Phaser.Math.Between(40, 90),
+        y: d.y + Math.sin(a) * Phaser.Math.Between(40, 90),
+        alpha: 0,
+        duration: Phaser.Math.Between(400, 700),
+        ease: 'Cubic.easeOut',
+        onComplete: () => d.destroy(),
+      });
     }
   }
 

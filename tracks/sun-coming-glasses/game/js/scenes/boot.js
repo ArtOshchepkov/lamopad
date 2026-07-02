@@ -56,14 +56,92 @@ export class BootScene extends Phaser.Scene {
       g.lineTo(4, 19); g.lineTo(-1, 16); g.lineTo(4, 14); g.closePath(); g.fillPath();
     });
 
-    // Облако
-    this.tex('p-cloud', 96, 26, (g) => {
-      g.fillStyle(0x2a0d3e, 0.35); g.fillEllipse(50, 20, 88, 12); // тень
-      g.fillStyle(0xfff4ff, 0.98);
-      g.fillEllipse(48, 14, 92, 18);
-      g.fillEllipse(26, 9, 34, 16);
-      g.fillEllipse(56, 6, 38, 18);
-      g.fillEllipse(78, 10, 28, 14);
+    // Облака собираются из кругов разного размера: низ — бугристый,
+    // разной глубины, чтобы силуэт был кучевым, а не ровным.
+
+    // Облако А: классическое пухлое
+    this.tex('p-cloud-a', 96, 30, (g) => {
+      g.fillStyle(0x2a0d3e, 0.35); g.fillEllipse(50, 27, 64, 6);   // мягкая тень
+      g.fillStyle(0xcdb4e8);                                       // затенённые нижние бугры
+      g.fillCircle(18, 19, 9); g.fillCircle(36, 19, 10);
+      g.fillCircle(56, 20, 9); g.fillCircle(74, 18, 8); g.fillCircle(86, 16, 6);
+      g.fillStyle(0xf6eeff);                                       // тело
+      g.fillCircle(20, 12, 10); g.fillCircle(40, 10, 13);
+      g.fillCircle(60, 10, 12); g.fillCircle(79, 12, 9); g.fillCircle(88, 14, 6);
+      g.fillStyle(0xffffff, 0.95);                                 // солнечные блики сверху
+      g.fillEllipse(44, 4, 20, 6); g.fillEllipse(66, 5, 14, 5); g.fillEllipse(22, 6, 12, 5);
+    });
+
+    // Облако Б: широкое, слоистое
+    this.tex('p-cloud-b', 116, 26, (g) => {
+      g.fillStyle(0x2a0d3e, 0.35); g.fillEllipse(58, 23, 82, 5);
+      g.fillStyle(0xcdb4e8);
+      g.fillCircle(16, 15, 8); g.fillCircle(34, 16, 9); g.fillCircle(54, 16, 9);
+      g.fillCircle(74, 16, 8); g.fillCircle(94, 14, 7); g.fillCircle(105, 12, 5);
+      g.fillStyle(0xf6eeff);
+      g.fillCircle(18, 9, 9); g.fillCircle(36, 8, 11); g.fillCircle(58, 7, 11);
+      g.fillCircle(78, 8, 9); g.fillCircle(96, 9, 7);
+      g.fillStyle(0xffffff, 0.95);
+      g.fillEllipse(44, 2.5, 18, 5); g.fillEllipse(72, 3, 16, 5);
+    });
+
+    // Облако В: маленькое кучевое, два горба
+    this.tex('p-cloud-c', 72, 30, (g) => {
+      g.fillStyle(0x2a0d3e, 0.35); g.fillEllipse(36, 27, 44, 5);
+      g.fillStyle(0xcdb4e8);
+      g.fillCircle(18, 19, 9); g.fillCircle(36, 20, 9); g.fillCircle(52, 18, 8);
+      g.fillStyle(0xf6eeff);
+      g.fillCircle(20, 11, 11); g.fillCircle(44, 10, 12); g.fillCircle(58, 14, 7);
+      g.fillStyle(0xffffff, 0.95);
+      g.fillEllipse(20, 4, 12, 5); g.fillEllipse(46, 3, 13, 5);
+    });
+
+    // Стесняшка-закатик: тёплое румяное облачко
+    this.tex('p-sunset', 86, 32, (g) => {
+      g.fillStyle(0x8f2a5e, 0.45); g.fillEllipse(44, 29, 56, 6);  // тень
+      g.fillStyle(0xf7a06a);                                       // закатные нижние бугры
+      g.fillCircle(18, 20, 9); g.fillCircle(36, 21, 10);
+      g.fillCircle(56, 20, 9); g.fillCircle(70, 17, 7);
+      g.fillStyle(0xffd0a8);                                       // тело
+      g.fillCircle(20, 12, 10); g.fillCircle(40, 10, 12);
+      g.fillCircle(58, 10, 10); g.fillCircle(71, 13, 7);
+      g.fillStyle(0xfff0d8, 0.95);                                 // блик
+      g.fillEllipse(46, 3, 18, 6);
+      // смущённые щёчки и закрытые глазки
+      g.fillStyle(0xff6f9c, 0.85);
+      g.fillEllipse(30, 17, 9, 5); g.fillEllipse(54, 17, 9, 5);
+      g.lineStyle(2, 0x8f2a5e);
+      g.beginPath(); g.arc(36, 12, 4, 0.15 * Math.PI, 0.85 * Math.PI); g.strokePath();
+      g.beginPath(); g.arc(48, 12, 4, 0.15 * Math.PI, 0.85 * Math.PI); g.strokePath();
+    });
+
+    // Чемодан: солидный, но ненадёжный
+    this.tex('p-suitcase', 76, 34, (g) => {
+      g.fillStyle(0x2a0d3e, 0.4); g.fillEllipse(38, 31, 66, 8);   // тень
+      g.lineStyle(3, 0x4a2c14);
+      g.strokeRoundedRect(28, 1, 20, 8, 3);                        // ручка
+      g.fillStyle(0x8a5a34); g.fillRoundedRect(4, 6, 68, 24, 6);   // корпус
+      g.fillStyle(0xa06a3e); g.fillRoundedRect(4, 6, 68, 10, { tl: 6, tr: 6, bl: 0, br: 0 }); // крышка
+      g.fillStyle(0x5d3a1e);                                       // ремни
+      g.fillRect(16, 6, 7, 24); g.fillRect(53, 6, 7, 24);
+      g.lineStyle(2, 0x4a2c14); g.strokeRoundedRect(4, 6, 68, 24, 6);
+      g.fillStyle(0xd8b060);                                       // уголки-заклёпки
+      g.fillCircle(9, 11, 2); g.fillCircle(67, 11, 2); g.fillCircle(9, 26, 2); g.fillCircle(67, 26, 2);
+    });
+
+    // Пташка (касатик): летит боком, крыло вверх
+    this.tex('p-bird', 58, 28, (g) => {
+      g.fillStyle(0x2a0d3e, 0.3); g.fillEllipse(29, 25, 34, 6);   // тень
+      g.fillStyle(0xfff6ec);                                       // тело
+      g.fillEllipse(28, 16, 34, 15);
+      g.fillTriangle(8, 14, 16, 10, 16, 20);                       // хвост
+      g.fillStyle(0xffe9d2);                                       // крыло
+      g.fillTriangle(24, 14, 40, 2, 38, 15);
+      g.fillStyle(0xffb322);                                       // клюв
+      g.fillTriangle(45, 13, 54, 16, 45, 19);
+      g.fillStyle(0x3a0d18); g.fillCircle(40, 13, 1.8);            // глаз
+      g.lineStyle(2, 0xcdb4e8);                                    // штрих пера
+      g.beginPath(); g.moveTo(22, 18); g.lineTo(30, 19); g.strokePath();
     });
 
     // Стикер «нехай повисит»
@@ -124,12 +202,31 @@ export class BootScene extends Phaser.Scene {
       g.fillStyle(0xffffff); g.fillCircle(2, 2, 2);
     });
 
-    // Плашка для вех/HUD
-    this.tex('plate', 420, 96, (g) => {
-      g.fillStyle(0x1a052e, 0.82);
-      g.fillRoundedRect(0, 0, 420, 96, 16);
-      g.lineStyle(2, 0xffcf3f, 0.5);
-      g.strokeRoundedRect(1, 1, 418, 94, 16);
+    // Лучистая вспышка за ачивкой (солнце вехи)
+    this.tex('burst', 180, 180, (g) => {
+      const cx = 90, cy = 90;
+      g.fillStyle(0xffcf3f, 0.5);
+      for (let i = 0; i < 12; i++) {
+        const a = (i / 12) * Math.PI * 2;
+        const wing = 0.085;
+        g.fillTriangle(
+          cx + Math.cos(a - wing) * 24, cy + Math.sin(a - wing) * 24,
+          cx + Math.cos(a + wing) * 24, cy + Math.sin(a + wing) * 24,
+          cx + Math.cos(a) * 88, cy + Math.sin(a) * 88,
+        );
+      }
+      g.fillStyle(0xffcf3f, 0.35); g.fillCircle(cx, cy, 34);
+      g.fillStyle(0xffe89a, 0.5);  g.fillCircle(cx, cy, 22);
+    });
+
+    // Флажок вехи в мире
+    this.tex('flag', 26, 34, (g) => {
+      g.lineStyle(3, 0x3a0d18);
+      g.beginPath(); g.moveTo(4, 2); g.lineTo(4, 32); g.strokePath(); // древко
+      g.fillStyle(0xffcf3f);
+      g.fillTriangle(6, 2, 6, 16, 24, 9);                            // вымпел
+      g.lineStyle(2, 0x3a0d18);
+      g.strokeTriangle(6, 2, 6, 16, 24, 9);
     });
   }
 }

@@ -94,32 +94,78 @@ export class UIScene extends Phaser.Scene {
     const m = this.plateQueue.shift();
     const res = Math.min(window.devicePixelRatio || 1, 2);
     const cx = CONF.width / 2;
+    const cy = CONF.height * 0.3;
 
-    const title = this.add.text(0, -18, `${m.m} м · ${m.title}`, {
-      fontFamily: 'Unbounded, sans-serif', fontSize: '17px', fontStyle: '700',
-      color: CONF.colors.gold, align: 'center', wordWrap: { width: 380 },
+    // лучистое солнце за цифрой
+    const burst = this.add.image(0, 0, 'burst').setAlpha(0.85).setScale(m.ach ? 1.25 : 1);
+    this.tweens.add({ targets: burst, angle: 90, duration: 4000, repeat: -1 });
+
+    const alt = this.add.text(0, 0, `${m.m} м`, {
+      fontFamily: 'Unbounded, sans-serif', fontSize: '38px', fontStyle: '900',
+      color: CONF.colors.gold, stroke: '#3a0d18', strokeThickness: 8,
     }).setOrigin(0.5).setResolution(res);
-    const sub = this.add.text(0, 14, m.sub, {
-      fontFamily: 'Nunito, sans-serif', fontSize: '14px', fontStyle: 'italic',
-      color: CONF.colors.text, align: 'center', wordWrap: { width: 380 },
-    }).setOrigin(0.5).setResolution(res);
 
-    const plate = this.add.container(cx, 218, [
-      this.add.image(0, 0, 'plate').setScale(0.98, 1),
-      title, sub,
-    ]).setAlpha(0).setScale(0.92);
+    const title = this.add.text(0, 44, m.title, {
+      fontFamily: 'Unbounded, sans-serif', fontSize: '19px', fontStyle: '700',
+      color: CONF.colors.white, stroke: '#3a0d18', strokeThickness: 6,
+      align: 'center', wordWrap: { width: 400 },
+    }).setOrigin(0.5, 0).setResolution(res);
 
-    const hold = m.ach ? 3400 : 2400; // ачивки читаем дольше
+    const sub = this.add.text(0, 50 + title.height, m.sub, {
+      fontFamily: 'Nunito, sans-serif', fontSize: '15px', fontStyle: 'italic',
+      color: CONF.colors.text, stroke: '#3a0d18', strokeThickness: 4,
+      align: 'center', wordWrap: { width: 380 },
+    }).setOrigin(0.5, 0).setResolution(res).setAlpha(0);
+
+    const parts = [burst, alt, title, sub];
+    if (m.ach) {
+      const achText = this.add.text(0, -46, '★ ДОСТИЖЕНИЕ ★', {
+        fontFamily: 'Unbounded, sans-serif', fontSize: '13px', fontStyle: '700',
+        color: CONF.colors.gold, stroke: '#3a0d18', strokeThickness: 5,
+      }).setOrigin(0.5).setResolution(res);
+      if (achText.setLetterSpacing) achText.setLetterSpacing(3);
+      parts.push(achText);
+    }
+
+    const badge = this.add.container(cx, cy, parts).setScale(0.3).setAlpha(0).setAngle(-5);
+
+    this.sparkles(cx, cy, m.ach ? 16 : 10);
+
+    const hold = m.ach ? 3200 : 2200; // ачивки читаем дольше
     this.tweens.add({
-      targets: plate, alpha: 1, scale: 1, duration: 320, ease: 'Back.easeOut',
-      onComplete: () => this.tweens.add({
-        targets: plate, alpha: 0, y: 190, delay: hold, duration: 420,
-        onComplete: () => {
-          plate.destroy();
-          this.plateBusy = false;
-          this.drainPlates();
-        },
-      }),
+      targets: badge, alpha: 1, scale: 1, angle: 0,
+      duration: 420, ease: 'Back.easeOut',
     });
+    this.tweens.add({ targets: sub, alpha: 1, delay: 380, duration: 300 });
+    this.tweens.add({
+      targets: badge, alpha: 0, y: cy - 70,
+      delay: hold, duration: 420, ease: 'Cubic.easeIn',
+      onComplete: () => {
+        this.tweens.killTweensOf(burst);
+        badge.destroy();
+        this.plateBusy = false;
+        this.drainPlates();
+      },
+    });
+  }
+
+  /** Разлёт золотых искр из точки. */
+  sparkles(x, y, n) {
+    for (let i = 0; i < n; i++) {
+      const a = Math.random() * Math.PI * 2;
+      const dist = Phaser.Math.Between(60, 150);
+      const d = this.add.image(x, y, 'dot')
+        .setTint(0xffcf3f).setScale(Phaser.Math.FloatBetween(1.2, 2.6));
+      this.tweens.add({
+        targets: d,
+        x: x + Math.cos(a) * dist,
+        y: y + Math.sin(a) * dist,
+        alpha: 0,
+        scale: 0.4,
+        duration: Phaser.Math.Between(450, 800),
+        ease: 'Cubic.easeOut',
+        onComplete: () => d.destroy(),
+      });
+    }
   }
 }

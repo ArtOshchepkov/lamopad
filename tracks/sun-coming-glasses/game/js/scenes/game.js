@@ -24,6 +24,12 @@ export class GameScene extends Phaser.Scene {
     this.buildLyricMarkers();
     this.milestoneIdx = 0;
 
+    // флажки вех в мире: чередуем стороны
+    this.flagMarkers = MILESTONES.map((m, i) => ({
+      y: -m.m * CONF.pxPerM, m, left: i % 2 === 0,
+    }));
+    this.flagIdx = 0;
+
     // управление
     this.cursors = this.input.keyboard.createCursorKeys();
     this.keys = this.input.keyboard.addKeys('A,D');
@@ -111,6 +117,7 @@ export class GameScene extends Phaser.Scene {
     this.field.ensure(cam.scrollY - CONF.spawn.ahead);
     this.field.update(dt, cam.scrollY + CONF.height);
     this.spawnLyrics(cam);
+    this.spawnFlags(cam);
 
     // высота
     if (curM > this.maxM) {
@@ -142,43 +149,26 @@ export class GameScene extends Phaser.Scene {
         break;
       case 'backpack':
         this.player.bounce(P.springVy, 0.34);
-        this.puff(plat, 0xffd000);
+        this.field.react(plat);
         break;
       case 'llama':
         this.player.bounce(P.llamaVy, 0.42);
-        this.shout(plat, 'Там хорошо!');
-        this.puff(plat, 0xffb8dd);
+        this.field.react(plat);
         break;
-      default:
+      case 'sunset':
+        this.player.bounce(P.bounceVy * 1.08, 0.2);
+        this.field.react(plat);
+        break;
+      case 'bird':
+        this.player.bounce(P.bounceVy * 1.15, 0.24);
+        this.field.react(plat);
+        break;
+      case 'suitcase':
+        this.field.crumble(plat); // отскока нет — проваливаемся
+        break;
+      default: // облака
         this.player.bounce(P.bounceVy);
-    }
-  }
-
-  // Крик ламы: всплывающий текст в мире
-  shout(plat, text) {
-    const t = this.add.text(plat.x, plat.y - 34, text, {
-      fontFamily: 'Unbounded, sans-serif', fontSize: '17px', fontStyle: '700',
-      color: CONF.colors.gold, stroke: '#3a0d18', strokeThickness: 5,
-    }).setOrigin(0.5).setDepth(11).setResolution(this.dpr());
-    this.tweens.add({
-      targets: t, y: t.y - 70, alpha: 0, duration: 1100,
-      ease: 'Cubic.easeOut', onComplete: () => t.destroy(),
-    });
-  }
-
-  // Простенький всплеск частиц при сильном отскоке
-  puff(plat, tint) {
-    const n = LOW_GFX ? 5 : 9;
-    for (let i = 0; i < n; i++) {
-      const d = this.add.image(plat.x, plat.y - 8, 'dot').setDepth(9)
-        .setTint(tint).setScale(Phaser.Math.FloatBetween(1, 2.2));
-      this.tweens.add({
-        targets: d,
-        x: d.x + Phaser.Math.Between(-46, 46),
-        y: d.y - Phaser.Math.Between(14, 58),
-        alpha: 0, duration: Phaser.Math.Between(320, 560),
-        ease: 'Cubic.easeOut', onComplete: () => d.destroy(),
-      });
+        this.field.react(plat);
     }
   }
 
@@ -193,6 +183,21 @@ export class GameScene extends Phaser.Scene {
         wordWrap: { width: 330 },
       }).setOrigin(0.5).setDepth(2).setAlpha(0.55).setResolution(this.dpr());
       // тексты позади нас чистит сборщик вместе с камерой — их мало, не пулим
+    }
+  }
+
+  // Флажок вехи у края: пролетаешь мимо него физически
+  spawnFlags(cam) {
+    const bound = cam.scrollY - CONF.spawn.ahead;
+    while (this.flagIdx < this.flagMarkers.length &&
+           this.flagMarkers[this.flagIdx].y >= bound) {
+      const mk = this.flagMarkers[this.flagIdx++];
+      const x = mk.left ? 22 : CONF.width - 22;
+      this.add.image(x, mk.y - 16, 'flag').setDepth(2).setFlipX(!mk.left).setAlpha(0.95);
+      this.add.text(mk.left ? 38 : CONF.width - 38, mk.y - 12, `${mk.m.m} м`, {
+        fontFamily: 'Unbounded, sans-serif', fontSize: '12px', fontStyle: '700',
+        color: CONF.colors.gold, stroke: '#3a0d18', strokeThickness: 4,
+      }).setOrigin(mk.left ? 0 : 1, 0.5).setDepth(2).setAlpha(0.9).setResolution(this.dpr());
     }
   }
 

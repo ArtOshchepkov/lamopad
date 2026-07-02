@@ -35,20 +35,34 @@ export const CONF = {
 
   // Зоны высот: веса типов платформ и разброс вертикальных разрывов (px)
   zones: [
-    { fromM: 0,    gap: [62, 100], types: { cloud: 55, sticker: 35, backpack: 10, cloudMove: 0,  llama: 0  } },
-    { fromM: 200,  gap: [72, 120], types: { cloud: 50, sticker: 25, backpack: 8,  cloudMove: 15, llama: 2  } },
-    { fromM: 600,  gap: [88, 148], types: { cloud: 45, sticker: 18, backpack: 8,  cloudMove: 25, llama: 4  } },
-    { fromM: 1500, gap: [108, 168], types: { cloud: 40, sticker: 15, backpack: 9,  cloudMove: 30, llama: 6  } },
-    { fromM: 3000, gap: [126, 186], types: { cloud: 35, sticker: 12, backpack: 10, cloudMove: 35, llama: 8  } },
-    { fromM: 6000, gap: [146, 200], types: { cloud: 30, sticker: 10, backpack: 10, cloudMove: 40, llama: 10 } },
+    { fromM: 0,    gap: [62, 100],  types: { cloud: 55, sticker: 35, backpack: 10 } },
+    { fromM: 200,  gap: [72, 120],  types: { cloud: 40, cloudMove: 12, sticker: 22, backpack: 8, suitcase: 10, sunset: 4,  bird: 2,  llama: 2  } },
+    { fromM: 600,  gap: [88, 148],  types: { cloud: 34, cloudMove: 20, sticker: 15, backpack: 8, suitcase: 10, sunset: 6,  bird: 3,  llama: 4  } },
+    { fromM: 1500, gap: [108, 168], types: { cloud: 29, cloudMove: 24, sticker: 12, backpack: 9, suitcase: 9,  sunset: 8,  bird: 5,  llama: 6  } },
+    { fromM: 3000, gap: [126, 186], types: { cloud: 25, cloudMove: 27, sticker: 10, backpack: 10, suitcase: 7, sunset: 9,  bird: 8,  llama: 8  } },
+    { fromM: 6000, gap: [146, 200], types: { cloud: 21, cloudMove: 29, sticker: 8,  backpack: 10, suitcase: 5, sunset: 10, bird: 10, llama: 10 } },
   ],
 
   platforms: {
-    cloud:     { tex: 'p-cloud',    w: 96, h: 26 },
-    cloudMove: { tex: 'p-cloud',    w: 88, h: 26, tint: 0xffd6ee, speed: [42, 92] },
-    sticker:   { tex: 'p-sticker',  w: 72, h: 30 },
-    backpack:  { tex: 'p-backpack', w: 66, h: 40 },
-    llama:     { tex: 'p-llama',    w: 80, h: 48 },
+    // облака — три формы, выбираются случайно
+    cloud: { variants: [
+      { tex: 'p-cloud-a', w: 96,  h: 30 },
+      { tex: 'p-cloud-b', w: 116, h: 26 },
+      { tex: 'p-cloud-c', w: 72,  h: 30 },
+    ] },
+    cloudMove: { variants: [
+      { tex: 'p-cloud-a', w: 96,  h: 30 },
+      { tex: 'p-cloud-c', w: 72,  h: 30 },
+    ], tint: 0xffd6ee, speed: [42, 92] },
+    sticker:  { tex: 'p-sticker',  w: 72, h: 30 },
+    backpack: { tex: 'p-backpack', w: 66, h: 40 },
+    llama:    { tex: 'p-llama',    w: 80, h: 48 },
+    // стесняшка-закатик: застенчиво тает и возвращается (тайминговая платформа)
+    sunset:   { tex: 'p-sunset',   w: 86, h: 32, cycle: { visible: 2300, blush: 700, hidden: 1300 } },
+    // чемодан: ловушка, проламывается; спавнер всегда кладёт рядом спасительное облако
+    suitcase: { tex: 'p-suitcase', w: 76, h: 34 },
+    // пташка: летит синусоидой, отскок бодрее облака
+    bird:     { tex: 'p-bird',     w: 58, h: 28, speed: [70, 120], wobble: { amp: 11, freq: 2.4 } },
   },
 
   sisyphus: {

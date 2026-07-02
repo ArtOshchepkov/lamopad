@@ -130,6 +130,13 @@ html, body {
   margin-bottom: 22px;
 }
 
+.death-reason {
+  font-style: italic;
+  font-size: 15px;
+  color: #ffb8dd;
+  margin: -10px 0 18px;
+}
+
 .death-stats { margin-bottom: 26px; }
 
 .death-height {

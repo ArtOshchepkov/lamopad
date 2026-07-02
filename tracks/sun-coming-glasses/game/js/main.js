@@ -74,7 +74,15 @@ document.addEventListener('visibilitychange', () => {
 });
 
 // ─── Экран смерти ────────────────────────────────────────────────────────────
-game.events.on('scg-death', ({ height, best, isNew }) => {
+const DEATH_REASONS = {
+  croc: 'Съеден крокодилом 🐊',
+  snake: 'Проглочен крайтом 🐍',
+  suitcase: 'Поверил чемодану 🧳',
+  fall: 'Просто закис',
+};
+
+game.events.on('scg-death', ({ height, best, isNew, cause }) => {
+  $('death-reason').textContent = DEATH_REASONS[cause] || DEATH_REASONS.fall;
   $('death-height').textContent = height + ' м';
   $('death-best').textContent = 'рекорд · ' + best + ' м';
   $('death-new').classList.toggle('hidden', !isNew);

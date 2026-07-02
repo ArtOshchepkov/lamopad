@@ -117,6 +117,20 @@ export class BootScene extends Phaser.Scene {
       g.fillEllipse(20, 4, 12, 5); g.fillEllipse(46, 3, 13, 5);
     });
 
+    // Офисный диван: с него начинается побег
+    this.tex('p-couch', 150, 40, (g) => {
+      g.fillStyle(0x1a1a20, 0.5); g.fillEllipse(75, 37, 130, 6);  // тень
+      g.fillStyle(0x2e2a34);                                       // ножки
+      g.fillRect(14, 30, 8, 8); g.fillRect(128, 30, 8, 8);
+      g.fillStyle(0x5a525e); g.fillRoundedRect(6, 12, 138, 22, 8); // корпус
+      g.fillStyle(0x6e6672);                                       // подушки
+      g.fillRoundedRect(14, 6, 58, 16, 6); g.fillRoundedRect(78, 6, 58, 16, 6);
+      g.fillStyle(0x4a4450);                                       // подлокотники
+      g.fillRoundedRect(0, 4, 16, 28, 6); g.fillRoundedRect(134, 4, 16, 28, 6);
+      g.lineStyle(2, 0x3a3540);                                    // швы
+      g.strokeRoundedRect(14, 6, 58, 16, 6); g.strokeRoundedRect(78, 6, 58, 16, 6);
+    });
+
     // Грозовая туча: тёмная, набухшая — при прыжке бьёт молнией
     this.tex('p-storm', 90, 36, (g) => {
       g.translateCanvas(0, 6);

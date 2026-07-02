@@ -15,9 +15,10 @@ export class PlatformField {
     this.spawnTutorial();
   }
 
-  // Стартовая лесенка: широкие статичные облака, чтобы освоиться
+  // Стартовая лесенка: офисный диван, затем облака (первые — прямо в офисе,
+  // привет Магритту), выше — обычные
   spawnTutorial() {
-    this.place('cloud', CONF.width / 2, 0, { wide: 1.6 });
+    this.place('couch', CONF.width / 2, 0);
     const xs = [140, 340, 110, 360, 240];
     xs.forEach((x, i) => this.place('cloud', x, -(i + 1) * 86, { wide: i < 2 ? 1.3 : 1 }));
     this.lastY = -xs.length * 86;

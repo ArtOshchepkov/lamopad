@@ -30,7 +30,7 @@ export class UIScene extends Phaser.Scene {
 
     // стартовая подсказка
     this.hint = this.add.container(cx, CONF.height * 0.56, [
-      this.add.text(0, 0, 'Тапни или жми клавишу — и наверх!', {
+      this.add.text(0, 0, 'Тапни — и к чёрту потолок!', {
         fontFamily: 'Unbounded, sans-serif', fontSize: '19px', fontStyle: '700',
         color: CONF.colors.white, stroke: '#2a0d3e', strokeThickness: 6,
         align: 'center', wordWrap: { width: 360 },

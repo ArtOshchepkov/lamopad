@@ -1,5 +1,5 @@
 // ─── Игровая сцена: мир, физика, камера, вехи ────────────────────────────────
-import { CONF, MILESTONES, LYRICS, LYRIC_STEP_M, LYRIC_CLEAR_M } from '../config.js';
+import { CONF, MILESTONES, LYRICS, LYRIC_STEP_M, LYRIC_CLEAR_M, GRUMBLE } from '../config.js';
 import { Player } from '../objects/player.js';
 import { PlatformField } from '../objects/platforms.js';
 import { Background } from '../objects/background.js';
@@ -34,6 +34,14 @@ export class GameScene extends Phaser.Scene {
     this.flagIdx = 0;
 
     this.isShroom = false; // ГРИБОК после блока «?»
+    this.buildOffice();    // серое утро, из которого мы сбежим
+
+    // ворчание засиженного облака и причина смерти
+    this.lastPlat = null;
+    this.samePlatCount = 0;
+    this.grumbleIdx = 0;
+    this.deathCause = null;
+    this.suitcaseBlame = false;
 
     // реактивные ранцы
     this.jets = [];
@@ -140,6 +148,9 @@ export class GameScene extends Phaser.Scene {
 
     this.player.update(dt, this.inputDir());
 
+    // первый рывок вверх проламывает офисный потолок
+    if (!this.ceilingBroken && this.player.y < this.officeCeilingY + 10) this.breakCeiling();
+
     // реактивный ранец: взлёт мимо всех препятствий
     if (this.jetTime > 0) this.updateJet(dt);
 
@@ -181,6 +192,19 @@ export class GameScene extends Phaser.Scene {
 
   onLand(plat) {
     const P = CONF.physics;
+
+    // засиделся на одном облаке — оно начинает ворчать
+    if (plat === this.lastPlat) {
+      this.samePlatCount++;
+      if (this.samePlatCount >= 7 && (this.samePlatCount - 7) % 3 === 0) {
+        this.field.shout(plat, GRUMBLE[this.grumbleIdx++ % GRUMBLE.length]);
+      }
+    } else {
+      this.lastPlat = plat;
+      this.samePlatCount = 1;
+    }
+    this.suitcaseBlame = plat.type === 'suitcase'; // упал после чемодана — виноват он
+
     switch (plat.type) {
       case 'sticker':
         this.player.bounce(P.stickerVy, 0.16);
@@ -253,6 +277,88 @@ export class GameScene extends Phaser.Scene {
         color: CONF.colors.gold, stroke: '#3a0d18', strokeThickness: 4,
       }).setOrigin(mk.left ? 0 : 1, 0.5).setDepth(2).setAlpha(0.9).setResolution(this.dpr());
     }
+  }
+
+  /** Серый офис вокруг старта: стены, пол, реквизит и потолок на слом. */
+  buildOffice() {
+    const W = CONF.width;
+    this.add.rectangle(W / 2, -104, W, 296, 0x44444e).setDepth(-3);   // стены
+    this.add.rectangle(W / 2, 46, W, 90, 0x35353d).setDepth(-2.95);   // пол
+    this.add.rectangle(W / 2, 2, W, 4, 0x2e2e36).setDepth(-2.9);      // плинтус
+
+    const props = this.add.graphics().setDepth(-2.9);
+    // часы — вечные 10:10
+    props.fillStyle(0xd8d4dc); props.fillCircle(70, -180, 16);
+    props.lineStyle(2, 0x44444e);
+    props.beginPath(); props.moveTo(70, -180); props.lineTo(63, -187); props.strokePath();
+    props.beginPath(); props.moveTo(70, -180); props.lineTo(77, -187); props.strokePath();
+    // доска, обклеенная стикерами-тасками
+    props.fillStyle(0x55505c); props.fillRoundedRect(310, -205, 110, 74, 4);
+    props.fillStyle(0xffd94b);
+    [[320, -196], [352, -198], [384, -194], [322, -168], [356, -170], [388, -166]]
+      .forEach(([x, y]) => props.fillRect(x, y, 22, 18));
+    // тумба с монитором: таски и там
+    props.fillStyle(0x3a3a42); props.fillRect(380, -34, 70, 44);
+    props.fillStyle(0x22222a); props.fillRoundedRect(388, -74, 54, 38, 4);
+    props.fillStyle(0x3a5a8c); props.fillRoundedRect(392, -70, 46, 30, 2);
+    props.fillStyle(0x8ab0d8);
+    props.fillRect(396, -66, 30, 3); props.fillRect(396, -58, 38, 3); props.fillRect(396, -50, 24, 3);
+    // кактус — единственное живое
+    props.fillStyle(0xb05a3a); props.fillRect(52, -6, 26, 16);
+    props.fillStyle(0x4a7a3a); props.fillEllipse(65, -18, 14, 26); props.fillEllipse(56, -20, 8, 12);
+
+    // потолок из плит — их и будем ломать
+    this.officeCeilingY = -252;
+    this.ceilingBroken = false;
+    this.ceilingPieces = [];
+    let cx = 0;
+    while (cx < W) {
+      const w = Math.min(Phaser.Math.Between(52, 88), W - cx);
+      this.ceilingPieces.push(
+        this.add.rectangle(cx + w / 2, this.officeCeilingY, w - 3, 24, 0x3a3a42).setDepth(-2.8),
+      );
+      cx += w;
+    }
+  }
+
+  /** Первый рывок вверх: плиты разлетаются, в пролом бьёт тёплый свет. */
+  breakCeiling() {
+    this.ceilingBroken = true;
+    for (const p of this.ceilingPieces) {
+      this.tweens.add({
+        targets: p,
+        x: p.x + Phaser.Math.Between(-140, 140),
+        y: p.y - Phaser.Math.Between(80, 260),
+        angle: Phaser.Math.Between(-180, 180),
+        alpha: 0,
+        duration: Phaser.Math.Between(600, 1000),
+        ease: 'Cubic.easeOut',
+        onComplete: () => p.destroy(),
+      });
+    }
+    // тёплый свет из пролома
+    const light = this.add.image(this.player.x, this.officeCeilingY, 'glowball')
+      .setBlendMode(Phaser.BlendModes.ADD).setTint(0xffb322)
+      .setScale(3).setAlpha(0.9).setDepth(-2.7);
+    this.tweens.add({
+      targets: light, scale: 6.5, alpha: 0, duration: 900,
+      onComplete: () => light.destroy(),
+    });
+    // пыль
+    for (let i = 0; i < 12; i++) {
+      const d = this.add.image(
+        Phaser.Math.Between(20, CONF.width - 20), this.officeCeilingY, 'dot',
+      ).setDepth(-2.7).setTint(0x9a9aa8).setScale(Phaser.Math.FloatBetween(1.2, 2.4));
+      this.tweens.add({
+        targets: d,
+        y: d.y + Phaser.Math.Between(30, 120),
+        alpha: 0,
+        duration: Phaser.Math.Between(500, 900),
+        onComplete: () => d.destroy(),
+      });
+    }
+    this.cameras.main.shake(130, 0.004);
+    this.field.shout({ x: this.player.x, y: this.officeCeilingY + 34 }, 'К чёрту потолок!');
   }
 
   /** Прыжок на блок «?»: герой становится ГРИБКОМ до конца забега. */
@@ -425,6 +531,7 @@ export class GameScene extends Phaser.Scene {
   eaten(plat) {
     if (this.state !== 'run') return;
     this.state = 'eaten'; // физика и управление замирают
+    this.deathCause = plat.type;
     const cry = plat.type === 'snake' ? 'Ш-ШШ!' : 'АМ!';
     const tint = plat.type === 'snake' ? 0xa04ab0 : 0x55a03c;
     this.field.lunge(plat, this.player.x, cry, tint);
@@ -446,7 +553,8 @@ export class GameScene extends Phaser.Scene {
     const isNew = this.maxM > this.startBest;
     const best = Math.max(this.startBest, this.maxM);
     if (isNew) this.saveBest(best);
-    this.game.events.emit('scg-death', { height: this.maxM, best, isNew });
+    const cause = this.deathCause || (this.suitcaseBlame ? 'suitcase' : 'fall');
+    this.game.events.emit('scg-death', { height: this.maxM, best, isNew, cause });
   }
 
   dpr() { return Math.min(window.devicePixelRatio || 1, 2); }

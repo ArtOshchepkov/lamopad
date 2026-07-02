@@ -329,9 +329,43 @@ export class BootScene extends Phaser.Scene {
       g.beginPath(); g.moveTo(7, 4); g.lineTo(10, 6); g.strokePath();
     });
 
+    // Реактивный ранец: красный рюкзак с соплами и ручкой-петлёй сверху
+    this.tex('jetpack', 48, 68, (g) => {
+      g.translateCanvas(0, 6); // место под ручку над корпусом
+      // ручка, как у настоящего ранца (рисуем до корпуса — он прикроет низ петли)
+      g.lineStyle(4, 0x5e0d12);
+      g.strokeRoundedRect(17, -5, 14, 12, 5);
+      // сопла снизу: длинные, с ободком и тёмным жерлом
+      g.fillStyle(0x4a4a58);
+      g.fillRoundedRect(6, 38, 14, 20, 4); g.fillRoundedRect(28, 38, 14, 20, 4);
+      g.fillStyle(0x6a6a7a); // ободки на срезе
+      g.fillRect(6, 52, 14, 3); g.fillRect(28, 52, 14, 3);
+      g.fillStyle(0x2a2a34); // жерла
+      g.fillEllipse(13, 57, 12, 5); g.fillEllipse(35, 57, 12, 5);
+      // корпус — фирменный красный рюкзак
+      g.fillStyle(0x5e0d12); g.fillRoundedRect(2, 4, 44, 40, 12);  // кант
+      g.fillStyle(0xd42222); g.fillRoundedRect(4, 2, 40, 40, 12);  // тело
+      g.fillStyle(0xff5040); g.fillRoundedRect(4, 2, 40, 16, { tl: 12, tr: 12, bl: 0, br: 0 }); // клапан
+      g.fillStyle(0xffd000); g.fillRoundedRect(17, 22, 14, 12, 4); // карман
+      g.lineStyle(3, 0x5e0d12);
+      g.strokeRoundedRect(4, 2, 40, 40, 12);
+      g.beginPath(); g.moveTo(12, 2); g.lineTo(12, 42); g.strokePath(); // лямки
+      g.beginPath(); g.moveTo(36, 2); g.lineTo(36, 42); g.strokePath();
+    });
+
     // Светлячок: почти пиксель
     this.tex('spark', 3, 3, (g) => {
       g.fillStyle(0xffffff); g.fillCircle(1.5, 1.5, 1.2);
+    });
+
+    // Мягкий светящийся шар (для огня ранца и вспышек)
+    this.tex('glowball', 64, 64, (g) => {
+      for (let i = 0; i < 14; i++) {
+        const t = i / 13;
+        g.fillStyle(0xffffff, 0.02 + t * t * 0.09);
+        g.fillCircle(32, 32, 30 - t * 20);
+      }
+      g.fillStyle(0xffffff, 0.9); g.fillCircle(32, 32, 7);
     });
 
     // Пассажирский лайнер для фона (смотрит вправо): приглушённые цвета,

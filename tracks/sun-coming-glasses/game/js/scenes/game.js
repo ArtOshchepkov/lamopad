@@ -33,6 +33,13 @@ export class GameScene extends Phaser.Scene {
     }));
     this.flagIdx = 0;
 
+    // реактивные ранцы
+    this.jets = [];
+    this.nextJetM = CONF.jet.fromM;
+    this.jetTime = 0;
+    this.jetSprite = null;
+    this.flameAcc = 0;
+
     // управление
     this.cursors = this.input.keyboard.createCursorKeys();
     this.keys = this.input.keyboard.addKeys('A,D');
@@ -51,6 +58,7 @@ export class GameScene extends Phaser.Scene {
             Phaser.Math.Between(70, CONF.width - 70), cam.scrollY + 200);
           this.cheatBuf = '';
         }
+        else if (this.cheatBuf.endsWith('jet')) { this.spawnJetOnCloud(); this.cheatBuf = ''; }
       }
     });
 
@@ -120,8 +128,11 @@ export class GameScene extends Phaser.Scene {
 
     this.player.update(dt, this.inputDir());
 
-    // приземление
-    const plat = this.field.landing(this.player);
+    // реактивный ранец: взлёт мимо всех препятствий
+    if (this.jetTime > 0) this.updateJet(dt);
+
+    // приземление (в полёте на ранце коллизий нет)
+    const plat = this.jetTime > 0 ? null : this.field.landing(this.player);
     if (plat) this.onLand(plat);
 
     // камера тянется только вверх
@@ -133,6 +144,7 @@ export class GameScene extends Phaser.Scene {
     this.field.update(dt, cam.scrollY + CONF.height, this.player);
     this.spawnLyrics(cam);
     this.spawnFlags(cam);
+    this.updateJetPickups(cam);
 
     // высота
     if (curM > this.maxM) {
@@ -218,6 +230,134 @@ export class GameScene extends Phaser.Scene {
         fontFamily: 'Unbounded, sans-serif', fontSize: '12px', fontStyle: '700',
         color: CONF.colors.gold, stroke: '#3a0d18', strokeThickness: 4,
       }).setOrigin(mk.left ? 0 : 1, 0.5).setDepth(2).setAlpha(0.9).setResolution(this.dpr());
+    }
+  }
+
+  // ─── Реактивный ранец ────────────────────────────────────────────────────
+
+  /** Спавн подбираемых ранцев по высоте + проверка подбора + чистка. */
+  updateJetPickups(cam) {
+    if (this.maxM >= this.nextJetM) {
+      this.nextJetM = this.maxM +
+        Phaser.Math.Between(CONF.jet.intervalM[0], CONF.jet.intervalM[1]);
+      const s = this.add.image(
+        Phaser.Math.Between(60, CONF.width - 60),
+        cam.scrollY - Phaser.Math.Between(200, 500),
+        'jetpack',
+      ).setDepth(4).setScale(0.9);
+      this.tweens.add({ // парит и манит
+        targets: s, y: s.y - 10, angle: 4,
+        yoyo: true, repeat: -1, duration: 900, ease: 'Sine.easeInOut',
+      });
+      this.jets.push(s);
+    }
+    for (let i = this.jets.length - 1; i >= 0; i--) {
+      const s = this.jets[i];
+      if (Math.abs(this.player.x - s.x) < 44 && Math.abs(this.player.y - s.y) < 48) {
+        this.tweens.killTweensOf(s);
+        s.destroy();
+        this.jets.splice(i, 1);
+        this.startJet();
+      } else if (s.y > cam.scrollY + CONF.height + 300) {
+        this.tweens.killTweensOf(s);
+        s.destroy();
+        this.jets.splice(i, 1);
+      }
+    }
+  }
+
+  /** Чит-код: положить ранец на видимое облачко над игроком. */
+  spawnJetOnCloud() {
+    const cam = this.cameras.main;
+    const clouds = this.field.active.filter(p =>
+      p.type === 'cloud' && !p.dead &&
+      p.y > cam.scrollY + 80 && p.y < this.player.y - 40);
+    const plat = clouds.length ? Phaser.Utils.Array.GetRandom(clouds) : null;
+    const x = plat ? plat.x : Phaser.Math.Between(60, CONF.width - 60);
+    const y = plat ? plat.y - plat.h / 2 - 26 : cam.scrollY + 160;
+    const s = this.add.image(x, y, 'jetpack').setDepth(4).setScale(0.9);
+    this.tweens.add({
+      targets: s, y: y - 10, angle: 4,
+      yoyo: true, repeat: -1, duration: 900, ease: 'Sine.easeInOut',
+    });
+    this.jets.push(s);
+  }
+
+  /** Взлёт: ранец на спине, тёплый огонь из сопел. */
+  startJet() {
+    if (this.state !== 'run') return;
+    this.jetTime = CONF.jet.duration;
+    if (!this.jetSprite) {
+      this.jetSprite = this.add.image(this.player.x, this.player.y + 14, 'jetpack')
+        .setDepth(9.6).setScale(0.8);
+      // живой свет, вырывающийся из сопел
+      this.jetGlow = this.add.image(this.player.x, this.player.y + 46, 'glowball')
+        .setBlendMode(Phaser.BlendModes.ADD).setTint(0xffa322)
+        .setDepth(9.4).setScale(1.8);
+      this.field.shout({ x: this.player.x, y: this.player.y - 20 }, 'ВЖ-Ж-Ж!');
+    }
+  }
+
+  updateJet(dt) {
+    this.jetTime -= dt;
+    this.player.vy = -CONF.jet.speed;
+    this.jetSprite.setPosition(this.player.x, this.player.y + 14);
+
+    // свет полыхает и дрожит
+    this.jetGlow.setPosition(this.player.x, this.player.y + 48)
+      .setAlpha(0.55 + Math.random() * 0.35)
+      .setScale(1.6 + Math.random() * 0.7);
+
+    // рвущееся пламя из двух сопел: аддитивное, с бело-жарким ядром
+    this.flameAcc += dt;
+    const step = LOW_GFX ? 0.04 : 0.022;
+    while (this.flameAcc >= step) {
+      this.flameAcc -= step;
+      const hot = Math.random() < 0.3; // жаркое ядро — почти белое
+      const nozzleX = this.player.x + (Math.random() < 0.5 ? -9 : 9);
+      const f = this.add.image(nozzleX, this.player.y + 38, 'dot')
+        .setDepth(9.5)
+        .setBlendMode(Phaser.BlendModes.ADD)
+        .setTint(hot
+          ? 0xfff2b0
+          : Phaser.Utils.Array.GetRandom([0xffd93b, 0xffb322, 0xff7d1e, 0xff4d1c]))
+        .setScale(hot
+          ? Phaser.Math.FloatBetween(1.8, 2.6)
+          : Phaser.Math.FloatBetween(2.6, 4.4));
+      this.tweens.add({
+        targets: f,
+        y: f.y + Phaser.Math.Between(55, 115),
+        x: f.x + Phaser.Math.Between(-14, 14),
+        alpha: 0,
+        scale: 0.4,
+        duration: Phaser.Math.Between(300, 520),
+        ease: 'Cubic.easeOut',
+        onComplete: () => f.destroy(),
+      });
+    }
+
+    if (this.jetTime <= 0) this.endJet();
+  }
+
+  endJet() {
+    this.jetTime = 0;
+    this.player.vy = -260; // мягкая передача в обычную физику
+    if (this.jetGlow) {
+      const glow = this.jetGlow;
+      this.jetGlow = null;
+      this.tweens.add({
+        targets: glow, alpha: 0, scale: 0.4, duration: 300,
+        onComplete: () => glow.destroy(),
+      });
+    }
+    if (this.jetSprite) {
+      const s = this.jetSprite;
+      this.jetSprite = null;
+      this.tweens.add({ // отработавший ранец отваливается
+        targets: s, y: s.y + 90, angle: 140, alpha: 0,
+        duration: 700, ease: 'Cubic.easeIn',
+        onComplete: () => s.destroy(),
+      });
     }
   }
 

@@ -23,28 +23,44 @@ const $ = (id) => document.getElementById(id);
 const loading = $('loading');
 const deathOverlay = $('death');
 const audio = $('track');
-const muteBtn = $('mute');
+const muteMusicBtn = $('mute-music');
+const muteSfxBtn = $('mute-sfx');
 
 game.events.once('scg-booted', () => {
   loading.classList.add('hidden');
 });
 
-// ─── Звук: трек стримится обычным <audio>, разлочка первым жестом ────────────
-let muted = false;
-try { muted = localStorage.getItem(CONF.storage.muted) === '1'; } catch (e) { /* ок */ }
+// ─── Звук: музыка (стрим <audio>) и SFX (Phaser) мутятся независимо ──────────
+const load = (key) => {
+  try { return localStorage.getItem(key) === '1'; } catch (e) { return false; }
+};
+const save = (key, v) => {
+  try { localStorage.setItem(key, v ? '1' : '0'); } catch (e) { /* ок */ }
+};
+let musicMuted = load(CONF.storage.muted);
+let sfxMuted = load(CONF.storage.sfxMuted);
 
 function renderMute() {
-  muteBtn.textContent = muted ? '🔇' : '🔊';
-  muteBtn.setAttribute('aria-label', muted ? 'Включить музыку' : 'Выключить музыку');
-  audio.muted = muted;
+  muteMusicBtn.classList.toggle('off', musicMuted);
+  muteMusicBtn.setAttribute('aria-label', musicMuted ? 'Включить музыку' : 'Выключить музыку');
+  muteSfxBtn.classList.toggle('off', sfxMuted);
+  muteSfxBtn.setAttribute('aria-label', sfxMuted ? 'Включить звуки' : 'Выключить звуки');
+  audio.muted = musicMuted;
+  game.sound.mute = sfxMuted;
 }
 renderMute();
 
-muteBtn.addEventListener('click', () => {
-  muted = !muted;
-  try { localStorage.setItem(CONF.storage.muted, muted ? '1' : '0'); } catch (e) { /* ок */ }
+muteMusicBtn.addEventListener('click', () => {
+  musicMuted = !musicMuted;
+  save(CONF.storage.muted, musicMuted);
   renderMute();
-  if (!muted && audio.paused) audio.play().catch(() => {});
+  if (!musicMuted && audio.paused) audio.play().catch(() => {});
+});
+
+muteSfxBtn.addEventListener('click', () => {
+  sfxMuted = !sfxMuted;
+  save(CONF.storage.sfxMuted, sfxMuted);
+  renderMute();
 });
 
 game.events.on('scg-start', () => {
@@ -54,7 +70,7 @@ game.events.on('scg-start', () => {
 document.addEventListener('visibilitychange', () => {
   if (document.hidden) audio.pause();
   // возобновляем, только если трек уже был запущен жестом игрока
-  else if (!muted && audio.currentTime > 0) audio.play().catch(() => {});
+  else if (!musicMuted && audio.currentTime > 0) audio.play().catch(() => {});
 });
 
 // ─── Экран смерти ────────────────────────────────────────────────────────────

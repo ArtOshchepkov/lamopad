@@ -107,6 +107,7 @@ export const CONF = {
   storage: {
     best: 'lamopad_scg_best',
     muted: 'lamopad_scg_muted',
+    sfxMuted: 'lamopad_scg_sfx_muted',
   },
   sounds: {
     seagull: 'seagul_ira.mp3',

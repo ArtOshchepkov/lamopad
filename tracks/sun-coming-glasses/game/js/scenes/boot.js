@@ -253,22 +253,70 @@ export class BootScene extends Phaser.Scene {
       g.fillStyle(0x3e7d2a); g.fillRect(28, 26, 6, 5); g.fillRect(46, 26, 6, 5);
     });
 
-    // Змея (голова слева), свернулась кольцами на облаке
+    // Змея (голова слева): кислотно-зелёная, кольца-полосы как у ленточного крайта
     this.tex('snake', 60, 34, (g) => {
       g.translateCanvas(4, 0); // запас слева под высунутый язык
-      // кольца: широкое основание, уже кверху
-      g.fillStyle(0x8e3aa0); g.fillEllipse(32, 26, 40, 13);
-      g.fillStyle(0xa04ab0); g.fillEllipse(32, 19, 31, 10);
-      g.fillStyle(0xb45ec4); g.fillEllipse(32, 13, 22, 8);
-      // тёмные полоски на кольцах
-      g.lineStyle(2, 0x5e2470);
-      g.beginPath(); g.moveTo(16, 25); g.lineTo(48, 25); g.strokePath();
-      g.beginPath(); g.moveTo(19, 18); g.lineTo(45, 18); g.strokePath();
-      // шея тянется вверх-влево
-      g.fillStyle(0xa04ab0);
-      g.fillCircle(16, 14, 4); g.fillCircle(13, 10, 4);
+      const BAND = 0x101c08;   // почти чёрные поперечные кольца
+      // кольцо свернувшегося тела: труба с просветом в середине — читается
+      // как виток длинной змеи, а не сплошное брюхо
+      g.lineStyle(10, 0x66e01a); // трубка тела толще шеи
+      g.strokeEllipse(33, 22.5, 34, 13); // лежащий виток, шея выше него
+      // полосы крайта поперёк трубки кольца
+      for (const th of [0.5, 1.6, 2.6, 5.3]) {
+        const px = 33 + 17 * Math.cos(th), py = 22.5 + 6.5 * Math.sin(th);
+        const tx = -17 * Math.sin(th), ty = 6.5 * Math.cos(th); // касательная
+        const tl = Math.hypot(tx, ty) || 1;
+        const nx = -ty / tl, ny = tx / tl; // нормаль = поперёк трубки
+        g.lineStyle(3, BAND);
+        g.beginPath();
+        g.moveTo(px - nx * 4.8, py - ny * 4.8);
+        g.lineTo(px + nx * 4.8, py + ny * 4.8);
+        g.strokePath();
+      }
+      // кончик хвоста выглядывает из-под витка
+      g.fillStyle(0x66e01a);
+      g.fillCircle(52.5, 28.5, 2.6); g.fillCircle(54.8, 26.8, 1.6);
+
+      // шея поднимается из кольца киношной дугой «?» — без капюшона, это крайт
+      const pts = [
+        { x: 14,   y: 8,   r: 3.1 },  // голова тянется к добыче
+        { x: 17,   y: 7.5, r: 3.3 },  // горизонтальный вынос
+        { x: 21,   y: 9,   r: 3.5 },  // гребень дуги
+        { x: 23.5, y: 12,  r: 3.7 },  // скат назад
+        { x: 24.5, y: 16,  r: 3.9 },  // задняя выпуклость
+        { x: 23.5, y: 20,  r: 4.1 },
+        { x: 22,   y: 24,  r: 4.3 },  // впадает в кольцо
+      ];
+      const samples = [];
+      for (let i = 0; i < pts.length - 1; i++) {
+        for (let s = 0; s < 6; s++) {
+          const t = s / 6;
+          samples.push({
+            x: Phaser.Math.Linear(pts[i].x, pts[i + 1].x, t),
+            y: Phaser.Math.Linear(pts[i].y, pts[i + 1].y, t),
+            r: Phaser.Math.Linear(pts[i].r, pts[i + 1].r, t),
+          });
+        }
+      }
+      samples.forEach((p) => {
+        g.fillStyle(0x7dff24);
+        g.fillCircle(p.x, p.y, p.r);
+      });
+      // кольца крайта: узкие полосы строго поперёк шеи
+      for (const f of [0.22, 0.52, 0.8]) {
+        const i = Math.min(samples.length - 2, Math.round(f * samples.length));
+        const p = samples[i], q = samples[i + 1];
+        const dl = Math.hypot(q.x - p.x, q.y - p.y) || 1;
+        const nx = -(q.y - p.y) / dl, ny = (q.x - p.x) / dl; // перпендикуляр к телу
+        const half = p.r * 0.92;
+        g.lineStyle(Math.max(2.2, p.r * 0.62), BAND);
+        g.beginPath();
+        g.moveTo(p.x - nx * half, p.y - ny * half);
+        g.lineTo(p.x + nx * half, p.y + ny * half);
+        g.strokePath();
+      }
       // голова
-      g.fillEllipse(11, 7, 14, 8);
+      g.fillStyle(0x7dff24); g.fillEllipse(11, 7, 14, 8);
       // глазное яблоко (зрачок — отдельный следящий спрайт)
       g.fillStyle(0xffffff); g.fillCircle(9, 6, 2.6);
     });

@@ -45,6 +45,12 @@ export class GameScene extends Phaser.Scene {
         this.cheatBuf = (this.cheatBuf + e.key.toLowerCase()).slice(-8);
         if (this.cheatBuf.endsWith('fire')) { this.bg.spawnFireflies(true); this.cheatBuf = ''; }
         else if (this.cheatBuf.endsWith('plane')) { this.bg.spawnPlane(); this.cheatBuf = ''; }
+        else if (this.cheatBuf.endsWith('snake')) {
+          const cam = this.cameras.main;
+          this.field.place('snake',
+            Phaser.Math.Between(70, CONF.width - 70), cam.scrollY + 200);
+          this.cheatBuf = '';
+        }
       }
     });
 

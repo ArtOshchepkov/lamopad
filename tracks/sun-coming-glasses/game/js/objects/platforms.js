@@ -107,10 +107,29 @@ export class PlatformField {
         targets: p.deco, angle: 2.5, yoyo: true, repeat: -1,
         duration: R(900, 1400), ease: 'Sine.easeInOut',
       });
-      // зрачок крокодила — отдельный спрайт, следит за игроком
-      if (def.deco === 'croc') {
+      // зрачок хищника — отдельный спрайт, следит за игроком
+      if (def.eye) {
         p.pupil = this.scene.add.image(x, y, 'dot')
-          .setDepth(6.1).setTint(0x1a1a1a).setScale(0.75);
+          .setDepth(6.1).setTint(0x1a1a1a).setScale(def.eye.s);
+      }
+      // язык змеи: высовывается, дрожит и прячется — как в природе
+      if (def.tongue) {
+        const dir = p.deco.flipX ? 1 : -1;
+        p.tongue = this.scene.add.image(
+          p.deco.x + def.tongue.x * -dir,
+          p.deco.y + def.tongue.y,
+          'tongue',
+        ).setOrigin(0, 0.5).setDepth(6.05).setScale(0, 1);
+        this.scene.tweens.add({
+          targets: p.tongue,
+          scaleX: dir,
+          duration: 100,
+          yoyo: true,
+          hold: 170,          // подрожать снаружи
+          repeat: -1,
+          repeatDelay: R(700, 2200), // пауза между высовываниями
+          ease: 'Quad.easeOut',
+        });
       }
     }
     this.active.push(p);
@@ -132,13 +151,14 @@ export class PlatformField {
     }
   }
 
-  // Зрачок крокодила следит за игроком (глаз в текстуре: (21,13) при центре (36,16))
+  // Зрачок хищника следит за игроком (смещение глаза — в def.eye)
   trackEye(p, player) {
-    const ex = p.deco.x + (p.deco.flipX ? 15 : -15);
-    const ey = p.deco.y - 3;
+    const eye = p.def.eye;
+    const ex = p.deco.x + (p.deco.flipX ? -eye.x : eye.x);
+    const ey = p.deco.y + eye.y;
     const dx = player.x - ex, dy = player.y - ey;
     const len = Math.hypot(dx, dy) || 1;
-    p.pupil.setPosition(ex + (dx / len) * 1.6, ey + (dy / len) * 1.6);
+    p.pupil.setPosition(ex + (dx / len) * 1.5, ey + (dy / len) * 1.5);
   }
 
   // горизонтальный дрейф с отскоком от краёв
@@ -202,6 +222,11 @@ export class PlatformField {
     if (p.pupil) {
       p.pupil.destroy();
       p.pupil = null;
+    }
+    if (p.tongue) {
+      this.scene.tweens.killTweensOf(p.tongue);
+      p.tongue.destroy();
+      p.tongue = null;
     }
     p.sprite.setActive(false).setVisible(false);
     this.pool.push(p.sprite);

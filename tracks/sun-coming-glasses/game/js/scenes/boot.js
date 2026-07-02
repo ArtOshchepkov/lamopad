@@ -266,14 +266,16 @@ export class BootScene extends Phaser.Scene {
       g.fillCircle(16, 14, 4); g.fillCircle(13, 10, 4);
       // голова
       g.fillEllipse(11, 7, 14, 8);
-      // глаз
+      // глазное яблоко (зрачок — отдельный следящий спрайт)
       g.fillStyle(0xffffff); g.fillCircle(9, 6, 2.6);
-      g.fillStyle(0x1a1a1a); g.fillCircle(8.5, 6, 1.2);
-      // раздвоенный язык
+    });
+
+    // Раздвоенный язык змеи: основание слева, остриё вправо (зеркалим scaleX)
+    this.tex('tongue', 11, 8, (g) => {
       g.lineStyle(1.5, 0xff3b57);
-      g.beginPath(); g.moveTo(4, 8); g.lineTo(-1, 8); g.strokePath();
-      g.beginPath(); g.moveTo(-1, 8); g.lineTo(-3, 6); g.strokePath();
-      g.beginPath(); g.moveTo(-1, 8); g.lineTo(-3, 10); g.strokePath();
+      g.beginPath(); g.moveTo(0, 4); g.lineTo(7, 4); g.strokePath();
+      g.beginPath(); g.moveTo(7, 4); g.lineTo(10, 2); g.strokePath();
+      g.beginPath(); g.moveTo(7, 4); g.lineTo(10, 6); g.strokePath();
     });
 
     // Светлячок: почти пиксель

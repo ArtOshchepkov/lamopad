@@ -37,7 +37,16 @@ export class GameScene extends Phaser.Scene {
     this.cursors = this.input.keyboard.createCursorKeys();
     this.keys = this.input.keyboard.addKeys('A,D');
     this.input.on('pointerdown', () => this.startRun());
-    this.input.keyboard.on('keydown', () => this.startRun());
+    // чит-коды: набери fire — светлячки, plane — самолёт
+    this.cheatBuf = '';
+    this.input.keyboard.on('keydown', (e) => {
+      this.startRun();
+      if (e.key && e.key.length === 1) {
+        this.cheatBuf = (this.cheatBuf + e.key.toLowerCase()).slice(-8);
+        if (this.cheatBuf.endsWith('fire')) { this.bg.spawnFireflies(true); this.cheatBuf = ''; }
+        else if (this.cheatBuf.endsWith('plane')) { this.bg.spawnPlane(); this.cheatBuf = ''; }
+      }
+    });
 
     this.game.events.emit('scg-height', { cur: 0, best: this.startBest });
   }
@@ -100,7 +109,7 @@ export class GameScene extends Phaser.Scene {
     const dt = Math.min(deltaMs / 1000, CONF.physics.maxDt);
     const cam = this.cameras.main;
     const curM = Math.max(0, Math.round(-this.player.y / CONF.pxPerM));
-    this.bg.update(curM, this.maxM);
+    this.bg.update(curM, this.maxM, this.player);
     if (this.state !== 'run') return;
 
     this.player.update(dt, this.inputDir());
@@ -166,6 +175,9 @@ export class GameScene extends Phaser.Scene {
       case 'suitcase':
         this.field.crumble(plat); // отскока нет — проваливаемся
         break;
+      case 'croc':
+        this.eaten(plat);
+        break;
       default: // облака
         this.player.bounce(P.bounceVy);
         this.field.react(plat);
@@ -207,6 +219,24 @@ export class GameScene extends Phaser.Scene {
       this.game.events.emit('scg-milestone', MILESTONES[this.milestoneIdx]);
       this.milestoneIdx++;
     }
+  }
+
+  /** Съеден крокодилом: выпад, очки утягиваются в пасть, затем экран смерти. */
+  eaten(plat) {
+    if (this.state !== 'run') return;
+    this.state = 'eaten'; // физика и управление замирают
+    this.field.crocLunge(plat, this.player.x);
+    const mouth = plat.deco || plat.sprite;
+    this.tweens.add({
+      targets: this.player.sprite,
+      x: mouth.x,
+      y: mouth.y - 4,
+      scale: 0,
+      angle: 220,
+      duration: 420,
+      ease: 'Cubic.easeIn',
+    });
+    this.time.delayedCall(800, () => this.die());
   }
 
   die() {

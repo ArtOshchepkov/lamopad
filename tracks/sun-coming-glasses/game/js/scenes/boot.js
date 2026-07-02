@@ -222,6 +222,60 @@ export class BootScene extends Phaser.Scene {
       g.fillStyle(0xffffff); g.fillCircle(2, 2, 2);
     });
 
+    // Крокодил (мордой влево), сидит на облаке
+    this.tex('croc', 72, 32, (g) => {
+      // хвост загнут вверх
+      g.fillStyle(0x3e7d2a); g.fillTriangle(66, 22, 58, 12, 56, 24);
+      // тело
+      g.fillStyle(0x55a03c); g.fillEllipse(40, 22, 44, 14);
+      // гребень на спине
+      g.fillStyle(0x3e7d2a);
+      g.fillTriangle(32, 16, 36, 10, 40, 16);
+      g.fillTriangle(42, 16, 46, 10, 50, 16);
+      // голова и морда
+      g.fillStyle(0x55a03c);
+      g.fillEllipse(18, 20, 26, 11); g.fillEllipse(8, 22, 16, 7);
+      g.fillCircle(21, 14, 5); // надбровный бугор
+      // пасть
+      g.lineStyle(2, 0x2a5220);
+      g.beginPath(); g.moveTo(1, 23); g.lineTo(20, 23); g.strokePath();
+      // зубки
+      g.fillStyle(0xffffff);
+      g.fillTriangle(4, 23, 6, 20, 8, 23);
+      g.fillTriangle(9, 23, 11, 20, 13, 23);
+      g.fillTriangle(14, 23, 16, 20, 18, 23);
+      // глаз
+      g.fillStyle(0xffffff); g.fillCircle(21, 13, 3);
+      g.fillStyle(0x1a1a1a); g.fillCircle(22, 13, 1.4);
+      // лапки
+      g.fillStyle(0x3e7d2a); g.fillRect(28, 26, 6, 5); g.fillRect(46, 26, 6, 5);
+    });
+
+    // Светлячок: почти пиксель
+    this.tex('spark', 3, 3, (g) => {
+      g.fillStyle(0xffffff); g.fillCircle(1.5, 1.5, 1.2);
+    });
+
+    // Пассажирский лайнер для фона (смотрит вправо): приглушённые цвета,
+    // без жёстких контуров — далёкий силуэт, а не объект геймплея
+    this.tex('plane', 76, 32, (g) => {
+      // киль — стреловидный, приглушённо-красный
+      g.fillStyle(0xb03448); g.fillTriangle(15, 14, 5, 3, 10, 15);
+      // стабилизатор
+      g.fillStyle(0xd0c0e0); g.fillTriangle(14, 15, 5, 11, 15, 17);
+      // фюзеляж — длинный и узкий
+      g.fillStyle(0xe6dcf2); g.fillEllipse(39, 15, 60, 9);
+      // тень брюха
+      g.fillStyle(0xbcaad4, 0.8); g.fillEllipse(39, 17.5, 56, 4);
+      // кабина
+      g.fillStyle(0x5a4a72); g.fillEllipse(63, 13.5, 7, 3);
+      // крыло — стреловидное, крупное и читаемое, темнее фюзеляжа
+      g.fillStyle(0xa88fc8); g.fillTriangle(45, 15, 17, 29, 50, 17);
+      // двигатель под крылом
+      g.fillStyle(0x9884b8); g.fillEllipse(32, 24, 12, 6);
+      g.fillStyle(0x4a3a62); g.fillEllipse(26.5, 24, 2.5, 4);
+    });
+
     // Гало закатика: широкое, очень мягкое, само по себе почти незаметное
     this.tex('sunhalo', 760, 760, (g) => {
       const c = 380;

@@ -50,14 +50,19 @@ export class PlatformField {
       this.place(type, x, this.lastY);
       // чемодан — ловушка: на той же высоте всегда есть честная опора
       if (type === 'suitcase') {
-        let cx = this.randX('cloud');
-        if (Math.abs(cx - x) < 140) {
-          cx = x > CONF.width / 2 ? x - 150 : x + 150;
-          cx = Phaser.Math.Clamp(cx, 60, CONF.width - 60);
-        }
-        this.place('cloud', cx, this.lastY - R(4, 18));
+        this.place('cloud', this.apartX(x), this.lastY - R(4, 18));
+      }
+      // крокодилье облако — добавка к ярусу: честный путь не занимает
+      if (type !== 'suitcase' && m > CONF.croc.fromM && Math.random() < CONF.croc.chance) {
+        this.place('croc', this.apartX(x), this.lastY - R(4, 16));
       }
     }
+  }
+
+  /** X на том же ярусе, гарантированно в стороне от занятого. */
+  apartX(x) {
+    let nx = x > CONF.width / 2 ? x - R(150, 220) : x + R(150, 220);
+    return Phaser.Math.Clamp(nx, 60, CONF.width - 60);
   }
 
   randX(type) {
@@ -92,6 +97,16 @@ export class PlatformField {
     };
     if (type === 'cloudMove') p.vx = RF(def.speed[0], def.speed[1]) * (Math.random() < 0.5 ? -1 : 1);
     if (type === 'bird') p.vx = RF(def.speed[0], def.speed[1]) * (Math.random() < 0.5 ? -1 : 1);
+
+    // декор поверх платформы (крокодил на облаке); редкий — не пулим
+    if (def.deco) {
+      p.deco = this.scene.add.image(x, y - p.h / 2 - 12, def.deco)
+        .setDepth(6).setFlipX(Math.random() < 0.5);
+      this.scene.tweens.add({ // лениво покачивает хвостом
+        targets: p.deco, angle: 2.5, yoyo: true, repeat: -1,
+        duration: R(900, 1400), ease: 'Sine.easeInOut',
+      });
+    }
     this.active.push(p);
     return p;
   }
@@ -163,6 +178,11 @@ export class PlatformField {
     const p = this.active[i];
     // твины (слом, реакция) не должны догнать переиспользованный спрайт
     this.scene.tweens.killTweensOf(p.sprite);
+    if (p.deco) {
+      this.scene.tweens.killTweensOf(p.deco);
+      p.deco.destroy();
+      p.deco = null;
+    }
     p.sprite.setActive(false).setVisible(false);
     this.pool.push(p.sprite);
     this.active.splice(i, 1);
@@ -249,6 +269,21 @@ export class PlatformField {
       duration: 70, yoyo: true, repeat: 3,
       onComplete: () => s.setAngle(0),
     });
+  }
+
+  /** Крокодил делает выпад к добыче. */
+  crocLunge(p, px) {
+    if (!p.deco) return;
+    this.scene.tweens.killTweensOf(p.deco);
+    p.deco.setFlipX(px > p.deco.x); // мордой к жертве (морда слева в текстуре)
+    this.scene.tweens.add({
+      targets: p.deco,
+      y: p.deco.y - 10,
+      scaleX: 1.18, scaleY: 1.22,
+      duration: 130, yoyo: true, ease: 'Quad.easeOut',
+    });
+    this.shout(p, 'АМ!');
+    this.puff(p, 0x55a03c, 6);
   }
 
   /** Чемодан проламывается: отскока нет. */

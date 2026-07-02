@@ -79,6 +79,177 @@ export class Background {
     // ── пальмы: стоят на своих высотах по краям, до стратосферы ──
     this.nextPalmM = 60;
     this.palms = [];
+
+    // ── падающие ламы: изредка кувыркаются через экран, как на странице трека ──
+    this.scheduleFallingLlama();
+
+    // ── самолётики с инверсионным следом ──
+    this.schedulePlane();
+
+    // ── светлячки: сгустки мерцающих искр, разлетаются от игрока ──
+    this.fireflies = [];
+    this.nextFireM = 140;
+  }
+
+  /** Сгусток светлячков. inView — прямо на экране (для чит-кода). */
+  spawnFireflies(inView = false) {
+    const scene = this.scene;
+    const cam = scene.cameras.main;
+    const cx = Phaser.Math.Between(80, CONF.width - 80);
+    const cy = inView
+      ? cam.scrollY + CONF.height * 0.45
+      : cam.scrollY - Phaser.Math.Between(160, 420);
+
+    const flies = [];
+    const n = this.lowGfx ? 10 : 18;
+    for (let i = 0; i < n; i++) {
+      const a = Math.random() * Math.PI * 2;
+      const r = Math.pow(Math.random(), 0.6) * 52; // гуще к центру
+      const fly = scene.add.image(cx + Math.cos(a) * r, cy + Math.sin(a) * r * 0.8, 'spark')
+        .setDepth(3).setBlendMode(Phaser.BlendModes.ADD)
+        .setTint(Math.random() < 0.75 ? 0xffe9a0 : 0xd8ffb0)
+        .setAlpha(Phaser.Math.FloatBetween(0.4, 1));
+      // мерцание
+      scene.tweens.add({
+        targets: fly, alpha: Phaser.Math.FloatBetween(0.1, 0.35),
+        duration: Phaser.Math.Between(280, 900),
+        yoyo: true, repeat: -1, delay: Phaser.Math.Between(0, 500),
+      });
+      // медленное блуждание
+      scene.tweens.add({
+        targets: fly,
+        x: fly.x + Phaser.Math.Between(-9, 9),
+        y: fly.y + Phaser.Math.Between(-7, 7),
+        duration: Phaser.Math.Between(1400, 2800),
+        yoyo: true, repeat: -1, ease: 'Sine.easeInOut',
+      });
+      flies.push(fly);
+    }
+    this.fireflies.push({ x: cx, y: cy, flies, scattered: false });
+  }
+
+  /** Игрок влетел в сгусток — светлячки прыскают в стороны. */
+  scatterFireflies(cluster, px, py) {
+    cluster.scattered = true;
+    for (const fly of cluster.flies) {
+      this.scene.tweens.killTweensOf(fly);
+      const dx = fly.x - px, dy = fly.y - py;
+      const len = Math.hypot(dx, dy) || 1;
+      const dist = Phaser.Math.Between(70, 170);
+      this.scene.tweens.add({
+        targets: fly,
+        x: fly.x + (dx / len) * dist + Phaser.Math.Between(-16, 16),
+        y: fly.y + (dy / len) * dist + Phaser.Math.Between(-16, 16),
+        alpha: 0,
+        duration: Phaser.Math.Between(500, 1000),
+        ease: 'Cubic.easeOut',
+        onComplete: () => fly.destroy(),
+      });
+    }
+    cluster.flies = [];
+  }
+
+  schedulePlane() {
+    this.scene.time.addEvent({
+      delay: Phaser.Math.Between(12000, 26000),
+      callback: () => {
+        this.spawnPlane();
+        this.schedulePlane();
+      },
+    });
+  }
+
+  /** Лайнер пересекает небо под углом набора/снижения, оставляя тающий след. */
+  spawnPlane() {
+    const scene = this.scene;
+    const dir = Math.random() < 0.5 ? 1 : -1;
+    const startX = dir > 0 ? -70 : CONF.width + 70;
+    const endX = dir > 0 ? CONF.width + 70 : -70;
+    const startY = Phaser.Math.Between(80, CONF.height * 0.6);
+
+    // угол тангажа как на взлёте/посадке: ±12°, но не выводящий за экран
+    let pitch = Phaser.Math.FloatBetween(-12, 12);
+    const dx = Math.abs(endX - startX);
+    let endY = startY - Math.tan(Phaser.Math.DegToRad(pitch)) * dx;
+    if (endY < 50 || endY > CONF.height * 0.75) {
+      pitch = -pitch;
+      endY = startY - Math.tan(Phaser.Math.DegToRad(pitch)) * dx;
+    }
+    endY = Phaser.Math.Clamp(endY, 50, CONF.height * 0.75);
+
+    const plane = scene.add.image(startX, startY, 'plane')
+      .setScrollFactor(0).setDepth(-6.5)
+      .setScale(Phaser.Math.FloatBetween(0.65, 0.95))
+      .setAlpha(0.55).setFlipX(dir < 0)
+      .setAngle(dir > 0 ? -pitch : pitch);
+
+    // единичный вектор курса — след тянется строго за хвостом
+    const len = Math.hypot(endX - startX, endY - startY);
+    const ux = (endX - startX) / len, uy = (endY - startY) / len;
+    const puffGap = this.lowGfx ? 28 : 15;
+    let lastX = plane.x, lastY = plane.y;
+
+    scene.tweens.add({
+      targets: plane,
+      x: endX,
+      y: endY,
+      duration: Phaser.Math.Between(8000, 13000),
+      onUpdate: () => {
+        if (Math.hypot(plane.x - lastX, plane.y - lastY) >= puffGap) {
+          lastX = plane.x; lastY = plane.y;
+          const s = plane.scaleX;
+          const puff = scene.add.image(
+            plane.x - ux * 34 * s,
+            plane.y - uy * 34 * s + 1,
+            'dot',
+          ).setScrollFactor(0).setDepth(-6.6)
+           .setAlpha(0.22).setScale(Phaser.Math.FloatBetween(1.3, 2));
+          scene.tweens.add({
+            targets: puff,
+            alpha: 0,
+            scale: puff.scale + 1.1,
+            duration: Phaser.Math.Between(2000, 3000),
+            onComplete: () => puff.destroy(),
+          });
+        }
+      },
+      onComplete: () => plane.destroy(),
+    });
+  }
+
+  scheduleFallingLlama() {
+    this.scene.time.addEvent({
+      delay: Phaser.Math.Between(7000, 18000),
+      callback: () => {
+        this.spawnFallingLlama();
+        this.scheduleFallingLlama();
+      },
+    });
+  }
+
+  /** Лама кувырком падает через экран — чистый фон, без коллизий. */
+  spawnFallingLlama() {
+    const scene = this.scene;
+    const scale = Phaser.Math.FloatBetween(0.45, 0.85);
+    // разброс почти во всю ширину: отступ ровно под габарит ламы
+    const margin = Math.ceil(40 * scale);
+    const llama = scene.add.image(
+      Phaser.Math.Between(margin, CONF.width - margin),
+      -60,
+      'p-llama',
+    ).setScrollFactor(0).setDepth(-5).setScale(scale)
+     .setAlpha(0.85).setFlipX(Math.random() < 0.5);
+
+    const dur = Phaser.Math.Between(2800, 5200);
+    scene.tweens.add({
+      targets: llama,
+      y: CONF.height + 80,
+      x: llama.x + Phaser.Math.Between(-70, 70),
+      angle: (Math.random() < 0.5 ? -1 : 1) * Phaser.Math.Between(280, 620),
+      duration: dur,
+      ease: 'Sine.easeIn',
+      onComplete: () => llama.destroy(),
+    });
   }
 
   /** Пересадить дальнее облако: сбоку при старте или сверху при подъёме. */
@@ -91,8 +262,25 @@ export class Background {
     c.x = Phaser.Math.Between(30, CONF.width - 30);
   }
 
-  update(curM, maxM) {
+  update(curM, maxM, player) {
     const cam = this.scene.cameras.main;
+
+    // светлячки: спавн по высоте, разлёт от игрока, чистка внизу
+    if (maxM >= this.nextFireM && maxM < 8000) {
+      this.spawnFireflies();
+      this.nextFireM = maxM + Phaser.Math.Between(280, 650);
+    }
+    for (let i = this.fireflies.length - 1; i >= 0; i--) {
+      const c = this.fireflies[i];
+      if (!c.scattered && player &&
+          Math.abs(player.x - c.x) < 72 && Math.abs(player.y - c.y) < 72) {
+        this.scatterFireflies(c, player.x, player.y);
+      }
+      if (c.y > cam.scrollY + CONF.height + 300 || (c.scattered && c.flies.length === 0)) {
+        for (const fly of c.flies) { this.scene.tweens.killTweensOf(fly); fly.destroy(); }
+        this.fireflies.splice(i, 1);
+      }
+    }
 
     // окно градиента: снизу (офис) к верху (космос)
     const t = Phaser.Math.Clamp(curM / SKY_MAX_M, 0, 1);

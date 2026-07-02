@@ -25,18 +25,22 @@ export class Background {
       .setOrigin(0, 0).setScrollFactor(0).setDepth(-10);
     this.sky.setDisplaySize(CONF.width, SKY_TEX_H);
 
-    // ── солнце: дышит внизу и медленно отстаёт при подъёме ──
-    // маленький scrollFactor = сильный параллакс: тонет в ~7 раз медленнее мира
-    const sunSf = 0.14;
-    const sunScreenY = CONF.height - 165; // где солнце висит на старте
-    this.sun = scene.add.image(
-      CONF.width / 2,
-      sunScreenY + scene.cameras.main.scrollY * sunSf,
-      'bigsun',
-    ).setScrollFactor(1, sunSf).setDepth(-9).setBlendMode(Phaser.BlendModes.ADD);
+    // ── стесняшка-закатик: во всю ширину поля, из-за кромки виден только срез ──
+    // мягкое гало отдельным слоем за диском, светится аддитивно
+    const halo = scene.add.image(0, 0, 'sunhalo')
+      .setBlendMode(Phaser.BlendModes.ADD);
+    const disc = scene.add.image(0, 0, 'shysun');
+    this.sun = scene.add.container(CONF.width / 2, -108, [halo, disc])
+      .setScrollFactor(0).setDepth(-9);
+    // застенчиво приподнимается и прячется обратно
     scene.tweens.add({
-      targets: this.sun, scale: 1.08, yoyo: true, repeat: -1,
-      duration: 2600, ease: 'Sine.easeInOut',
+      targets: this.sun, y: -92, yoyo: true, repeat: -1,
+      duration: 3800, ease: 'Sine.easeInOut',
+    });
+    // гало мягко дышит
+    scene.tweens.add({
+      targets: halo, alpha: 0.72, yoyo: true, repeat: -1,
+      duration: 5200, ease: 'Sine.easeInOut',
     });
 
     // ── дальние полупрозрачные облака (параллакс-слой) ──
@@ -93,6 +97,9 @@ export class Background {
     // окно градиента: снизу (офис) к верху (космос)
     const t = Phaser.Math.Clamp(curM / SKY_MAX_M, 0, 1);
     this.sky.y = (CONF.height - SKY_TEX_H) * (1 - t);
+
+    // закатик остаётся до стратосферы, дальше тает — в космосе закатов нет
+    this.sun.setAlpha(1 - Phaser.Math.Clamp((curM - 7600) / 1200, 0, 1));
 
     // дальние облака: ушли вниз — вернулись сверху; в космосе тают
     const decorFade = 1 - Phaser.Math.Clamp((curM - 7500) / 1200, 0, 1);
@@ -173,18 +180,36 @@ export class Background {
     const mountain = scene.add.image(0, 0, 'mountain');
     if (!onLeft) mountain.setFlipX(true);
 
-    // лама с валуном на склоне: прогресс растёт с каждым появлением
+    // лама с валуном: прогресс по склону растёт с каждым появлением
     this.sisProgress = Math.min(1, this.sisProgress + 0.11);
-    // склон текстуры: от подножия (-64, 62) к вершине (8, -66) в локальных координатах
-    const lx = Phaser.Math.Linear(-64, 8, this.sisProgress) * (onLeft ? 1 : -1);
-    const ly = Phaser.Math.Linear(62, -58, this.sisProgress);
-    const llama = scene.add.image(lx, ly, 'p-llama').setScale(0.28).setTint(0x140a28);
-    const boulder = scene.add.image(lx + (onLeft ? 13 : -13), ly - 2, 'boulder').setTint(0x140a28);
+    const side = onLeft ? 1 : -1;
+
+    // ребро горы из текстуры (см. boot.js): (0,150)→(128,26), центр текстуры (95,75)
+    const A = { x: 0 - 95, y: 150 - 75 };   // подножие
+    const B = { x: 128 - 95, y: 26 - 75 };  // вершина
+    const t = 0.18 + this.sisProgress * 0.68; // не с самого края и не на пике
+    const rx = Phaser.Math.Linear(A.x, B.x, t);
+    const ry = Phaser.Math.Linear(A.y, B.y, t);
+    // единичный вектор вдоль склона и перпендикуляр «от горы»
+    const len = Math.hypot(B.x - A.x, B.y - A.y);
+    const ux = (B.x - A.x) / len, uy = (B.y - A.y) / len;
+    const nxp = uy, nyp = -ux; // перпендикуляр вверх-влево от ребра
+
+    // лама стоит на ребре, наклонена по склону, светлее горы
+    const llama = scene.add.image((rx + nxp * 7) * side, ry + nyp * 7, 'p-llama')
+      .setScale(0.32).setTint(0x8a6aa8).setFlipX(!onLeft)
+      .setAngle(-24 * side);
+    // валун — выше по склону, перед ламой
+    const boulder = scene.add.image(
+      (rx + ux * 13 + nxp * 5) * side,
+      ry + uy * 13 + nyp * 5,
+      'boulder',
+    ).setTint(0x9a8ab8).setScale(0.95);
 
     const group = scene.add.container(cx, cam.scrollY - 60, [mountain, llama, boulder])
       .setDepth(1).setAlpha(0);
 
-    scene.tweens.add({ targets: group, alpha: 0.42, duration: 1400 });
+    scene.tweens.add({ targets: group, alpha: 0.52, duration: 1400 });
     scene.tweens.add({
       targets: group,
       y: group.y + S.driftPx,

@@ -202,15 +202,16 @@ export class BootScene extends Phaser.Scene {
       g.fillEllipse(24, 24, 6, 4); g.fillEllipse(40, 29, 5, 3);
     });
 
-    // Сизифова гора (силуэт)
+    // Сизифова гора: длинное прямое ребро слева — по нему идёт лама.
+    // ВАЖНО: ребро (0,150)→(128,26) захардкожено в background.js (sisRidge)
     this.tex('mountain', 190, 150, (g) => {
       g.fillStyle(0x140a28);
       g.beginPath();
-      g.moveTo(0, 150); g.lineTo(38, 78); g.lineTo(58, 96);
-      g.lineTo(103, 8); g.lineTo(132, 60); g.lineTo(150, 42);
+      g.moveTo(0, 150); g.lineTo(128, 26);           // ребро для ламы
+      g.lineTo(146, 46); g.lineTo(164, 36);          // малый пик справа
       g.lineTo(190, 150); g.closePath(); g.fillPath();
       g.fillStyle(0x2a1a48); // снежная шапка чуть светлее
-      g.fillTriangle(103, 8, 92, 30, 114, 30);
+      g.fillTriangle(128, 26, 117, 47, 140, 47);
     });
 
     this.tex('boulder', 14, 14, (g) => {
@@ -221,17 +222,42 @@ export class BootScene extends Phaser.Scene {
       g.fillStyle(0xffffff); g.fillCircle(2, 2, 2);
     });
 
-    // Большое солнце для фона: плавное свечение, без видимых колец
-    this.tex('bigsun', 340, 340, (g) => {
-      const c = 170;
-      const steps = 36;
-      for (let i = 0; i < steps; i++) {
-        const t = i / (steps - 1);
-        g.fillStyle(0xffd93b, 0.008 + t * t * 0.05);
-        g.fillCircle(c, c, 168 - t * 122); // 168 → 46, шаг ~3.4px
+    // Гало закатика: широкое, очень мягкое, само по себе почти незаметное
+    this.tex('sunhalo', 760, 760, (g) => {
+      const c = 380;
+      for (let i = 0; i < 28; i++) {
+        const t = i / 27;
+        g.fillStyle(0xff3a4e, 0.012 + t * t * 0.05);
+        g.fillCircle(c, c, 372 - t * 158); // 372 → 214, тает к краю
       }
-      g.fillStyle(0xfff2b0, 0.9); g.fillCircle(c, c, 42);
-      g.fillStyle(0xfffbe0, 1);   g.fillCircle(c, c, 32);
+    });
+
+    // Стесняшка-закатик: огромное красное солнце во всю ширину поля,
+    // из-за верхней кромки виден только нижний срез
+    this.tex('shysun', 520, 520, (g) => {
+      const c = 260;
+      // мягкий край свечения
+      for (let i = 0; i < 22; i++) {
+        const t = i / 21;
+        g.fillStyle(0xd42045, 0.012 + t * t * 0.06);
+        g.fillCircle(c, c, 254 - t * 40); // 254 → 214
+      }
+      // тело: глубокий красный, плавно теплеющий к центру (без колец)
+      g.fillStyle(0xe8304a); g.fillCircle(c, c, 212);
+      for (let i = 0; i < 26; i++) {
+        g.fillStyle(0xff5a3e, 0.07);
+        g.fillCircle(c, c, 204 - i * 2.6); // 204 → 139
+      }
+      for (let i = 0; i < 22; i++) {
+        g.fillStyle(0xff8a5a, 0.06);
+        g.fillCircle(c, c, 130 - i * 2.6); // 130 → 75
+      }
+      // застенчивая мордочка на нижнем (видимом) срезе
+      g.lineStyle(4, 0x7a1030);
+      g.beginPath(); g.arc(216, 400, 10, 0.15 * Math.PI, 0.85 * Math.PI); g.strokePath();
+      g.beginPath(); g.arc(304, 400, 10, 0.15 * Math.PI, 0.85 * Math.PI); g.strokePath();
+      g.fillStyle(0xff8aa8, 0.85);
+      g.fillEllipse(172, 428, 22, 12); g.fillEllipse(348, 428, 22, 12);
     });
 
     // Пальма — как на странице трека: серповидные листья, ствол со штрихами

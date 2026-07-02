@@ -8,17 +8,25 @@ export class UIScene extends Phaser.Scene {
     const res = Math.min(window.devicePixelRatio || 1, 2);
     const cx = CONF.width / 2;
 
-    // текущая высота — крупно
-    this.heightText = this.add.text(cx, 46, '0 м', {
-      fontFamily: 'Unbounded, sans-serif', fontSize: '40px', fontStyle: '900',
-      color: CONF.colors.white, stroke: '#2a0d3e', strokeThickness: 7,
-    }).setOrigin(0.5, 0).setResolution(res);
+    // текущая высота: чистое число в стиле трека — золото-закатный градиент,
+    // тёмный кант и тёплая тень, лёгкий наклон
+    this.heightText = this.add.text(16, 8, '0', {
+      fontFamily: 'Unbounded, sans-serif', fontSize: '38px', fontStyle: '900',
+      stroke: '#3a0d18', strokeThickness: 7,
+    }).setOrigin(0, 0).setResolution(res).setAngle(-2);
+    const grad = this.heightText.context.createLinearGradient(0, 0, 0, 50);
+    grad.addColorStop(0, '#fff6ec');
+    grad.addColorStop(0.45, '#ffcf3f');
+    grad.addColorStop(1, '#ff7d1e');
+    this.heightText.setFill(grad);
+    this.heightText.setShadow(0, 3, 'rgba(120,10,60,0.55)', 6, false, true);
+    this.lastHundred = 0;
 
-    // рекорд — мелко под ней
-    this.bestText = this.add.text(cx, 96, '', {
+    // рекорд — кубок и число
+    this.bestText = this.add.text(18, 56, '', {
       fontFamily: 'Nunito, sans-serif', fontSize: '15px', fontStyle: '700',
       color: CONF.colors.gold, stroke: '#2a0d3e', strokeThickness: 4,
-    }).setOrigin(0.5, 0).setResolution(res);
+    }).setOrigin(0, 0).setResolution(res);
 
     // стартовая подсказка
     this.hint = this.add.container(cx, CONF.height * 0.56, [
@@ -59,8 +67,20 @@ export class UIScene extends Phaser.Scene {
   }
 
   onHeight({ cur, best }) {
-    this.heightText.setText(cur + ' м');
-    this.bestText.setText(best > 0 ? 'рекорд · ' + best + ' м' : '');
+    this.heightText.setText(String(cur));
+    this.bestText.setText(best > 0 ? '🏆' + best + ' м' : '');
+    // каждый взятый стометровый рубеж — лёгкий пульс цифры
+    const hundred = Math.floor(cur / 100);
+    if (hundred < this.lastHundred) this.lastHundred = hundred; // упали — рубежи снова впереди
+    if (hundred > this.lastHundred) {
+      this.lastHundred = hundred;
+      this.tweens.killTweensOf(this.heightText);
+      this.heightText.setScale(1);
+      this.tweens.add({
+        targets: this.heightText, scale: 1.14,
+        duration: 130, yoyo: true, ease: 'Quad.easeOut',
+      });
+    }
   }
 
   hideHint() {

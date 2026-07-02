@@ -440,6 +440,21 @@ export class BootScene extends Phaser.Scene {
       g.fillStyle(0xffffff); g.fillCircle(1.5, 1.5, 1.2);
     });
 
+    // Мыльный пузырь: тонкая плёнка с радужными бликами
+    this.tex('bubble', 100, 100, (g) => {
+      const c = 50, r = 46;
+      g.fillStyle(0xcfe8ff, 0.09); g.fillCircle(c, c, r);        // плёнка
+      g.lineStyle(2.5, 0xffffff, 0.75); g.strokeCircle(c, c, r); // контур
+      // радужные переливы по ободу
+      g.lineStyle(3, 0xffb8dd, 0.5);
+      g.beginPath(); g.arc(c, c, r - 4, Math.PI * 0.55, Math.PI * 0.95); g.strokePath();
+      g.lineStyle(3, 0xa8e8ff, 0.5);
+      g.beginPath(); g.arc(c, c, r - 4, Math.PI * 1.15, Math.PI * 1.5); g.strokePath();
+      // блики
+      g.fillStyle(0xffffff, 0.85); g.fillEllipse(32, 26, 16, 9);
+      g.fillStyle(0xffffff, 0.45); g.fillEllipse(66, 70, 8, 5);
+    });
+
     // Мягкий светящийся шар (для огня ранца и вспышек)
     this.tex('glowball', 64, 64, (g) => {
       for (let i = 0; i < 14; i++) {

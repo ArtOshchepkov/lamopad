@@ -50,10 +50,19 @@ export class GameScene extends Phaser.Scene {
     this.jetSprite = null;
     this.flameAcc = 0;
 
+    // мыльные пузыри
+    this.bubbles = [];
+    this.nextBubbleM = CONF.bubble.fromM;
+    this.bubbleTime = 0;
+    this.bubbleSprite = null;
+
     // управление
     this.cursors = this.input.keyboard.createCursorKeys();
     this.keys = this.input.keyboard.addKeys('A,D');
-    this.input.on('pointerdown', () => this.startRun());
+    this.input.on('pointerdown', () => {
+      this.startRun();
+      if (this.bubbleTime > 0) this.popBubble(); // свежий тап лопает пузырь
+    });
     // чит-коды: набери fire — светлячки, plane — самолёт
     this.cheatBuf = '';
     this.input.keyboard.on('keydown', (e) => {
@@ -69,6 +78,10 @@ export class GameScene extends Phaser.Scene {
           this.cheatBuf = '';
         }
         else if (this.cheatBuf.endsWith('jet')) { this.spawnJetOnCloud(); this.cheatBuf = ''; }
+        else if (this.cheatBuf.endsWith('bubble')) {
+          this.spawnBubble(this.cameras.main.scrollY + 200);
+          this.cheatBuf = '';
+        }
         else if (this.cheatBuf.endsWith('light')) {
           this.field.place('storm',
             Phaser.Math.Between(80, CONF.width - 80), this.cameras.main.scrollY + 200);
@@ -153,9 +166,12 @@ export class GameScene extends Phaser.Scene {
 
     // реактивный ранец: взлёт мимо всех препятствий
     if (this.jetTime > 0) this.updateJet(dt);
+    // пузырь: плавный подъём
+    if (this.bubbleTime > 0) this.updateBubble(dt);
 
-    // приземление (в полёте на ранце коллизий нет)
-    const plat = this.jetTime > 0 ? null : this.field.landing(this.player);
+    // приземление (в ранце и пузыре коллизий нет)
+    const plat = (this.jetTime > 0 || this.bubbleTime > 0)
+      ? null : this.field.landing(this.player);
     if (plat) this.onLand(plat);
 
     // камера тянется только вверх
@@ -168,6 +184,7 @@ export class GameScene extends Phaser.Scene {
     this.spawnLyrics(cam);
     this.spawnFlags(cam);
     this.updateJetPickups(cam);
+    this.updateBubblePickups(cam);
 
     // высота
     if (curM > this.maxM) {
@@ -404,6 +421,87 @@ export class GameScene extends Phaser.Scene {
     }
   }
 
+  // ─── Мыльный пузырь ──────────────────────────────────────────────────────
+
+  /** Спавн парящих пузырей по высоте + вход игрока + чистка. */
+  updateBubblePickups(cam) {
+    if (this.maxM >= this.nextBubbleM) {
+      this.nextBubbleM = this.maxM +
+        Phaser.Math.Between(CONF.bubble.intervalM[0], CONF.bubble.intervalM[1]);
+      this.spawnBubble(cam.scrollY - Phaser.Math.Between(200, 500));
+    }
+    for (let i = this.bubbles.length - 1; i >= 0; i--) {
+      const s = this.bubbles[i];
+      const inReach = Math.abs(this.player.x - s.x) < 48 &&
+                      Math.abs(this.player.y - s.y) < 48;
+      if (inReach && this.jetTime <= 0 && this.bubbleTime <= 0) {
+        this.tweens.killTweensOf(s);
+        s.destroy();
+        this.bubbles.splice(i, 1);
+        this.enterBubble();
+      } else if (s.y > cam.scrollY + CONF.height + 300) {
+        this.tweens.killTweensOf(s);
+        s.destroy();
+        this.bubbles.splice(i, 1);
+      }
+    }
+  }
+
+  spawnBubble(y) {
+    const s = this.add.image(
+      Phaser.Math.Between(70, CONF.width - 70), y, 'bubble',
+    ).setDepth(4).setAlpha(0.9);
+    this.tweens.add({ // парит и переливается
+      targets: s, y: y - 14, x: s.x + Phaser.Math.Between(-18, 18),
+      yoyo: true, repeat: -1, duration: Phaser.Math.Between(1600, 2400),
+      ease: 'Sine.easeInOut',
+    });
+    this.bubbles.push(s);
+  }
+
+  /** Игрок в пузыре: плавно вверх, коллизий нет. */
+  enterBubble() {
+    this.bubbleTime = CONF.bubble.duration;
+    this.bubbleSprite = this.add.image(this.player.x, this.player.y, 'bubble')
+      .setDepth(11).setScale(0.2).setAlpha(0.95);
+    this.tweens.add({ targets: this.bubbleSprite, scale: 1, duration: 220, ease: 'Back.easeOut' });
+  }
+
+  updateBubble(dt) {
+    this.bubbleTime -= dt;
+    this.player.vy = -CONF.bubble.speed;
+    // плёнка дышит
+    const w = Math.sin(this.bubbleTime * 9) * 0.045;
+    this.bubbleSprite.setPosition(this.player.x, this.player.y)
+      .setScale(1 + w, 1 - w);
+    if (this.bubbleTime <= 0) this.popBubble();
+  }
+
+  /** ПЫК! Разлёт капель, лёгкий остаточный подъём. */
+  popBubble() {
+    if (!this.bubbleSprite) return;
+    this.bubbleTime = 0;
+    this.field.shout({ x: this.player.x, y: this.player.y - 40 }, 'ПЫК!');
+    for (let i = 0; i < 12; i++) {
+      const a = (i / 12) * Math.PI * 2;
+      const d = this.add.image(this.player.x, this.player.y, 'dot').setDepth(11)
+        .setTint(Phaser.Utils.Array.GetRandom([0xffffff, 0xcfe8ff, 0xffb8dd, 0xa8e8ff]))
+        .setScale(Phaser.Math.FloatBetween(1, 1.8));
+      this.tweens.add({
+        targets: d,
+        x: d.x + Math.cos(a) * Phaser.Math.Between(40, 70),
+        y: d.y + Math.sin(a) * Phaser.Math.Between(40, 70),
+        alpha: 0,
+        duration: Phaser.Math.Between(300, 520),
+        ease: 'Cubic.easeOut',
+        onComplete: () => d.destroy(),
+      });
+    }
+    this.bubbleSprite.destroy();
+    this.bubbleSprite = null;
+    this.player.vy = -380; // мягкий толчок, чтобы не рухнуть камнем
+  }
+
   // ─── Реактивный ранец ────────────────────────────────────────────────────
 
   /** Спавн подбираемых ранцев по высоте + проверка подбора + чистка. */
@@ -457,6 +555,7 @@ export class GameScene extends Phaser.Scene {
   /** Взлёт: ранец на спине, тёплый огонь из сопел. */
   startJet() {
     if (this.state !== 'run') return;
+    if (this.bubbleTime > 0) this.popBubble(); // ракета рвёт пузырь
     this.jetTime = CONF.jet.duration;
     if (!this.jetSprite) {
       this.jetSprite = this.add.image(this.player.x, this.player.y + 14, 'jetpack')

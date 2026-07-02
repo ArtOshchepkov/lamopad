@@ -244,11 +244,36 @@ export class BootScene extends Phaser.Scene {
       g.fillTriangle(4, 23, 6, 20, 8, 23);
       g.fillTriangle(9, 23, 11, 20, 13, 23);
       g.fillTriangle(14, 23, 16, 20, 18, 23);
-      // глаз
+      // глазное яблоко (зрачок — отдельный спрайт, следит за игроком)
       g.fillStyle(0xffffff); g.fillCircle(21, 13, 3);
-      g.fillStyle(0x1a1a1a); g.fillCircle(22, 13, 1.4);
       // лапки
       g.fillStyle(0x3e7d2a); g.fillRect(28, 26, 6, 5); g.fillRect(46, 26, 6, 5);
+    });
+
+    // Змея (голова слева), свернулась кольцами на облаке
+    this.tex('snake', 60, 34, (g) => {
+      g.translateCanvas(4, 0); // запас слева под высунутый язык
+      // кольца: широкое основание, уже кверху
+      g.fillStyle(0x8e3aa0); g.fillEllipse(32, 26, 40, 13);
+      g.fillStyle(0xa04ab0); g.fillEllipse(32, 19, 31, 10);
+      g.fillStyle(0xb45ec4); g.fillEllipse(32, 13, 22, 8);
+      // тёмные полоски на кольцах
+      g.lineStyle(2, 0x5e2470);
+      g.beginPath(); g.moveTo(16, 25); g.lineTo(48, 25); g.strokePath();
+      g.beginPath(); g.moveTo(19, 18); g.lineTo(45, 18); g.strokePath();
+      // шея тянется вверх-влево
+      g.fillStyle(0xa04ab0);
+      g.fillCircle(16, 14, 4); g.fillCircle(13, 10, 4);
+      // голова
+      g.fillEllipse(11, 7, 14, 8);
+      // глаз
+      g.fillStyle(0xffffff); g.fillCircle(9, 6, 2.6);
+      g.fillStyle(0x1a1a1a); g.fillCircle(8.5, 6, 1.2);
+      // раздвоенный язык
+      g.lineStyle(1.5, 0xff3b57);
+      g.beginPath(); g.moveTo(4, 8); g.lineTo(-1, 8); g.strokePath();
+      g.beginPath(); g.moveTo(-1, 8); g.lineTo(-3, 6); g.strokePath();
+      g.beginPath(); g.moveTo(-1, 8); g.lineTo(-3, 10); g.strokePath();
     });
 
     // Светлячок: почти пиксель

@@ -124,7 +124,7 @@ export class GameScene extends Phaser.Scene {
 
     // генерация и чистка мира
     this.field.ensure(cam.scrollY - CONF.spawn.ahead);
-    this.field.update(dt, cam.scrollY + CONF.height);
+    this.field.update(dt, cam.scrollY + CONF.height, this.player);
     this.spawnLyrics(cam);
     this.spawnFlags(cam);
 
@@ -176,6 +176,7 @@ export class GameScene extends Phaser.Scene {
         this.field.crumble(plat); // отскока нет — проваливаемся
         break;
       case 'croc':
+      case 'snake':
         this.eaten(plat);
         break;
       default: // облака
@@ -221,11 +222,13 @@ export class GameScene extends Phaser.Scene {
     }
   }
 
-  /** Съеден крокодилом: выпад, очки утягиваются в пасть, затем экран смерти. */
+  /** Съеден хищником: выпад, очки утягиваются в пасть, затем экран смерти. */
   eaten(plat) {
     if (this.state !== 'run') return;
     this.state = 'eaten'; // физика и управление замирают
-    this.field.crocLunge(plat, this.player.x);
+    const cry = plat.type === 'snake' ? 'Ш-ШШ!' : 'АМ!';
+    const tint = plat.type === 'snake' ? 0xa04ab0 : 0x55a03c;
+    this.field.lunge(plat, this.player.x, cry, tint);
     const mouth = plat.deco || plat.sprite;
     this.tweens.add({
       targets: this.player.sprite,

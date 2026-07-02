@@ -52,9 +52,10 @@ export class PlatformField {
       if (type === 'suitcase') {
         this.place('cloud', this.apartX(x), this.lastY - R(4, 18));
       }
-      // крокодилье облако — добавка к ярусу: честный путь не занимает
-      if (type !== 'suitcase' && m > CONF.croc.fromM && Math.random() < CONF.croc.chance) {
-        this.place('croc', this.apartX(x), this.lastY - R(4, 16));
+      // хищное облако — добавка к ярусу: честный путь не занимает
+      if (type !== 'suitcase' && m > CONF.enemy.fromM && Math.random() < CONF.enemy.chance) {
+        const enemy = Phaser.Utils.Array.GetRandom(CONF.enemy.types);
+        this.place(enemy, this.apartX(x), this.lastY - R(4, 16));
       }
     }
   }
@@ -98,7 +99,7 @@ export class PlatformField {
     if (type === 'cloudMove') p.vx = RF(def.speed[0], def.speed[1]) * (Math.random() < 0.5 ? -1 : 1);
     if (type === 'bird') p.vx = RF(def.speed[0], def.speed[1]) * (Math.random() < 0.5 ? -1 : 1);
 
-    // декор поверх платформы (крокодил на облаке); редкий — не пулим
+    // декор поверх платформы (хищник на облаке); редкий — не пулим
     if (def.deco) {
       p.deco = this.scene.add.image(x, y - p.h / 2 - 12, def.deco)
         .setDepth(6).setFlipX(Math.random() < 0.5);
@@ -106,13 +107,18 @@ export class PlatformField {
         targets: p.deco, angle: 2.5, yoyo: true, repeat: -1,
         duration: R(900, 1400), ease: 'Sine.easeInOut',
       });
+      // зрачок крокодила — отдельный спрайт, следит за игроком
+      if (def.deco === 'croc') {
+        p.pupil = this.scene.add.image(x, y, 'dot')
+          .setDepth(6.1).setTint(0x1a1a1a).setScale(0.75);
+      }
     }
     this.active.push(p);
     return p;
   }
 
   /** Поведение платформ + чистка улетевших вниз. */
-  update(dt, camBottomY) {
+  update(dt, camBottomY, player) {
     const limit = camBottomY + CONF.spawn.despawnBelow;
     for (let i = this.active.length - 1; i >= 0; i--) {
       const p = this.active[i];
@@ -120,9 +126,19 @@ export class PlatformField {
         if (p.vx !== 0) this.drift(p, dt);
         if (p.type === 'bird') this.flap(p, dt);
         if (p.type === 'sunset') this.shyCycle(p, dt);
+        if (p.pupil && player) this.trackEye(p, player);
       }
       if (p.baseY > limit) this.release(i);
     }
+  }
+
+  // Зрачок крокодила следит за игроком (глаз в текстуре: (21,13) при центре (36,16))
+  trackEye(p, player) {
+    const ex = p.deco.x + (p.deco.flipX ? 15 : -15);
+    const ey = p.deco.y - 3;
+    const dx = player.x - ex, dy = player.y - ey;
+    const len = Math.hypot(dx, dy) || 1;
+    p.pupil.setPosition(ex + (dx / len) * 1.6, ey + (dy / len) * 1.6);
   }
 
   // горизонтальный дрейф с отскоком от краёв
@@ -182,6 +198,10 @@ export class PlatformField {
       this.scene.tweens.killTweensOf(p.deco);
       p.deco.destroy();
       p.deco = null;
+    }
+    if (p.pupil) {
+      p.pupil.destroy();
+      p.pupil = null;
     }
     p.sprite.setActive(false).setVisible(false);
     this.pool.push(p.sprite);
@@ -271,8 +291,8 @@ export class PlatformField {
     });
   }
 
-  /** Крокодил делает выпад к добыче. */
-  crocLunge(p, px) {
+  /** Хищник делает выпад к добыче. */
+  lunge(p, px, cry, tint) {
     if (!p.deco) return;
     this.scene.tweens.killTweensOf(p.deco);
     p.deco.setFlipX(px > p.deco.x); // мордой к жертве (морда слева в текстуре)
@@ -282,8 +302,8 @@ export class PlatformField {
       scaleX: 1.18, scaleY: 1.22,
       duration: 130, yoyo: true, ease: 'Quad.easeOut',
     });
-    this.shout(p, 'АМ!');
-    this.puff(p, 0x55a03c, 6);
+    this.shout(p, cry);
+    this.puff(p, tint, 6);
   }
 
   /** Чемодан проламывается: отскока нет. */

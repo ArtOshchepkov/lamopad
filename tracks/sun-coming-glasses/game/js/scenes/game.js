@@ -16,6 +16,9 @@ export class GameScene extends Phaser.Scene {
     this.startBest = this.loadBest();
     this.recordBeaten = false;
 
+    // камера — до фона: параллакс-слои позиционируются от стартового скролла
+    this.cameras.main.setScroll(0, -(CONF.height - 150));
+
     this.bg = new Background(this, LOW_GFX);
     this.field = new PlatformField(this);
     this.player = new Player(this, CONF.player.startX, CONF.player.startY);
@@ -35,9 +38,6 @@ export class GameScene extends Phaser.Scene {
     this.keys = this.input.keyboard.addKeys('A,D');
     this.input.on('pointerdown', () => this.startRun());
     this.input.keyboard.on('keydown', () => this.startRun());
-
-    // камера: старт так, чтобы нижняя платформа была у низа экрана
-    this.cameras.main.setScroll(0, -(CONF.height - 150));
 
     this.game.events.emit('scg-height', { cur: 0, best: this.startBest });
   }

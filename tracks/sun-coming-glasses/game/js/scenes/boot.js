@@ -31,25 +31,40 @@ export class BootScene extends Phaser.Scene {
   }
 
   makeTextures() {
-    // Очки-герой: красная оправа, звезда, дужки-ножки зигзагом
+    // Очки-герой: красная оправа с тёмным кантом (контраст на любом небе)
     this.tex('glasses', CONF.player.texW, CONF.player.texH, (g) => {
-      // ножки
-      g.lineStyle(5, 0xff2f23);
-      g.beginPath(); g.moveTo(20, 30); g.lineTo(13, 43); g.lineTo(22, 56); g.strokePath();
-      g.beginPath(); g.moveTo(46, 28); g.lineTo(53, 41); g.lineTo(43, 56); g.strokePath();
-      // конверсы
+      g.translateCanvas(3, 6); // запас под толстый кант: ничего не режется краями
+      const DARK = 0x2a0616;
+      // ножки: тёмный кант, потом красная линия
+      const leg = (pts) => {
+        for (const [w, col] of [[9, DARK], [5, 0xff2f23]]) {
+          g.lineStyle(w, col);
+          g.beginPath(); g.moveTo(pts[0], pts[1]); g.lineTo(pts[2], pts[3]); g.lineTo(pts[4], pts[5]); g.strokePath();
+        }
+      };
+      leg([20, 30, 13, 43, 22, 56]);
+      leg([46, 28, 53, 41, 43, 56]);
+      // конверсы с кантом
+      g.fillStyle(DARK); g.fillEllipse(21, 57, 17, 9); g.fillEllipse(44, 57, 17, 9);
       g.fillStyle(0xd41f1f); g.fillEllipse(21, 57, 13, 6); g.fillEllipse(44, 57, 13, 6);
       g.fillStyle(0xffffff); g.fillEllipse(19, 58.5, 8, 3); g.fillEllipse(42, 58.5, 8, 3);
       // переносица
+      g.lineStyle(10, DARK);
+      g.beginPath(); g.moveTo(26, 15); g.lineTo(38, 11); g.strokePath();
       g.lineStyle(6, 0xff2f23);
       g.beginPath(); g.moveTo(26, 15); g.lineTo(38, 11); g.strokePath();
-      // линзы
+      // линзы: тёмное кольцо-кант, красная оправа, тёмное стекло
+      g.lineStyle(11, DARK); g.strokeCircle(18, 19, 12); g.strokeCircle(46, 15, 14);
       g.fillStyle(0x4a0f1d); g.lineStyle(6, 0xff2f23);
       g.fillCircle(18, 19, 12); g.strokeCircle(18, 19, 12);
       g.fillCircle(46, 15, 14); g.strokeCircle(46, 15, 14);
       // блики
       g.fillStyle(0xffffff, 0.95); g.fillEllipse(14, 15, 8, 5); g.fillEllipse(41, 10, 10, 6);
-      // звезда на левой линзе
+      // звезда на левой линзе с тёмным кантом
+      g.lineStyle(4, DARK);
+      g.beginPath();
+      g.moveTo(6, 8); g.lineTo(9, 14); g.lineTo(15, 16); g.lineTo(10, 19); g.lineTo(8, 25);
+      g.lineTo(4, 19); g.lineTo(-1, 16); g.lineTo(4, 14); g.closePath(); g.strokePath();
       g.fillStyle(0xffd000);
       g.beginPath();
       g.moveTo(6, 8); g.lineTo(9, 14); g.lineTo(15, 16); g.lineTo(10, 19); g.lineTo(8, 25);
@@ -60,7 +75,8 @@ export class BootScene extends Phaser.Scene {
     // разной глубины, чтобы силуэт был кучевым, а не ровным.
 
     // Облако А: классическое пухлое
-    this.tex('p-cloud-a', 96, 30, (g) => {
+    this.tex('p-cloud-a', 96, 36, (g) => {
+      g.translateCanvas(0, 6); // запас сверху: макушки кругов не режутся
       g.fillStyle(0x2a0d3e, 0.35); g.fillEllipse(50, 27, 64, 6);   // мягкая тень
       g.fillStyle(0xcdb4e8);                                       // затенённые нижние бугры
       g.fillCircle(18, 19, 9); g.fillCircle(36, 19, 10);
@@ -73,7 +89,8 @@ export class BootScene extends Phaser.Scene {
     });
 
     // Облако Б: широкое, слоистое
-    this.tex('p-cloud-b', 116, 26, (g) => {
+    this.tex('p-cloud-b', 116, 32, (g) => {
+      g.translateCanvas(0, 6);
       g.fillStyle(0x2a0d3e, 0.35); g.fillEllipse(58, 23, 82, 5);
       g.fillStyle(0xcdb4e8);
       g.fillCircle(16, 15, 8); g.fillCircle(34, 16, 9); g.fillCircle(54, 16, 9);
@@ -86,7 +103,8 @@ export class BootScene extends Phaser.Scene {
     });
 
     // Облако В: маленькое кучевое, два горба
-    this.tex('p-cloud-c', 72, 30, (g) => {
+    this.tex('p-cloud-c', 72, 36, (g) => {
+      g.translateCanvas(0, 6);
       g.fillStyle(0x2a0d3e, 0.35); g.fillEllipse(36, 27, 44, 5);
       g.fillStyle(0xcdb4e8);
       g.fillCircle(18, 19, 9); g.fillCircle(36, 20, 9); g.fillCircle(52, 18, 8);
@@ -97,7 +115,8 @@ export class BootScene extends Phaser.Scene {
     });
 
     // Стесняшка-закатик: тёплое румяное облачко
-    this.tex('p-sunset', 86, 32, (g) => {
+    this.tex('p-sunset', 86, 38, (g) => {
+      g.translateCanvas(0, 6);
       g.fillStyle(0x8f2a5e, 0.45); g.fillEllipse(44, 29, 56, 6);  // тень
       g.fillStyle(0xf7a06a);                                       // закатные нижние бугры
       g.fillCircle(18, 20, 9); g.fillCircle(36, 21, 10);
@@ -200,6 +219,85 @@ export class BootScene extends Phaser.Scene {
 
     this.tex('dot', 4, 4, (g) => {
       g.fillStyle(0xffffff); g.fillCircle(2, 2, 2);
+    });
+
+    // Большое солнце для фона: плавное свечение, без видимых колец
+    this.tex('bigsun', 340, 340, (g) => {
+      const c = 170;
+      const steps = 36;
+      for (let i = 0; i < steps; i++) {
+        const t = i / (steps - 1);
+        g.fillStyle(0xffd93b, 0.008 + t * t * 0.05);
+        g.fillCircle(c, c, 168 - t * 122); // 168 → 46, шаг ~3.4px
+      }
+      g.fillStyle(0xfff2b0, 0.9); g.fillCircle(c, c, 42);
+      g.fillStyle(0xfffbe0, 1);   g.fillCircle(c, c, 32);
+    });
+
+    // Пальма — как на странице трека: серповидные листья, ствол со штрихами
+    this.tex('palm', 200, 260, (g) => {
+      // серповидный лист: дуга наружу + дуга обратно (полумесяц);
+      // выпуклость всегда вверх — листья ниспадают фонтаном, как у настоящей пальмы
+      const frond = (cx, cy, tx, ty, bulge, color) => {
+        const dx = ty - cy, dy = cx - tx;
+        const len = Math.hypot(dx, dy) || 1;
+        let nx = dx / len, ny = dy / len;
+        if (ny > 0) { nx = -nx; ny = -ny; }
+        const pts = [];
+        const N = 9;
+        for (let i = 0; i <= N; i++) { // внешняя дуга
+          const t = i / N;
+          const b = bulge * 4 * t * (1 - t);
+          pts.push({
+            x: cx + (tx - cx) * t + nx * b,
+            y: cy + (ty - cy) * t + ny * b,
+          });
+        }
+        for (let i = N; i >= 0; i--) { // обратная дуга — площе, даёт серп
+          const t = i / N;
+          const b = bulge * 0.25 * 4 * t * (1 - t);
+          pts.push({
+            x: cx + (tx - cx) * t + nx * b,
+            y: cy + (ty - cy) * t + ny * b,
+          });
+        }
+        g.fillStyle(color);
+        g.fillPoints(pts, true);
+      };
+
+      // ствол: тёмный кант, светлое тело, штрихи — вдоль изгиба к кроне
+      const trunkAt = (t) => ({
+        x: 16 + 88 * t * t * 0.9 + t * 24,
+        y: 254 - t * 184,
+        r: 10 - t * 4.5,
+      });
+      for (let i = 0; i <= 16; i++) {
+        const p = trunkAt(i / 16);
+        g.fillStyle(0x35202c); g.fillCircle(p.x, p.y, p.r + 2.5);
+      }
+      for (let i = 0; i <= 16; i++) {
+        const p = trunkAt(i / 16);
+        g.fillStyle(0x8d6b53); g.fillCircle(p.x, p.y, p.r);
+      }
+      g.lineStyle(3, 0x5d4436); // поперечные штрихи коры
+      for (const t of [0.22, 0.42, 0.6, 0.76]) {
+        const p = trunkAt(t);
+        g.beginPath();
+        g.moveTo(p.x - p.r * 0.9, p.y - 2);
+        g.lineTo(p.x + p.r * 0.9, p.y + 2);
+        g.strokePath();
+      }
+
+      // крона-фонтан: верхние листья тянутся вверх, боковые и нижние — ниспадают
+      const cx = 128, cy = 66;
+      frond(cx, cy, 150, 6, 16, 0x2e4d28);   // вверх
+      frond(cx, cy, 188, 26, 22, 0x2e4d28);  // вверх-вправо
+      frond(cx, cy, 74, 18, 22, 0x365a2e);   // вверх-влево
+      frond(cx, cy, 198, 78, 24, 0x365a2e);  // вправо, дуга сверху
+      frond(cx, cy, 56, 68, 24, 0x365a2e);   // влево, дуга сверху
+      frond(cx, cy, 176, 120, 20, 0x27411f); // ниспадает вправо-вниз
+      frond(cx, cy, 80, 124, 20, 0x27411f);  // ниспадает влево-вниз
+
     });
 
     // Лучистая вспышка за ачивкой (солнце вехи)

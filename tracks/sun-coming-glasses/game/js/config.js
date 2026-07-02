@@ -108,11 +108,15 @@ export const CONF = {
     best: 'lamopad_scg_best',
     muted: 'lamopad_scg_muted',
   },
+  sounds: {
+    seagull: 'seagul_ira.mp3',
+    croissant: 'crusassan_gleb.mp3'
+  }
 };
 
 // ─── Вехи высоты ──────────────────────────────────────────────────────────────
 export const MILESTONES = [
-  { m: 330,   title: 'Эйфелева башня',        sub: 'Париж пройден' },
+  { m: 330,   title: 'Эйфелева башня',        sub: 'Париж пройден', sound: 'france'},
   { m: 462,   title: 'Лахта-центр',           sub: 'Ачивка: ВЫШЕ КУКУРУЗИНЫ 🌽', ach: true },
   { m: 828,   title: 'Бурдж-Халифа',          sub: 'Выше Дубая' },
   { m: 1270,  title: 'Гора Зелёная, Шерегеш', sub: 'Геш! Сезон открыт' },

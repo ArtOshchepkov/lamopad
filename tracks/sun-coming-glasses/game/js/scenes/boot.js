@@ -4,6 +4,9 @@ import { CONF } from '../config.js';
 export class BootScene extends Phaser.Scene {
   constructor() { super('boot'); }
 
+  preload() {
+    this.loadSounds();
+  }
   create() {
     this.makeTextures();
     const fonts = [
@@ -577,5 +580,10 @@ export class BootScene extends Phaser.Scene {
       g.lineStyle(2, 0x3a0d18);
       g.strokeTriangle(6, 2, 6, 16, 24, 9);
     });
+  }
+
+  loadSounds() {
+    this.load.audio('seagull', 'sounds/' + CONF.sounds.seagull);
+    this.load.audio('france', 'sounds/' + CONF.sounds.croissant);
   }
 }

@@ -170,6 +170,7 @@ export class GameScene extends Phaser.Scene {
         break;
       case 'bird':
         this.player.bounce(P.bounceVy * 1.15, 0.24);
+        this.sound.play('seagull');
         this.field.react(plat);
         break;
       case 'suitcase':
@@ -217,7 +218,11 @@ export class GameScene extends Phaser.Scene {
   checkMilestones() {
     while (this.milestoneIdx < MILESTONES.length &&
            this.maxM >= MILESTONES[this.milestoneIdx].m) {
-      this.game.events.emit('scg-milestone', MILESTONES[this.milestoneIdx]);
+      const milestone = MILESTONES[this.milestoneIdx];
+      this.game.events.emit('scg-milestone', milestone);
+      if(milestone.sound) {
+        this.sound.play(milestone.sound);
+      }
       this.milestoneIdx++;
     }
   }

@@ -165,20 +165,18 @@ export class Background {
     const dir = Math.random() < 0.5 ? 1 : -1;
     const startX = dir > 0 ? -70 : CONF.width + 70;
     const endX = dir > 0 ? CONF.width + 70 : -70;
-    const startY = Phaser.Math.Between(80, CONF.height * 0.6);
+    const scrollX = 1;
+    const scrollY = 0.4;
+    const startY = 150  + scrollY * this.scene.cameras.main.scrollY;//+ scene.tweens.y Phaser.Math.Between(8, CONF.height * 0.6) ;
 
     // угол тангажа как на взлёте/посадке: ±12°, но не выводящий за экран
-    let pitch = Phaser.Math.FloatBetween(-12, 12);
+    let pitch = Phaser.Math.FloatBetween(0, 15);
     const dx = Math.abs(endX - startX);
     let endY = startY - Math.tan(Phaser.Math.DegToRad(pitch)) * dx;
-    if (endY < 50 || endY > CONF.height * 0.75) {
-      pitch = -pitch;
-      endY = startY - Math.tan(Phaser.Math.DegToRad(pitch)) * dx;
-    }
-    endY = Phaser.Math.Clamp(endY, 50, CONF.height * 0.75);
+
 
     const plane = scene.add.image(startX, startY, 'plane')
-      .setScrollFactor(0).setDepth(-6.5)
+      .setScrollFactor(scrollX, scrollY).setDepth(-6.5)
       .setScale(Phaser.Math.FloatBetween(0.65, 0.95))
       .setAlpha(0.55).setFlipX(dir < 0)
       .setAngle(dir > 0 ? -pitch : pitch);
@@ -202,7 +200,7 @@ export class Background {
             plane.x - ux * 34 * s,
             plane.y - uy * 34 * s + 1,
             'dot',
-          ).setScrollFactor(0).setDepth(-6.6)
+          ).setScrollFactor(scrollX, scrollY).setDepth(-6.6)
            .setAlpha(0.22).setScale(Phaser.Math.FloatBetween(1.3, 2));
           scene.tweens.add({
             targets: puff,

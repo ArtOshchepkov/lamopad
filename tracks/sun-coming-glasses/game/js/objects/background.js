@@ -159,6 +159,26 @@ export class Background {
     });
   }
 
+  getPlaneTexture(heightMeters) {
+    if (heightMeters < 500) {
+      return 'cessna';
+    }
+
+    if (heightMeters < 5000) {
+      return Phaser.Utils.Array.GetRandom([
+        'plane',
+        'plane2',
+        'cessna'
+      ]);
+    }
+
+    return Phaser.Utils.Array.GetRandom([
+      'plane',
+      'plane2',
+      'cessna'
+    ]);
+  }
+
   /** Лайнер пересекает небо под углом набора/снижения, оставляя тающий след. */
   spawnPlane() {
     const scene = this.scene;
@@ -167,7 +187,7 @@ export class Background {
     const endX = dir > 0 ? CONF.width + 70 : -70;
     const scrollX = 1;
     const scrollY = 0.4;
-    const startY = 150  + scrollY * this.scene.cameras.main.scrollY;//+ scene.tweens.y Phaser.Math.Between(8, CONF.height * 0.6) ;
+    const startY = 150  + scrollY * this.scene.cameras.main.scrollY;
 
     // угол тангажа как на взлёте/посадке: ±12°, но не выводящий за экран
     let pitch = Phaser.Math.FloatBetween(0, 15);
@@ -175,7 +195,8 @@ export class Background {
     let endY = startY - Math.tan(Phaser.Math.DegToRad(pitch)) * dx;
 
 
-    const plane = scene.add.image(startX, startY, 'plane')
+    const curM = Math.max(0, Math.round(-this.scene.player.y / CONF.pxPerM)); // FIXME: pass it better?
+    const plane = scene.add.image(startX, startY, this.getPlaneTexture(curM))
       .setScrollFactor(scrollX, scrollY).setDepth(-6.5)
       .setScale(Phaser.Math.FloatBetween(0.65, 0.95))
       .setAlpha(0.55).setFlipX(dir < 0)

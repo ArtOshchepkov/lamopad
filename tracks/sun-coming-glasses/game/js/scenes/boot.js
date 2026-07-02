@@ -303,6 +303,150 @@ export class BootScene extends Phaser.Scene {
       g.fillStyle(0x4a3a62); g.fillEllipse(26.5, 24, 2.5, 4);
     });
 
+    this.tex('plane2', 82, 34, (g) => {
+      // киль (белый)
+      g.fillStyle(0xf3eefc);
+      g.fillTriangle(18, 16, 7, 0, 14, 17);
+
+      // цветная верхушка киля
+      g.fillStyle(0xe06274);
+      g.fillTriangle(15, 11, 9, 2, 13, 12);
+
+      // хвостовой стабилизатор
+      g.fillStyle(0xe2d8f2);
+      g.fillTriangle(17, 17, 8, 12, 19, 19);
+
+      // фюзеляж
+      g.fillStyle(0xede5f8);
+      g.fillEllipse(42, 16, 64, 10);
+
+      // тень снизу
+      g.fillStyle(0xb7a6cf, 0.75);
+      g.fillEllipse(42, 18.5, 60, 4);
+
+      // кабина
+      g.fillStyle(0x5b4b74);
+      g.fillEllipse(68, 14.5, 8, 3);
+
+      // основное крыло
+      g.fillStyle(0xa18ac3);
+      g.fillTriangle(49, 16, 23, 31, 55, 18);
+
+      // второй участок крыла
+      g.fillTriangle(40, 16, 30, 11, 53, 17);
+
+      // двигатели
+      g.fillStyle(0x8c79af);
+      g.fillEllipse(37, 25, 11, 5.5);
+      g.fillEllipse(49, 22.5, 10, 5);
+
+      // воздухозаборники
+      g.fillStyle(0x49395f);
+      g.fillEllipse(32, 25, 2.5, 3.8);
+      g.fillEllipse(44, 22.5, 2.3, 3.5);
+    });
+
+    // Небольшая Cessna (смотрит вправо)
+// Высокоплан с одним винтом и трёхопорным шасси.
+    this.tex('cessna', 64, 36, (g) => {
+      // киль
+      g.fillStyle(0xf1eefb);
+      g.fillTriangle(14, 17, 7, 5, 12, 18);
+
+      // горизонтальный стабилизатор
+      g.fillStyle(0xd9cdea);
+      g.fillTriangle(14, 18, 6, 15, 15, 20);
+
+      // фюзеляж
+      g.fillStyle(0xe8e1f6);
+      g.fillEllipse(33, 18, 34, 8);
+
+      // нижняя тень
+      g.fillStyle(0xb7a8cd, 0.75);
+      g.fillEllipse(33, 20, 31, 3);
+
+      // кабина
+      g.fillStyle(0x5b4c73);
+      g.fillEllipse(42, 16.5, 8, 4);
+
+      // высокорасположенное крыло
+      g.fillStyle(0xa890c7);
+      g.fillTriangle(32, 13, 18, 7, 47, 15);
+      g.fillTriangle(32, 13, 18, 19, 47, 15);
+
+      // стойка крыла
+      g.lineStyle(1.2, 0x8c79ad);
+      g.beginPath();
+      g.moveTo(28, 15);
+      g.lineTo(24, 20);
+      g.strokePath();
+
+      // двигатель
+      g.fillStyle(0x8e7ab0);
+      g.fillEllipse(49, 18, 6, 6);
+
+      // винт
+      g.lineStyle(1.5, 0xd8d2e6, 0.7);
+      g.beginPath();
+      g.moveTo(53, 13);
+      g.lineTo(53, 23);
+      g.moveTo(50, 18);
+      g.lineTo(56, 18);
+      g.strokePath();
+
+      // основные колёса
+      g.fillStyle(0x6a5a82);
+      g.fillCircle(24, 25, 1.5);
+      g.fillCircle(35, 25, 1.5);
+
+      // носовое колесо
+      g.fillCircle(46, 24, 1.2);
+    });
+
+    this.tex('highplane', 88, 36, (g) => {
+      // киль
+      g.fillStyle(0xf2eef9);
+      g.fillTriangle(16, 17, 9, 4, 14, 18);
+
+      // хвостовой стабилизатор
+      g.fillStyle(0xd8cdea);
+      g.fillTriangle(16, 18, 8, 15, 17, 20);
+
+      // длинный тонкий фюзеляж
+      g.fillStyle(0xe9e2f7);
+      g.fillEllipse(45, 18, 56, 5.5);
+
+      // тень
+      g.fillStyle(0xb5a8ca, 0.75);
+      g.fillEllipse(45, 19.5, 52, 2.4);
+
+      // кабина
+      g.fillStyle(0x5a4b73);
+      g.fillEllipse(61, 16.8, 6, 2.5);
+
+      // сверхдлинное крыло
+      g.fillStyle(0xa88fc8);
+      g.fillTriangle(45, 17, 10, 9, 78, 17);
+      g.fillTriangle(45, 17, 10, 25, 78, 17);
+
+      // небольшие законцовки
+      g.fillStyle(0x947bb6);
+      g.fillRect(8, 8, 1.5, 18);
+      g.fillRect(78, 8, 1.5, 18);
+
+      // двигатель
+      g.fillStyle(0x8f7ab0);
+      g.fillEllipse(64, 18, 5, 4);
+
+      // винт
+      g.lineStyle(1.2, 0xe8e1f5, 0.7);
+      g.beginPath();
+      g.moveTo(67, 13);
+      g.lineTo(67, 23);
+      g.moveTo(64.5, 18);
+      g.lineTo(69.5, 18);
+      g.strokePath();
+    });
     // Гало закатика: широкое, очень мягкое, само по себе почти незаметное
     this.tex('sunhalo', 760, 760, (g) => {
       const c = 380;

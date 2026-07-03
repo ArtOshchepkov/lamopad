@@ -24,6 +24,8 @@ export class GameScene extends Phaser.Scene {
     this.field.onLightning = (pts) => this.boltHits(pts);
     this.player = new Player(this, CONF.player.startX, CONF.player.startY);
 
+    this.deaths = this.loadDeaths();
+    this.buildDeathMarks();
     this.buildRecordLine();
     this.buildLyricMarkers();
     this.milestoneIdx = 0;
@@ -119,6 +121,37 @@ export class GameScene extends Phaser.Scene {
 
   saveBest(v) {
     try { localStorage.setItem(CONF.storage.best, String(v)); } catch (e) { /* приватный режим */ }
+  }
+
+  loadDeaths() {
+    try {
+      const v = JSON.parse(localStorage.getItem(CONF.storage.deaths));
+      return Array.isArray(v) ? v : [];
+    } catch (e) { return []; }
+  }
+
+  saveDeath(m) {
+    this.deaths.push(m);
+    if (this.deaths.length > 60) this.deaths = this.deaths.slice(-60);
+    try { localStorage.setItem(CONF.storage.deaths, JSON.stringify(this.deaths)); }
+    catch (e) { /* приватный режим */ }
+  }
+
+  // Черепки у левого края на высотах прошлых смертей: гиблые места видно сразу.
+  // Смерти группируются по ~10 м — вместо кучи меток один черепок со счётом
+  buildDeathMarks() {
+    const groups = new Map();
+    for (const m of this.deaths) {
+      if (m < 10) continue; // офисную возню не отмечаем
+      const key = Math.round(m / 10) * 10;
+      groups.set(key, (groups.get(key) || 0) + 1);
+    }
+    for (const [m, n] of groups) {
+      this.add.text(6, -m * CONF.pxPerM, n > 1 ? `💀×${n}` : '💀', {
+        fontFamily: 'Nunito, sans-serif', fontSize: '15px', fontStyle: '700',
+        color: '#ff5040', stroke: '#2a0d3e', strokeThickness: 3,
+      }).setOrigin(0, 0.5).setDepth(2).setAlpha(0.9).setResolution(this.dpr());
+    }
   }
 
   // Золотой пунктир «прошлый ты» на высоте рекорда
@@ -727,6 +760,7 @@ export class GameScene extends Phaser.Scene {
 
   die() {
     this.state = 'over';
+    this.saveDeath(Math.max(0, Math.round(-this.player.y / CONF.pxPerM)));
     const isNew = this.maxM > this.startBest;
     const best = Math.max(this.startBest, this.maxM);
     if (isNew) this.saveBest(best);

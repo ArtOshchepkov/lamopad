@@ -165,6 +165,7 @@ export const CONF = {
     best: 'lamopad_scg_best',
     muted: 'lamopad_scg_muted',
     sfxMuted: 'lamopad_scg_sfx_muted',
+    deaths: 'lamopad_scg_deaths',
   },
   sounds: {
     seagull: 'seagul_ira.mp3',

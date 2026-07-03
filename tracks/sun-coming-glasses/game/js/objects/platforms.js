@@ -184,6 +184,9 @@ export class PlatformField {
         if (p.type === 'bird') this.flap(p, dt);
         if (p.type === 'sunset') this.shyCycle(p, dt);
         if (p.pupil && player) this.trackEye(p, player);
+      } else if (p.respawnT > 0) {
+        p.respawnT -= dt;
+        if (p.respawnT <= 0) this.respawnSticker(p);
       }
       if (p.baseY > limit) this.release(i);
     }
@@ -489,9 +492,11 @@ export class PlatformField {
     });
   }
 
-  /** Стикер отклеивается после одного прыжка. */
+  /** Стикер отклеивается после одного прыжка и возвращается через
+   *  respawnS секунд — чтобы игрок не остался запертым без пути наверх. */
   breakSticker(p) {
     p.dead = true;
+    p.respawnT = p.def.respawnS;
     this.scene.tweens.add({
       targets: p.sprite,
       y: p.sprite.y + 70,
@@ -499,6 +504,23 @@ export class PlatformField {
       alpha: 0,
       duration: 550,
       ease: 'Cubic.easeIn',
+    });
+  }
+
+  /** Стикер приклеивается обратно на своё место. */
+  respawnSticker(p) {
+    this.scene.tweens.killTweensOf(p.sprite);
+    p.dead = false;
+    p.y = p.baseY;
+    p.sprite.setPosition(p.x, p.baseY).setAngle(0).setAlpha(0)
+      .setScale(p.baseScaleX * 0.7, 0.7);
+    this.scene.tweens.add({
+      targets: p.sprite,
+      alpha: 1,
+      scaleX: p.baseScaleX,
+      scaleY: 1,
+      duration: 260,
+      ease: 'Back.easeOut',
     });
   }
 

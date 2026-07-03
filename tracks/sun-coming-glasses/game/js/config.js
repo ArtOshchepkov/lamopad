@@ -67,7 +67,8 @@ export const CONF = {
       { tex: 'p-cloud-a', w: 96,  h: 30 },
       { tex: 'p-cloud-c', w: 72,  h: 30 },
     ], tint: 0xffd6ee, speed: [42, 92] },
-    sticker:  { tex: 'p-sticker',  w: 72, h: 30 },
+    // стикер отклеивается после прыжка и возвращается через respawnS сек
+    sticker:  { tex: 'p-sticker',  w: 72, h: 30, respawnS: 6 },
     backpack: { tex: 'p-backpack', w: 66, h: 40 },
     llama:    { tex: 'p-llama',    w: 80, h: 48 },
     // стесняшка-закатик: застенчиво тает и возвращается (тайминговая платформа)

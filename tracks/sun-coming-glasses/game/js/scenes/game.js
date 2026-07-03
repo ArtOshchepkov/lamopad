@@ -273,6 +273,12 @@ export class GameScene extends Phaser.Scene {
       });
     }
 
+    // грибная лихорадка кончилась — герой снова в очках
+    if (this.isShroom && this.maxM >= this.field.marioFeverUntilM) {
+      this.isShroom = false;
+      this.player.sprite.setTexture('glasses');
+    }
+
     // падение
     if (this.player.y > cam.scrollY + CONF.height + CONF.camera.deathMargin) this.die();
   }
@@ -467,11 +473,11 @@ export class GameScene extends Phaser.Scene {
     this.field.shout({ x: this.player.x, y: this.officeCeilingY + 34 }, 'К чёрту потолок!');
   }
 
-  /** Прыжок на блок «?»: герой становится ГРИБКОМ до конца забега. */
+  /** Прыжок на блок «?»: герой становится ГРИБКОМ на CONF.mario.feverLengthM метров. */
   becomeShroom() {
-    if (this.isShroom) return;
+    if (this.isShroom) return; // пока грибок — повторные блоки «?» лихорадку не продлевают
     this.isShroom = true;
-    // мир наводняется марио — уже бесполезными — на ближайшие 1500 м
+    // мир наводняется марио — уже бесполезными — на те же feverLengthM метров
     this.field.marioFeverUntilM = this.maxM + CONF.mario.feverLengthM;
     this.player.sprite.setTexture('shroom');
     this.field.shout({ x: this.player.x, y: this.player.y - 26 }, 'ГРИБОК!');

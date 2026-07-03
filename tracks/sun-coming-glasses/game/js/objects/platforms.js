@@ -88,10 +88,12 @@ export class PlatformField {
         }
       }
       // мега-редкий Марио — тоже добавка. После превращения игрока в грибка
-      // Марио заполоняют небо на feverLengthM метров, хотя толку от них никакого
-      const marioChance = m < this.marioFeverUntilM
-        ? CONF.mario.feverChance : CONF.mario.chance;
-      if (m > CONF.mario.fromM && Math.random() < marioChance) {
+      // Марио заполоняют небо на feverLengthM метров, хотя толку от них никакого.
+      // Лихорадка бьёт мимо обычного порога fromM — иначе ранний чит-код «mario»
+      // триггерит превращение, а сама лихорадка ниже 1500 м не разгоняется.
+      const inFever = m < this.marioFeverUntilM;
+      const marioChance = inFever ? CONF.mario.feverChance : CONF.mario.chance;
+      if ((inFever || m > CONF.mario.fromM) && Math.random() < marioChance) {
         this.place('mario', this.apartX(x), this.lastY - R(20, 50));
       }
     }

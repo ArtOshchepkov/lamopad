@@ -156,19 +156,16 @@ const orderOverlay = $('order');
 $('order-open').addEventListener('click', () => orderOverlay.classList.remove('hidden'));
 $('order-close').addEventListener('click', () => orderOverlay.classList.add('hidden'));
 
-// почта копируется в буфер с уведомлением; без clipboard API — обычный mailto
-const orderMail = $('order-mail');
-orderMail.addEventListener('click', (e) => {
-  if (!navigator.clipboard) return; // сработает href=mailto
-  e.preventDefault();
-  navigator.clipboard.writeText('tim.oshchepkov@gmail.com').then(() => {
-    orderMail.textContent = '✓ адрес скопирован!';
-    clearTimeout(orderMail._t);
-    orderMail._t = setTimeout(() => {
-      orderMail.textContent = '✉️ tim.oshchepkov@gmail.com';
-    }, 1600);
-  }).catch(() => { window.location.href = orderMail.href; });
-});
+// тексты, контакты и почта-с-копированием — общий модуль /lib/order-widget.js
+LamopadOrder.fill({
+  openBtn: $('order-open'),
+  title:   $('order-title'),
+  text:    $('order-text'),
+  mail:    $('order-mail'),
+  tg:      $('order-tg'),
+  games:   $('order-games'),
+}, { ghClass: 'order-gh' });
+LamopadOrder.bindMailCopy($('order-mail'));
 
 // для отладки в консоли
 window.__scg = game;

@@ -40,6 +40,8 @@
   </style>
 </div>
 <script src="https://cdn.jsdelivr.net/npm/phaser@3.60.0/dist/phaser.min.js"></script>
+<!-- общий экран заказа «хочу игру под свой трек»: тексты в LAMOPAD_ORDER -->
+<script src="../../lib/order-widget.js"></script>
 <script>
 'use strict';
 
@@ -1494,6 +1496,25 @@ class GameScene extends Phaser.Scene {
 
   }
 
+  /**
+   * Держит HTML-подпись на месте при ресайзе. fn пересчитывает позицию от
+   * rect канваса; Phaser обновляет канвас НЕ синхронно с window.resize
+   * (опрос до ~500мс), поэтому слушаем scale.resize Фазера + window.resize
+   * с отложенным повтором — иначе подписи уезжают относительно кнопок
+   * при выходе из фулскрина или смене размера окна.
+   */
+  _trackReposition(fn) {
+    fn();
+    const onResize = () => { fn(); clearTimeout(fn._t); fn._t = setTimeout(fn, 550); };
+    this.scale.on('resize', onResize);
+    window.addEventListener('resize', onResize);
+    this.events.once('shutdown', () => {
+      this.scale.off('resize', onResize);
+      window.removeEventListener('resize', onResize);
+      clearTimeout(fn._t);
+    });
+  }
+
   createButtons() {
     const W = this.scale.width, H = this.scale.height;
     const BW = 120, BH = 36, GAP = 4;
@@ -1553,11 +1574,7 @@ class GameScene extends Phaser.Scene {
         lbl.style.top      = (rect.top  + (by + BH / 2)  * sy) + 'px';
         lbl.style.fontSize = Math.round(12 * sx) + 'px';
       };
-      positionLbl();
-      let _lblResizeId;
-      const onLblResize = () => { clearTimeout(_lblResizeId); _lblResizeId = setTimeout(positionLbl, 100); };
-      window.addEventListener('resize', onLblResize);
-      this.events.once('shutdown', () => window.removeEventListener('resize', onLblResize));
+      this._trackReposition(positionLbl);
 
       const zone = this.add.zone(cx - BW / 2, by, BW, BH)
         .setOrigin(0, 0).setDepth(32).setInteractive();
@@ -2295,9 +2312,10 @@ class GameScene extends Phaser.Scene {
       }
 
       // ── Кнопки ──────────────────────────────────────────────────────────────
+      // Иерархия: главный CTA → вторичный → поделиться → надписи (заказ, игры)
       const BTN_W = 90, BTN_H = 14, BTN_GAP = 4;
-      const CTA_W = 110, CTA_H = 18;
-      const btnY = [cy + 24, cy + 46, cy + 70, cy + 90];
+      const CTA_W = 120, CTA_H = 18;
+      const btnY = [cy + 24, cy + 48, cy + 69];
 
       // HTML-контейнер для подписей кнопок экрана смерти
       const deathLblContainer = document.createElement('div');
@@ -2341,9 +2359,7 @@ class GameScene extends Phaser.Scene {
           statsEl.style.maxWidth = Math.round(600 * sx) + 'px';
           statsEl.style.fontSize = Math.round(8 * sx) + 'px';
         };
-        posStats();
-        window.addEventListener('resize', posStats);
-        this.events.once('shutdown', () => window.removeEventListener('resize', posStats));
+        this._trackReposition(posStats);
       }
 
       // ── Рекорды ──────────────────────────────────────────────────────────────
@@ -2395,9 +2411,7 @@ class GameScene extends Phaser.Scene {
           recEl.style.maxWidth = Math.round(440 * sx) + 'px';
           recEl.style.fontSize = Math.round(7 * sx) + 'px';
         };
-        posRec();
-        window.addEventListener('resize', posRec);
-        this.events.once('shutdown', () => window.removeEventListener('resize', posRec));
+        this._trackReposition(posRec);
       }
 
       const mkGoBtn = (idx, label, col, onClick, w = BTN_W, h = BTN_H, fs = 7) => {
@@ -2439,9 +2453,7 @@ class GameScene extends Phaser.Scene {
           el.style.fontSize = Math.round(fs * sx) + 'px';
           el.style.maxWidth = Math.round(w  * sx) + 'px';
         };
-        positionLbl();
-        window.addEventListener('resize', positionLbl);
-        this.events.once('shutdown', () => window.removeEventListener('resize', positionLbl));
+        this._trackReposition(positionLbl);
 
         const zone = this.add.zone(cx - w / 2, by, w, h)
           .setOrigin(0, 0).setDepth(DEPTH + 2).setInteractive();
@@ -2453,7 +2465,40 @@ class GameScene extends Phaser.Scene {
         return { gfx, lbl: { setText: (t) => { el.textContent = t; } } };
       };
 
-      // Кнопка 1: ПРОДОЛЖИТЬ ИГРУ
+      // Надпись-ссылка (без кнопочной коробки) — для второстепенных действий
+      const mkLink = (byC, label, fs, onClick) => {
+        const el = document.createElement('div');
+        el.textContent = label;
+        el.style.cssText = [
+          'position:absolute',
+          'transform:translate(-50%,-50%)',
+          'font-family:"Arial Black",Arial,sans-serif',
+          'font-weight:900',
+          'color:#8f8f8f',
+          'text-align:center',
+          'white-space:nowrap',
+          'text-shadow:1px 1px 0 #000',
+          'pointer-events:auto',
+          'cursor:pointer',
+          'transition:color .15s',
+        ].join(';');
+        el.addEventListener('mouseenter', () => { el.style.color = '#fff'; });
+        el.addEventListener('mouseleave', () => { el.style.color = '#8f8f8f'; });
+        el.addEventListener('pointerdown', onClick);
+        deathLblContainer.appendChild(el);
+        const pos = () => {
+          const rect = this.sys.game.canvas.getBoundingClientRect();
+          const sx = rect.width / W;
+          const sy = rect.height / H;
+          el.style.left = (rect.left + cx * sx) + 'px';
+          el.style.top  = (rect.top + byC * sy) + 'px';
+          el.style.fontSize = Math.round(fs * sx) + 'px';
+        };
+        this._trackReposition(pos);
+        return el;
+      };
+
+      // Кнопка 1 (главный CTA): ПРОДОЛЖИТЬ ИГРУ
       let countdown = 3;
       const btn2 = mkGoBtn(0, 'ПРОДОЛЖИТЬ ИГРУ', 0x1c4c2c, () => {
         const tick = () => {
@@ -2466,20 +2511,36 @@ class GameScene extends Phaser.Scene {
           }
         };
         tick();
-      });
-
-      // Кнопка 2 (CTA): ДОБАВИТЬ ТРЕК К СЕБЕ
-      mkGoBtn(1, 'ДОБАВИТЬ ТРЕК К СЕБЕ', 0x3c1c5c, () => {
-        window.open('https://band.link/atgul', '_blank');
       }, CTA_W, CTA_H, 8);
 
-      // Кнопка 3: ДРУГИЕ ИГРЫ
-      mkGoBtn(2, 'ДРУГИЕ ИГРЫ', 0x1c3c3c, () => {
+      // Кнопка 2 (вторичный CTA): ДОБАВИТЬ ТРЕК К СЕБЕ
+      mkGoBtn(1, 'ДОБАВИТЬ ТРЕК К СЕБЕ', 0x3c1c5c, () => {
+        window.open('https://band.link/atgul', '_blank');
+      }, 105, 15, 7);
+
+      // Надпись: ХОЧУ ИГРУ ПОД СВОЙ ТРЕК — общий экран заказа
+      // (/lib/order-widget.js, тексты в LAMOPAD_ORDER), тема — думерская
+      mkLink(cy + 94, LAMOPAD_ORDER.btnLabel, 6, () => {
+        LamopadOrder.open({
+          bg: 'rgba(6,6,8,0.97)',
+          ink: '#ddd',
+          accent: '#ee3333',
+          mailColor: '#ffdd44',
+          tgColor: '#6ec9ff',
+          titleFont: "'Arial Black',Arial,sans-serif",
+          bodyFont: 'Arial,sans-serif',
+          emoji: '💼',
+          radius: '4px',
+        });
+      });
+
+      // Надпись: ДРУГИЕ ИГРЫ
+      mkLink(cy + 106, 'ДРУГИЕ ИГРЫ', 5.5, () => {
         window.location.href = '/games';
       });
 
-      // Кнопка 4: ПОДЕЛИТЬСЯ
-      const shareBtn = mkGoBtn(3, 'ПОДЕЛИТЬСЯ', 0x1c4c4c, () => {
+      // Кнопка 3: ПОДЕЛИТЬСЯ
+      const shareBtn = mkGoBtn(2, 'ПОДЕЛИТЬСЯ', 0x1c4c4c, () => {
         const text = 'Прогибайся, чтобы заработать онлайн.' +
           '\nЯ прогнулся ' + this.state.bowCount + ' раз ' +
           'и заработал ' + Math.round(this.state.totalEarned).toLocaleString('ru') + ' ₽\n' +
@@ -3416,14 +3477,23 @@ class GameScene extends Phaser.Scene {
 
 // ─── Phaser config ────────────────────────────────────────────────────────────
 
+// Размер поля фиксируем НА МОМЕНТ ЗАГРУЗКИ под аспект вьюпорта (нормируем к
+// альбомной). EXPAND не годится: он меняет внутренний размер игры при каждом
+// ресайзе (выход из фулскрина), а сцена и HTML-подписи разложены один раз —
+// вёрстка уезжала. FIT с фиксированным размером стабилен; поля по краям
+// не видны — фон страницы совпадает с фоном игры.
+const _vw = window.innerWidth, _vh = window.innerHeight;
+const _aspect = Math.max(_vw, _vh) / Math.min(_vw, _vh);
+const GAME_W = Phaser.Math.Clamp(Math.round(270 * _aspect), 440, 620);
+
 const config = {
   type: Phaser.AUTO,
-  width: 480,
+  width: GAME_W,
   height: 270,
   backgroundColor: '#060608',
   scene: [GameScene],
   scale: {
-    mode: Phaser.Scale.EXPAND,
+    mode: Phaser.Scale.FIT,
     autoCenter: Phaser.Scale.CENTER_BOTH,
   },
   // Увеличиваем лимит источников: 1 прожектор + ~8 фонарей + запас

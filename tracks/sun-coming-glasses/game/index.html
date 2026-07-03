@@ -75,23 +75,24 @@
     <button id="restart" type="button" class="death-go">Откиснуть и погнали</button>
     <button id="death-save" type="button" class="death-save">🎧 добавить трек к себе</button>
     <div class="death-links">
-      <button id="order-open" type="button" class="death-more death-order">🎮 ХОЧУ ИГРУ ПОД СВОЙ ТРЕК</button>
+      <button id="order-open" type="button" class="death-more death-order"></button>
       <a class="death-more" href="../../../games/">другие игры</a>
     </div>
   </div>
 </div>
 
-<!-- заказать игру под свой трек -->
+<!-- заказать игру под свой трек: тексты и контакты заполняет main.js
+     из общего модуля ../../../lib/order-widget.js (LAMOPAD_ORDER) -->
 <div id="order" class="hidden">
   <div class="plat-inner">
     <div class="plat-glasses">🕶</div>
-    <p class="plat-thanks">Игра под ваш трек</p>
-    <p class="order-text">Я в коммерческой <a class="order-gh" target="_blank" rel="noopener" href="https://github.com/ArtOshchepkov">разработке</a> 7+&nbsp;лет. Закончил ИТМО. С&nbsp;помощью нейронок и своих знаний сделаю игру для вашего трека всего за несколько дней. Разгон идеи и демо&nbsp;— бесплатно.</p>
+    <p class="plat-thanks" id="order-title"></p>
+    <p class="order-text" id="order-text"></p>
     <div class="plat-links">
-      <a class="plat p-mail" id="order-mail" href="mailto:tim.oshchepkov@gmail.com">✉️ tim.oshchepkov@gmail.com</a>
-      <a class="plat p-tg" target="_blank" rel="noopener" href="https://t.me/art_oshk">✈️ Телеграм · @art_oshk</a>
+      <a class="plat p-mail" id="order-mail" href="#"></a>
+      <a class="plat p-tg" id="order-tg" target="_blank" rel="noopener" href="#"></a>
     </div>
-    <a class="order-games" href="../../../games/">а какие ещё игры у тебя есть?</a>
+    <a class="order-games" id="order-games" href="../../../games/"></a>
     <button id="order-close" type="button" class="plat-close">← назад</button>
   </div>
 </div>
@@ -115,6 +116,7 @@
 </div>
 
 <script src="../../../lib/phaser.min.js"></script>
+<script src="../../../lib/order-widget.js"></script>
 <script type="module" src="js/main.js"></script>
 
 </body>

@@ -2356,20 +2356,13 @@ class GameScene extends Phaser.Scene {
 
       if (this.state.bowCount > 0) {
         const fmt = (v) => Math.round(v).toLocaleString('ru') + ' ₽';
-        const balance = Math.round(this.state.money);
         const bows = this.state.bowCount;
         const statsEl = document.createElement('div');
         statsEl.innerHTML =
           '<span style="color:#ccc">ВЫ ПРОГНУЛИСЬ </span>' +
           '<span style="color:#ffdd44">' + bows + ' РАЗ</span>' +
           '<span style="color:#ccc"> И ЗАРАБОТАЛИ </span>' +
-          '<span style="color:#55ff77">' + fmt(this.state.totalEarned) + '</span>' +
-          '<br>' +
-          '<span style="color:#ccc">ПОТРАТИЛИ </span>' +
-          '<span style="color:#ff6666">' + fmt(this.state.totalSpent) + '</span>' +
-          '<span style="color:#ccc">, ИТОГО В НАСЛЕДСТВО ОСТАЛОСЬ ЦЕЛЫХ </span>' +
-          '<span style="color:' + (balance >= 0 ? '#ffdd44' : '#ff4444') + '">' + fmt(balance) + '</span>' +
-          '';
+          '<span style="color:#55ff77">' + fmt(this.state.totalEarned) + '</span>';
         statsEl.style.cssText = [
           'position:absolute',
           'transform:translate(-50%,-50%)',

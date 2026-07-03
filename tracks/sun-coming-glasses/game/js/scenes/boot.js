@@ -288,44 +288,26 @@ export class BootScene extends Phaser.Scene {
       g.fillStyle(0x3e7d2a); g.fillRect(28, 26, 6, 5); g.fillRect(46, 26, 6, 5);
     });
 
-    // Змея (голова слева): кислотно-зелёная, кольца-полосы как у ленточного крайта
-    this.tex('snake', 60, 34, (g) => {
-      g.translateCanvas(4, 0); // запас слева под высунутый язык
-      const BAND = 0x101c08;   // почти чёрные поперечные кольца
-      // кольцо свернувшегося тела: труба с просветом в середине — читается
-      // как виток длинной змеи, а не сплошное брюхо
-      g.lineStyle(10, 0x66e01a); // трубка тела толще шеи
-      g.strokeEllipse(33, 22.5, 34, 13); // лежащий виток, шея выше него
-      // полосы крайта поперёк трубки кольца
-      for (const th of [0.5, 1.6, 2.6, 5.3]) {
-        const px = 33 + 17 * Math.cos(th), py = 22.5 + 6.5 * Math.sin(th);
-        const tx = -17 * Math.sin(th), ty = 6.5 * Math.cos(th); // касательная
-        const tl = Math.hypot(tx, ty) || 1;
-        const nx = -ty / tl, ny = tx / tl; // нормаль = поперёк трубки
-        g.lineStyle(3, BAND);
-        g.beginPath();
-        g.moveTo(px - nx * 4.8, py - ny * 4.8);
-        g.lineTo(px + nx * 4.8, py + ny * 4.8);
-        g.strokePath();
-      }
-      // кончик хвоста выглядывает из-под витка
-      g.fillStyle(0x66e01a);
-      g.fillCircle(52.5, 28.5, 2.6); g.fillCircle(54.8, 26.8, 1.6);
+    // Змея (голова слева): мультяшная жёлтая, чёрный контур, большие глаза
+    this.tex('snake', 70, 36, (g) => {
+      g.translateCanvas(4, 0); // запас слева под мордой/языком
+      const YELLOW = 0xffe14d;
+      const OUTLINE = 0x1c1206;
 
-      // шея поднимается из кольца киношной дугой «?» — без капюшона, это крайт
+      // волнистое тело головой вперёд, сужается к острому кончику хвоста
       const pts = [
-        { x: 14,   y: 8,   r: 3.1 },  // голова тянется к добыче
-        { x: 17,   y: 7.5, r: 3.3 },  // горизонтальный вынос
-        { x: 21,   y: 9,   r: 3.5 },  // гребень дуги
-        { x: 23.5, y: 12,  r: 3.7 },  // скат назад
-        { x: 24.5, y: 16,  r: 3.9 },  // задняя выпуклость
-        { x: 23.5, y: 20,  r: 4.1 },
-        { x: 22,   y: 24,  r: 4.3 },  // впадает в кольцо
+        { x: 12, y: 10, r: 8.5 }, // голова
+        { x: 20, y: 15, r: 7 },
+        { x: 28, y: 21, r: 6.3 },
+        { x: 36, y: 14, r: 5.8 }, // горб
+        { x: 44, y: 22, r: 5 },   // впадина
+        { x: 52, y: 15, r: 3 },
+        { x: 58, y: 19, r: 1.2 }, // острый кончик хвоста
       ];
       const samples = [];
       for (let i = 0; i < pts.length - 1; i++) {
-        for (let s = 0; s < 6; s++) {
-          const t = s / 6;
+        for (let s = 0; s < 8; s++) {
+          const t = s / 8;
           samples.push({
             x: Phaser.Math.Linear(pts[i].x, pts[i + 1].x, t),
             y: Phaser.Math.Linear(pts[i].y, pts[i + 1].y, t),
@@ -333,35 +315,44 @@ export class BootScene extends Phaser.Scene {
           });
         }
       }
-      samples.forEach((p) => {
-        g.fillStyle(0x7dff24);
-        g.fillCircle(p.x, p.y, p.r);
-      });
-      // кольца крайта: узкие полосы строго поперёк шеи
-      for (const f of [0.22, 0.52, 0.8]) {
-        const i = Math.min(samples.length - 2, Math.round(f * samples.length));
-        const p = samples[i], q = samples[i + 1];
-        const dl = Math.hypot(q.x - p.x, q.y - p.y) || 1;
-        const nx = -(q.y - p.y) / dl, ny = (q.x - p.x) / dl; // перпендикуляр к телу
-        const half = p.r * 0.92;
-        g.lineStyle(Math.max(2.2, p.r * 0.62), BAND);
-        g.beginPath();
-        g.moveTo(p.x - nx * half, p.y - ny * half);
-        g.lineTo(p.x + nx * half, p.y + ny * half);
-        g.strokePath();
-      }
-      // голова
-      g.fillStyle(0x7dff24); g.fillEllipse(11, 7, 14, 8);
-      // глазное яблоко (зрачок — отдельный следящий спрайт)
-      g.fillStyle(0xffffff); g.fillCircle(9, 6, 2.6);
+      samples.push(pts[pts.length - 1]);
+
+      // контур: та же труба чуть толще, сплошным тёмным — проступает по силуэту
+      g.fillStyle(OUTLINE);
+      samples.forEach((p) => g.fillCircle(p.x, p.y, p.r + 2.2));
+      // тело поверх контура
+      g.fillStyle(YELLOW);
+      samples.forEach((p) => g.fillCircle(p.x, p.y, p.r));
+      // блики на горбах — мультяшный лоск
+      g.fillStyle(0xfff2a3);
+      g.fillEllipse(34, 11, 7, 3.5);
+      g.fillEllipse(18, 13, 5, 2.6);
+
+      // голова отдельным кругом покрупнее — перекрывает начало тела
+      g.fillStyle(OUTLINE); g.fillCircle(12, 10, 10.2);
+      g.fillStyle(YELLOW);  g.fillCircle(12, 10, 8.5);
+
+      // пасть — открытый тёмный клин у мордочки
+      g.fillStyle(OUTLINE);
+      g.fillTriangle(4, 9, 13, 13, 9, 17);
+      // клыки
+      g.fillStyle(0xffffff);
+      g.fillTriangle(6, 11, 7.5, 15.5, 5, 15);
+      g.fillTriangle(10, 12.5, 11.5, 17, 9, 16.5);
+
+      // глаз (зрачок — отдельный следящий спрайт поверх)
+      g.fillStyle(OUTLINE); g.fillCircle(12, 7, 5.2);
+      g.fillStyle(0xffffff); g.fillCircle(12, 7, 4.2);
     });
 
-    // Раздвоенный язык змеи: основание слева, остриё вправо (зеркалим scaleX)
-    this.tex('tongue', 11, 8, (g) => {
-      g.lineStyle(1.5, 0xff3b57);
-      g.beginPath(); g.moveTo(0, 4); g.lineTo(7, 4); g.strokePath();
-      g.beginPath(); g.moveTo(7, 4); g.lineTo(10, 2); g.strokePath();
-      g.beginPath(); g.moveTo(7, 4); g.lineTo(10, 6); g.strokePath();
+    // Раздвоенный язык змеи: сплошная лента, основание слева, вилка справа
+    // (зеркалим scaleX для другого направления головы)
+    this.tex('tongue', 12, 9, (g) => {
+      const RED = 0xff3b57;
+      g.fillStyle(RED);
+      g.fillRect(0, 3.2, 8, 1.8);
+      g.fillTriangle(8, 4.5, 12, 1, 9.5, 4.5);
+      g.fillTriangle(8, 4.5, 12, 8, 9.5, 4.5);
     });
 
     // Сам СУПЕР МАРИО — мега-редкая платформа

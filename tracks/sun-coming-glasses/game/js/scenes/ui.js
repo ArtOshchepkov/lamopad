@@ -114,11 +114,12 @@ export class UIScene extends Phaser.Scene {
     const m = this.plateQueue.shift();
     const res = Math.min(window.devicePixelRatio || 1, 2);
     const cx = CONF.width / 2;
-    const cy = CONF.height * 0.3;
+    // внизу экрана: сверху плашка закрывала платформы, куда прыгает игрок
+    const cy = CONF.height * 0.78;
 
-    // лучистое солнце за цифрой
-    const burst = this.add.image(0, 0, 'burst').setAlpha(0.85).setScale(m.ach ? 1.25 : 1);
-    this.tweens.add({ targets: burst, angle: 90, duration: 4000, repeat: -1 });
+    // лучистое солнце за цифрой — полупрозрачное и ленивое, чтобы не отвлекало
+    const burst = this.add.image(0, 0, 'burst').setAlpha(0.38).setScale(m.ach ? 1.25 : 1);
+    this.tweens.add({ targets: burst, angle: 90, duration: 11000, repeat: -1 });
 
     const alt = this.add.text(0, 0, `${m.m} м`, {
       fontFamily: 'Unbounded, sans-serif', fontSize: '38px', fontStyle: '900',
@@ -139,11 +140,11 @@ export class UIScene extends Phaser.Scene {
 
     const parts = [burst, alt, title, sub];
     if (m.ach) {
-      const achText = this.add.text(0, -46, '★ ДОСТИЖЕНИЕ ★', {
-        fontFamily: 'Unbounded, sans-serif', fontSize: '13px', fontStyle: '700',
+      const achText = this.add.text(0, -46, '★ 🏅 ★', {
+        fontFamily: 'Unbounded, sans-serif', fontSize: '16px', fontStyle: '700',
         color: CONF.colors.gold, stroke: '#3a0d18', strokeThickness: 5,
       }).setOrigin(0.5).setResolution(res);
-      if (achText.setLetterSpacing) achText.setLetterSpacing(3);
+      if (achText.setLetterSpacing) achText.setLetterSpacing(4);
       parts.push(achText);
     }
 
@@ -151,14 +152,14 @@ export class UIScene extends Phaser.Scene {
 
     this.sparkles(cx, cy, m.ach ? 16 : 10);
 
-    const hold = m.ach ? 3200 : 2200; // ачивки читаем дольше
+    const hold = m.ach ? 5200 : 3800; // достижения читаем дольше
     this.tweens.add({
       targets: badge, alpha: 1, scale: 1, angle: 0,
       duration: 420, ease: 'Back.easeOut',
     });
     this.tweens.add({ targets: sub, alpha: 1, delay: 380, duration: 300 });
     this.tweens.add({
-      targets: badge, alpha: 0, y: cy - 70,
+      targets: badge, alpha: 0, y: cy + 60,
       delay: hold, duration: 420, ease: 'Cubic.easeIn',
       onComplete: () => {
         this.tweens.killTweensOf(burst);

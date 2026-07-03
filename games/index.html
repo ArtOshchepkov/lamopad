@@ -4,7 +4,7 @@
   <meta charset="UTF-8">
   <meta name="viewport" content="width=device-width, initial-scale=1.0">
   <title>Игры — Ламопад</title>
-  <meta name="description" content="Мини-игры Ламопада — самосвал сквозь ретро-космос и выгорание в офисе.">
+  <meta name="description" content="Мини-игры Ламопада — самосвал сквозь ретро-космос, выгорание в офисе и дудл-джампер к солнцу.">
   <meta name="author" content="Ламопад">
   <meta name="robots" content="index, follow">
   <link rel="canonical" href="https://lamopad.ru/games/">
@@ -12,7 +12,7 @@
 
   <meta property="og:type" content="website">
   <meta property="og:title" content="Игры — Ламопад">
-  <meta property="og:description" content="Мини-игры Ламопада — самосвал сквозь ретро-космос и выгорание в офисе.">
+  <meta property="og:description" content="Мини-игры Ламопада — самосвал сквозь ретро-космос, выгорание в офисе и дудл-джампер к солнцу.">
   <meta property="og:url" content="https://lamopad.ru/games/">
   <meta property="og:locale" content="ru_RU">
   <meta property="og:site_name" content="Ламопад">
@@ -24,10 +24,14 @@
     *, *::before, *::after { box-sizing: border-box; margin: 0; padding: 0; }
 
     :root {
-      --bg:    #f8f4ed;
-      --ink:   #1e1810;
-      --faded: #7a6e62;
-      --red:   #c8281e;
+      --bg:     #f8f4ed;
+      --ink:    #1e1810;
+      --faded:  #7a6e62;
+      --red:    #c8281e;
+      --grey:   #8a8175;
+      --purple: #7700dd;
+      --purple-light: #aa44ff;
+      --gold:   #d99a1a;
     }
 
     body {
@@ -108,7 +112,30 @@
       letter-spacing: .01em;
     }
 
-    .game-link:hover .game-title { color: var(--red); }
+    .game-link:hover .game-title:not(.retro) { color: var(--red); }
+
+    /* Самосвал — retrofuturistic violet */
+    .game-title.retro {
+      color: var(--purple);
+      text-shadow: 0 0 14px rgba(119, 0, 221, 0.28);
+    }
+    .game-link:hover .game-title.retro {
+      color: var(--purple-light);
+      text-shadow: 0 0 20px rgba(170, 68, 255, 0.45);
+    }
+
+    /* АТГУЛ — red/grey letters, matching /agu/text */
+    .game-title.atgul .r { color: var(--red); }
+    .game-title.atgul .g { color: var(--grey); }
+
+    /* Солнценаступательные очки — «Солнце» picked out in warm gold, as in the game's own loading screen */
+    .game-title.sun .g {
+      color: var(--gold);
+      text-shadow: 0 0 16px rgba(217, 154, 26, 0.4);
+    }
+    .game-link:hover .game-title.sun .g {
+      text-shadow: 0 0 22px rgba(217, 154, 26, 0.6);
+    }
 
     .game-desc {
       font-size: clamp(13px, 2.5vw, 15px);
@@ -179,15 +206,22 @@
 
       <li>
         <a class="game-link" href="/samosval/game/">
-          <div class="game-title">Самосвал<span class="game-arrow">→</span></div>
+          <div class="game-title retro">Самосвал<span class="game-arrow">→</span></div>
           <div class="game-desc">Управляй ламой-самосвалом сквозь ретро-космос — уворачивайся от ящиков, собирай пилюли.</div>
         </a>
       </li>
 
       <li>
         <a class="game-link" href="/agu/game/">
-          <div class="game-title">АГУ<span class="game-arrow">→</span></div>
+          <div class="game-title atgul"><span class="r">А</span><span class="g">Т</span><span class="r">Г</span><span class="r">У</span><span class="g">Л</span><span class="game-arrow">→</span></div>
           <div class="game-desc">Прогибайся, чтобы собирать деньги. Тяни лямку, чтобы тебе бросали купюры. Можно взять отгул, но скорее всего в нём откажут. </div>
+        </a>
+      </li>
+
+      <li>
+        <a class="game-link" href="/tracks/sun-coming-glasses/game/">
+          <div class="game-title sun"><span class="g">Солнце</span>наступательные очки<span class="game-arrow">→</span></div>
+          <div class="game-desc">Прыгай очками по облакам от офисной рутины к солнцу. Дудл-джампер с ламами, рюкзаками и крокодилами.</div>
         </a>
       </li>
 

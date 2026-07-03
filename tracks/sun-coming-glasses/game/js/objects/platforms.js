@@ -13,6 +13,9 @@ export class PlatformField {
     this.lastY = 0;     // отметка последнего спавна (мир, вверх = минус)
     this.marioFeverUntilM = 0; // лихорадка: марио повсюду до этой высоты
     this.rainBand = null;      // дождевой пояс задаёт game-сцена
+    this.onLightning = null;   // game-сцена вешает сюда проверку попаданий
+    // самопроизвольные молнии: один общий таймер на все тучи экрана
+    this.autoStrike = { t: RF(2, 4), target: null, charge: 0 };
     this.spawnTutorial();
   }
 
@@ -151,6 +154,7 @@ export class PlatformField {
 
   /** Поведение платформ + чистка улетевших вниз. */
   update(dt, camBottomY, player) {
+    this.stormTick(dt, camBottomY);
     const limit = camBottomY + CONF.spawn.despawnBelow;
     for (let i = this.active.length - 1; i >= 0; i--) {
       const p = this.active[i];
@@ -161,6 +165,41 @@ export class PlatformField {
         if (p.pupil && player) this.trackEye(p, player);
       }
       if (p.baseY > limit) this.release(i);
+    }
+  }
+
+  // Самопроизвольные молнии: раз в interval секунд случайная туча на экране
+  // мерцает telegraph секунд (успей отойти!) и бьёт. Один разряд за раз —
+  // иначе дождевой пояс, где грозовых туч большинство, превращается в стробоскоп
+  stormTick(dt, camBottomY) {
+    const a = this.autoStrike;
+    const L = CONF.lightning;
+    if (a.target) {
+      const p = a.target;
+      if (p.dead || !this.active.includes(p)) { a.target = null; return; }
+      a.charge -= dt;
+      if (a.charge > 0) { // копит заряд: нутро тревожно мерцает
+        if (Math.floor(a.charge * 14) % 2 === 0) p.sprite.setTintFill(0xe8f0ff);
+        else p.sprite.clearTint();
+        return;
+      }
+      p.sprite.clearTint();
+      a.target = null;
+      a.t = RF(L.interval[0], L.interval[1]);
+      const pts = this.strikeLightning(p);
+      if (this.onLightning) this.onLightning(pts);
+    } else {
+      a.t -= dt;
+      if (a.t > 0) return;
+      const camTop = camBottomY - CONF.height;
+      const storms = this.active.filter(p =>
+        p.type === 'storm' && !p.dead && p.y > camTop + 60 && p.y < camBottomY - 90);
+      if (storms.length) {
+        a.target = Phaser.Utils.Array.GetRandom(storms);
+        a.charge = L.telegraph;
+      } else {
+        a.t = 0.4; // туч на экране нет — заглянем позже
+      }
     }
   }
 
@@ -373,6 +412,31 @@ export class PlatformField {
       onComplete: () => flash.destroy(),
     });
     scene.cameras.main.shake(140, 0.0045);
+    return pts; // траектория разряда — для проверки попадания
+  }
+
+  /** Молния поджарила хищника: уголёк падает, облако остаётся честным. */
+  fryEnemy(p) {
+    const deco = p.deco;
+    p.deco = null;
+    p.type = 'cloud';
+    p.def = CONF.platforms.cloud;
+    if (p.pupil) { p.pupil.destroy(); p.pupil = null; }
+    if (p.tongue) {
+      this.scene.tweens.killTweensOf(p.tongue);
+      p.tongue.destroy();
+      p.tongue = null;
+    }
+    this.shout(p, 'ПШ-Ш-Ш!');
+    this.puff(p, 0x555055, 7); // дымок
+    this.scene.tweens.killTweensOf(deco);
+    deco.setTintFill(0x2a2126);
+    this.scene.tweens.add({
+      targets: deco,
+      y: deco.y + 170, angle: R(120, 220), alpha: 0,
+      duration: 700, ease: 'Cubic.easeIn',
+      onComplete: () => deco.destroy(),
+    });
   }
 
   /** Хищник делает выпад к добыче. */

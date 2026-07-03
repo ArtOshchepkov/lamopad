@@ -21,6 +21,7 @@ export class GameScene extends Phaser.Scene {
 
     this.bg = new Background(this, LOW_GFX);
     this.field = new PlatformField(this);
+    this.field.onLightning = (pts) => this.boltHits(pts);
     this.player = new Player(this, CONF.player.startX, CONF.player.startY);
 
     this.buildRecordLine();
@@ -236,7 +237,7 @@ export class GameScene extends Phaser.Scene {
     this.suitcaseBlame = plat.type === 'suitcase'; // упал после чемодана — виноват он
 
     switch (plat.type) {
-      case 'sticker':
+      case 'sticker':л
         this.player.bounce(P.stickerVy, 0.16);
         this.field.breakSticker(plat);
         break;
@@ -272,7 +273,8 @@ export class GameScene extends Phaser.Scene {
       case 'storm':
         this.player.bounce(P.bounceVy * 0.95, 0.2);
         this.field.react(plat);
-        this.field.strikeLightning(plat);
+        // свой разряд бьёт вниз и игрока не достаёт, а вот хищникам — достаётся
+        this.boltHits(this.field.strikeLightning(plat));
         break;
       default: // облака
         this.player.bounce(P.bounceVy);
@@ -654,6 +656,52 @@ export class GameScene extends Phaser.Scene {
       }
       this.milestoneIdx++;
     }
+  }
+
+  // ─── Молния ──────────────────────────────────────────────────────────────
+
+  /** Разряд прошёл по ломаной pts: жарим всех, кто на пути. */
+  boltHits(pts) {
+    for (const p of this.field.active) {
+      if ((p.type === 'croc' || p.type === 'snake') && !p.dead && p.deco &&
+          this.nearBolt(pts, p.deco.x, p.deco.y, 32)) {
+        this.field.fryEnemy(p);
+      }
+    }
+    if (this.state !== 'run' || this.jetTime > 0) return; // на ранце — мимо
+    if (!this.nearBolt(pts, this.player.x, this.player.y, CONF.lightning.hitR)) return;
+    if (this.bubbleTime > 0) { this.popBubble(); return; } // пузырь принял удар
+    this.electrocuted();
+  }
+
+  /** Точка ближе r к какому-нибудь сегменту ломаной? */
+  nearBolt(pts, x, y, r) {
+    for (let i = 1; i < pts.length; i++) {
+      const ax = pts[i - 1].x, ay = pts[i - 1].y;
+      const dx = pts[i].x - ax, dy = pts[i].y - ay;
+      const t = Phaser.Math.Clamp(
+        ((x - ax) * dx + (y - ay) * dy) / (dx * dx + dy * dy || 1), 0, 1);
+      const px = ax + dx * t - x, py = ay + dy * t - y;
+      if (px * px + py * py < r * r) return true;
+    }
+    return false;
+  }
+
+  /** Зашибло молнией: судорога, чернеем и падаем угольком. */
+  electrocuted() {
+    this.state = 'zapped'; // физика и управление замирают
+    this.deathCause = 'lightning';
+    const s = this.player.sprite;
+    s.setTintFill(0x2a2126);
+    this.field.shout({ x: this.player.x, y: this.player.y - 40 }, 'ЖАХ!');
+    this.tweens.add({ // судорога
+      targets: s, x: s.x + 5, duration: 40, yoyo: true, repeat: 6,
+    });
+    this.tweens.add({ // уголёк осыпается
+      targets: s, y: s.y + 260, angle: 200, alpha: 0.15,
+      delay: 340, duration: 600, ease: 'Cubic.easeIn',
+    });
+    this.time.delayedCall(1000, () => this.die());
   }
 
   /** Съеден хищником: выпад, очки утягиваются в пасть, затем экран смерти. */

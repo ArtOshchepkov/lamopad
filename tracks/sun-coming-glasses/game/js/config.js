@@ -37,23 +37,23 @@ export const CONF = {
   },
 
   // Зоны высот: веса типов платформ и разброс вертикальных разрывов (px).
-  // Лесенка сложности: одна новинка за раз — шаг 150 м до ~800, дальше 250 м.
-  // Вместе с зонами в лесенке участвуют пикапы и добавки: 950 пузырь ·
-  // 1200 чайка · 1450 ранец · 1700 хищники · 1950 гроза · 2200 лама ·
-  // 2450 Марио · 2700+ дождевой пояс
+  // Лесенка сложности: одна новинка за раз — шаг 100 м до 500, дальше 200 м.
+  // Вместе с зонами в лесенке участвуют пикапы и добавки: 700 пузырь ·
+  // 900 чайка · 1000 хищники · 1100 ранец · 1200 гроза · 1300 лама ·
+  // 1500 Марио · 1700+ дождевой пояс
   zones: [
     { fromM: 0,    gap: [62, 96],   types: { cloud: 100 } },
     { fromM: 100,  gap: [64, 100],  types: { cloud: 75, sticker: 25 } },
-    { fromM: 250,  gap: [68, 106],  types: { cloud: 62, sticker: 26, cloudMove: 12 } },
-    { fromM: 400,  gap: [72, 112],  types: { cloud: 55, sticker: 24, cloudMove: 12, suitcase: 9 } },
-    { fromM: 550,  gap: [76, 118],  types: { cloud: 48, sticker: 22, cloudMove: 13, suitcase: 9, backpack: 8 } },
-    { fromM: 700,  gap: [80, 124],  types: { cloud: 44, sticker: 20, cloudMove: 14, suitcase: 9, backpack: 8, sunset: 5 } },
-    { fromM: 1200, gap: [88, 134],  types: { cloud: 40, sticker: 17, cloudMove: 16, suitcase: 9, backpack: 8, sunset: 6, bird: 4 } },
-    { fromM: 1950, gap: [98, 146],  types: { cloud: 36, sticker: 14, cloudMove: 18, suitcase: 9, backpack: 8, sunset: 7, bird: 5, storm: 3 } },
-    { fromM: 2200, gap: [102, 152], types: { cloud: 33, sticker: 13, cloudMove: 19, suitcase: 8, backpack: 8, sunset: 7, bird: 6, storm: 4, llama: 2 } },
-    { fromM: 2700, gap: [110, 162], types: { cloud: 30, sticker: 12, cloudMove: 21, suitcase: 8, backpack: 9, sunset: 8, bird: 7, storm: 5, llama: 3 } },
-    { fromM: 3500, gap: [122, 177], types: { cloud: 26, sticker: 10, cloudMove: 24, suitcase: 7, backpack: 10, sunset: 9, bird: 8, storm: 5, llama: 6 } },
-    { fromM: 6000, gap: [140, 195], types: { cloud: 22, sticker: 8,  cloudMove: 27, suitcase: 5, backpack: 10, sunset: 10, bird: 10, storm: 6, llama: 8 } },
+    { fromM: 200,  gap: [68, 106],  types: { cloud: 62, sticker: 26, cloudMove: 12 } },
+    { fromM: 300,  gap: [72, 112],  types: { cloud: 55, sticker: 24, cloudMove: 12, suitcase: 9 } },
+    { fromM: 400,  gap: [76, 118],  types: { cloud: 48, sticker: 22, cloudMove: 13, suitcase: 9, backpack: 8 } },
+    { fromM: 500,  gap: [80, 124],  types: { cloud: 44, sticker: 20, cloudMove: 14, suitcase: 9, backpack: 8, sunset: 5 } },
+    { fromM: 900,  gap: [88, 134],  types: { cloud: 40, sticker: 17, cloudMove: 16, suitcase: 9, backpack: 8, sunset: 6, bird: 4 } },
+    { fromM: 1200, gap: [98, 146],  types: { cloud: 36, sticker: 14, cloudMove: 18, suitcase: 9, backpack: 8, sunset: 7, bird: 5, storm: 3 } },
+    { fromM: 1300, gap: [102, 152], types: { cloud: 33, sticker: 13, cloudMove: 19, suitcase: 8, backpack: 8, sunset: 7, bird: 6, storm: 4, llama: 2 } },
+    { fromM: 1800, gap: [110, 162], types: { cloud: 30, sticker: 12, cloudMove: 21, suitcase: 8, backpack: 9, sunset: 8, bird: 7, storm: 5, llama: 3 } },
+    { fromM: 2600, gap: [122, 177], types: { cloud: 26, sticker: 10, cloudMove: 24, suitcase: 7, backpack: 10, sunset: 9, bird: 8, storm: 5, llama: 6 } },
+    { fromM: 5100, gap: [140, 195], types: { cloud: 22, sticker: 8,  cloudMove: 27, suitcase: 5, backpack: 10, sunset: 10, bird: 10, storm: 6, llama: 8 } },
   ],
 
   platforms: {
@@ -93,17 +93,17 @@ export const CONF = {
   },
 
   // шанс хищного облака на ярус (доп. к обычной платформе), по видам
-  enemy: { fromM: 1700, chance: { croc: 0.018, snake: 0.014 } },
+  enemy: { fromM: 1000, chance: { croc: 0.018, snake: 0.014 } },
 
   // мега-редкий СУПЕР МАРИО: прыжок превращает героя в ГРИБКА.
   // После превращения — грибная лихорадка: марио повсюду (но уже бесполезные)
-  mario: { fromM: 2450, chance: 0.012, feverChance: 0.8, feverLengthM: 1500 },
+  mario: { fromM: 1500, chance: 0.012, feverChance: 0.8, feverLengthM: 1500 },
 
   // дождевой пояс: начинается где-то в [minStartM..maxStartM], длится lengthM.
   // Внутри — дождь на весь экран и резко больше грозовых туч
   rain: {
-    minStartM: 2700,
-    maxStartM: 3700,
+    minStartM: 1700,
+    maxStartM: 2700,
     lengthM: 1000,
     stormWeight: 130, // вес грозовых туч внутри пояса (обычно 4-6) — гроза почти всюду
     edgeM: 80,        // плавный вход/выход из дождя
@@ -119,7 +119,7 @@ export const CONF = {
 
   // мыльный пузырь: медленно несёт вверх, лопается сам или по тапу
   bubble: {
-    fromM: 950,
+    fromM: 700,
     intervalM: [800, 1600],
     speed: 230,     // px/s плавного подъёма
     duration: 4.5,  // секунд, потом лопается сам
@@ -127,7 +127,7 @@ export const CONF = {
 
   // реактивный ранец: подбираешь — взмываешь, минуя препятствия
   jet: {
-    fromM: 1450,           // первый не раньше этой высоты
+    fromM: 1100,           // первый не раньше этой высоты
     intervalM: [700, 1400],// дальше каждые столько метров
     speed: 1500,           // px/s вертикального взлёта
     duration: 2.2,         // секунд полёта (~330 м)

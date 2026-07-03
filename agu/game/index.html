@@ -78,6 +78,8 @@ window.addEventListener('unhandledrejection', (e) => {
 
 const BASE_SPEED = 100; // px/sec
 const EXPECTED_GAME_TIME = 170; // ~ as track. Will be faster bcs of loosing hp
+const SPRINT_HP_DRAIN = 5;                   // ФИГАЧИТЬ: расход здоровья, hp/сек
+const BOW_HP_DRAIN    = SPRINT_HP_DRAIN / 4; // ПРОГНУТЬСЯ: вчетверо меньше
 const LAMP_COUNT = 6;  // количество уличных фонарей (+ столько же отражений на воде)
 
 const AGE_TILT  = [0, 5, 5, 8, 10, 12];   // degrees of resting body tilt per stage
@@ -2889,10 +2891,13 @@ class GameScene extends Phaser.Scene {
     const bowFactor = this.state.isBowing ? 0.4 : 1;
     const effSpd    = this._dayOffActive ? 0 : (this.state.isSprinting ? spd * 2 : spd) * bowFactor * (this._ropeSlack ? 0.5 : 1);
 
-    // Спринт: дополнительный расход здоровья
-    if (this.state.isSprinting) {
-      this.state.health = Math.max(0, this.state.health - 5 * dt);
-    }
+    // Действия тратят здоровье: ФИГАЧИТЬ быстро, ПРОГНУТЬСЯ — вчетверо меньше.
+    // Суммарный темп запоминаем — HUD подсвечивает полоску при ускоренном расходе
+    let hpDrain = 0;
+    if (this.state.isSprinting) hpDrain += SPRINT_HP_DRAIN;
+    if (this.state.isBowing)    hpDrain += BOW_HP_DRAIN;
+    if (hpDrain > 0) this.state.health = Math.max(0, this.state.health - hpDrain * dt);
+    this._hpDrain = hpDrain;
 
     // Все слои масштабируются на effSpd — спринт ускоряет мир
     this.tl4.tilePositionX += BASE_SPEED * 0.1 * effSpd * dt;
@@ -3158,7 +3163,22 @@ class GameScene extends Phaser.Scene {
       // заливка
       const hw = Math.round(w * Math.min(this.state.health, 100) / 100);
       const mw = Math.round(w * Math.min(this.state.money, 1_000_000) / 1_000_000);
-      if (hw > 0) { this.barGfx.fillStyle(0xdd2222, 1); this.barGfx.fillRect(x, hy, hw, h); }
+      if (hw > 0) {
+        // при ускоренном расходе полоска тревожно мигает:
+        // ФИГАЧИТЬ — ярко и часто, ПРОГНУТЬСЯ — мягче и реже
+        let hpCol = 0xdd2222;
+        const drain = this._hpDrain || 0;
+        if (drain > 0) {
+          const fast = drain >= SPRINT_HP_DRAIN;
+          const on = Math.sin(this.time.now * (fast ? 0.02 : 0.01)) > 0;
+          if (on) hpCol = fast ? 0xff8833 : 0xff5522;
+        }
+        this.barGfx.fillStyle(hpCol, 1); this.barGfx.fillRect(x, hy, hw, h);
+        if (drain > 0) {
+          this.barGfx.lineStyle(1, 0xffcc44, 0.9);
+          this.barGfx.strokeRect(x, hy, hw, h);
+        }
+      }
       if (mw > 0) { this.barGfx.fillStyle(0x22dd55, 1); this.barGfx.fillRect(x, my, mw, h); }
       // рамка
       this.barGfx.lineStyle(1, 0x444444, 0.7);

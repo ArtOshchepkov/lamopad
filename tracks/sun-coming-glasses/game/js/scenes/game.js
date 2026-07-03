@@ -24,6 +24,10 @@ export class GameScene extends Phaser.Scene {
     this.field.onLightning = (pts) => this.boltHits(pts);
     this.player = new Player(this, CONF.player.startX, CONF.player.startY);
 
+    // декор мира (строчки, флажки, черепки): копится за спиной — чистим пачкой
+    this.worldDecor = [];
+    this.decorSweepAt = 0;
+
     this.deaths = this.loadDeaths();
     this.buildDeathMarks();
     this.buildRecordLine();
@@ -147,10 +151,10 @@ export class GameScene extends Phaser.Scene {
       groups.set(key, (groups.get(key) || 0) + 1);
     }
     for (const [m, n] of groups) {
-      this.add.text(6, -m * CONF.pxPerM, n > 1 ? `💀×${n}` : '💀', {
+      this.worldDecor.push(this.add.text(6, -m * CONF.pxPerM, n > 1 ? `💀×${n}` : '💀', {
         fontFamily: 'Nunito, sans-serif', fontSize: '15px', fontStyle: '700',
         color: '#ff5040', stroke: '#2a0d3e', strokeThickness: 3,
-      }).setOrigin(0, 0.5).setDepth(2).setAlpha(0.9).setResolution(this.dpr());
+      }).setOrigin(0, 0.5).setDepth(2).setAlpha(0.9).setResolution(this.dpr()));
     }
   }
 
@@ -232,6 +236,18 @@ export class GameScene extends Phaser.Scene {
     this.spawnFlags(cam);
     this.updateJetPickups(cam);
     this.updateBubblePickups(cam);
+
+    // раз в секунду сносим декор, ушедший под нижнюю кромку
+    if (time > this.decorSweepAt) {
+      this.decorSweepAt = time + 1000;
+      const decorLimit = cam.scrollY + CONF.height + 300;
+      for (let i = this.worldDecor.length - 1; i >= 0; i--) {
+        if (this.worldDecor[i].y > decorLimit) {
+          this.worldDecor[i].destroy();
+          this.worldDecor.splice(i, 1);
+        }
+      }
+    }
 
     // высота
     if (curM > this.maxM) {
@@ -320,12 +336,11 @@ export class GameScene extends Phaser.Scene {
     while (this.lyricIdx < this.lyricMarkers.length &&
            this.lyricMarkers[this.lyricIdx].y >= bound) {
       const mk = this.lyricMarkers[this.lyricIdx++];
-      this.add.text(CONF.width / 2, mk.y, mk.text, {
+      this.worldDecor.push(this.add.text(CONF.width / 2, mk.y, mk.text, {
         fontFamily: 'Nunito, sans-serif', fontStyle: 'italic',
         fontSize: '15px', color: CONF.colors.text, align: 'center',
         wordWrap: { width: 330 },
-      }).setOrigin(0.5).setDepth(2).setAlpha(0.55).setResolution(this.dpr());
-      // тексты позади нас чистит сборщик вместе с камерой — их мало, не пулим
+      }).setOrigin(0.5).setDepth(2).setAlpha(0.55).setResolution(this.dpr()));
     }
   }
 
@@ -336,11 +351,13 @@ export class GameScene extends Phaser.Scene {
            this.flagMarkers[this.flagIdx].y >= bound) {
       const mk = this.flagMarkers[this.flagIdx++];
       const x = mk.left ? 22 : CONF.width - 22;
-      this.add.image(x, mk.y - 16, 'flag').setDepth(2).setFlipX(!mk.left).setAlpha(0.95);
-      this.add.text(mk.left ? 38 : CONF.width - 38, mk.y - 12, `${mk.m.m} м`, {
-        fontFamily: 'Unbounded, sans-serif', fontSize: '12px', fontStyle: '700',
-        color: CONF.colors.gold, stroke: '#3a0d18', strokeThickness: 4,
-      }).setOrigin(mk.left ? 0 : 1, 0.5).setDepth(2).setAlpha(0.9).setResolution(this.dpr());
+      this.worldDecor.push(
+        this.add.image(x, mk.y - 16, 'flag').setDepth(2).setFlipX(!mk.left).setAlpha(0.95),
+        this.add.text(mk.left ? 38 : CONF.width - 38, mk.y - 12, `${mk.m.m} м`, {
+          fontFamily: 'Unbounded, sans-serif', fontSize: '12px', fontStyle: '700',
+          color: CONF.colors.gold, stroke: '#3a0d18', strokeThickness: 4,
+        }).setOrigin(mk.left ? 0 : 1, 0.5).setDepth(2).setAlpha(0.9).setResolution(this.dpr()),
+      );
     }
   }
 

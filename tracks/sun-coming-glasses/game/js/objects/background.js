@@ -233,7 +233,7 @@ export class Background {
     // единичный вектор курса — след тянется строго за хвостом
     const len = Math.hypot(endX - startX, endY - startY);
     const ux = (endX - startX) / len, uy = (endY - startY) / len;
-    const puffGap = this.lowGfx ? 28 : 15;
+    const puffGap = this.lowGfx ? 28 : 18;
     let lastX = plane.x, lastY = plane.y;
 
     scene.tweens.add({
@@ -255,7 +255,7 @@ export class Background {
             targets: puff,
             alpha: 0,
             scale: puff.scale + 1.1,
-            duration: Phaser.Math.Between(2000, 3000),
+            duration: Phaser.Math.Between(1600, 2400),
             onComplete: () => puff.destroy(),
           });
         }

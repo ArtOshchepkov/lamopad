@@ -2609,27 +2609,41 @@ class GameScene extends Phaser.Scene {
     if (n === 5) this._tryAch('star5', 'ПОВЕЛИТЕЛЬ ЗВЁЗД', '5 звёзд — это уже созвездие');
   }
 
+  // Ачивка — не модалка, а крупная игровая надпись: «припечатывается»
+  // сверху как штамп (офисная бюрократия), потом уносится вверх
   showAchievement(title, sub) {
-    const W = this.scale.width;
+    const OUTLINE = '-2px -2px 0 #000,2px -2px 0 #000,-2px 2px 0 #000,2px 2px 0 #000,' +
+                    '0 2px 0 #000,0 -2px 0 #000,2px 0 0 #000,-2px 0 0 #000';
+    // Каждый штамп ложится по-своему: угол чуть гуляет, иногда — в другую сторону
+    const sign = Math.random() < 0.35 ? 1 : -1;
+    const restDeg  = sign * Phaser.Math.FloatBetween(1.2, 3.2);
+    const stampDeg = sign * Phaser.Math.FloatBetween(4.5, 8);
     const el = document.createElement('div');
     el.style.cssText = [
-      'position:fixed;top:8%;left:50%;transform:translateX(-50%) translateY(-30px);z-index:200',
-      'background:rgba(0,0,0,0.85);border:1px solid #ffd700;border-radius:6px',
-      'padding:8px 20px;text-align:center;pointer-events:none;opacity:0',
+      'position:fixed;top:7%;left:50%;z-index:200',
+      'transform:translateX(-50%) translateY(-10%) scale(1.7) rotate(' + stampDeg + 'deg)',
+      'width:max-content;max-width:90vw',
+      'text-align:center;pointer-events:none;opacity:0',
       'font-family:"Arial Black",Arial,sans-serif',
-      'transition:opacity .4s,transform .4s',
+      'transition:opacity .22s ease-out,transform .32s cubic-bezier(.2,1.7,.4,1)',
     ].join(';');
-    el.innerHTML = '<div style="color:#ffd700;font-size:13px;font-weight:900;letter-spacing:.08em">' + title + '</div>' +
-      '<div style="color:#aaa;font-size:10px;margin-top:2px">' + sub + '</div>';
+    el.innerHTML =
+      '<div style="color:#ffd700;font-size:clamp(20px,4.6vmin,34px);font-weight:900;' +
+        'letter-spacing:.06em;line-height:1.15;' +
+        'text-shadow:' + OUTLINE + ',0 0 18px rgba(255,180,0,0.5)">' + title + '</div>' +
+      '<div style="color:#ddd;font-size:clamp(12px,2.4vmin,17px);font-weight:900;' +
+        'margin-top:.5vmin;letter-spacing:.04em;' +
+        'text-shadow:-1px -1px 0 #000,1px -1px 0 #000,-1px 1px 0 #000,1px 1px 0 #000">' + sub + '</div>';
     document.body.appendChild(el);
     requestAnimationFrame(() => requestAnimationFrame(() => {
       el.style.opacity = '1';
-      el.style.transform = 'translateX(-50%) translateY(0)';
+      el.style.transform = 'translateX(-50%) translateY(0) scale(1) rotate(' + restDeg + 'deg)';
     }));
     setTimeout(() => {
+      el.style.transition = 'opacity .5s ease-in,transform .5s ease-in';
       el.style.opacity = '0';
-      el.style.transform = 'translateX(-50%) translateY(-20px)';
-      setTimeout(() => el.remove(), 500);
+      el.style.transform = 'translateX(-50%) translateY(-140%) scale(0.9) rotate(' + restDeg + 'deg)';
+      setTimeout(() => el.remove(), 550);
     }, 2500);
   }
 

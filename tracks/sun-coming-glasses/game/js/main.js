@@ -4,6 +4,15 @@ import { BootScene } from './scenes/boot.js';
 import { GameScene } from './scenes/game.js';
 import { UIScene } from './scenes/ui.js';
 
+// Узкие телефонные экраны: тянем поле по высоте под реальную пропорцию,
+// иначе FIT оставляет пустые поля по бокам. Ширина мира не меняется —
+// геймплей одинаковый, просто видно больше неба. Берём пропорцию физического
+// экрана (не окна): панели браузера прячутся на скролле, а поле уже не поменять
+const aspect = window.screen && screen.width < screen.height
+  ? screen.width / screen.height
+  : window.innerWidth / window.innerHeight;
+CONF.height = Phaser.Math.Clamp(Math.round(CONF.width / aspect), CONF.height, 1150);
+
 const game = new Phaser.Game({
   type: Phaser.AUTO,
   parent: 'game',

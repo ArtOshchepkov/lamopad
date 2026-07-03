@@ -104,7 +104,8 @@ export class UIScene extends Phaser.Scene {
   /** НОВЫЙ РЕКОРД: вздрог мира, ударные волны, солнце, слэм-текст, конфетти. */
   epicRecord() {
     const res = Math.min(window.devicePixelRatio || 1, 2);
-    const cx = CONF.width / 2, cy = CONF.height * 0.34;
+    // в нижней трети: сверху надпись загораживала игрока
+    const cx = CONF.width / 2, cy = CONF.height * 0.72;
 
     // мир вздрагивает и озаряется золотом
     const gameCam = this.scene.get('game').cameras.main;

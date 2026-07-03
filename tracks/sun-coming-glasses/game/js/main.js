@@ -4,14 +4,13 @@ import { BootScene } from './scenes/boot.js';
 import { GameScene } from './scenes/game.js';
 import { UIScene } from './scenes/ui.js';
 
-// Узкие телефонные экраны: тянем поле по высоте под реальную пропорцию,
-// иначе FIT оставляет пустые поля по бокам. Ширина мира не меняется —
-// геймплей одинаковый, просто видно больше неба. Берём пропорцию физического
-// экрана (не окна): панели браузера прячутся на скролле, а поле уже не поменять
-const aspect = window.screen && screen.width < screen.height
-  ? screen.width / screen.height
-  : window.innerWidth / window.innerHeight;
-CONF.height = Phaser.Math.Clamp(Math.round(CONF.width / aspect), CONF.height, 1150);
+// Телефоны: подгоняем высоту поля под реальный вьюпорт, иначе FIT оставляет
+// поля по бокам. Ширина мира не меняется — геймплей одинаковый. Страница не
+// скроллится, панели браузера не прячутся, поэтому меряем окно, а не экран;
+// в горизонтальной ориентации нормируем к портрету (играть лёжа не советуем)
+const vw = window.innerWidth, vh = window.innerHeight;
+const aspect = Math.min(vw, vh) / Math.max(vw, vh);
+CONF.height = Phaser.Math.Clamp(Math.round(CONF.width / aspect), 780, 1150);
 
 const game = new Phaser.Game({
   type: Phaser.AUTO,
@@ -70,6 +69,48 @@ muteSfxBtn.addEventListener('click', () => {
   sfxMuted = !sfxMuted;
   save(CONF.storage.sfxMuted, sfxMuted);
   renderMute();
+});
+
+// ─── Стартовый экран: звук, полноэкранный режим, ориентация ─────────────────
+const startOverlay = $('start');
+const optMusic = $('opt-music');
+const optSfx = $('opt-sfx');
+const optFs = $('opt-fs');
+optMusic.classList.toggle('off', musicMuted);
+optSfx.classList.toggle('off', sfxMuted);
+[optMusic, optSfx, optFs].forEach((b) =>
+  b.addEventListener('click', () => b.classList.toggle('off')));
+
+// полноэкранный режим не везде есть (iPhone — нет): прячем тумблер
+const docEl = document.documentElement;
+const requestFs = docEl.requestFullscreen || docEl.webkitRequestFullscreen;
+if (!requestFs) optFs.classList.add('hidden');
+
+// в горизонтальной ориентации советуем перевернуть
+const orientHint = $('orient-hint');
+const updateOrient = () => {
+  orientHint.classList.toggle('hidden', window.innerHeight >= window.innerWidth);
+};
+updateOrient();
+window.addEventListener('resize', updateOrient);
+
+$('start-btn').addEventListener('click', () => {
+  musicMuted = optMusic.classList.contains('off');
+  sfxMuted = optSfx.classList.contains('off');
+  save(CONF.storage.muted, musicMuted);
+  save(CONF.storage.sfxMuted, sfxMuted);
+  renderMute();
+  if (requestFs && !optFs.classList.contains('off')) {
+    try { requestFs.call(docEl).catch(() => {}); } catch (e) { /* не судьба */ }
+  }
+  // взлёт: очки прыгают, экран уносится вверх — и открывается офис
+  startOverlay.classList.add('takeoff');
+  setTimeout(() => {
+    startOverlay.classList.add('hidden');
+    window.__scgReady = true; // теперь тап/клавиша запускают забег
+  }, 850);
+  // клик — жест пользователя: сразу разлочиваем музыку
+  if (!musicMuted) audio.play().catch(() => {});
 });
 
 game.events.on('scg-start', () => {

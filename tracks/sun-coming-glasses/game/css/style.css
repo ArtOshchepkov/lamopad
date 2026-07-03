@@ -17,10 +17,19 @@ html, body {
   font-family: 'Nunito', sans-serif;
   -webkit-tap-highlight-color: transparent;
   user-select: none;
+  -webkit-user-select: none;
+  -webkit-touch-callout: none;
+  touch-action: none;
 }
 
 #game { width: 100%; height: 100%; }
-#game canvas { display: block; }
+#game canvas {
+  display: block;
+  user-select: none;
+  -webkit-user-select: none;
+  -webkit-touch-callout: none;
+  touch-action: none;
+}
 
 /* ── кнопки звука: музыка и SFX отдельно ── */
 #audio-controls {
@@ -72,7 +81,9 @@ html, body {
 .load-title {
   font-family: 'Unbounded', sans-serif;
   font-weight: 900;
-  font-size: clamp(22px, 7vmin, 44px);
+  font-size: clamp(26px, 8.4vw, 48px);
+  line-height: 1.15;
+  text-align: center;
   color: var(--white);
   text-shadow: 0 0 24px rgba(255, 150, 40, 0.5);
 }
@@ -93,6 +104,315 @@ html, body {
 .load-dots span:nth-child(2) { animation-delay: 0.4s; }
 .load-dots span:nth-child(3) { animation-delay: 0.8s; }
 @keyframes load-dot { 0%, 100% { opacity: 0.15; } 50% { opacity: 1; } }
+
+/* студия-производитель: скромно, но присутствует; ведёт на главную */
+.load-studio {
+  position: absolute;
+  bottom: calc(max(9px, env(safe-area-inset-bottom)) + 17px);
+  left: 50%;
+  transform: translateX(-50%);
+  white-space: nowrap;
+  font-family: 'Unbounded', sans-serif;
+  font-weight: 700;
+  font-size: 13px;
+  letter-spacing: 0.3em;
+  text-transform: uppercase;
+  color: var(--text);
+  opacity: 0.45;
+  text-decoration: none;
+}
+
+/* ── стартовый экран: сцена, а не модалка ── */
+#start {
+  position: fixed;
+  inset: 0;
+  z-index: 95;
+  overflow: hidden;
+  background: linear-gradient(180deg, #241058 0%, #71178f 45%, #c81653 80%, #ff4d1c 100%);
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  text-align: center;
+  padding: 24px;
+  transition: opacity 0.45s ease;
+}
+#start.hidden { opacity: 0; pointer-events: none; }
+
+/* солнце встаёт за заголовком: ленивые лучи + тёплый диск */
+#start::before {
+  content: '';
+  position: absolute;
+  top: -46vmin; left: 50%;
+  width: 100vmin; height: 100vmin;
+  margin-left: -50vmin;
+  border-radius: 50%;
+  background: repeating-conic-gradient(rgba(255, 207, 63, 0.13) 0 8deg, transparent 8deg 20deg);
+  animation: sun-spin 80s linear infinite;
+}
+#start::after {
+  content: '';
+  position: absolute;
+  top: -24vmin; left: 50%;
+  width: 44vmin; height: 44vmin;
+  margin-left: -22vmin;
+  border-radius: 50%;
+  background: radial-gradient(circle, #ffe9a0 0%, #ffcf3f 45%, rgba(255, 150, 40, 0) 72%);
+}
+@keyframes sun-spin { to { transform: rotate(360deg); } }
+
+/* попутки-облака */
+.s-cloud {
+  position: absolute;
+  width: 30vmin; height: 9vmin;
+  background: rgba(255, 246, 236, 0.14);
+  border-radius: 9vmin;
+  animation: cloud-drift 9s ease-in-out infinite alternate;
+}
+.s-cloud::before, .s-cloud::after {
+  content: '';
+  position: absolute;
+  background: inherit;
+  border-radius: 50%;
+}
+.s-cloud::before { width: 12vmin; height: 12vmin; left: 4vmin; top: -5vmin; }
+.s-cloud::after { width: 8vmin; height: 8vmin; right: 5vmin; top: -3.4vmin; }
+.s-cloud.c1 { left: -6vmin; top: 22%; }
+.s-cloud.c2 { right: -8vmin; top: 47%; animation-delay: -4s; }
+.s-cloud.c3 { left: 10vmin; bottom: 6%; animation-delay: -7s; scale: 0.65; }
+@keyframes cloud-drift { from { translate: 0 0; } to { translate: 5vmin -2vmin; } }
+
+.start-inner {
+  position: relative;
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  gap: 14px;
+  max-width: 440px;
+}
+
+.start-title {
+  font-family: 'Unbounded', sans-serif;
+  font-weight: 900;
+  font-size: clamp(24px, 8.4vw, 44px);
+  line-height: 1.12;
+  color: var(--white);
+  text-shadow: 0 3px 0 rgba(90, 10, 50, 0.35), 0 0 26px rgba(255, 150, 40, 0.5);
+}
+.start-title .sun-word {
+  background: linear-gradient(180deg, #fff6ec, #ffcf3f 55%, #ff7d1e);
+  -webkit-background-clip: text;
+  background-clip: text;
+  color: transparent;
+  text-shadow: none;
+  filter: drop-shadow(0 0 14px rgba(255, 180, 40, 0.5));
+}
+
+.start-glasses {
+  font-size: clamp(40px, 12vmin, 68px);
+  animation: load-hop 0.7s cubic-bezier(.36, 0, .64, 1) infinite alternate;
+  filter: drop-shadow(0 6px 10px rgba(90, 0, 40, 0.45));
+}
+
+.start-sub {
+  font-size: 16.5px;
+  font-style: italic;
+  color: var(--text);
+  opacity: 0.85;
+  line-height: 1.4;
+}
+
+.start-toggles {
+  display: flex;
+  flex-wrap: wrap;
+  justify-content: center;
+  gap: 10px;
+  margin-top: 4px;
+}
+.tgl {
+  font-family: 'Nunito', sans-serif;
+  font-weight: 700;
+  font-size: 15.5px;
+  color: var(--white);
+  background: rgba(26, 5, 46, 0.55);
+  border: 1px solid rgba(255, 207, 63, 0.5);
+  border-radius: 24px;
+  padding: 9px 15px;
+  cursor: pointer;
+  transition: opacity 0.2s, transform 0.15s;
+}
+.tgl:active { transform: scale(0.94); }
+.tgl::before { content: '✓'; color: #8fe89a; margin-right: 7px; font-weight: 800; }
+.tgl.off::before { content: '✕'; color: #ff7a7a; }
+.tgl.off { opacity: 0.5; }
+.tgl.hidden { display: none; }
+
+.start-warn {
+  font-size: 13.5px;
+  font-weight: 700;
+  letter-spacing: 0.08em;
+  text-transform: uppercase;
+  color: #ffb8dd;
+  opacity: 0.9;
+}
+
+.start-orient {
+  font-size: 15px;
+  color: var(--gold);
+  animation: new-rec 1s ease-in-out infinite alternate;
+}
+.start-orient.hidden { display: none; }
+
+.start-go {
+  position: relative;
+  font-family: 'Unbounded', sans-serif;
+  font-weight: 700;
+  font-size: clamp(16px, 4.6vmin, 20px);
+  color: #5a1400;
+  background: linear-gradient(135deg, #ffce3a, #ff8a1e);
+  border: none;
+  border-radius: 44px;
+  padding: 16px 46px;
+  margin-top: 6px;
+  cursor: pointer;
+  box-shadow: 0 0 30px rgba(255, 180, 50, 0.5), 0 5px 0 rgba(120, 30, 0, 0.35);
+  animation: go-glow 1.4s ease-in-out infinite alternate;
+}
+.start-go:active { transform: translateY(2px) scale(0.97); }
+/* гало-солнце: вращающиеся лучи + тёплое ядро. Кнопка — второе солнце */
+.start-go::before {
+  content: '';
+  position: absolute;
+  left: 50%; top: 50%;
+  width: 52vmin; height: 52vmin;
+  margin: -26vmin 0 0 -26vmin;
+  border-radius: 50%;
+  background:
+    radial-gradient(closest-side, rgba(255, 200, 60, 0.5), rgba(255, 170, 40, 0.16) 55%, transparent 72%),
+    repeating-conic-gradient(rgba(255, 207, 63, 0.2) 0 10deg, transparent 10deg 24deg);
+  z-index: -1;
+  pointer-events: none;
+  animation: halo-sun 16s linear infinite;
+}
+.start-go::after {
+  content: '';
+  position: absolute;
+  inset: -30px -42px;
+  border-radius: 50%;
+  background: radial-gradient(closest-side, rgba(255, 222, 110, 0.55), transparent 70%);
+  z-index: -1;
+  pointer-events: none;
+  animation: halo-pulse 1.4s ease-in-out infinite alternate;
+}
+@keyframes halo-sun { to { transform: rotate(360deg); } }
+@keyframes halo-pulse {
+  from { opacity: 0.5; transform: scale(0.9); }
+  to   { opacity: 1; transform: scale(1.12); }
+}
+
+/* ── взлёт: очки прыгают первыми, экран уносится вверх, солнце вспыхивает ── */
+#start.takeoff { pointer-events: none; }
+#start.takeoff .start-glasses {
+  animation: glasses-launch 0.55s cubic-bezier(0.4, -0.3, 0.7, 1) forwards;
+}
+@keyframes glasses-launch {
+  25%  { transform: translateY(7px) scale(1.18, 0.78); } /* присели... */
+  100% { transform: translateY(-64vh) scale(0.9) rotate(-8deg); } /* ...и в небо */
+}
+#start.takeoff .start-go::before,
+#start.takeoff .start-go::after {
+  animation: halo-burst 0.55s ease-out forwards;
+}
+@keyframes halo-burst {
+  to { transform: scale(5); opacity: 0; }
+}
+#start.takeoff {
+  animation: start-takeoff 0.7s cubic-bezier(0.55, 0, 0.85, 0.4) 0.12s forwards;
+}
+@keyframes start-takeoff {
+  to { transform: translateY(-112%); }
+}
+@keyframes go-glow {
+  from { box-shadow: 0 0 14px rgba(255, 180, 50, 0.3), 0 5px 0 rgba(120, 30, 0, 0.35); }
+  to   { box-shadow: 0 0 42px rgba(255, 190, 60, 0.75), 0 5px 0 rgba(120, 30, 0, 0.35); }
+}
+
+/* ── хаверы: только на стартовом экране (загрузка мимолётна) ── */
+
+/* заголовок вспыхивает, как солнце из-за облака */
+.start-title { transition: text-shadow 0.35s; }
+.start-title:hover {
+  text-shadow: 0 3px 0 rgba(90, 10, 50, 0.35), 0 0 40px rgba(255, 190, 50, 0.85);
+}
+.start-title .sun-word { transition: filter 0.35s; }
+.start-title:hover .sun-word { filter: drop-shadow(0 0 24px rgba(255, 205, 70, 0.95)); }
+
+/* очки ловят солнечный блик */
+.start-glasses { transition: filter 0.4s; }
+.start-glasses:hover {
+  filter: drop-shadow(0 6px 10px rgba(90, 0, 40, 0.45))
+          drop-shadow(0 0 20px rgba(255, 214, 90, 0.95));
+}
+
+/* облако пыхает, как под очками в игре */
+.s-cloud { transition: background 0.35s; }
+.s-cloud:hover { background: rgba(255, 246, 236, 0.28); }
+
+/* студия расправляет плечи */
+#start .load-studio { transition: opacity 0.35s, letter-spacing 0.35s; }
+#start .load-studio:hover { opacity: 0.95; letter-spacing: 0.48em; }
+
+/* тумблеры приподнимаются к солнцу */
+.tgl { transition: opacity 0.2s, transform 0.15s, border-color 0.2s, background 0.2s; }
+.tgl:hover {
+  transform: translateY(-2px);
+  border-color: var(--gold);
+  background: rgba(60, 16, 80, 0.7);
+}
+.tgl:hover:active { transform: translateY(0) scale(0.94); }
+
+/* подзаголовок и предупреждение проявляются */
+.start-sub { transition: opacity 0.3s; }
+.start-sub:hover { opacity: 1; }
+.start-warn { transition: opacity 0.3s; }
+.start-warn:hover { opacity: 1; }
+
+/* «Погнали!» тянется вверх — туда и дорога */
+.start-go { transition: transform 0.15s; }
+.start-go:hover { transform: translateY(-3px) scale(1.03); }
+.start-go:hover:active { transform: translateY(2px) scale(0.97); }
+
+/* другие игры: скромная дверца рядом с главной дорогой */
+.start-more {
+  font-family: 'Nunito', sans-serif;
+  font-weight: 700;
+  font-size: 13.5px;
+  color: var(--text);
+  opacity: 0.65;
+  text-decoration: none;
+  border: 1px solid rgba(255, 231, 210, 0.3);
+  border-radius: 20px;
+  padding: 7px 16px;
+  transition: opacity 0.2s, border-color 0.2s, transform 0.15s;
+}
+.start-more:hover {
+  opacity: 1;
+  border-color: var(--gold);
+  color: var(--gold);
+  transform: translateY(-2px);
+}
+
+/* кое-какие права — очень мелко, но защищены */
+.load-copy {
+  position: absolute;
+  bottom: max(9px, env(safe-area-inset-bottom));
+  left: 50%;
+  transform: translateX(-50%);
+  white-space: nowrap;
+  font-size: 10px;
+  letter-spacing: 0.05em;
+  color: var(--text);
+  opacity: 0.55;
+}
 
 /* ── экран падения ── */
 #death {

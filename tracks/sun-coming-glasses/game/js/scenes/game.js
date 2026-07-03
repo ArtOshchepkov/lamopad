@@ -187,6 +187,7 @@ export class GameScene extends Phaser.Scene {
   }
 
   startRun() {
+    if (!window.__scgReady) return; // стартовый экран ещё не закрыт
     if (this.state !== 'ready') return;
     this.state = 'run';
     this.player.bounce(CONF.physics.bounceVy);

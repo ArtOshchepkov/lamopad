@@ -45,6 +45,37 @@
 <script>
 'use strict';
 
+// ─── Ловушка ошибок ───────────────────────────────────────────────────────────
+// Phaser планирует следующий RAF-кадр ПОСЛЕ колбэка: неперехваченное исключение
+// внутри кадра убивает игровой цикл навсегда — игра «зависает» без следов.
+// Пишем такие ошибки в консоль и localStorage (agu_errors, последние 20)
+// и показываем бейдж ⚠ — чтобы редкие зависания можно было диагностировать.
+function _logFatal(msg) {
+  try {
+    const arr = JSON.parse(localStorage.getItem('agu_errors') || '[]');
+    arr.push(new Date().toISOString() + ' ' + msg);
+    localStorage.setItem('agu_errors', JSON.stringify(arr.slice(-20)));
+  } catch (e) { /* localStorage недоступен — ну и ладно */ }
+  let badge = document.getElementById('_agu_err');
+  if (!badge) {
+    badge = document.createElement('div');
+    badge.id = '_agu_err';
+    badge.title = 'Ошибка JS — детали в консоли и localStorage.agu_errors. Клик — скрыть.';
+    badge.style.cssText = 'position:fixed;bottom:8px;left:8px;z-index:99999;cursor:pointer;' +
+      'font:900 14px "Arial Black",Arial,sans-serif;color:#ff5544;' +
+      'background:rgba(0,0,0,0.7);border:1px solid #ff5544;border-radius:4px;padding:3px 8px';
+    badge.textContent = '⚠';
+    badge.addEventListener('pointerdown', () => badge.remove());
+    document.body.appendChild(badge);
+  }
+}
+window.addEventListener('error', (e) => {
+  _logFatal((e.message || 'error') + ' @ ' + (e.filename || '') + ':' + (e.lineno || 0));
+});
+window.addEventListener('unhandledrejection', (e) => {
+  _logFatal('promise: ' + ((e.reason && (e.reason.stack || e.reason.message)) || e.reason));
+});
+
 const BASE_SPEED = 100; // px/sec
 const EXPECTED_GAME_TIME = 170; // ~ as track. Will be faster bcs of loosing hp
 const LAMP_COUNT = 6;  // количество уличных фонарей (+ столько же отражений на воде)
@@ -2500,7 +2531,10 @@ class GameScene extends Phaser.Scene {
 
       // Кнопка 1 (главный CTA): ПРОДОЛЖИТЬ ИГРУ
       let countdown = 3;
+      let restartTicking = false; // повторные клики не плодят параллельные цепочки
       const btn2 = mkGoBtn(0, 'ПРОДОЛЖИТЬ ИГРУ', 0x1c4c2c, () => {
+        if (restartTicking) return;
+        restartTicking = true;
         const tick = () => {
           btn2.lbl.setText('ИГРА ПРОДОЛЖИТСЯ В ЛЮБОМ СЛУЧАЕ ' + countdown + '...');
           countdown--;

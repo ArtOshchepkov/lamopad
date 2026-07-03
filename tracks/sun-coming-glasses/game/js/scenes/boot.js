@@ -167,18 +167,23 @@ export class BootScene extends Phaser.Scene {
       g.beginPath(); g.arc(48, 12, 4, 0.15 * Math.PI, 0.85 * Math.PI); g.strokePath();
     });
 
-    // Чемодан: солидный, но ненадёжный
+    // Чемодан: чёрный, казённый — такому доверять не хочется
     this.tex('p-suitcase', 76, 34, (g) => {
-      g.fillStyle(0x2a0d3e, 0.4); g.fillEllipse(38, 31, 66, 8);   // тень
-      g.lineStyle(3, 0x4a2c14);
+      g.fillStyle(0x060410, 0.55); g.fillEllipse(38, 31, 66, 8);  // тень
+      g.lineStyle(3, 0x0a0810);
       g.strokeRoundedRect(28, 1, 20, 8, 3);                        // ручка
-      g.fillStyle(0x8a5a34); g.fillRoundedRect(4, 6, 68, 24, 6);   // корпус
-      g.fillStyle(0xa06a3e); g.fillRoundedRect(4, 6, 68, 10, { tl: 6, tr: 6, bl: 0, br: 0 }); // крышка
-      g.fillStyle(0x5d3a1e);                                       // ремни
+      g.fillStyle(0x1a1622); g.fillRoundedRect(4, 6, 68, 24, 6);   // корпус
+      g.fillStyle(0x2c2740); g.fillRoundedRect(4, 6, 68, 10, { tl: 6, tr: 6, bl: 0, br: 0 }); // холодный отлив крышки
+      g.fillStyle(0x0e0c16);                                       // ремни
       g.fillRect(16, 6, 7, 24); g.fillRect(53, 6, 7, 24);
-      g.lineStyle(2, 0x4a2c14); g.strokeRoundedRect(4, 6, 68, 24, 6);
-      g.fillStyle(0xd8b060);                                       // уголки-заклёпки
+      g.lineStyle(2, 0x0a0810); g.strokeRoundedRect(4, 6, 68, 24, 6);
+      g.fillStyle(0x767284);                                       // стальные заклёпки
       g.fillCircle(9, 11, 2); g.fillCircle(67, 11, 2); g.fillCircle(9, 26, 2); g.fillCircle(67, 26, 2);
+      g.lineStyle(2, 0x453e58, 0.9);                               // царапины бывалого
+      g.beginPath(); g.moveTo(29, 21); g.lineTo(44, 26); g.strokePath();
+      g.beginPath(); g.moveTo(36, 17); g.lineTo(48, 20); g.strokePath();
+      // ободранный обрывок наклейки — единственное светлое пятно
+      g.fillStyle(0x8a8494, 0.75); g.fillTriangle(24, 25, 32, 20, 34, 27);
     });
 
     // Пташка (касатик): летит боком, крыло вверх

@@ -50,21 +50,42 @@ export class PlatformField {
     while (this.lastY > worldY) {
       const m = -this.lastY / CONF.pxPerM;
       const zone = this.zoneFor(m);
-      this.lastY -= R(zone.gap[0], zone.gap[1]);
+      let gap = R(zone.gap[0], zone.gap[1]);
+      // со слабой платформы большой разрыв не допрыгнуть — поджимаем
+      const cap = this.prevPlat && CONF.spawn.gapCapAfter[this.prevPlat.type];
+      if (cap) gap = Math.min(gap, cap);
+      this.lastY -= gap;
       // в дождевом поясе грозовых туч гораздо больше
       const inRain = this.rainBand && m >= this.rainBand.from && m <= this.rainBand.to;
       const types = inRain ? { ...zone.types, storm: CONF.rain.stormWeight } : zone.types;
-      const type = this.pickType(types);
+      let type = this.pickType(types);
+      // над стикером нельзя таймиговое: он одноразовый, цикл закатика не
+      // переждать, летящую чайку не подгадать — перекатываем в облако
+      if ((type === 'sunset' || type === 'bird') &&
+          this.prevPlat && this.prevPlat.type === 'sticker') {
+        type = 'cloud';
+      }
       const x = this.randX(type);
-      this.place(type, x, this.lastY);
+      const plat = this.place(type, x, this.lastY);
+      // закатик над закатиком — бегущая волна: фаза верхнего отстаёт на 0.6с,
+      // он проявляется к твоему прилёту (противофаза запирала путь наверх)
+      if (type === 'sunset' && this.prevPlat && this.prevPlat.type === 'sunset') {
+        const c = plat.def.cycle;
+        plat.t = this.prevPlat.t + (c.visible + c.hidden) / 1000 - 0.6;
+      }
+      this.prevPlat = plat;
       // чемодан — ловушка: на той же высоте всегда есть честная опора
       if (type === 'suitcase') {
         this.place('cloud', this.apartX(x), this.lastY - R(4, 18));
       }
       // хищное облако — добавка к ярусу: честный путь не занимает
-      if (type !== 'suitcase' && m > CONF.enemy.fromM && Math.random() < CONF.enemy.chance) {
-        const enemy = Phaser.Utils.Array.GetRandom(CONF.enemy.types);
-        this.place(enemy, this.apartX(x), this.lastY - R(4, 16));
+      if (type !== 'suitcase' && m > CONF.enemy.fromM) {
+        for (const enemy in CONF.enemy.chance) {
+          if (Math.random() < CONF.enemy.chance[enemy]) {
+            this.place(enemy, this.apartX(x), this.lastY - R(4, 16));
+            break;
+          }
+        }
       }
       // мега-редкий Марио — тоже добавка. После превращения игрока в грибка
       // Марио заполоняют небо на feverLengthM метров, хотя толку от них никакого
@@ -457,7 +478,7 @@ export class PlatformField {
   /** Чемодан проламывается: отскока нет. */
   crumble(p) {
     p.dead = true;
-    this.puff(p, 0x8a5a34, 7);
+    this.puff(p, 0x38324a, 7);
     this.scene.tweens.add({
       targets: p.sprite,
       y: p.sprite.y + 110,

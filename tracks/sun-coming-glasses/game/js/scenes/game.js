@@ -237,7 +237,7 @@ export class GameScene extends Phaser.Scene {
     this.suitcaseBlame = plat.type === 'suitcase'; // упал после чемодана — виноват он
 
     switch (plat.type) {
-      case 'sticker':л
+      case 'sticker':
         this.player.bounce(P.stickerVy, 0.16);
         this.field.breakSticker(plat);
         break;

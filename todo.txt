@@ -1,5 +1,3 @@
-1) На основной странице добавить наверху главные разделы: треки, игры, рассказы
-2) в /tracks АТГУЛ тоже сделай по дизайну АтГУл (выдели А Г У цветами отдельно)
-3) звёзды более кликабельные
-4) https://www.goatcounter.com/
-5) Кнопка скачать MP3
+phaser.min.js:1 Uncaught TypeError: Cannot read properties of null (reading 'cut') <- agu when restart
+
+Later: https://www.goatcounter.com/

@@ -90,6 +90,12 @@ export class GameScene extends Phaser.Scene {
             Phaser.Math.Between(70, CONF.width - 70), cam.scrollY + 200);
           this.cheatBuf = '';
         }
+        else if (this.cheatBuf.endsWith('croco')) {
+          const cam = this.cameras.main;
+          this.field.place('croc',
+            Phaser.Math.Between(70, CONF.width - 70), cam.scrollY + 200);
+          this.cheatBuf = '';
+        }
         else if (this.cheatBuf.endsWith('jet')) { this.spawnJetOnCloud(); this.cheatBuf = ''; }
         else if (this.cheatBuf.endsWith('rain')) {
           // ливень прямо здесь и на километр вверх

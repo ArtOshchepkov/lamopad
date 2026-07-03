@@ -64,7 +64,7 @@
 
 <!-- экран падения -->
 <div id="death" class="hidden">
-  <div class="death-box">
+  <div class="death-inner">
     <p class="death-quote">Раскисать и откисать —<br>это разные вещи.</p>
     <p id="death-reason" class="death-reason"></p>
     <div class="death-stats">
@@ -72,8 +72,45 @@
       <div id="death-best" class="death-best">рекорд · 0 м</div>
       <div id="death-new" class="death-new hidden">★ НОВЫЙ РЕКОРД! ★</div>
     </div>
-    <button id="restart" type="button" class="death-btn">Откиснуть и погнали</button>
-    <a class="death-link" href="../">← к треку «Солнценаступательные очки»</a>
+    <button id="restart" type="button" class="death-go">Откиснуть и погнали</button>
+    <button id="death-save" type="button" class="death-save">🎧 добавить трек к себе</button>
+    <div class="death-links">
+      <button id="order-open" type="button" class="death-more death-order">🎮 ХОЧУ ИГРУ ПОД СВОЙ ТРЕК</button>
+      <a class="death-more" href="../../../games/">другие игры</a>
+    </div>
+  </div>
+</div>
+
+<!-- заказать игру под свой трек -->
+<div id="order" class="hidden">
+  <div class="plat-inner">
+    <div class="plat-glasses">🕶</div>
+    <p class="plat-thanks">Игра под ваш трек</p>
+    <p class="order-text">Я в коммерческой <a class="order-gh" target="_blank" rel="noopener" href="https://github.com/ArtOshchepkov">разработке</a> 7+&nbsp;лет. Закончил ИТМО. С&nbsp;помощью нейронок и своих знаний сделаю игру для вашего трека всего за несколько дней. Разгон идеи и демо&nbsp;— бесплатно.</p>
+    <div class="plat-links">
+      <a class="plat p-mail" id="order-mail" href="mailto:tim.oshchepkov@gmail.com">✉️ tim.oshchepkov@gmail.com</a>
+      <a class="plat p-tg" target="_blank" rel="noopener" href="https://t.me/art_oshk">✈️ Телеграм · @art_oshk</a>
+    </div>
+    <a class="order-games" href="../../../games/">а какие ещё игры у тебя есть?</a>
+    <button id="order-close" type="button" class="plat-close">← назад</button>
+  </div>
+</div>
+
+<!-- площадки: спасибо и ссылки -->
+<div id="platforms" class="hidden">
+  <div class="plat-inner">
+    <div class="plat-glasses">🕶</div>
+    <p class="plat-thanks">Спасибо!<br>Рад, что трек понравился</p>
+    <div class="plat-links">
+      <a class="plat p-ya" target="_blank" rel="noopener" href="https://music.yandex.ru/album/38663792">Яндекс Музыка</a>
+      <a class="plat p-vk" target="_blank" rel="noopener" href="https://music.vk.com/link/6TBTq">VK Музыка</a>
+      <a class="plat p-sp" target="_blank" rel="noopener" href="https://open.spotify.com/album/6zImZch7GqXizMoUXIq0Jl">Spotify</a>
+      <a class="plat p-ap" target="_blank" rel="noopener" href="https://music.apple.com/ru/album/1850991276?mt=1&amp;at=1000lqjf&amp;ct=bq&amp;app=music">Apple Music</a>
+      <a class="plat p-zv" target="_blank" rel="noopener" href="https://zvuk.com/release/42745333">Звук</a>
+      <a class="plat p-yt" target="_blank" rel="noopener" href="https://www.youtube.com/watch?v=A0mOHyGgVPA">YouTube · клип</a>
+      <a class="plat p-mp3" href="../../sun-coming-glasses.mp3" download>⬇ Скачать mp3</a>
+    </div>
+    <button id="plat-close" type="button" class="plat-close">← назад</button>
   </div>
 </div>
 

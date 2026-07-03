@@ -430,57 +430,56 @@ html, body {
 }
 #death.hidden { opacity: 0; pointer-events: none; }
 
-.death-box {
-  background: var(--panel);
-  border: 1px solid rgba(255, 207, 63, 0.5);
-  border-radius: 18px;
-  padding: clamp(26px, 6vmin, 44px) clamp(22px, 6vmin, 44px);
-  max-width: 420px;
+.death-inner {
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  gap: 14px;
+  max-width: 440px;
   width: 100%;
   text-align: center;
-  box-shadow: 0 0 60px rgba(255, 120, 30, 0.25);
 }
 
 .death-quote {
   font-family: 'Unbounded', sans-serif;
   font-weight: 700;
-  font-size: clamp(16px, 4.6vmin, 22px);
+  font-size: clamp(18px, 5.2vmin, 25px);
   line-height: 1.5;
   color: var(--white);
-  margin-bottom: 22px;
+  text-shadow: 0 0 22px rgba(255, 120, 60, 0.35);
 }
 
 .death-reason {
   font-style: italic;
-  font-size: 15px;
+  font-size: 16px;
   color: #ffb8dd;
-  margin: -10px 0 18px;
 }
-
-.death-stats { margin-bottom: 26px; }
 
 .death-height {
   font-family: 'Unbounded', sans-serif;
   font-weight: 900;
-  font-size: clamp(36px, 11vmin, 56px);
-  color: var(--gold);
+  font-size: clamp(46px, 15vmin, 74px);
   line-height: 1.1;
-  text-shadow: 0 0 22px rgba(255, 180, 40, 0.45);
+  background: linear-gradient(180deg, #fff6ec, #ffcf3f 55%, #ff7d1e);
+  -webkit-background-clip: text;
+  background-clip: text;
+  color: transparent;
+  filter: drop-shadow(0 0 24px rgba(255, 180, 40, 0.45));
 }
 
 .death-best {
-  font-size: 15px;
+  font-size: 16px;
   color: var(--text);
   opacity: 0.75;
-  margin-top: 6px;
+  margin-top: 4px;
 }
 
 .death-new {
   font-family: 'Unbounded', sans-serif;
   font-weight: 700;
-  font-size: 15px;
+  font-size: 16px;
   color: var(--gold);
-  margin-top: 10px;
+  margin-top: 8px;
   animation: new-rec 1s ease-in-out infinite alternate;
 }
 .death-new.hidden { display: none; }
@@ -489,30 +488,197 @@ html, body {
   to   { text-shadow: 0 0 18px rgba(255, 207, 63, 0.8); }
 }
 
-.death-btn {
-  display: block;
-  width: 100%;
+/* главный CTA: снова в небо */
+.death-go {
   font-family: 'Unbounded', sans-serif;
   font-weight: 700;
-  font-size: clamp(14px, 4vmin, 17px);
+  font-size: clamp(15px, 4.4vmin, 19px);
   color: #5a1400;
   background: linear-gradient(135deg, #ffce3a, #ff8a1e);
   border: none;
-  border-radius: 40px;
-  padding: 15px 20px;
+  border-radius: 44px;
+  padding: 16px 40px;
+  margin-top: 10px;
   cursor: pointer;
-  box-shadow: 0 0 24px rgba(255, 180, 50, 0.45), 0 4px 0 rgba(120, 30, 0, 0.35);
+  box-shadow: 0 0 24px rgba(255, 180, 50, 0.45), 0 5px 0 rgba(120, 30, 0, 0.35);
+  animation: go-glow 1.4s ease-in-out infinite alternate;
   transition: transform 0.15s;
 }
-.death-btn:hover { transform: translateY(-2px) scale(1.02); }
-.death-btn:active { transform: translateY(1px) scale(0.98); }
+.death-go:hover { transform: translateY(-3px) scale(1.03); }
+.death-go:active, .death-go:hover:active { transform: translateY(2px) scale(0.97); }
 
-.death-link {
-  display: inline-block;
-  margin-top: 18px;
+/* вторичный CTA: забрать трек с собой в рюкзак */
+.death-save {
+  font-family: 'Nunito', sans-serif;
+  font-weight: 700;
+  font-size: 15.5px;
+  color: var(--gold);
+  background: rgba(255, 207, 63, 0.08);
+  border: 1.5px solid rgba(255, 207, 63, 0.55);
+  border-radius: 40px;
+  padding: 13px 28px;
+  cursor: pointer;
+  transition: transform 0.15s, background 0.2s, border-color 0.2s, box-shadow 0.25s;
+}
+.death-save:hover {
+  transform: translateY(-2px);
+  background: rgba(255, 207, 63, 0.18);
+  border-color: var(--gold);
+  box-shadow: 0 0 22px rgba(255, 190, 60, 0.35);
+}
+.death-save:active { transform: translateY(1px) scale(0.97); }
+
+/* третичное: едва заметные дверцы, столбиком */
+.death-links {
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  gap: 12px;
+  margin-top: 6px;
+}
+.death-order {
+  font-size: 15px;
+  font-weight: 700;
+  letter-spacing: 0.04em;
+  opacity: 0.75;
+}
+.death-more {
+  font-family: 'Nunito', sans-serif;
   font-size: 13px;
   color: var(--text);
-  opacity: 0.7;
+  opacity: 0.38;
   text-decoration: none;
+  background: none;
+  border: none;
+  padding: 0;
+  cursor: pointer;
+  transition: opacity 0.2s, color 0.2s;
 }
-.death-link:hover { opacity: 1; color: var(--gold); }
+.death-more:hover { opacity: 0.9; color: var(--gold); }
+
+/* ── площадки и заказ: спасибо и большие ссылки ── */
+#platforms,
+#order {
+  position: fixed;
+  inset: 0;
+  z-index: 96;
+  overflow: hidden;
+  background: linear-gradient(180deg, #0a0618 0%, #241058 55%, #71178f 125%);
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  text-align: center;
+  padding: 24px;
+  transition: opacity 0.35s ease;
+}
+#platforms.hidden,
+#order.hidden { opacity: 0; pointer-events: none; }
+
+.plat-inner {
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  gap: 14px;
+  width: 100%;
+  max-width: 360px;
+}
+
+.plat-glasses {
+  font-size: clamp(36px, 10vmin, 56px);
+  animation: load-hop 0.7s cubic-bezier(.36, 0, .64, 1) infinite alternate;
+  filter: drop-shadow(0 6px 10px rgba(90, 0, 40, 0.45));
+}
+
+.plat-thanks {
+  font-family: 'Unbounded', sans-serif;
+  font-weight: 700;
+  font-size: clamp(17px, 5vmin, 23px);
+  line-height: 1.45;
+  color: var(--white);
+  text-shadow: 0 0 22px rgba(255, 150, 40, 0.4);
+  margin-bottom: 8px;
+}
+
+.plat-links {
+  display: flex;
+  flex-direction: column;
+  gap: 12px;
+  width: 100%;
+}
+.plat {
+  --c: #ffffff;
+  display: block;
+  font-family: 'Unbounded', sans-serif;
+  font-weight: 700;
+  font-size: clamp(15px, 4.4vmin, 18px);
+  color: var(--c);
+  background: rgba(255, 255, 255, 0.05);
+  border: 1.5px solid var(--c);
+  border-radius: 18px;
+  padding: 16px;
+  text-decoration: none;
+  transition: transform 0.18s, box-shadow 0.25s, background 0.25s;
+}
+.plat:hover {
+  transform: translateY(-3px) rotate(-1.2deg) scale(1.02);
+  background: rgba(255, 255, 255, 0.1);
+  box-shadow: 0 0 26px var(--c);
+}
+.plat:nth-child(even):hover { transform: translateY(-3px) rotate(1.2deg) scale(1.02); }
+.plat:active { transform: translateY(1px) scale(0.98); }
+.p-ya { --c: #ffdb4d; }
+.p-vk { --c: #5e9bff; }
+.p-sp { --c: #1ed760; }
+.p-ap { --c: #ff5e6c; }
+.p-zv { --c: #a18aff; }
+.p-yt { --c: #ff5449; }
+.p-mp3 { --c: #ffe7d2; }
+.p-mail { --c: #ffcf3f; }
+.p-tg { --c: #6ec9ff; }
+
+/* почта и телеграм длинные — шрифт поспокойнее */
+.p-mail, .p-tg {
+  font-family: 'Nunito', sans-serif;
+  font-size: 15.5px;
+}
+
+.order-text {
+  font-size: 15.5px;
+  line-height: 1.65;
+  color: var(--text);
+  opacity: 0.92;
+  margin-bottom: 8px;
+}
+.order-gh {
+  color: var(--gold);
+  text-decoration: underline;
+  text-underline-offset: 3px;
+}
+.order-gh:hover { text-shadow: 0 0 12px rgba(255, 207, 63, 0.7); }
+
+/* а какие ещё игры есть? — надпись-дверца */
+.order-games {
+  font-size: 13.5px;
+  color: var(--text);
+  opacity: 0.55;
+  text-decoration: underline dotted;
+  text-underline-offset: 3px;
+  transition: opacity 0.2s, color 0.2s;
+}
+.order-games:hover { opacity: 1; color: var(--gold); }
+
+.plat-close {
+  font-family: 'Nunito', sans-serif;
+  font-weight: 700;
+  font-size: 14px;
+  color: var(--text);
+  opacity: 0.7;
+  background: none;
+  border: 1px solid rgba(255, 231, 210, 0.3);
+  border-radius: 20px;
+  padding: 9px 22px;
+  margin-top: 6px;
+  cursor: pointer;
+  transition: opacity 0.2s, border-color 0.2s;
+}
+.plat-close:hover { opacity: 1; border-color: var(--gold); }

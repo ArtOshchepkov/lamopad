@@ -34,6 +34,14 @@ export class PlatformField {
     return z;
   }
 
+  /** Множитель скорости/частоты хазардов по высоте (world y, отрицательный). */
+  speedMult(y) {
+    const m = -y / CONF.pxPerM;
+    let mult = 1;
+    for (const step of CONF.speedBoost) if (m >= step.fromM) mult = step.mult;
+    return mult;
+  }
+
   pickType(types) {
     let total = 0;
     for (const t in types) total += types[t];
@@ -138,8 +146,8 @@ export class PlatformField {
       vx: 0,
       t: RF(0, 10), // фаза для синусоид/циклов
     };
-    if (type === 'cloudMove') p.vx = RF(def.speed[0], def.speed[1]) * (Math.random() < 0.5 ? -1 : 1);
-    if (type === 'bird') p.vx = RF(def.speed[0], def.speed[1]) * (Math.random() < 0.5 ? -1 : 1);
+    if (type === 'cloudMove') p.vx = RF(def.speed[0], def.speed[1]) * this.speedMult(y) * (Math.random() < 0.5 ? -1 : 1);
+    if (type === 'bird') p.vx = RF(def.speed[0], def.speed[1]) * this.speedMult(y) * (Math.random() < 0.5 ? -1 : 1);
 
     // декор поверх платформы (хищник на облаке); редкий — не пулим
     if (def.deco) {
@@ -217,7 +225,8 @@ export class PlatformField {
       }
       p.sprite.clearTint();
       a.target = null;
-      a.t = RF(L.interval[0], L.interval[1]);
+      // выше boost.fromM бьёт чаще — интервал сжимается тем же множителем
+      a.t = RF(L.interval[0], L.interval[1]) / this.speedMult(camBottomY);
       const pts = this.strikeLightning(p);
       if (this.onLightning) this.onLightning(pts);
     } else {

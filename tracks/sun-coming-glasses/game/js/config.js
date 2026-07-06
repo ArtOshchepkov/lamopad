@@ -109,9 +109,21 @@ export const CONF = {
   // После boost.fromM шанс умножается на boost.mult — выше опаснее
   enemy: { fromM: 1000, chance: { croc: 0.018, snake: 0.014 }, boost: { fromM: 4000, mult: 1.5 } },
 
+  // после fromM дрейфующие облака/чайки летят быстрее, а молнии бьют чаще
+  // (интервал делится на mult) — на больших высотах ощутимо жарче.
+  // Ступени применяются по последней достигнутой (как zones)
+  speedBoost: [
+    { fromM: 4000, mult: 1.1 },
+    { fromM: 5000, mult: 1.5 },
+    { fromM: 7000, mult: 2 },
+    { fromM: 8000, mult: 2.5 },
+    { fromM: 9000, mult: 3 },
+    { fromM: 10000, mult: 3.2 },
+  ],
+
   // мега-редкий СУПЕР МАРИО: прыжок превращает героя в ГРИБКА на feverLengthM
   // метров. Пока это длится — грибная лихорадка: марио повсюду (но бесполезные)
-  mario: { fromM: 1500, chance: 0.012, feverChance: 0.8, feverLengthM: 703 },
+  mario: { fromM: 3000, chance: 0.01, feverChance: 0.95, feverLengthM: 703 },
 
   // дождевой пояс: начинается где-то в [minStartM..maxStartM], длится lengthM.
   // Внутри — дождь на весь экран и резко больше грозовых туч

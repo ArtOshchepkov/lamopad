@@ -43,6 +43,7 @@ export class GameScene extends Phaser.Scene {
     this.isShroom = false; // ГРИБОК после блока «?»
     this.shroomLockUntilM = 0; // до этой высоты — «остывание» после лихорадки
     this.idleT = 0; // секретная концовка: простой без прорыва потолка
+    this.idleFading = false;
     this.buildOffice();    // серое утро, из которого мы сбежим
 
     // дождевой пояс: случайное начало, километр ливня и грозовых туч
@@ -233,6 +234,7 @@ export class GameScene extends Phaser.Scene {
       const k = this.idleT > 5 ? Math.min(1, (this.idleT - 5) / 5) : 0;
       this.idleOverlay.setAlpha(k * 0.97);
       if (k > 0) {
+        this.idleFading = true;
         const c = Phaser.Display.Color.Interpolate.ColorWithColor(
           { r: 255, g: 255, b: 255 }, { r: 20, g: 20, b: 24 }, 100, k * 100,
         );
@@ -244,9 +246,12 @@ export class GameScene extends Phaser.Scene {
         this.die();
         return;
       }
-    } else if (this.player.sprite.alpha < 1 || this.player.sprite.tintTopLeft !== 0xffffff) {
-      // самовосстановление: если ушли из простоя (начали забег/сломали
-      // потолок) с недорастаявшим видом — гарантированно возвращаем обычный
+    } else if (this.idleFading) {
+      // самовосстановление: ушли из простоя (начали забег/сломали потолок)
+      // с недорастаявшим видом — гарантированно возвращаем обычный. Флаг,
+      // а не общая проверка alpha/tint — иначе конфликт с другими анимациями
+      // смерти (падение, поджарка), у которых свои тени/альфа
+      this.idleFading = false;
       this.player.sprite.clearTint().setAlpha(1);
       this.idleOverlay.setAlpha(0);
     }
@@ -317,7 +322,27 @@ export class GameScene extends Phaser.Scene {
     }
 
     // падение
-    if (this.player.y > cam.scrollY + CONF.height + CONF.camera.deathMargin) this.die();
+    if (this.player.y > cam.scrollY + CONF.height + CONF.camera.deathMargin) this.fallDeath();
+  }
+
+  /** Обычное падение мимо всех платформ: кувырок вниз и затемнение, потом экран смерти. */
+  fallDeath() {
+    if (this.state !== 'run') return;
+    this.state = 'falling'; // физика и управление замирают
+    const s = this.player.sprite;
+    const spin = this.player.vx < 0 ? -1 : 1; // кувырок в сторону последнего движения
+    this.field.shout({ x: this.player.x, y: this.player.y - 20 }, 'А-А-А!');
+    this.tweens.add({
+      targets: s,
+      y: s.y + 320,
+      x: s.x + spin * 60,
+      angle: spin * 480,
+      alpha: 0,
+      duration: 700,
+      ease: 'Cubic.easeIn',
+    });
+    this.cameras.main.shake(160, 0.003);
+    this.time.delayedCall(700, () => this.die());
   }
 
   onLand(plat) {

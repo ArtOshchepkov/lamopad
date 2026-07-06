@@ -289,7 +289,7 @@ export class BootScene extends Phaser.Scene {
     });
 
     // Змея: свернувшаяся кольцами, срисована по мотивам ~/Documents/snake.svg
-    // (голова с двумя глазами и языком слева-сверху, тело уходит вправо-вниз)
+    // (глаза и язык — динамические оверлеи поверх этой текстуры, см. config.js)
     this.tex('snake', 59, 45, (g) => {
       // body (main coil, bright green)
       g.fillStyle(0x9cf73c);
@@ -888,152 +888,6 @@ export class BootScene extends Phaser.Scene {
       g.lineTo(5.12, 12.48);
       g.fillPath();
 
-      // tongue (coral red, forked)
-      g.fillStyle(0xfc6650);
-      g.beginPath();
-      g.moveTo(11.87, 12.35);
-      g.lineTo(14.05, 12.03);
-      g.lineTo(14.56, 13.57);
-      g.lineTo(15.41, 14.92);
-      g.lineTo(16.49, 16.09);
-      g.lineTo(17.69, 17.08);
-      g.lineTo(18.9, 17.87);
-      g.lineTo(19.99, 18.47);
-      g.lineTo(20.86, 18.87);
-      g.lineTo(21.38, 19.07);
-      g.lineTo(21.21, 19.27);
-      g.lineTo(20.82, 19.33);
-      g.lineTo(20.3, 19.27);
-      g.lineTo(19.72, 19.13);
-      g.lineTo(19.13, 18.97);
-      g.lineTo(18.63, 18.81);
-      g.lineTo(18.27, 18.71);
-      g.lineTo(18.14, 18.7);
-      g.lineTo(18.2, 19);
-      g.lineTo(18.37, 19.39);
-      g.lineTo(18.61, 19.82);
-      g.lineTo(18.9, 20.26);
-      g.lineTo(19.18, 20.67);
-      g.lineTo(19.43, 21.01);
-      g.lineTo(19.61, 21.25);
-      g.lineTo(19.67, 21.33);
-      g.lineTo(18.57, 20.81);
-      g.lineTo(17.29, 19.85);
-      g.lineTo(15.94, 18.58);
-      g.lineTo(14.63, 17.13);
-      g.lineTo(13.45, 15.66);
-      g.lineTo(12.53, 14.28);
-      g.lineTo(11.97, 13.13);
-      g.lineTo(11.87, 12.35);
-      g.closePath();
-      g.fillPath();
-
-      // tongue shading (motion blur)
-      g.fillStyle(0xa64234, 0.337);
-      g.beginPath();
-      g.moveTo(11.88, 12.35);
-      g.lineTo(14.06, 12.03);
-      g.lineTo(14.08, 12.14);
-      g.lineTo(14.11, 12.27);
-      g.lineTo(14.15, 12.41);
-      g.lineTo(14.2, 12.56);
-      g.lineTo(14.25, 12.72);
-      g.lineTo(14.3, 12.88);
-      g.lineTo(14.35, 13.04);
-      g.lineTo(14.4, 13.2);
-      g.lineTo(14.52, 13.49);
-      g.lineTo(14.67, 13.79);
-      g.lineTo(14.83, 14.08);
-      g.lineTo(15, 14.34);
-      g.lineTo(15.15, 14.57);
-      g.lineTo(15.28, 14.75);
-      g.lineTo(15.36, 14.87);
-      g.lineTo(15.39, 14.91);
-      g.lineTo(15.37, 14.9);
-      g.lineTo(15.3, 14.83);
-      g.lineTo(15.2, 14.7);
-      g.lineTo(15.07, 14.53);
-      g.lineTo(14.93, 14.32);
-      g.lineTo(14.77, 14.08);
-      g.lineTo(14.61, 13.82);
-      g.lineTo(14.45, 13.54);
-      g.lineTo(14.36, 13.37);
-      g.lineTo(14.28, 13.2);
-      g.lineTo(14.2, 13.02);
-      g.lineTo(14.13, 12.85);
-      g.lineTo(14.07, 12.7);
-      g.lineTo(14.02, 12.55);
-      g.lineTo(13.99, 12.43);
-      g.lineTo(13.97, 12.34);
-      g.lineTo(13.49, 12.44);
-      g.lineTo(13.5, 12.54);
-      g.lineTo(13.54, 12.7);
-      g.lineTo(13.61, 12.91);
-      g.lineTo(13.7, 13.16);
-      g.lineTo(13.81, 13.45);
-      g.lineTo(13.94, 13.75);
-      g.lineTo(14.09, 14.06);
-      g.lineTo(14.24, 14.38);
-      g.lineTo(14.45, 14.77);
-      g.lineTo(14.7, 15.17);
-      g.lineTo(14.95, 15.57);
-      g.lineTo(15.2, 15.93);
-      g.lineTo(15.42, 16.25);
-      g.lineTo(15.6, 16.49);
-      g.lineTo(15.71, 16.64);
-      g.lineTo(15.74, 16.68);
-      g.lineTo(15.66, 16.6);
-      g.lineTo(15.49, 16.42);
-      g.lineTo(15.27, 16.17);
-      g.lineTo(15.01, 15.86);
-      g.lineTo(14.73, 15.52);
-      g.lineTo(14.44, 15.16);
-      g.lineTo(14.18, 14.79);
-      g.lineTo(13.95, 14.44);
-      g.lineTo(13.79, 14.19);
-      g.lineTo(13.65, 13.92);
-      g.lineTo(13.53, 13.67);
-      g.lineTo(13.42, 13.42);
-      g.lineTo(13.33, 13.19);
-      g.lineTo(13.26, 12.98);
-      g.lineTo(13.21, 12.8);
-      g.lineTo(13.19, 12.65);
-      g.lineTo(12.53, 12.79);
-      g.lineTo(12.55, 13.05);
-      g.lineTo(12.69, 13.46);
-      g.lineTo(12.93, 13.96);
-      g.lineTo(13.21, 14.49);
-      g.lineTo(13.5, 14.99);
-      g.lineTo(13.76, 15.42);
-      g.lineTo(13.94, 15.72);
-      g.lineTo(14.01, 15.84);
-      g.lineTo(14.14, 15.98);
-      g.lineTo(14.4, 16.32);
-      g.lineTo(14.76, 16.8);
-      g.lineTo(15.15, 17.34);
-      g.lineTo(15.54, 17.87);
-      g.lineTo(15.86, 18.33);
-      g.lineTo(16.07, 18.65);
-      g.lineTo(16.12, 18.75);
-      g.lineTo(15.91, 18.56);
-      g.lineTo(15.54, 18.17);
-      g.lineTo(15.05, 17.63);
-      g.lineTo(14.49, 16.98);
-      g.lineTo(13.92, 16.29);
-      g.lineTo(13.38, 15.6);
-      g.lineTo(12.92, 14.96);
-      g.lineTo(12.6, 14.43);
-      g.lineTo(12.42, 14.1);
-      g.lineTo(12.26, 13.77);
-      g.lineTo(12.12, 13.45);
-      g.lineTo(12, 13.16);
-      g.lineTo(11.92, 12.89);
-      g.lineTo(11.86, 12.67);
-      g.lineTo(11.85, 12.48);
-      g.lineTo(11.88, 12.35);
-      g.closePath();
-      g.fillPath();
-
       // white highlight A (snout)
       g.fillStyle(0xffffff);
       g.beginPath();
@@ -1144,45 +998,6 @@ export class BootScene extends Phaser.Scene {
       g.closePath();
       g.fillPath();
 
-      // eye 1 pupil (dark)
-      g.fillStyle(0x69663d);
-      g.beginPath();
-      g.moveTo(7.07, 6.96);
-      g.lineTo(7.03, 6.51);
-      g.lineTo(7.02, 6.11);
-      g.lineTo(7.05, 5.77);
-      g.lineTo(7.11, 5.5);
-      g.lineTo(7.19, 5.27);
-      g.lineTo(7.28, 5.11);
-      g.lineTo(7.38, 4.99);
-      g.lineTo(7.49, 4.93);
-      g.lineTo(7.6, 4.92);
-      g.lineTo(7.73, 4.96);
-      g.lineTo(7.86, 5.05);
-      g.lineTo(7.99, 5.19);
-      g.lineTo(8.12, 5.41);
-      g.lineTo(8.23, 5.69);
-      g.lineTo(8.33, 6.05);
-      g.lineTo(8.41, 6.49);
-      g.lineTo(8.46, 6.98);
-      g.lineTo(8.49, 7.47);
-      g.lineTo(8.48, 7.94);
-      g.lineTo(8.46, 8.38);
-      g.lineTo(8.42, 8.77);
-      g.lineTo(8.35, 9.1);
-      g.lineTo(8.28, 9.34);
-      g.lineTo(8.19, 9.48);
-      g.lineTo(8.07, 9.5);
-      g.lineTo(7.93, 9.37);
-      g.lineTo(7.77, 9.13);
-      g.lineTo(7.6, 8.8);
-      g.lineTo(7.44, 8.39);
-      g.lineTo(7.29, 7.94);
-      g.lineTo(7.16, 7.45);
-      g.lineTo(7.07, 6.96);
-      g.closePath();
-      g.fillPath();
-
       // eye 2 sclera (white)
       g.fillStyle(0xffffff);
       g.beginPath();
@@ -1221,45 +1036,15 @@ export class BootScene extends Phaser.Scene {
       g.lineTo(13.93, 5.23);
       g.closePath();
       g.fillPath();
-
-      // eye 2 pupil (dark)
-      g.fillStyle(0x69663d);
-      g.beginPath();
-      g.moveTo(15.12, 5.9);
-      g.lineTo(15.06, 5.44);
-      g.lineTo(15.02, 5.04);
-      g.lineTo(14.99, 4.69);
-      g.lineTo(15, 4.4);
-      g.lineTo(15.03, 4.16);
-      g.lineTo(15.11, 3.98);
-      g.lineTo(15.23, 3.85);
-      g.lineTo(15.41, 3.78);
-      g.lineTo(15.61, 3.78);
-      g.lineTo(15.78, 3.86);
-      g.lineTo(15.94, 4.02);
-      g.lineTo(16.08, 4.26);
-      g.lineTo(16.2, 4.55);
-      g.lineTo(16.3, 4.91);
-      g.lineTo(16.39, 5.33);
-      g.lineTo(16.46, 5.79);
-      g.lineTo(16.5, 6.26);
-      g.lineTo(16.52, 6.69);
-      g.lineTo(16.5, 7.09);
-      g.lineTo(16.47, 7.44);
-      g.lineTo(16.42, 7.75);
-      g.lineTo(16.35, 8);
-      g.lineTo(16.27, 8.19);
-      g.lineTo(16.18, 8.31);
-      g.lineTo(16.08, 8.33);
-      g.lineTo(15.94, 8.22);
-      g.lineTo(15.78, 8);
-      g.lineTo(15.62, 7.68);
-      g.lineTo(15.46, 7.29);
-      g.lineTo(15.32, 6.85);
-      g.lineTo(15.2, 6.38);
-      g.lineTo(15.12, 5.9);
-      g.closePath();
-      g.fillPath();
+    });
+    // Раздвоенный язык змеи: сплошная лента, основание слева, вилка справа
+    // (зеркалим scaleX для другого направления головы)
+    this.tex('tongue', 12, 9, (g) => {
+      const RED = 0xff3b57;
+      g.fillStyle(RED);
+      g.fillRect(0, 3.2, 8, 1.8);
+      g.fillTriangle(8, 4.5, 12, 1, 9.5, 4.5);
+      g.fillTriangle(8, 4.5, 12, 8, 9.5, 4.5);
     });
 
     // Сам СУПЕР МАРИО — мега-редкая платформа

@@ -146,10 +146,13 @@ export class PlatformField {
         targets: p.deco, angle: 2.5, yoyo: true, repeat: -1,
         duration: R(900, 1400), ease: 'Sine.easeInOut',
       });
-      // зрачок хищника — отдельный спрайт, следит за игроком
-      if (def.eye) {
-        p.pupil = this.scene.add.image(x, y, 'dot')
-          .setDepth(6.1).setTint(0x1a1a1a).setScale(def.eye.s);
+      // зрачки хищника — отдельные спрайты, следят за игроком
+      if (def.eyes) {
+        p.pupils = def.eyes.map(eye => ({
+          cfg: eye,
+          img: this.scene.add.image(x, y, 'dot')
+            .setDepth(6.1).setTint(0x1a1a1a).setScale(eye.s),
+        }));
       }
       // язык змеи: высовывается, дрожит и прячется — как в природе
       if (def.tongue) {
@@ -185,7 +188,7 @@ export class PlatformField {
         if (p.vx !== 0) this.drift(p, dt);
         if (p.type === 'bird') this.flap(p, dt);
         if (p.type === 'sunset') this.shyCycle(p, dt);
-        if (p.pupil && player) this.trackEye(p, player);
+        if (p.pupils && player) this.trackEyes(p, player);
       } else if (p.respawnT > 0) {
         p.respawnT -= dt;
         if (p.respawnT <= 0) this.respawnSticker(p);
@@ -229,14 +232,16 @@ export class PlatformField {
     }
   }
 
-  // Зрачок хищника следит за игроком (смещение глаза — в def.eye)
-  trackEye(p, player) {
-    const eye = p.def.eye;
-    const ex = p.deco.x + (p.deco.flipX ? -eye.x : eye.x);
-    const ey = p.deco.y + eye.y;
-    const dx = player.x - ex, dy = player.y - ey;
-    const len = Math.hypot(dx, dy) || 1;
-    p.pupil.setPosition(ex + (dx / len) * 1.5, ey + (dy / len) * 1.5);
+  // Зрачки хищника следят за игроком (смещения глаз — в def.eyes)
+  trackEyes(p, player) {
+    for (const pu of p.pupils) {
+      const eye = pu.cfg;
+      const ex = p.deco.x + (p.deco.flipX ? -eye.x : eye.x);
+      const ey = p.deco.y + eye.y;
+      const dx = player.x - ex, dy = player.y - ey;
+      const len = Math.hypot(dx, dy) || 1;
+      pu.img.setPosition(ex + (dx / len) * 1.5, ey + (dy / len) * 1.5);
+    }
   }
 
   // горизонтальный дрейф с отскоком от краёв
@@ -297,9 +302,9 @@ export class PlatformField {
       p.deco.destroy();
       p.deco = null;
     }
-    if (p.pupil) {
-      p.pupil.destroy();
-      p.pupil = null;
+    if (p.pupils) {
+      p.pupils.forEach(pu => pu.img.destroy());
+      p.pupils = null;
     }
     if (p.tongue) {
       this.scene.tweens.killTweensOf(p.tongue);
@@ -447,7 +452,7 @@ export class PlatformField {
     p.deco = null;
     p.type = 'cloud';
     p.def = CONF.platforms.cloud;
-    if (p.pupil) { p.pupil.destroy(); p.pupil = null; }
+    if (p.pupils) { p.pupils.forEach(pu => pu.img.destroy()); p.pupils = null; }
     if (p.tongue) {
       this.scene.tweens.killTweensOf(p.tongue);
       p.tongue.destroy();

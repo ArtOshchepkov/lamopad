@@ -41,6 +41,7 @@ export class GameScene extends Phaser.Scene {
     this.flagIdx = 0;
 
     this.isShroom = false; // ГРИБОК после блока «?»
+    this.shroomLockUntilM = 0; // до этой высоты — «остывание» после лихорадки
     this.buildOffice();    // серое утро, из которого мы сбежим
 
     // дождевой пояс: случайное начало, километр ливня и грозовых туч
@@ -278,10 +279,12 @@ export class GameScene extends Phaser.Scene {
       });
     }
 
-    // грибная лихорадка кончилась — герой снова в очках
+    // грибная лихорадка кончилась — герой снова в очках, и на cooldownM
+    // метров нельзя обратно (иначе отскок на залежавшийся марио — имба)
     if (this.isShroom && this.maxM >= this.field.marioFeverUntilM) {
       this.isShroom = false;
       this.player.sprite.setTexture('glasses');
+      this.shroomLockUntilM = this.maxM + CONF.mario.cooldownM;
     }
 
     // падение
@@ -489,6 +492,7 @@ export class GameScene extends Phaser.Scene {
   /** Прыжок на блок «?»: герой становится ГРИБКОМ на CONF.mario.feverLengthM метров. */
   becomeShroom() {
     if (this.isShroom) return; // пока грибок — повторные блоки «?» лихорадку не продлевают
+    if (this.maxM < this.shroomLockUntilM) return; // остывание — залежавшийся марио не считается
     this.isShroom = true;
     // мир наводняется марио — уже бесполезными — на те же feverLengthM метров
     this.field.marioFeverUntilM = this.maxM + CONF.mario.feverLengthM;

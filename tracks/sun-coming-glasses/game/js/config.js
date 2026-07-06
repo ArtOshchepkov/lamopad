@@ -46,25 +46,29 @@ export const CONF = {
     { fromM: 100,  gap: [64, 100],  types: { cloud: 75, sticker: 25 } },
     { fromM: 200,  gap: [68, 106],  types: { cloud: 62, sticker: 26, cloudMove: 12 } },
     { fromM: 300,  gap: [72, 112],  types: { cloud: 55, sticker: 24, cloudMove: 12, suitcase: 9 } },
-    { fromM: 400,  gap: [76, 118],  types: { cloud: 48, sticker: 22, cloudMove: 13, suitcase: 9, backpack: 8 } },
-    { fromM: 500,  gap: [80, 124],  types: { cloud: 44, sticker: 20, cloudMove: 14, suitcase: 9, backpack: 8, sunset: 5 } },
-    { fromM: 900,  gap: [88, 134],  types: { cloud: 40, sticker: 17, cloudMove: 16, suitcase: 9, backpack: 8, sunset: 6, bird: 4 } },
-    { fromM: 1200, gap: [98, 146],  types: { cloud: 36, sticker: 14, cloudMove: 18, suitcase: 9, backpack: 8, sunset: 7, bird: 5, storm: 3 } },
-    { fromM: 1300, gap: [102, 152], types: { cloud: 33, sticker: 13, cloudMove: 19, suitcase: 8, backpack: 8, sunset: 7, bird: 6, storm: 4, llama: 2 } },
-    { fromM: 1800, gap: [110, 162], types: { cloud: 30, sticker: 12, cloudMove: 21, suitcase: 8, backpack: 9, sunset: 8, bird: 7, storm: 5, llama: 3 } },
-    { fromM: 2600, gap: [122, 177], types: { cloud: 26, sticker: 10, cloudMove: 24, suitcase: 7, backpack: 10, sunset: 9, bird: 8, storm: 5, llama: 6 } },
+    // плюшки (рюкзак/лама) занижены вполовину, потом чуть подняты (~+15%)
+    { fromM: 400,  gap: [76, 118],  types: { cloud: 48, sticker: 22, cloudMove: 13, suitcase: 9, backpack: 5 } },
+    { fromM: 500,  gap: [80, 124],  types: { cloud: 44, sticker: 20, cloudMove: 14, suitcase: 9, backpack: 5, sunset: 5 } },
+    { fromM: 900,  gap: [88, 134],  types: { cloud: 40, sticker: 17, cloudMove: 16, suitcase: 9, backpack: 5, sunset: 6, bird: 4 } },
+    { fromM: 1200, gap: [98, 146],  types: { cloud: 36, sticker: 14, cloudMove: 18, suitcase: 9, backpack: 5, sunset: 7, bird: 5, storm: 3 } },
+    { fromM: 1300, gap: [102, 152], types: { cloud: 33, sticker: 13, cloudMove: 19, suitcase: 8, backpack: 5, sunset: 7, bird: 6, storm: 4, llama: 1 } },
+    { fromM: 1800, gap: [110, 162], types: { cloud: 30, sticker: 12, cloudMove: 21, suitcase: 8, backpack: 5, sunset: 8, bird: 7, storm: 5, llama: 1 } },
+    { fromM: 2600, gap: [122, 177], types: { cloud: 26, sticker: 10, cloudMove: 24, suitcase: 7, backpack: 6, sunset: 9, bird: 8, storm: 5, llama: 3 } },
     // дождевой пояс обычно кончается к этой высоте — дальше меньше обычных
     // облаков, чтобы не было ощущения «всё как было», после ливня
-    { fromM: 3000, gap: [128, 183], types: { cloud: 18, sticker: 9,  cloudMove: 27, suitcase: 7, backpack: 10, sunset: 9,  bird: 9,  storm: 7,  llama: 9 } },
+    { fromM: 3000, gap: [128, 183], types: { cloud: 18, sticker: 9,  cloudMove: 27, suitcase: 7, backpack: 6, sunset: 9,  bird: 9,  storm: 7,  llama: 5 } },
     // почти только дрейфующие облака и чайки — воздушный, летящий участок
     { fromM: 3500, gap: [130, 185], types: { cloudMove: 65, bird: 30, cloud: 3, sticker: 2 } },
     // ещё меньше обычных облаков — выше уже почти всё разнообразие
-    { fromM: 4000, gap: [132, 187], types: { cloud: 10, sticker: 8,  cloudMove: 30, suitcase: 7, backpack: 11, sunset: 10, bird: 10, storm: 9,  llama: 11 } },
+    { fromM: 4000, gap: [132, 187], types: { cloud: 10, sticker: 8,  cloudMove: 30, suitcase: 7, backpack: 6, sunset: 10, bird: 10, storm: 9,  llama: 6 } },
     // почти только одноразовые стикеры — ритм «прыгнул-отклеилось»
     { fromM: 4500, gap: [136, 190], types: { sticker: 90, cloud: 5, cloudMove: 5 } },
     // назад к разнообразию перед финальным участком
-    { fromM: 5000, gap: [138, 193], types: { cloud: 9,  sticker: 7,  cloudMove: 29, suitcase: 6, backpack: 11, sunset: 10, bird: 11, storm: 9,  llama: 11 } },
-    { fromM: 5100, gap: [140, 195], types: { cloud: 8,  sticker: 6,  cloudMove: 32, suitcase: 5, backpack: 12, sunset: 11, bird: 12, storm: 10, llama: 12 } },
+    { fromM: 5000, gap: [138, 193], types: { cloud: 9,  sticker: 7,  cloudMove: 29, suitcase: 6, backpack: 6, sunset: 10, bird: 11, storm: 9,  llama: 6 } },
+    { fromM: 5100, gap: [140, 195], types: { cloud: 8,  sticker: 6,  cloudMove: 32, suitcase: 5, backpack: 7, sunset: 11, bird: 12, storm: 10, llama: 7 } },
+    // намного меньше «плюшек» (рюкзак/лама) — на такой высоте они делали
+    // подъём слишком лёгким, вес ушёл в честные и опасные типы
+    { fromM: 8000, gap: [145, 200], types: { cloud: 10, sticker: 8, cloudMove: 34, suitcase: 8, backpack: 2, sunset: 10, bird: 14, storm: 14, llama: 1 } },
   ],
 
   platforms: {
@@ -131,8 +135,10 @@ export const CONF = {
   ],
 
   // мега-редкий СУПЕР МАРИО: прыжок превращает героя в ГРИБКА на feverLengthM
-  // метров. Пока это длится — грибная лихорадка: марио повсюду (но бесполезные)
-  mario: { fromM: 3000, chance: 0.01, feverChance: 0.95, feverLengthM: 703 },
+  // метров. Пока это длится — грибная лихорадка: марио повсюду (но бесполезные).
+  // cooldownM: после конца лихорадки столько метров нельзя обратно в грибка —
+  // иначе отскок назад на залежавшийся марио из лихорадки продлевает её вечно
+  mario: { fromM: 3000, chance: 0.01, feverChance: 0.95, feverLengthM: 703, cooldownM: 100 },
 
   // дождевой пояс: начинается где-то в [minStartM..maxStartM], длится lengthM.
   // Внутри — дождь на весь экран и резко больше грозовых туч
@@ -153,17 +159,19 @@ export const CONF = {
   },
 
   // мыльный пузырь: медленно несёт вверх, лопается сам или по тапу
+  // (было вдвое реже, теперь интервал укорочен на ~15% — чуть почаще)
   bubble: {
     fromM: 700,
-    intervalM: [800, 1600],
+    intervalM: [1400, 2800],
     speed: 230,     // px/s плавного подъёма
     duration: 4.5,  // секунд, потом лопается сам
   },
 
   // реактивный ранец: подбираешь — взмываешь, минуя препятствия
+  // (было вдвое реже, теперь интервал укорочен на ~15% — чуть почаще)
   jet: {
     fromM: 1100,           // первый не раньше этой высоты
-    intervalM: [700, 1400],// дальше каждые столько метров
+    intervalM: [1200, 2400],// дальше каждые столько метров
     speed: 1500,           // px/s вертикального взлёта
     duration: 2.2,         // секунд полёта (~330 м)
   },

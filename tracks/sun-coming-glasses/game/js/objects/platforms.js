@@ -42,6 +42,14 @@ export class PlatformField {
     return mult;
   }
 
+  /** Множитель ширины платформ по высоте (world y, отрицательный). */
+  sizeMult(y) {
+    const m = -y / CONF.pxPerM;
+    let mult = 1;
+    for (const step of CONF.sizeBoost) if (m >= step.fromM) mult = step.mult;
+    return mult;
+  }
+
   pickType(types) {
     let total = 0;
     for (const t in types) total += types[t];
@@ -129,7 +137,7 @@ export class PlatformField {
 
     let sprite = this.pool.pop();
     if (!sprite) sprite = this.scene.add.image(0, 0, variant.tex).setDepth(5);
-    const sx = opts.wide || 1;
+    const sx = (opts.wide || 1) * this.sizeMult(y);
     sprite.setTexture(variant.tex).setActive(true).setVisible(true)
       .setPosition(x, y).setAlpha(1).setAngle(0).setFlipX(false)
       .setScale(sx, 1);

@@ -16,6 +16,15 @@ export class GameScene extends Phaser.Scene {
     this.startBest = this.loadBest();
     this.recordBeaten = false;
 
+    // стартовый бонус-джетпак (молча): каждая every-я игра, или игра сразу
+    // после нового рекорда выше recordMinM (флаг одноразовый, гасим сразу же)
+    const games = this.loadGames() + 1;
+    this.saveGames(games);
+    const everyBonus = games % CONF.startBonus.every === 0;
+    const recordBonus = this.loadRecordBonusPending();
+    if (recordBonus) this.clearRecordBonusPending();
+    this.startBonusJet = everyBonus || recordBonus;
+
     // камера — до фона: параллакс-слои позиционируются от стартового скролла
     this.cameras.main.setScroll(0, -(CONF.height - 150));
 
@@ -139,6 +148,24 @@ export class GameScene extends Phaser.Scene {
 
   saveBest(v) {
     try { localStorage.setItem(CONF.storage.best, String(v)); } catch (e) { /* приватный режим */ }
+  }
+
+  loadGames() {
+    try { return parseInt(localStorage.getItem(CONF.storage.games), 10) || 0; }
+    catch (e) { return 0; }
+  }
+
+  saveGames(v) {
+    try { localStorage.setItem(CONF.storage.games, String(v)); } catch (e) { /* приватный режим */ }
+  }
+
+  loadRecordBonusPending() {
+    try { return localStorage.getItem(CONF.storage.recordBonus) === '1'; }
+    catch (e) { return false; }
+  }
+
+  clearRecordBonusPending() {
+    try { localStorage.removeItem(CONF.storage.recordBonus); } catch (e) { /* приватный режим */ }
   }
 
   loadDeaths() {
@@ -547,6 +574,29 @@ export class GameScene extends Phaser.Scene {
     }
     this.cameras.main.shake(130, 0.004);
     this.field.shout({ x: this.player.x, y: this.officeCeilingY + 34 }, 'К чёрту потолок!');
+
+    // стартовый бонус-джетпак — молча кладём на ближайшее облачко за потолком
+    if (this.startBonusJet) {
+      this.startBonusJet = false;
+      this.placeBonusJet();
+    }
+  }
+
+  /** Кладёт подбираемый ранец на одно из ближайших облаков сразу за потолком. */
+  placeBonusJet() {
+    const near = this.field.active
+      .filter(p => p.type === 'cloud' && !p.dead && p.y < this.officeCeilingY)
+      .sort((a, b) => b.y - a.y)
+      .slice(0, 2);
+    const plat = near.length ? Phaser.Utils.Array.GetRandom(near) : null;
+    const x = plat ? plat.x : CONF.width / 2;
+    const y = plat ? plat.y - plat.h / 2 - 26 : this.officeCeilingY - 60;
+    const s = this.add.image(x, y, 'jetpack').setDepth(4).setScale(0.9);
+    this.tweens.add({
+      targets: s, y: y - 10, angle: 4,
+      yoyo: true, repeat: -1, duration: 900, ease: 'Sine.easeInOut',
+    });
+    this.jets.push(s);
   }
 
   /** Прыжок на блок «?»: герой становится ГРИБКОМ на CONF.mario.feverLengthM метров. */
@@ -871,6 +921,10 @@ export class GameScene extends Phaser.Scene {
     const isNew = this.maxM > this.startBest;
     const best = Math.max(this.startBest, this.maxM);
     if (isNew) this.saveBest(best);
+    // новый рекорд выше recordMinM — следующая игра тоже получит стартовый ранец
+    if (isNew && this.maxM > CONF.startBonus.recordMinM) {
+      try { localStorage.setItem(CONF.storage.recordBonus, '1'); } catch (e) { /* приватный режим */ }
+    }
     const cause = this.deathCause || (this.suitcaseBlame ? 'suitcase' : 'fall');
     this.game.events.emit('scg-death', { height: this.maxM, best, isNew, cause });
   }

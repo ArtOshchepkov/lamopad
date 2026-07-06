@@ -210,7 +210,13 @@ export const CONF = {
     sfxMuted: 'lamopad_scg_sfx_muted',
     fsDisabled: 'lamopad_scg_fs_disabled',
     deaths: 'lamopad_scg_deaths',
+    games: 'lamopad_scg_games',
+    recordBonus: 'lamopad_scg_record_bonus',
   },
+
+  // стартовый бонус-джетпак сразу после потолка: каждую every-ю игру,
+  // и на следующую игру после нового рекорда выше recordMinM метров
+  startBonus: { every: 10, recordMinM: 1000 },
   sounds: {
     seagull: 'seagul_ira.mp3',
     croissant: 'crusassan_gleb.mp3'

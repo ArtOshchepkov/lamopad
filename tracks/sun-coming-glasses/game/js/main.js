@@ -47,6 +47,7 @@ const save = (key, v) => {
 };
 let musicMuted = load(CONF.storage.muted);
 let sfxMuted = load(CONF.storage.sfxMuted);
+let fsMuted = load(CONF.storage.fsDisabled);
 
 function renderMute() {
   muteMusicBtn.classList.toggle('off', musicMuted);
@@ -78,6 +79,7 @@ const optSfx = $('opt-sfx');
 const optFs = $('opt-fs');
 optMusic.classList.toggle('off', musicMuted);
 optSfx.classList.toggle('off', sfxMuted);
+optFs.classList.toggle('off', fsMuted);
 [optMusic, optSfx, optFs].forEach((b) =>
   b.addEventListener('click', () => b.classList.toggle('off')));
 
@@ -97,8 +99,10 @@ window.addEventListener('resize', updateOrient);
 $('start-btn').addEventListener('click', () => {
   musicMuted = optMusic.classList.contains('off');
   sfxMuted = optSfx.classList.contains('off');
+  fsMuted = optFs.classList.contains('off');
   save(CONF.storage.muted, musicMuted);
   save(CONF.storage.sfxMuted, sfxMuted);
+  save(CONF.storage.fsDisabled, fsMuted);
   renderMute();
   if (requestFs && !optFs.classList.contains('off')) {
     try { requestFs.call(docEl).catch(() => {}); } catch (e) { /* не судьба */ }

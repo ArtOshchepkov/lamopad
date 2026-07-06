@@ -167,6 +167,7 @@ export const CONF = {
     best: 'lamopad_scg_best',
     muted: 'lamopad_scg_muted',
     sfxMuted: 'lamopad_scg_sfx_muted',
+    fsDisabled: 'lamopad_scg_fs_disabled',
     deaths: 'lamopad_scg_deaths',
   },
   sounds: {

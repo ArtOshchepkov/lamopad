@@ -53,7 +53,10 @@ export const CONF = {
     { fromM: 1300, gap: [102, 152], types: { cloud: 33, sticker: 13, cloudMove: 19, suitcase: 8, backpack: 8, sunset: 7, bird: 6, storm: 4, llama: 2 } },
     { fromM: 1800, gap: [110, 162], types: { cloud: 30, sticker: 12, cloudMove: 21, suitcase: 8, backpack: 9, sunset: 8, bird: 7, storm: 5, llama: 3 } },
     { fromM: 2600, gap: [122, 177], types: { cloud: 26, sticker: 10, cloudMove: 24, suitcase: 7, backpack: 10, sunset: 9, bird: 8, storm: 5, llama: 6 } },
-    { fromM: 5100, gap: [140, 195], types: { cloud: 22, sticker: 8,  cloudMove: 27, suitcase: 5, backpack: 10, sunset: 10, bird: 10, storm: 6, llama: 8 } },
+    // дождевой пояс обычно кончается к этой высоте — дальше меньше обычных
+    // облаков, чтобы не было ощущения «всё как было», после ливня
+    { fromM: 3000, gap: [128, 183], types: { cloud: 18, sticker: 9,  cloudMove: 27, suitcase: 7, backpack: 10, sunset: 9,  bird: 9,  storm: 7, llama: 9 } },
+    { fromM: 5100, gap: [140, 195], types: { cloud: 14, sticker: 7,  cloudMove: 29, suitcase: 5, backpack: 11, sunset: 10, bird: 11, storm: 8, llama: 10 } },
   ],
 
   platforms: {

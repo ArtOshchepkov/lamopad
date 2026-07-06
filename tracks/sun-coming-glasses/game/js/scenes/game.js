@@ -76,7 +76,8 @@ export class GameScene extends Phaser.Scene {
       this.startRun();
       if (this.bubbleTime > 0) this.popBubble(); // свежий тап лопает пузырь
     });
-    // чит-коды: набери fire — светлячки, plane — самолёт
+    // чит-коды: набери fire — светлячки, plane — самолёт,
+    // height1..height9 — телепорт на N километров
     this.cheatBuf = '';
     this.input.keyboard.on('keydown', (e) => {
       this.startRun();
@@ -117,6 +118,10 @@ export class GameScene extends Phaser.Scene {
           this.field.place('mario',
             Phaser.Math.Between(70, CONF.width - 70), this.cameras.main.scrollY + 180);
           this.cheatBuf = '';
+        }
+        else {
+          const hm = this.cheatBuf.match(/height([1-9])$/);
+          if (hm) { this.teleportToHeight(parseInt(hm[1], 10) * 1000); this.cheatBuf = ''; }
         }
       }
     });
@@ -342,6 +347,14 @@ export class GameScene extends Phaser.Scene {
         this.player.bounce(P.bounceVy);
         this.field.react(plat);
     }
+  }
+
+  /** Чит: телепорт на заданную высоту (м) — догенерирует мир под ногами. */
+  teleportToHeight(m) {
+    const y = -m * CONF.pxPerM;
+    this.player.sprite.setPosition(this.player.sprite.x, y);
+    this.player.vy = 0;
+    this.field.ensure(y - CONF.spawn.ahead);
   }
 
   spawnLyrics(cam) {

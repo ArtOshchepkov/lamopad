@@ -45,30 +45,30 @@ export const CONF = {
     { fromM: 0,    gap: [62, 96],   types: { cloud: 100 } },
     { fromM: 100,  gap: [64, 100],  types: { cloud: 75, sticker: 25 } },
     { fromM: 200,  gap: [68, 106],  types: { cloud: 62, sticker: 26, cloudMove: 12 } },
-    { fromM: 300,  gap: [72, 112],  types: { cloud: 55, sticker: 24, cloudMove: 12, suitcase: 9 } },
-    // плюшки (рюкзак/лама) занижены вполовину, потом чуть подняты (~+15%)
-    { fromM: 400,  gap: [76, 118],  types: { cloud: 48, sticker: 22, cloudMove: 13, suitcase: 9, backpack: 5 } },
-    { fromM: 500,  gap: [80, 124],  types: { cloud: 44, sticker: 20, cloudMove: 14, suitcase: 9, backpack: 5, sunset: 5 } },
-    { fromM: 900,  gap: [88, 134],  types: { cloud: 40, sticker: 17, cloudMove: 16, suitcase: 9, backpack: 5, sunset: 6, bird: 4 } },
-    { fromM: 1200, gap: [98, 146],  types: { cloud: 36, sticker: 14, cloudMove: 18, suitcase: 9, backpack: 5, sunset: 7, bird: 5, storm: 3 } },
-    { fromM: 1300, gap: [102, 152], types: { cloud: 33, sticker: 13, cloudMove: 19, suitcase: 8, backpack: 5, sunset: 7, bird: 6, storm: 4, llama: 1 } },
-    { fromM: 1800, gap: [110, 162], types: { cloud: 30, sticker: 12, cloudMove: 21, suitcase: 8, backpack: 5, sunset: 8, bird: 7, storm: 5, llama: 1 } },
-    { fromM: 2600, gap: [122, 177], types: { cloud: 26, sticker: 10, cloudMove: 24, suitcase: 7, backpack: 6, sunset: 9, bird: 8, storm: 5, llama: 3 } },
+    // чемоданы везде ~+40%, рюкзак/лама ~+5% (веса не обязаны быть целыми)
+    { fromM: 300,  gap: [72, 112],  types: { cloud: 55, sticker: 24, cloudMove: 12, suitcase: 12.6 } },
+    { fromM: 400,  gap: [76, 118],  types: { cloud: 48, sticker: 22, cloudMove: 13, suitcase: 12.6, backpack: 5.25 } },
+    { fromM: 500,  gap: [80, 124],  types: { cloud: 44, sticker: 20, cloudMove: 14, suitcase: 12.6, backpack: 5.25, sunset: 5 } },
+    { fromM: 900,  gap: [88, 134],  types: { cloud: 40, sticker: 17, cloudMove: 16, suitcase: 12.6, backpack: 5.25, sunset: 6, bird: 4 } },
+    { fromM: 1200, gap: [98, 146],  types: { cloud: 36, sticker: 14, cloudMove: 18, suitcase: 12.6, backpack: 5.25, sunset: 7, bird: 5, storm: 3 } },
+    { fromM: 1300, gap: [102, 152], types: { cloud: 33, sticker: 13, cloudMove: 19, suitcase: 11.2, backpack: 5.25, sunset: 7, bird: 6, storm: 4, llama: 1.05 } },
+    { fromM: 1800, gap: [110, 162], types: { cloud: 30, sticker: 12, cloudMove: 21, suitcase: 11.2, backpack: 5.25, sunset: 8, bird: 7, storm: 5, llama: 1.05 } },
+    { fromM: 2600, gap: [122, 177], types: { cloud: 26, sticker: 10, cloudMove: 24, suitcase: 9.8, backpack: 6.3, sunset: 9, bird: 8, storm: 5, llama: 3.15 } },
     // дождевой пояс обычно кончается к этой высоте — дальше меньше обычных
     // облаков, чтобы не было ощущения «всё как было», после ливня
-    { fromM: 3000, gap: [128, 183], types: { cloud: 18, sticker: 9,  cloudMove: 27, suitcase: 7, backpack: 6, sunset: 9,  bird: 9,  storm: 7,  llama: 5 } },
+    { fromM: 3000, gap: [128, 183], types: { cloud: 18, sticker: 9,  cloudMove: 27, suitcase: 9.8, backpack: 6.3, sunset: 9,  bird: 9,  storm: 7,  llama: 5.25 } },
     // почти только дрейфующие облака и чайки — воздушный, летящий участок
     { fromM: 3500, gap: [130, 185], types: { cloudMove: 65, bird: 30, cloud: 3, sticker: 2 } },
     // ещё меньше обычных облаков — выше уже почти всё разнообразие
-    { fromM: 4000, gap: [132, 187], types: { cloud: 10, sticker: 8,  cloudMove: 30, suitcase: 7, backpack: 6, sunset: 10, bird: 10, storm: 9,  llama: 6 } },
+    { fromM: 4000, gap: [132, 187], types: { cloud: 10, sticker: 8,  cloudMove: 30, suitcase: 9.8, backpack: 6.3, sunset: 10, bird: 10, storm: 9,  llama: 6.3 } },
     // почти только одноразовые стикеры — ритм «прыгнул-отклеилось»
     { fromM: 4500, gap: [136, 190], types: { sticker: 90, cloud: 5, cloudMove: 5 } },
     // назад к разнообразию перед финальным участком
-    { fromM: 5000, gap: [138, 193], types: { cloud: 9,  sticker: 7,  cloudMove: 29, suitcase: 6, backpack: 6, sunset: 10, bird: 11, storm: 9,  llama: 6 } },
-    { fromM: 5100, gap: [140, 195], types: { cloud: 8,  sticker: 6,  cloudMove: 32, suitcase: 5, backpack: 7, sunset: 11, bird: 12, storm: 10, llama: 7 } },
+    { fromM: 5000, gap: [138, 193], types: { cloud: 9,  sticker: 7,  cloudMove: 29, suitcase: 8.4, backpack: 6.3, sunset: 10, bird: 11, storm: 9,  llama: 6.3 } },
+    { fromM: 5100, gap: [140, 195], types: { cloud: 8,  sticker: 6,  cloudMove: 32, suitcase: 7,   backpack: 7.35, sunset: 11, bird: 12, storm: 10, llama: 7.35 } },
     // намного меньше «плюшек» (рюкзак/лама) — на такой высоте они делали
     // подъём слишком лёгким, вес ушёл в честные и опасные типы
-    { fromM: 8000, gap: [145, 200], types: { cloud: 10, sticker: 8, cloudMove: 34, suitcase: 8, backpack: 2, sunset: 10, bird: 14, storm: 14, llama: 1 } },
+    { fromM: 8000, gap: [145, 200], types: { cloud: 10, sticker: 8, cloudMove: 34, suitcase: 11.2, backpack: 2.1, sunset: 10, bird: 14, storm: 14, llama: 1.05 } },
   ],
 
   platforms: {
@@ -159,19 +159,19 @@ export const CONF = {
   },
 
   // мыльный пузырь: медленно несёт вверх, лопается сам или по тапу
-  // (было вдвое реже, теперь интервал укорочен на ~15% — чуть почаще)
+  // (интервал укорочен ещё на ~10% — чуть почаще)
   bubble: {
     fromM: 700,
-    intervalM: [1400, 2800],
+    intervalM: [1270, 2545],
     speed: 230,     // px/s плавного подъёма
     duration: 4.5,  // секунд, потом лопается сам
   },
 
   // реактивный ранец: подбираешь — взмываешь, минуя препятствия
-  // (было вдвое реже, теперь интервал укорочен на ~15% — чуть почаще)
+  // (интервал укорочен ещё на ~5% — общие плюшки чуть почаще)
   jet: {
     fromM: 1100,           // первый не раньше этой высоты
-    intervalM: [1200, 2400],// дальше каждые столько метров
+    intervalM: [1140, 2285],// дальше каждые столько метров
     speed: 1500,           // px/s вертикального взлёта
     duration: 2.2,         // секунд полёта (~330 м)
   },

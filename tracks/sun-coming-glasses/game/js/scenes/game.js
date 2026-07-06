@@ -42,6 +42,7 @@ export class GameScene extends Phaser.Scene {
 
     this.isShroom = false; // ГРИБОК после блока «?»
     this.shroomLockUntilM = 0; // до этой высоты — «остывание» после лихорадки
+    this.idleT = 0; // секретная концовка: простой без прорыва потолка
     this.buildOffice();    // серое утро, из которого мы сбежим
 
     // дождевой пояс: случайное начало, километр ливня и грозовых туч
@@ -202,6 +203,7 @@ export class GameScene extends Phaser.Scene {
     if (!window.__scgReady) return; // стартовый экран ещё не закрыт
     if (this.state !== 'ready') return;
     this.state = 'run';
+    this.player.sprite.clearTint().setAlpha(1); // если успел подрастаять в серости
     this.player.bounce(CONF.physics.bounceVy);
     this.game.events.emit('scg-start');
   }
@@ -221,6 +223,33 @@ export class GameScene extends Phaser.Scene {
     const cam = this.cameras.main;
     const curM = Math.max(0, Math.round(-this.player.y / CONF.pxPerM));
     this.bg.update(curM, this.maxM, this.player, dt);
+
+    // секретная концовка: 5 сек простоя без прорыва потолка — комната гаснет
+    // в почти чёрную серость, и сам игрок постепенно растворяется в ней
+    // (setTint, а не setTintFill — иначе цвет прыгает в сплошной силуэт разом);
+    // ещё 5 сек — смерть
+    if (this.state === 'ready' && !this.ceilingBroken) {
+      this.idleT += dt;
+      const k = this.idleT > 5 ? Math.min(1, (this.idleT - 5) / 5) : 0;
+      this.idleOverlay.setAlpha(k * 0.97);
+      if (k > 0) {
+        const c = Phaser.Display.Color.Interpolate.ColorWithColor(
+          { r: 255, g: 255, b: 255 }, { r: 20, g: 20, b: 24 }, 100, k * 100,
+        );
+        this.player.sprite.setTint(Phaser.Display.Color.GetColor(c.r, c.g, c.b));
+        this.player.sprite.setAlpha(1 - k * 0.97);
+      }
+      if (this.idleT >= 10) {
+        this.deathCause = 'boredom';
+        this.die();
+        return;
+      }
+    } else if (this.player.sprite.alpha < 1 || this.player.sprite.tintTopLeft !== 0xffffff) {
+      // самовосстановление: если ушли из простоя (начали забег/сломали
+      // потолок) с недорастаявшим видом — гарантированно возвращаем обычный
+      this.player.sprite.clearTint().setAlpha(1);
+      this.idleOverlay.setAlpha(0);
+    }
     if (this.state !== 'run') return;
 
     this.player.update(dt, this.inputDir());
@@ -430,6 +459,11 @@ export class GameScene extends Phaser.Scene {
       );
       cx += w;
     }
+
+    // секретная концовка: если просидеть тут не начиная забег, комната гаснет
+    // в почти чёрную серость (и герой вместе с ней) — alpha копится в update()
+    this.idleOverlay = this.add.rectangle(W / 2, -104, W, 296, 0x151518)
+      .setDepth(-2.6).setAlpha(0);
   }
 
   /** Стрелки офисных часов — по настоящему времени. */
@@ -452,6 +486,7 @@ export class GameScene extends Phaser.Scene {
   /** Первый рывок вверх: плиты разлетаются, в пролом бьёт тёплый свет. */
   breakCeiling() {
     this.ceilingBroken = true;
+    this.tweens.add({ targets: this.idleOverlay, alpha: 0, duration: 400 });
     for (const p of this.ceilingPieces) {
       this.tweens.add({
         targets: p,

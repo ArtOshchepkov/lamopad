@@ -134,6 +134,7 @@ const DEATH_REASONS = {
   suitcase: 'Поверил чемодану 🧳',
   lightning: 'Зашибло молнией ⚡',
   fall: 'Просто закис',
+  boredom: 'ВЫ ЗАКИСЛИ. Умер от скуки',
 };
 
 game.events.on('scg-death', ({ height, best, isNew, cause }) => {

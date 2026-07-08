@@ -65,8 +65,11 @@ export const CONF = {
     { fromM: 3500, gap: [130, 185], types: { cloudMove: 65, bird: 30, cloud: 3, sticker: 2 } },
     // ещё меньше обычных облаков — выше уже почти всё разнообразие
     { fromM: 4000, gap: [132, 187], types: { cloud: 10, sticker: 8,  cloudMove: 30, suitcase: 9.8, backpack: 6.3, sunset: 10, bird: 10, storm: 9,  llama: 6.3 } },
-    // почти только одноразовые стикеры — ритм «прыгнул-отклеилось»
-    { fromM: 4500, gap: [136, 190], types: { sticker: 90, cloud: 5, cloudMove: 5 } },
+    // почти только одноразовые стикеры — ритм «прыгнул-отклеилось».
+    // Дрейфующих облаков тут ноль: стикер одноразовый, дождаться, пока
+    // облако приплывёт под прыжок, негде — иногда это делало прыжок
+    // физически невозможным
+    { fromM: 4500, gap: [136, 190], types: { sticker: 95, cloud: 1, cloudMove: 0, suitcase: 4 } },
     // назад к разнообразию перед финальным участком
     { fromM: 5000, gap: [138, 193], types: { cloud: 9,  sticker: 7,  cloudMove: 29, suitcase: 8.4, backpack: 6.3, sunset: 10, bird: 11, storm: 9,  llama: 6.3 } },
     { fromM: 5100, gap: [140, 195], types: { cloud: 8,  sticker: 6,  cloudMove: 32, suitcase: 7,   backpack: 7.35, sunset: 11, bird: 12, storm: 10, llama: 7.35 } },

@@ -36,13 +36,13 @@ export class UIScene extends Phaser.Scene {
 
     // стартовая подсказка
     this.hint = this.add.container(cx, CONF.height * 0.56, [
-      this.add.text(0, 0, 'Тапни — и к чёрту потолок!', {
+      this.add.text(0, 0, 'Прыгай к Солнцу', {
         fontFamily: 'Unbounded, sans-serif', fontSize: '19px', fontStyle: '700',
         color: CONF.colors.white, stroke: '#2a0d3e', strokeThickness: 6,
         align: 'center', wordWrap: { width: 360 },
       }).setOrigin(0.5).setResolution(res),
-      this.add.text(0, 58, '← → / A D — или держи палец слева/справа', {
-        fontFamily: 'Nunito, sans-serif', fontSize: '15px',
+      this.add.text(0, 58, '← → / A D или держи палец слева/справа', {
+        fontFamily: 'Nunito, sans-serif', fontSize: '19px',
         color: CONF.colors.text, stroke: '#2a0d3e', strokeThickness: 4,
         align: 'center',
       }).setOrigin(0.5).setResolution(res),

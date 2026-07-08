@@ -581,7 +581,7 @@ export class GameScene extends Phaser.Scene {
       });
     }
     this.cameras.main.shake(130, 0.004);
-    this.field.shout({ x: this.player.x, y: this.officeCeilingY + 34 }, 'К чёрту потолок!');
+    this.field.shout({ x: this.player.x, y: this.officeCeilingY + 34 }, 'Там хорошо!');
 
     // стартовый бонус-джетпак — молча кладём на ближайшее облачко за потолком
     if (this.startBonusJet) {
@@ -615,7 +615,7 @@ export class GameScene extends Phaser.Scene {
     // мир наводняется марио — уже бесполезными — на те же feverLengthM метров
     this.field.marioFeverUntilM = this.maxM + CONF.mario.feverLengthM;
     this.player.sprite.setTexture('shroom');
-    this.field.shout({ x: this.player.x, y: this.player.y - 26 }, 'ГРИБОК!');
+    this.field.shout({ x: this.player.x, y: this.player.y - 26 }, 'ТИПА ГРИБОК!');
     // разноцветные споры превращения
     for (let i = 0; i < 12; i++) {
       const d = this.add.image(this.player.x, this.player.y, 'dot').setDepth(11)

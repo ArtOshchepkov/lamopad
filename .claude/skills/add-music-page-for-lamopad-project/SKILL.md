@@ -67,6 +67,9 @@ description: Чеклист для создания страницы трека 
 - title «<Название> — текст песни и аккорды | Ламопад», meta description,
   keywords, OG + twitter cards, canonical https://lamopad.ru/tracks/<slug>/,
   JSON-LD MusicRecording, itemprop lyrics.
+- Аналитика — сниппет GoatCounter в <head> (единый для всего сайта):
+  <script data-goatcounter="https://lamopad.goatcounter.com/count"
+          async src="//gc.zgo.at/count.js"></script>
 
 ## После создания
 

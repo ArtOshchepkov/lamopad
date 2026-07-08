@@ -50,6 +50,9 @@ description: Чеклист для создания страницы корот�
   canonical https://lamopad.ru/stories/<slug>/,
   OG (og:type article, og:locale ru_RU, og:site_name Ламопад,
   article:author Ламопад) + twitter cards.
+- Аналитика — сниппет GoatCounter в <head> (единый для всего сайта):
+  <script data-goatcounter="https://lamopad.goatcounter.com/count"
+          async src="//gc.zgo.at/count.js"></script>
 
 ## После создания
 

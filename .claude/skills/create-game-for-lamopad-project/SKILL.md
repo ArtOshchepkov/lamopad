@@ -95,6 +95,9 @@ description: Требования и чеклист для создания иг
 - Текстуры рисовать процедурно в boot-сцене (canvas), без бинарных ассетов,
   где возможно.
 - SEO-optimized: title, description, h1, keywords, og-теги, canonical.
+- Аналитика — сниппет GoatCounter в <head> (единый для всего сайта):
+  <script data-goatcounter="https://lamopad.goatcounter.com/count"
+          async src="//gc.zgo.at/count.js"></script>
 
 ## Банальные оптимизации — сразу, не потом
 

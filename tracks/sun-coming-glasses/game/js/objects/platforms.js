@@ -95,10 +95,10 @@ export class PlatformField {
         this.place('cloud', this.apartX(x), this.lastY - R(4, 18));
       }
       // хищное облако — добавка к ярусу: честный путь не занимает.
-      // Выше boost.fromM шанс умножается — там опаснее
+      // Шанс умножается по лесенке boost — выше опаснее
       if (type !== 'suitcase' && m > CONF.enemy.fromM) {
-        const boost = CONF.enemy.boost;
-        const mult = (boost && m >= boost.fromM) ? boost.mult : 1;
+        let mult = 1;
+        for (const step of CONF.enemy.boost) if (m >= step.fromM) mult = step.mult;
         for (const enemy in CONF.enemy.chance) {
           if (Math.random() < CONF.enemy.chance[enemy] * mult) {
             this.place(enemy, this.apartX(x), this.lastY - R(4, 16));

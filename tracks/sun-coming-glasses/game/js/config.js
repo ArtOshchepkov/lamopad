@@ -36,46 +36,67 @@ export const CONF = {
     ahead: 1100,        // на сколько px вперёд (вверх) генерим мир
     despawnBelow: 180,  // насколько ниже камеры чистим объекты
     // анти-блокер: после платформы со слабым отскоком разрыв сверху ограничен
-    // (стикер подбрасывает на 187px, гроза — на 203px; разрывы растут до 195px)
+    // (стикер подбрасывает на 187px, гроза — на 203px; разрывы растут до 206px,
+    // обычный отскок 900px/s при g=1800 даёт апекс 225px — запас есть)
     gapCapAfter: { sticker: 150, storm: 165 },
   },
 
   // Зоны высот: веса типов платформ и разброс вертикальных разрывов (px).
   // Лесенка сложности: одна новинка за раз — шаг 100 м до 500, дальше 200 м.
-  // Вместе с зонами в лесенке участвуют пикапы и добавки: 700 пузырь ·
-  // 900 чайка · 1000 хищники · 1100 ранец · 1200 гроза · 1300 лама ·
-  // 1500 Марио · 1700+ дождевой пояс
+  // Вместе с зонами в лесенке участвуют пикапы и добавки: 350 пузырь ·
+  // 500 хищники (редко, в полную силу с 1000) · 900 чайка · 1100 ранец ·
+  // 1200 гроза · 1300 лама · 1500 Марио · 2000 стена гроз + дождевой пояс
   zones: [
     { fromM: 0,    gap: [62, 96],   types: { cloud: 100 } },
-    { fromM: 100,  gap: [64, 100],  types: { cloud: 75, sticker: 25 } },
-    { fromM: 200,  gap: [68, 106],  types: { cloud: 62, sticker: 26, cloudMove: 12 } },
+    { fromM: 50,  gap: [62, 96],  types: { cloud: 70, sticker: 20, suitcase:  5, llama: 5} },
+    { fromM: 100,  gap: [65, 100],  types: { cloud: 70, sticker: 20, suitcase:  5, llama: 5} },
+    { fromM: 200,  gap: [70, 105],  types: { cloud: 60, sticker: 26, cloudMove: 12, llama: 2 } },
     // чемоданы везде ~+40%, рюкзак/лама ~+5% (веса не обязаны быть целыми)
-    { fromM: 300,  gap: [72, 112],  types: { cloud: 55, sticker: 24, cloudMove: 12, suitcase: 12.6 } },
-    { fromM: 400,  gap: [76, 118],  types: { cloud: 48, sticker: 22, cloudMove: 13, suitcase: 12.6, backpack: 5.25 } },
-    { fromM: 500,  gap: [80, 124],  types: { cloud: 44, sticker: 20, cloudMove: 14, suitcase: 12.6, backpack: 5.25, sunset: 5 } },
-    { fromM: 900,  gap: [88, 134],  types: { cloud: 40, sticker: 17, cloudMove: 16, suitcase: 12.6, backpack: 5.25, sunset: 6, bird: 4 } },
-    { fromM: 1200, gap: [98, 146],  types: { cloud: 36, sticker: 14, cloudMove: 18, suitcase: 12.6, backpack: 5.25, sunset: 7, bird: 5, storm: 3 } },
-    { fromM: 1300, gap: [102, 152], types: { cloud: 33, sticker: 13, cloudMove: 19, suitcase: 11.2, backpack: 5.25, sunset: 7, bird: 6, storm: 4, llama: 1.05 } },
-    { fromM: 1800, gap: [110, 162], types: { cloud: 30, sticker: 12, cloudMove: 21, suitcase: 11.2, backpack: 5.25, sunset: 8, bird: 7, storm: 5, llama: 1.05 } },
-    { fromM: 2600, gap: [122, 177], types: { cloud: 26, sticker: 10, cloudMove: 24, suitcase: 9.8, backpack: 6.3, sunset: 9, bird: 8, storm: 5, llama: 3.15 } },
-    // дождевой пояс обычно кончается к этой высоте — дальше меньше обычных
-    // облаков, чтобы не было ощущения «всё как было», после ливня
-    { fromM: 3000, gap: [128, 183], types: { cloud: 18, sticker: 9,  cloudMove: 27, suitcase: 9.8, backpack: 6.3, sunset: 9,  bird: 9,  storm: 7,  llama: 5.25 } },
+    { fromM: 300,  gap: [80, 110],  types: { cloud: 53, sticker: 24, cloudMove: 12, suitcase: 12, llama: 2.6} },
+    { fromM: 400,  gap: [80, 120],  types: { cloud: 48, sticker: 22, cloudMove: 13, suitcase: 12, backpack: 5.25, llama: 0.6 } },
+    { fromM: 500,  gap: [85, 128],  types: { cloud: 44, sticker: 20, cloudMove: 14, suitcase: 12, backpack: 5.25, sunset: 5, llama: 0.6 } },
+    { fromM: 700,  gap: [88, 134],  types: { cloud: 30, sticker: 24, cloudMove: 19, suitcase: 12, backpack: 5.25, sunset: 10, llama: 0.6 } },
+    { fromM: 750,   gap: [70, 105],  types: { cloud: 5, sticker: 90, suitcase: 5 } },
+    { fromM: 800,  gap: [93, 139],  types: { cloud: 40, sticker: 17, cloudMove: 16, suitcase: 12, backpack: 5.25, sunset: 6, bird: 4, llama: 0.6} },
+    { fromM: 900,  gap: [93, 139],  types: { cloud: 20, sticker: 17, cloudMove: 26, suitcase: 12, backpack: 5.25, sunset: 6, bird: 4, llama: 0.6, storm: 10} },
+    // с 500 м облака разреженнее (+3% к разрывам по всей лесенке),
+    // с 1000 м дрейф быстрее (см. speedBoost), хищники в полную силу (enemy)
+    { fromM: 1000, gap: [95, 142],  types: { cloud: 40, sticker: 17, cloudMove: 16, suitcase: 12.6, backpack: 5.25, sunset: 6, bird: 4 } },
+    { fromM: 1200, gap: [105, 155], types: { cloud: 36, sticker: 14, cloudMove: 18, suitcase: 12.6, backpack: 5.25, sunset: 7, bird: 5, storm: 3 } },
+    { fromM: 1300, gap: [109, 161], types: { cloud: 33, sticker: 13, cloudMove: 19, suitcase: 11.2, backpack: 5.25, sunset: 7, bird: 6, storm: 4, llama: 1.05 } },
+    { fromM: 1400, gap: [109, 161], types: { cloudMove: 80, suitcase: 10, sunset: 5, bird: 5, storm: 4, llama: 1.05 } },
+    { fromM: 1500, gap: [119, 161], types: { cloud: 20, sticker: 23, cloudMove: 20, suitcase: 11.2, backpack: 5.25, sunset: 8, bird: 7, storm: 4, llama: 1.05 } },
+    { fromM: 1400, gap: [109, 161], types: { cloudMove: 20, bird: 805 } },
+    { fromM: 1500, gap: [110, 165], types: { cloud: 23, sticker: 23, cloudMove: 19, suitcase: 11.2, backpack: 5.25, sunset: 7, bird: 6, storm: 4, llama: 1.05 } },
+    { fromM: 1800, gap: [117, 171], types: { cloud: 15, sticker: 22, cloudMove: 26, suitcase: 11.2, backpack: 5.25, sunset: 8, bird: 7, storm: 5, llama: 1.05 } },
+    // предштормовая вероятность туч усилилась
+    { fromM: 1900, gap: [117, 171], types: { cloud: 15, sticker: 2, cloudMove: 26, suitcase: 11.2, backpack: 5.25, sunset: 8, bird: 7, storm: 25, llama: 1.05 } },
+    // стена шторма: ливень стартует здесь же (rain.minStartM = 2000) —
+    // ненадолго сплошные грозовые тучи почти без разрывов
+    { fromM: 2000, gap: [30, 75], types: { storm: 100 } },
+    // после стены — облачный этап как раньше (разрывы уже с бустами лесенки)
+    { fromM: 2200, gap: [130, 186], types: { cloud: 0, sticker: 10, cloudMove: 50, suitcase: 9, backpack: 6.3, sunset: 9, bird: 8, storm: 5.8, llama: 3.15 } },
+    // ливень (2000..3000) кончается к этой высоте — дальше меньше обычных
+    // облаков, чтобы не было ощущения «всё как было» после ливня
+    { fromM: 3000, gap: [136, 193], types: { cloud: 18, sticker: 9,  cloudMove: 27, suitcase: 9.8, backpack: 6.3, sunset: 9,  bird: 9,  storm: 7,  llama: 5.25 } },
     // почти только дрейфующие облака и чайки — воздушный, летящий участок
-    { fromM: 3500, gap: [130, 185], types: { cloudMove: 65, bird: 30, cloud: 3, sticker: 2 } },
+    { fromM: 3500, gap: [138, 195], types: { cloudMove: 65, bird: 30, cloud: 3, sticker: 2 } },
     // ещё меньше обычных облаков — выше уже почти всё разнообразие
-    { fromM: 4000, gap: [132, 187], types: { cloud: 10, sticker: 8,  cloudMove: 30, suitcase: 9.8, backpack: 6.3, sunset: 10, bird: 10, storm: 9,  llama: 6.3 } },
+    { fromM: 4000, gap: [140, 197], types: { cloud: 0, sticker: 10,  cloudMove: 35, suitcase: 9.8, backpack: 6.3, sunset: 10, bird: 13, storm: 9,  llama: 6.3 } },
+    // { fromM: 4200, gap: [140, 197], types: { sunset: 100} }, -- todo: is such sunset-only possible
+    { fromM: 4400, gap: [140, 197], types: { cloud: 20, sticker: 10,  cloudMove: 15, suitcase: 9.8, backpack: 6.3, sunset: 0, bird: 3, storm: 29,  llama: 6.3 } },
     // почти только одноразовые стикеры — ритм «прыгнул-отклеилось».
     // Дрейфующих облаков тут ноль: стикер одноразовый, дождаться, пока
     // облако приплывёт под прыжок, негде — иногда это делало прыжок
     // физически невозможным
-    { fromM: 4500, gap: [136, 190], types: { sticker: 95, cloud: 1, cloudMove: 0, suitcase: 4 } },
+    { fromM: 4500, gap: [144, 200], types: { sticker: 95, cloud: 1, cloudMove: 0, suitcase: 4 } },
     // назад к разнообразию перед финальным участком
-    { fromM: 5000, gap: [138, 193], types: { cloud: 9,  sticker: 7,  cloudMove: 29, suitcase: 8.4, backpack: 6.3, sunset: 10, bird: 11, storm: 9,  llama: 6.3 } },
-    { fromM: 5100, gap: [140, 195], types: { cloud: 8,  sticker: 6,  cloudMove: 32, suitcase: 7,   backpack: 7.35, sunset: 11, bird: 12, storm: 10, llama: 7.35 } },
+    { fromM: 5000, gap: [146, 203], types: { cloud: 9,  sticker: 7,  cloudMove: 29, suitcase: 8.4, backpack: 6.3, sunset: 10, bird: 11, storm: 9,  llama: 6.3 } },
+    { fromM: 5100, gap: [148, 205], types: { cloud: 0,  sticker: 8,  cloudMove: 34, suitcase: 7,   backpack: 8.35, sunset: 13, bird: 12, storm: 10, llama: 7.35 } },
+    { fromM: 5500, gap: [150, 205], types: { cloud: 0,  sticker: 8,  cloudMove: 34, suitcase: 7,   backpack: 8.35, sunset: 13, bird: 12, storm: 10, llama: 7.35 } },
     // намного меньше «плюшек» (рюкзак/лама) — на такой высоте они делали
     // подъём слишком лёгким, вес ушёл в честные и опасные типы
-    { fromM: 8000, gap: [145, 200], types: { cloud: 10, sticker: 8, cloudMove: 34, suitcase: 11.2, backpack: 2.1, sunset: 10, bird: 14, storm: 14, llama: 1.05 } },
+    { fromM: 8000, gap: [155, 206], types: { cloud: 10, sticker: 8, cloudMove: 34, suitcase: 11.2, backpack: 2.1, sunset: 10, bird: 14, storm: 14, llama: 1.05 } },
   ],
 
   platforms: {
@@ -117,19 +138,39 @@ export const CONF = {
   },
 
   // шанс хищного облака на ярус (доп. к обычной платформе), по видам.
-  // После boost.fromM шанс умножается на boost.mult — выше опаснее
-  enemy: { fromM: 1000, chance: { croc: 0.018, snake: 0.014 }, boost: { fromM: 4000, mult: 1.5 } },
+  // boost — лесенка множителей шанса (как speedBoost): с 500 м хищники —
+  // редкие гости, с 1000 м — в полную силу, выше 4000 м — опаснее
+  enemy: {
+    fromM: 500,
+    chance: { croc: 0.025, snake: 0.02 },
+    boost: [
+      { fromM: 500,  mult: 0.35 },
+      { fromM: 1000, mult: 1 },
+      { fromM: 2000, mult: 1.1 },
+      { fromM: 4000, mult: 1.5 },
+      { fromM: 4000, mult: 1.6 },
+    ],
+  },
 
   // после fromM дрейфующие облака/чайки летят быстрее, а молнии бьют чаще
   // (интервал делится на mult) — на больших высотах ощутимо жарче.
   // Ступени применяются по последней достигнутой (как zones)
   speedBoost: [
-    { fromM: 4000, mult: 1.1 },
-    { fromM: 5000, mult: 1.5 },
-    { fromM: 7000, mult: 2 },
-    { fromM: 8000, mult: 2.5 },
-    { fromM: 9000, mult: 3 },
-    { fromM: 10000, mult: 3.2 },
+    { fromM: 500, mult: 1.1 },
+    { fromM: 800, mult: 1.2 },
+    { fromM: 1000, mult: 1.25 },
+    { fromM: 2000, mult: 1.3 },
+    { fromM: 2500, mult: 1.4 },
+    { fromM: 3000, mult: 1.5 },
+    { fromM: 4000, mult: 1.6 },
+    { fromM: 4500, mult: 1.7 },
+    { fromM: 5000, mult: 1.8 },
+    { fromM: 5500, mult: 2 },
+    { fromM: 7000, mult: 2.1 },
+    { fromM: 8000, mult: 2.6 },
+    { fromM: 9000, mult: 3.1 },
+    { fromM: 10000, mult: 3.3 },
+    { fromM: 12000, mult: 4 },
   ],
 
   // после fromM платформы уже (мультипликатор ширины) — точность важнее.
@@ -150,10 +191,12 @@ export const CONF = {
   // дождевой пояс: начинается где-то в [minStartM..maxStartM], длится lengthM.
   // Внутри — дождь на весь экран и резко больше грозовых туч
   rain: {
-    minStartM: 1700,
-    maxStartM: 2700,
-    lengthM: 1000,
-    stormWeight: 130, // вес грозовых туч внутри пояса (обычно 4-6) — гроза почти всюду
+    // старт прибит к почти 2000. Начинается плавно, жёстко становится ровно к зоне плотных штормовых облаков (см. zones):
+    // ливень всегда начинается со «стены гроз»
+    minStartM: 1920,
+    maxStartM: 1950,
+    lengthM: 1050,
+    stormWeight: 150, // вес грозовых туч внутри пояса (обычно 4-6) — гроза почти всюду
     edgeM: 80,        // плавный вход/выход из дождя
   },
 
@@ -174,7 +217,7 @@ export const CONF = {
   // мыльный пузырь: медленно несёт вверх, лопается сам или по тапу
   // (интервал укорочен ещё на ~10% — чуть почаще)
   bubble: {
-    fromM: 700,
+    fromM: 350,
     intervalM: [1270, 2545],
     speed: 230,     // px/s плавного подъёма
     duration: 4.5,  // секунд, потом лопается сам

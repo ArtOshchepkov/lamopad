@@ -1,5 +1,6 @@
 // ─── Boot: шрифты + процедурные текстуры, затем запуск игры ──────────────────
 import { CONF } from '../config.js';
+import { registerSoundFolders } from '../sound.js';
 
 export class BootScene extends Phaser.Scene {
   constructor() { super('boot'); }
@@ -1454,8 +1455,22 @@ export class BootScene extends Phaser.Scene {
     });
   }
 
+  // Список файлов не хардкодим: читаем manifest.json (генерится из имён папок
+  // скриптом sounds/build-manifest.mjs) и на лету доливаем аудио в очередь —
+  // Phaser разрешает добавлять file'ы в load во время самого preload.
   loadSounds() {
-    this.load.audio('seagull', 'sounds/' + CONF.sounds.seagull);
-    this.load.audio('france', 'sounds/' + CONF.sounds.croissant);
+    this.load.json('soundManifest', 'sounds/manifest.json');
+    this.load.once('filecomplete-json-soundManifest', () => {
+      const manifest = this.cache.json.get('soundManifest');
+      const keysByFolder = {};
+      for (const [folder, files] of Object.entries(manifest)) {
+        keysByFolder[folder] = files.map((file, i) => {
+          const key = `${folder}/${i}`;
+          this.load.audio(key, `sounds/${folder}/${file}`);
+          return key;
+        });
+      }
+      registerSoundFolders(keysByFolder);
+    });
   }
 }

@@ -12,7 +12,8 @@
     "test": "echo \"Error: no test specified\" && exit 1",
     "start": "webpack serve --open --config webpack.config.dev.js",
     "build": "webpack --config webpack.config.prod.js",
-    "deploy": "npm run build && gh-pages -d dist"
+    "deploy": "npm run build && gh-pages -d dist",
+    "scg:sounds": "node tracks/sun-coming-glasses/game/sounds/build-manifest.mjs"
   },
   "devDependencies": {
     "gh-pages": "^6.1.1",

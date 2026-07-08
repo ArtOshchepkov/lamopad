@@ -31,6 +31,7 @@ const $ = (id) => document.getElementById(id);
 const loading = $('loading');
 const deathOverlay = $('death');
 const audio = $('track');
+audio.volume = CONF.music.volume;
 const muteMusicBtn = $('mute-music');
 const muteSfxBtn = $('mute-sfx');
 
@@ -155,6 +156,35 @@ $('restart').addEventListener('click', () => {
 const platformsOverlay = $('platforms');
 $('death-save').addEventListener('click', () => platformsOverlay.classList.remove('hidden'));
 $('plat-close').addEventListener('click', () => platformsOverlay.classList.add('hidden'));
+
+// «благодарности» → кто озвучил игру (открывается и с загрузки, и с экрана смерти)
+const creditsOverlay = $('credits');
+document.querySelectorAll('.js-credits-open').forEach((el) =>
+  el.addEventListener('click', () => creditsOverlay.classList.remove('hidden')));
+$('credits-close').addEventListener('click', () => creditsOverlay.classList.add('hidden'));
+
+// клик по титрам или по человеку — дождь из сердечек в знак благодарности
+const HEART_EMOJI = ['❤️', '🧡', '💛'];
+function spawnHearts(x, y) {
+  const n = 26 + Math.floor(Math.random() * 10);
+  for (let i = 0; i < n; i++) {
+    const h = document.createElement('span');
+    h.className = 'heart-fx';
+    h.textContent = HEART_EMOJI[Math.floor(Math.random() * HEART_EMOJI.length)];
+    h.style.left = x + 'px';
+    h.style.top = y + 'px';
+    h.style.fontSize = (16 + Math.random() * 14) + 'px';
+    h.style.animationDuration = (0.9 + Math.random() * 0.7) + 's';
+    h.style.setProperty('--dx', ((Math.random() - 0.5) * 340) + 'px');
+    h.style.setProperty('--rot', ((Math.random() - 0.5) * 110) + 'deg');
+    h.addEventListener('animationend', () => h.remove());
+    document.body.appendChild(h);
+  }
+}
+creditsOverlay.addEventListener('click', (e) => {
+  const hit = e.target.closest('.plat-thanks, .credits-list li');
+  if (hit) spawnHearts(e.clientX, e.clientY);
+});
 
 // «хочу игру под свой трек» → контакты
 const orderOverlay = $('order');

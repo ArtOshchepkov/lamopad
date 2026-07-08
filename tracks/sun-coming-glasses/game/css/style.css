@@ -544,7 +544,7 @@ html, body {
 }
 .death-more {
   font-family: 'Nunito', sans-serif;
-  font-size: 13px;
+  font-size: 15px;
   color: var(--text);
   opacity: 0.38;
   text-decoration: none;
@@ -556,12 +556,13 @@ html, body {
 }
 .death-more:hover { opacity: 0.9; color: var(--gold); }
 
-/* ── площадки и заказ: спасибо и большие ссылки ── */
+/* ── площадки, заказ и благодарности: общий тёмный оверлей-подложка ── */
 #platforms,
-#order {
+#order,
+#credits {
   position: fixed;
   inset: 0;
-  z-index: 96;
+  z-index: 101; /* выше #loading (100) — благодарности можно открыть и с загрузки */
   overflow: hidden;
   background: linear-gradient(180deg, #0a0618 0%, #241058 55%, #71178f 125%);
   display: flex;
@@ -572,7 +573,8 @@ html, body {
   transition: opacity 0.35s ease;
 }
 #platforms.hidden,
-#order.hidden { opacity: 0; pointer-events: none; }
+#order.hidden,
+#credits.hidden { opacity: 0; pointer-events: none; }
 
 .plat-inner {
   display: flex;
@@ -666,6 +668,67 @@ html, body {
   transition: opacity 0.2s, color 0.2s;
 }
 .order-games:hover { opacity: 1; color: var(--gold); }
+
+/* благодарности: заголовок у самого верха экрана — весь остаток высоты под список,
+   чтобы все имена помещались разом без прокрутки и без мелкого текста */
+#credits {
+  align-items: flex-start;
+  padding-top: calc(max(16px, env(safe-area-inset-top)) + 64px);
+}
+
+.credits-list {
+  display: flex;
+  flex-direction: column;
+  gap: 12px;
+  width: 100%;
+  text-align: left;
+  padding: 0;
+  margin: 0;
+  list-style: none;
+}
+.credits-list li {
+  position: relative;
+  font-size: 14.5px;
+  line-height: 1.5;
+  color: var(--text);
+  opacity: 0.92;
+  cursor: pointer;
+}
+.credits-list li:hover { z-index: 2; }
+.credits-name {
+  display: block;
+  font-family: 'Unbounded', sans-serif;
+  font-weight: 700;
+  font-size: 14.5px;
+  color: var(--gold);
+  transform-origin: left center;
+  transition: transform 0.25s cubic-bezier(.34, 1.56, .64, 1), color 0.25s;
+}
+.credits-list li:hover .credits-name {
+  transform: scale(1.45);
+  color: #fff6ec;
+}
+
+/* сердечки — клик по титрам или по человеку из списка */
+#credits .plat-thanks {
+  cursor: pointer;
+  transition: transform 0.25s cubic-bezier(.34, 1.56, .64, 1), text-shadow 0.25s;
+}
+#credits .plat-thanks:hover {
+  transform: scale(1.08);
+  text-shadow: 0 0 26px rgba(255, 150, 40, 0.6);
+}
+.heart-fx {
+  position: fixed;
+  z-index: 200;
+  pointer-events: none;
+  animation: heart-fall ease-in forwards;
+  will-change: transform, opacity;
+}
+@keyframes heart-fall {
+  0%   { transform: translate(0, 0) rotate(0deg) scale(1); opacity: 1; }
+  100% { transform: translate(var(--dx), 170px) rotate(var(--rot)) scale(0.65); opacity: 0; }
+}
 
 .plat-close {
   font-family: 'Nunito', sans-serif;

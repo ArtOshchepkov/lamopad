@@ -1,0 +1,75 @@
+{
+  "any_lighting_strike": [
+    "light_3_skyau_blin.mp3",
+    "light_4_ski_pau.mp3",
+    "lighting_1_bdunsh.mp3",
+    "lighting_2_skidish.mp3",
+    "lighting_5_tunnnb.mp3",
+    "lighting_6_piu.mp3",
+    "lighting_7_piu.mp3",
+    "lighting_9_chuuun.mp3"
+  ],
+  "bubble_enter": [
+    "enter_bubble_gleb.mp3"
+  ],
+  "bubble_pop": [
+    "pop_bubble_gleb.mp3"
+  ],
+  "ceil_crush": [
+    "ceil_crush_tydish.mp3",
+    "ceil_crush_utb.mp3"
+  ],
+  "crocodile_ate": [
+    "croco_eatan_strong.mp3",
+    "croco_eaten_nyam_nyam_cute.mp3",
+    "croco_eaten_yam.mp3"
+  ],
+  "crocodile_was_close": [
+    "wom_pididum.mp3"
+  ],
+  "death_light": [
+    "grom_and_lightting_dead.mp3",
+    "svalis_s_nebes_death_light.mp3"
+  ],
+  "dubai_tower": [
+    "my_sheih.mp3"
+  ],
+  "gamer_fall": [
+    "upali.mp3",
+    "vi_upali.mp3"
+  ],
+  "jet": [
+    "vrrrrr.mp3",
+    "vzhhhhh.mp3"
+  ],
+  "jump_on_red_backpack_boost_cloud": [
+    "jump_on_red.mp3"
+  ],
+  "new_record": [
+    "new_record_cherta.mp3",
+    "new_record_pozdravlayu.mp3"
+  ],
+  "one_time_ticket_cloud_jump_on": [
+    "discord-notification.mp3",
+    "meet-message-sound-1.mp3",
+    "ms-teams-notification.mp3",
+    "telegram-notification.mp3",
+    "web_whatsapp.mp3",
+    "whatsapp-notification-sound.mp3",
+    "windows-10-notification.mp3",
+    "y2mate_iVX6Kwx.mp3"
+  ],
+  "paris_tower": [
+    "a_chto_horoshego_paris.mp3",
+    "bonjour_paris.mp3",
+    "crusassan_gleb.mp3",
+    "dvizh_paris.mp3",
+    "noooor_rya_darya_paris.mp3"
+  ],
+  "seagul": [
+    "seagul_ira.mp3"
+  ],
+  "snake_ate": [
+    "snake_ate_skushala_tebya.mp3"
+  ]
+}

@@ -3,6 +3,7 @@ import { CONF, MILESTONES, LYRICS, LYRIC_STEP_M, LYRIC_CLEAR_M, GRUMBLE } from '
 import { Player } from '../objects/player.js';
 import { PlatformField } from '../objects/platforms.js';
 import { Background } from '../objects/background.js';
+import { playRandom } from '../sound.js';
 
 const LOW_GFX = ('ontouchstart' in window) || navigator.maxTouchPoints > 0;
 
@@ -299,6 +300,8 @@ export class GameScene extends Phaser.Scene {
       ? null : this.field.landing(this.player);
     if (plat) this.onLand(plat);
 
+    this.checkCrocProximity(dt);
+
     // камера тянется только вверх
     const target = this.player.y - CONF.height * CONF.camera.lookAhead;
     if (target < cam.scrollY) cam.scrollY = target;
@@ -329,6 +332,7 @@ export class GameScene extends Phaser.Scene {
       this.checkMilestones();
       if (!this.recordBeaten && this.startBest > 0 && this.maxM > this.startBest) {
         this.recordBeaten = true;
+        playRandom(this, 'new_record');
         this.game.events.emit('scg-newrecord');
       }
     }
@@ -356,6 +360,7 @@ export class GameScene extends Phaser.Scene {
   fallDeath() {
     if (this.state !== 'run') return;
     this.state = 'falling'; // физика и управление замирают
+    playRandom(this, 'gamer_fall');
     const s = this.player.sprite;
     const spin = this.player.vx < 0 ? -1 : 1; // кувырок в сторону последнего движения
     this.field.shout({ x: this.player.x, y: this.player.y - 20 }, 'А-А-А!');
@@ -390,10 +395,12 @@ export class GameScene extends Phaser.Scene {
     switch (plat.type) {
       case 'sticker':
         this.player.bounce(P.stickerVy, 0.16);
+        playRandom(this, 'one_time_ticket_cloud_jump_on');
         this.field.breakSticker(plat);
         break;
       case 'backpack':
         this.player.bounce(P.springVy, 0.34);
+        playRandom(this, 'jump_on_red_backpack_boost_cloud');
         this.field.react(plat);
         break;
       case 'llama':
@@ -406,7 +413,7 @@ export class GameScene extends Phaser.Scene {
         break;
       case 'bird':
         this.player.bounce(P.bounceVy * 1.15, 0.24);
-        this.sound.play('seagull');
+        playRandom(this, 'seagul');
         this.field.react(plat);
         break;
       case 'suitcase':
@@ -538,6 +545,7 @@ export class GameScene extends Phaser.Scene {
   /** Первый рывок вверх: плиты разлетаются, в пролом бьёт тёплый свет. */
   breakCeiling() {
     this.ceilingBroken = true;
+    playRandom(this, 'ceil_crush');
     this.tweens.add({ targets: this.idleOverlay, alpha: 0, duration: 400 });
     for (const p of this.ceilingPieces) {
       this.tweens.add({
@@ -666,6 +674,7 @@ export class GameScene extends Phaser.Scene {
 
   /** Игрок в пузыре: плавно вверх, коллизий нет. */
   enterBubble() {
+    playRandom(this, 'bubble_enter');
     this.bubbleTime = CONF.bubble.duration;
     this.bubbleSprite = this.add.image(this.player.x, this.player.y, 'bubble')
       .setDepth(11).setScale(0.2).setAlpha(0.95);
@@ -685,6 +694,7 @@ export class GameScene extends Phaser.Scene {
   /** ПЫК! Разлёт капель, лёгкий остаточный подъём. */
   popBubble() {
     if (!this.bubbleSprite) return;
+    playRandom(this, 'bubble_pop');
     this.bubbleTime = 0;
     this.field.shout({ x: this.player.x, y: this.player.y - 40 }, 'ПЫК!');
     for (let i = 0; i < 12; i++) {
@@ -761,6 +771,7 @@ export class GameScene extends Phaser.Scene {
   startJet() {
     if (this.state !== 'run') return;
     if (this.bubbleTime > 0) this.popBubble(); // ракета рвёт пузырь
+    playRandom(this, 'jet');
     this.jetTime = CONF.jet.duration;
     if (!this.jetSprite) {
       this.jetSprite = this.add.image(this.player.x, this.player.y + 14, 'jetpack')
@@ -841,9 +852,7 @@ export class GameScene extends Phaser.Scene {
            this.maxM >= MILESTONES[this.milestoneIdx].m) {
       const milestone = MILESTONES[this.milestoneIdx];
       this.game.events.emit('scg-milestone', milestone);
-      if(milestone.sound) {
-        this.sound.play(milestone.sound);
-      }
+      if (milestone.sound) playRandom(this, milestone.sound);
       this.milestoneIdx++;
     }
   }
@@ -852,6 +861,7 @@ export class GameScene extends Phaser.Scene {
 
   /** Разряд прошёл по ломаной pts: жарим всех, кто на пути. */
   boltHits(pts) {
+    if (pts && pts.length) playRandom(this, 'any_lighting_strike');
     for (const p of this.field.active) {
       if ((p.type === 'croc' || p.type === 'snake') && !p.dead && p.deco &&
           this.nearBolt(pts, p.deco.x, p.deco.y, 32)) {
@@ -881,6 +891,7 @@ export class GameScene extends Phaser.Scene {
   electrocuted() {
     this.state = 'zapped'; // физика и управление замирают
     this.deathCause = 'lightning';
+    playRandom(this, 'death_light');
     const s = this.player.sprite;
     s.setTintFill(0x2a2126);
     this.field.shout({ x: this.player.x, y: this.player.y - 40 }, 'ЖАХ!');
@@ -894,11 +905,28 @@ export class GameScene extends Phaser.Scene {
     this.time.delayedCall(1000, () => this.die());
   }
 
+  /** "Фух, пронесло": звук при пролёте рядом с живым крокодилом мимо пасти. */
+  checkCrocProximity(dt) {
+    if (this.state !== 'run') return; // не звучит поверх момента самого укуса
+    this.crocCloseCd = Math.max(0, (this.crocCloseCd || 0) - dt);
+    if (this.crocCloseCd > 0) return; // кулдаун — иначе спамит, пока герой скачет рядом
+    for (const p of this.field.active) {
+      if (p.type !== 'croc' || p.dead) continue;
+      const d = Phaser.Math.Distance.Between(this.player.x, this.player.y, p.x, p.y);
+      if (d < CONF.crocClose.r) {
+        playRandom(this, 'crocodile_was_close');
+        this.crocCloseCd = CONF.crocClose.cooldown;
+        break;
+      }
+    }
+  }
+
   /** Съеден хищником: выпад, очки утягиваются в пасть, затем экран смерти. */
   eaten(plat) {
     if (this.state !== 'run') return;
     this.state = 'eaten'; // физика и управление замирают
     this.deathCause = plat.type;
+    playRandom(this, plat.type === 'snake' ? 'snake_ate' : 'crocodile_ate');
     const cry = plat.type === 'snake' ? 'Ш-ШШ!' : 'АМ!';
     const tint = plat.type === 'snake' ? 0xa04ab0 : 0x55a03c;
     this.field.lunge(plat, this.player.x, cry, tint);

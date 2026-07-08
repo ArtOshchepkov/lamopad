@@ -1,62 +1,191 @@
-<!doctype html>
-<html lang="en">
-
+<!DOCTYPE html>
+<html lang="ru">
 <head>
-  <meta charset="utf-8">
-  <title>Page Not Found</title>
-  <meta name="viewport" content="width=device-width, initial-scale=1">
-  <style>
-    * {
-      line-height: 1.2;
-      margin: 0;
-    }
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>Странница потерялась — Ламопад</title>
+  <meta name="description" content="Такой страницы нет. Она ушла автостопом и не оставила координат.">
+  <meta name="author" content="Ламопад">
+  <meta name="robots" content="noindex, follow">
+  <link rel="icon" href="/img/slon_32px.jpg" type="image/jpeg">
 
-    html {
-      color: #888;
-      display: table;
-      font-family: sans-serif;
-      height: 100%;
-      text-align: center;
-      width: 100%;
+  <meta property="og:type" content="website">
+  <meta property="og:title" content="Странница потерялась — Ламопад">
+  <meta property="og:description" content="Такой страницы нет.">
+  <meta property="og:url" content="https://lamopad.ru/404.html">
+  <meta property="og:locale" content="ru_RU">
+  <meta property="og:site_name" content="Ламопад">
+
+  <link rel="preconnect" href="https://fonts.googleapis.com">
+  <link href="https://fonts.googleapis.com/css2?family=Nunito:ital,wght@0,400;0,600;0,700;1,400&family=Unbounded:wght@900&display=swap" rel="stylesheet">
+
+  <style>
+    *, *::before, *::after { box-sizing: border-box; margin: 0; padding: 0; }
+
+    :root {
+      --bg:    #f8f4ed;
+      --ink:   #1e1810;
+      --faded: #7a6e62;
+      --red:   #c8281e;
     }
 
     body {
-      display: table-cell;
-      vertical-align: middle;
-      margin: 2em auto;
+      background: var(--bg);
+      color: var(--ink);
+      font-family: 'Nunito', sans-serif;
+      font-size: clamp(16px, 3.2vw, 19px);
+      line-height: 1.8;
+      min-height: 100vh;
+      cursor: url('/img/lamopad_cursor_48px.png') 0 0, auto;
     }
 
-    h1 {
-      color: #555;
-      font-size: 2em;
-      font-weight: 400;
-    }
-
-    p {
+    .page {
+      position: relative;
+      z-index: 1;
+      max-width: 480px;
       margin: 0 auto;
-      width: 280px;
+      min-height: 100vh;
+      display: flex;
+      flex-direction: column;
+      justify-content: center;
+      padding: clamp(48px, 10vw, 96px) 24px;
+      text-align: center;
     }
 
-    @media only screen and (max-width: 280px) {
+    /* ── header ── */
+    h1 {
+      font-family: 'Unbounded', sans-serif;
+      font-size: clamp(72px, 24vw, 140px);
+      font-weight: 900;
+      line-height: 1;
+      color: var(--red);
+      letter-spacing: .01em;
+    }
 
-      body,
-      p {
-        width: 95%;
-      }
+    .tagline {
+      margin-top: 8px;
+      margin-bottom: 40px;
+      font-size: clamp(11px, 2vw, 13px);
+      letter-spacing: .28em;
+      text-transform: uppercase;
+      color: var(--faded);
+      font-weight: 700;
+    }
 
-      h1 {
-        font-size: 1.5em;
-        margin: 0 0 0.3em;
-      }
+    /* ── llama ── */
+    .lost-llama {
+      font-size: clamp(40px, 10vw, 56px);
+      margin-bottom: 32px;
+      display: inline-block;
+      transform: scaleX(-1);
+      animation: wander 3.5s ease-in-out infinite;
+    }
 
+    @keyframes wander {
+      0%, 100% { transform: scaleX(-1) translateY(0) rotate(0deg); }
+      50%      { transform: scaleX(-1) translateY(-6px) rotate(-4deg); }
+    }
+
+    /* ── text ── */
+    .story p {
+      margin-bottom: 1.1em;
+      color: var(--ink);
+    }
+    .story p:last-child { margin-bottom: 0; }
+
+    /* ── cta ── */
+    .cta-wrap {
+      margin-top: 48px;
+      display: flex;
+      flex-direction: column;
+      align-items: center;
+      gap: 20px;
+    }
+
+    .cta {
+      display: inline-block;
+      font-family: 'Unbounded', sans-serif;
+      font-size: clamp(13px, 2.5vw, 15px);
+      font-weight: 900;
+      letter-spacing: .04em;
+      color: var(--bg);
+      background: var(--red);
+      text-decoration: none;
+      padding: 14px 32px;
+      border-radius: 4px;
+      box-shadow: 3px 3px 0 rgba(0,0,0,0.12);
+      transition: transform 0.15s, box-shadow 0.15s;
+    }
+
+    .cta:hover {
+      transform: translate(-1px, -1px);
+      box-shadow: 5px 5px 0 rgba(0,0,0,0.16);
+    }
+
+    .also {
+      display: flex;
+      flex-wrap: wrap;
+      justify-content: center;
+      gap: 6px 4px;
+      font-size: 20px;
+      color: var(--faded);
+    }
+
+    .also a {
+      color: var(--faded);
+      text-decoration: underline;
+      text-decoration-color: rgba(200, 40, 30, 0.3);
+      text-underline-offset: 3px;
+      transition: color 0.15s, text-decoration-color 0.15s;
+    }
+
+    .also a:hover {
+      color: var(--red);
+      text-decoration-color: var(--red);
+    }
+
+    .also .sep { opacity: .4; }
+
+    /* ── footer ── */
+    .footer-copy {
+      margin-top: 56px;
+      font-size: 11px;
+      letter-spacing: .10em;
+      color: rgba(0,0,0,0.2);
     }
   </style>
+  <script data-goatcounter="https://lamopad.goatcounter.com/count"
+          async src="//gc.zgo.at/count.js"></script>
 </head>
 
 <body>
-  <h1>Page Not Found</h1>
-  <p>Sorry, but the page you were trying to view does not exist.</p>
-</body>
 
+<main class="page">
+
+  <header>
+    <h1>404</h1>
+    <p class="tagline">здесь дороги нет</p>
+  </header>
+
+  <span class="lost-llama" aria-hidden="true">🦙</span>
+
+  <section class="story">
+    <p>Даже страница куда-то делась, а ты всё ещё за экраном.</p>
+  </section>
+
+  <div class="cta-wrap">
+    <a class="cta" href="/">Вернуться на дорогу</a>
+    <nav class="also" aria-label="Другие разделы">
+      <a href="/tracks/">песни</a><span class="sep">·</span>
+      <a href="/games/">игры</a><span class="sep">·</span>
+      <a href="/stories/">рассказы</a><span class="sep">·</span>
+    </nav>
+  </div>
+
+  <p class="footer-copy">&copy; Ламопад — кое-какие права защищены</p>
+
+</main>
+
+<script src="/js/lamopad-fall.js"></script>
+</body>
 </html>
-<!-- IE needs 512+ bytes: https://docs.microsoft.com/archive/blogs/ieinternals/friendly-http-error-pages -->

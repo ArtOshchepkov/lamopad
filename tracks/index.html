@@ -137,6 +137,22 @@
       color: var(--red);
     }
 
+    /* «Летай»: обычный вид, но ховер — глитч как на странице трека */
+    .t-fly { display: inline-block; }
+    .track:hover .t-fly {
+      color: #3661A0;
+      text-shadow: 2px 0 rgba(54,97,160,0.55), -2px 0 rgba(112,136,168,0.7);
+      animation: fly-glitch 0.45s steps(2) infinite;
+    }
+    @keyframes fly-glitch {
+      0%, 100% { transform: translate(0, 0); }
+      33%      { transform: translate(-1px, 1px); }
+      66%      { transform: translate(1px, -1px); }
+    }
+    @media (prefers-reduced-motion: reduce) {
+      .track:hover .t-fly { animation: none; }
+    }
+
     .track-links {
       display: flex;
       gap: 8px;
@@ -277,6 +293,67 @@
     .aplayer .aplayer-list ol li .aplayer-list-author { color: var(--faded) !important; }
     .aplayer .aplayer-pic { border-radius: 4px !important; }
 
+    /* ── увеличенный плеер ── */
+    .aplayer .aplayer-pic {
+      width: 120px !important;
+      height: 120px !important;
+    }
+    .aplayer .aplayer-info {
+      margin-left: 120px !important;
+      height: 120px !important;
+      padding: 18px 16px 0 16px !important;
+    }
+    .aplayer .aplayer-info .aplayer-music {
+      height: auto !important;
+      margin: 0 0 14px !important;
+    }
+    .aplayer .aplayer-music .aplayer-title { font-size: 22px !important; }
+    .aplayer .aplayer-music .aplayer-author { font-size: 14px !important; }
+    .aplayer .aplayer-pic .aplayer-play {
+      width: 44px !important;
+      height: 44px !important;
+      margin: 0 -22px -22px 0 !important;
+    }
+    .aplayer .aplayer-pic .aplayer-play svg { width: 44px !important; height: 44px !important; }
+    .aplayer .aplayer-pic .aplayer-pause {
+      width: 26px !important;
+      height: 26px !important;
+      bottom: 8px !important;
+      right: 8px !important;
+    }
+    .aplayer .aplayer-pic .aplayer-pause svg { width: 26px !important; height: 26px !important; }
+    .aplayer .aplayer-bar-wrap .aplayer-bar { height: 4px !important; }
+    .aplayer .aplayer-bar-wrap .aplayer-bar .aplayer-loaded,
+    .aplayer .aplayer-bar-wrap .aplayer-bar .aplayer-played { height: 4px !important; }
+    .aplayer .aplayer-bar-wrap .aplayer-bar .aplayer-played .aplayer-thumb {
+      width: 14px !important;
+      height: 14px !important;
+    }
+    .aplayer .aplayer-controller .aplayer-time { font-size: 13px !important; }
+    .aplayer .aplayer-controller .aplayer-time .aplayer-icon {
+      width: 18px !important;
+      height: 18px !important;
+    }
+    .aplayer .aplayer-list ol li {
+      height: 38px !important;
+      line-height: 38px !important;
+      font-size: 14px !important;
+    }
+
+    @media (max-width: 480px) {
+      .aplayer .aplayer-pic {
+        width: 92px !important;
+        height: 92px !important;
+      }
+      .aplayer .aplayer-info {
+        margin-left: 92px !important;
+        height: 92px !important;
+        padding: 10px 12px 0 12px !important;
+      }
+      .aplayer .aplayer-info .aplayer-music { margin-bottom: 8px !important; }
+      .aplayer .aplayer-music .aplayer-title { font-size: 17px !important; }
+    }
+
   </style>
 </head>
 <body>
@@ -329,7 +406,7 @@
     <li class="track">
       <span class="track-num">04</span>
       <div class="track-body">
-        <a class="track-name" href="/fly/text/">Летай</a>
+        <a class="track-name t-fly" href="/fly/text/">Летай</a>
         <div class="track-links">
           <a class="track-link" href="/fly/text/">текст</a>
         </div>
@@ -359,7 +436,7 @@
     <li class="track">
       <span class="track-num">07</span>
       <div class="track-body">
-        <a class="track-name" href="/backpack/text/">Ранец-Иностранец</a>
+        <a class="track-name" href="/backpack/text/"><span class="r">Ранец</span>-Иностранец</a>
         <div class="track-links">
           <a class="track-link" href="/backpack/text/">текст</a>
         </div>
@@ -421,6 +498,7 @@ const ap = new APlayer({
   theme: '#c8281e',
   preload: 'none',
   listFolded: false,
+  listMaxHeight: '190px',
   audio: [
     { name: 'Атгул', artist: 'Ламопад', url: '/tracks/Ламопад -- Атгул.mp3', cover: '/tracks/agu_cover.jpg' },
     { name: 'Солнценаступательные очки', artist: 'Ламопад', url: '/tracks/sun-coming-glasses.mp3', cover: '/tracks/sun-coming-glasses-cover.jpg' },

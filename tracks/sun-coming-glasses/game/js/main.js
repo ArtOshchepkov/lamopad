@@ -138,12 +138,32 @@ const DEATH_REASONS = {
   boredom: 'ВЫ ЗАКИСЛИ. Умер от скуки',
 };
 
+let lastBest = 0;
 game.events.on('scg-death', ({ height, best, isNew, cause }) => {
+  lastBest = best;
   $('death-reason').textContent = DEATH_REASONS[cause] || DEATH_REASONS.fall;
   $('death-height').textContent = height + ' м';
   $('death-best').textContent = 'рекорд · ' + best + ' м';
   $('death-new').classList.toggle('hidden', !isNew);
   deathOverlay.classList.remove('hidden');
+});
+
+// «поделиться рекордом» → нативный шаринг, а без него — копия ссылки в буфер
+const GAME_URL = 'https://lamopad.ru/tracks/sun-coming-glasses/game/';
+const shareBtn = $('death-share');
+const shareLabel = shareBtn.textContent;
+shareBtn.addEventListener('click', async () => {
+  const text = `Я НАПРЫГАЛ ${lastBest} МЕТРОВ 🕶`;
+  if (navigator.share) {
+    try { await navigator.share({ title: 'Солнценаступательные очки', text, url: GAME_URL }); }
+    catch (e) { /* отменил шаринг — ничего страшного */ }
+    return;
+  }
+  try {
+    await navigator.clipboard.writeText(`${text}\n${GAME_URL}`);
+    shareBtn.textContent = '✅ скопировано!';
+    setTimeout(() => { shareBtn.textContent = shareLabel; }, 1800);
+  } catch (e) { /* буфер недоступен — молча ничего не делаем */ }
 });
 
 $('restart').addEventListener('click', () => {

@@ -251,7 +251,7 @@ export class PlatformField {
     const inBand = !!band;
     if (a.target) {
       const p = a.target;
-      if (p.dead || !this.active.includes(p)) { a.target = null; return; }
+      if (p.dead || p.released) { a.target = null; return; } // .released вместо O(n) includes()
       a.charge -= dt;
       if (a.charge > 0) { // копит заряд: нутро тревожно мерцает
         if (Math.floor(a.charge * 14) % 2 === 0) p.sprite.setTintFill(0xe8f0ff);
@@ -353,6 +353,7 @@ export class PlatformField {
 
   release(i) {
     const p = this.active[i];
+    p.released = true; // дешёвая замена active.includes(p) для внешних проверок (см. stormTick)
     // твины (слом, реакция) не должны догнать переиспользованный спрайт
     this.scene.tweens.killTweensOf(p.sprite);
     if (p.deco) {

@@ -30,6 +30,7 @@ const game = new Phaser.Game({
 const $ = (id) => document.getElementById(id);
 const loading = $('loading');
 const deathOverlay = $('death');
+$('death-version').textContent = CONF.version; // сверить актуальность деплоя
 const audio = $('track');
 audio.volume = CONF.music.volume;
 const muteMusicBtn = $('mute-music');

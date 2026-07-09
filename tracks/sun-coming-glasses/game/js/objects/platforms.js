@@ -272,11 +272,17 @@ export class PlatformField {
       a.t -= dt;
       if (a.t > 0) return;
       const camTop = camBottomY - CONF.height;
-      const storms = this.active.filter(p =>
-        (p.type === 'storm' || p.type === 'stormMove') && !p.dead &&
-        p.y > camTop + 60 && p.y < camBottomY - 90);
-      if (storms.length) {
-        a.target = Phaser.Utils.Array.GetRandom(storms);
+      // резервуарная выборка вместо filter+GetRandom — та же равномерная
+      // случайность, но без аллокации промежуточного массива каждый раз
+      let picked = null, seen = 0;
+      for (const p of this.active) {
+        if ((p.type !== 'storm' && p.type !== 'stormMove') || p.dead) continue;
+        if (p.y <= camTop + 60 || p.y >= camBottomY - 90) continue;
+        seen++;
+        if (Math.random() < 1 / seen) picked = p;
+      }
+      if (picked) {
+        a.target = picked;
         a.charge = (inBand && band.telegraph) ? band.telegraph : L.telegraph;
       } else {
         a.t = 0.4; // туч на экране нет — заглянем позже

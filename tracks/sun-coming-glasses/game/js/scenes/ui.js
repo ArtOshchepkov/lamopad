@@ -25,6 +25,7 @@ export class UIScene extends Phaser.Scene {
     // на слабой графике (тач-устройства) — вдвое реже
     this.pendingCur = null;
     this.lastHudAt = 0;
+    this.shownBest = -1; // не перерисовывать bestText, если рекорд не менялся
     const lowGfx = ('ontouchstart' in window) || navigator.maxTouchPoints > 0;
     this.hudInterval = lowGfx ? 90 : 45;
 
@@ -74,7 +75,12 @@ export class UIScene extends Phaser.Scene {
 
   onHeight({ cur, best }) {
     this.pendingCur = cur; // отрисует update() не чаще ~11 раз/сек
-    this.bestText.setText(best > 0 ? '🏆' + best + ' м' : '');
+    // перерисовка Text дорогая (см. коммент про heightText) — best меняется
+    // редко (только на новый рекорд), а событие летит почти каждый кадр
+    if (best !== this.shownBest) {
+      this.shownBest = best;
+      this.bestText.setText(best > 0 ? '🏆' + best + ' м' : '');
+    }
     // каждый взятый стометровый рубеж — лёгкий пульс цифры
     const hundred = Math.floor(cur / 100);
     if (hundred < this.lastHundred) this.lastHundred = hundred; // упали — рубежи снова впереди

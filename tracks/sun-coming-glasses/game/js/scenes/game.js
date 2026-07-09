@@ -1088,12 +1088,14 @@ export class GameScene extends Phaser.Scene {
   /** "Фух, пронесло": звук при пролёте рядом с живым крокодилом мимо пасти. */
   checkCrocProximity(dt) {
     if (this.state !== 'run') return; // не звучит поверх момента самого укуса
+    if (this.maxM < CONF.enemy.fromM) return; // крокодилов ещё физически нет — нечего искать
     this.crocCloseCd = Math.max(0, (this.crocCloseCd || 0) - dt);
     if (this.crocCloseCd > 0) return; // кулдаун — иначе спамит, пока герой скачет рядом
+    const r2 = CONF.crocClose.r * CONF.crocClose.r;
     for (const p of this.field.active) {
       if (p.type !== 'croc' || p.dead) continue;
-      const d = Phaser.Math.Distance.Between(this.player.x, this.player.y, p.x, p.y);
-      if (d < CONF.crocClose.r) {
+      const dx = this.player.x - p.x, dy = this.player.y - p.y;
+      if (dx * dx + dy * dy < r2) { // квадрат расстояния — без sqrt
         playRandom(this, 'crocodile_was_close');
         this.crocCloseCd = CONF.crocClose.cooldown;
         break;
@@ -1104,10 +1106,11 @@ export class GameScene extends Phaser.Scene {
   /** Аэротруба: хищника не «приземляют», а задевают на лету — смерть по близости. */
   checkAeroDanger() {
     if (this.jetTime > 0 || this.bubbleTime > 0) return; // ранец/пузырь — неприкосновенность, как везде
+    const r2 = CONF.aero.hitR * CONF.aero.hitR;
     for (const p of this.field.active) {
       if ((p.type !== 'croc' && p.type !== 'snake') || p.dead) continue;
-      const d = Phaser.Math.Distance.Between(this.player.x, this.player.y, p.x, p.y);
-      if (d < CONF.aero.hitR) { this.eaten(p); return; }
+      const dx = this.player.x - p.x, dy = this.player.y - p.y;
+      if (dx * dx + dy * dy < r2) { this.eaten(p); return; } // квадрат расстояния — без sqrt
     }
   }
 

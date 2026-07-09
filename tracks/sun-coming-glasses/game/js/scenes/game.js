@@ -44,6 +44,11 @@ export class GameScene extends Phaser.Scene {
     this.worldDecor = [];
     this.decorSweepAt = 0;
 
+    // TEMP profiling (?debug=true) — худшие тайминги за последнюю секунду,
+    // выводятся в Debug-оверлей (console недоступен на iPhone)
+    this.perf = { ensure: 0, fieldUpdate: 0, landing: 0, onLand: 0, total: 0, spawned: 0 };
+    this.perfReportAt = 0;
+
     this.deaths = this.loadDeaths();
     this.buildDeathMarks();
     this.buildRecordLine();
@@ -393,11 +398,8 @@ export class GameScene extends Phaser.Scene {
     const __tLand1 = __prof ? performance.now() : 0;
     if (plat) this.onLand(plat);
     if (__prof) {
-      const onLandMs = performance.now() - __tLand1;
-      const landingMs = __tLand1 - __tLand0;
-      if (landingMs > 1 || onLandMs > 1) {
-        console.warn(`[perf] landing=${landingMs.toFixed(2)}ms onLand=${onLandMs.toFixed(2)}ms plat=${plat ? plat.type : '-'}`);
-      }
+      this.perf.onLand = Math.max(this.perf.onLand, performance.now() - __tLand1);
+      this.perf.landing = Math.max(this.perf.landing, __tLand1 - __tLand0);
     }
 
     this.checkCrocProximity(dt);
@@ -425,12 +427,9 @@ export class GameScene extends Phaser.Scene {
     const __tEnsure1 = __prof ? performance.now() : 0;
     this.field.update(dt, cam.scrollY + CONF.height, this.player);
     if (__prof) {
-      const ensureMs = __tEnsure1 - __tEnsure0;
-      const fieldUpdateMs = performance.now() - __tEnsure1;
-      const spawned = this.field.active.length - __countBefore;
-      if (ensureMs > 1 || fieldUpdateMs > 1) {
-        console.warn(`[perf] ensure=${ensureMs.toFixed(2)}ms (+${spawned} platforms) fieldUpdate=${fieldUpdateMs.toFixed(2)}ms`);
-      }
+      this.perf.ensure = Math.max(this.perf.ensure, __tEnsure1 - __tEnsure0);
+      this.perf.fieldUpdate = Math.max(this.perf.fieldUpdate, performance.now() - __tEnsure1);
+      this.perf.spawned = Math.max(this.perf.spawned, this.field.active.length - __countBefore);
     }
     this.spawnLyrics(cam);
     this.spawnFlags(cam);
@@ -479,8 +478,15 @@ export class GameScene extends Phaser.Scene {
     if (this.player.y > cam.scrollY + CONF.height + CONF.camera.deathMargin) this.fallDeath();
 
     if (__prof) {
-      const totalMs = performance.now() - __t0;
-      if (totalMs > 8) console.warn(`[perf] TOTAL update=${totalMs.toFixed(2)}ms vy=${Math.round(this.player.vy)}`);
+      this.perf.total = Math.max(this.perf.total, performance.now() - __t0);
+      // раз в секунду сбрасываем в Debug-оверлей худшие тайминги и обнуляем
+      if (time > this.perfReportAt) {
+        this.perfReportAt = time + 1000;
+        Debug.set('perf ensure/fieldUpd', `${this.perf.ensure.toFixed(1)}/${this.perf.fieldUpdate.toFixed(1)}ms (+${this.perf.spawned})`);
+        Debug.set('perf landing/onLand', `${this.perf.landing.toFixed(1)}/${this.perf.onLand.toFixed(1)}ms`);
+        Debug.set('perf TOTAL (max/1s)', `${this.perf.total.toFixed(1)}ms`);
+        this.perf = { ensure: 0, fieldUpdate: 0, landing: 0, onLand: 0, total: 0, spawned: 0 };
+      }
     }
   }
 

@@ -220,7 +220,7 @@ export class PlatformField {
       }
       if (Debug.enabled) { // TEMP profiling
         const decoMs = performance.now() - __tDeco0;
-        if (decoMs > 0.5) console.warn(`[perf] enemy deco alloc (${type}) = ${decoMs.toFixed(2)}ms`);
+        Debug.set('perf enemy deco alloc', `${decoMs.toFixed(2)}ms (${type})`);
       }
     }
     this.active.push(p);

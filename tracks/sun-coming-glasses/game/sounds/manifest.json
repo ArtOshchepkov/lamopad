@@ -65,6 +65,11 @@
   "jump_on_mario": [
     "jump_on_mario.mp3"
   ],
+  "jump_on_one_time_boring_suitcase": [
+    "on_upal_on_odnorazovy.mp3",
+    "opat_rabota.mp3",
+    "suitcase_luggage.mp3"
+  ],
   "jump_on_red_backpack_boost_cloud": [
     "jump_on_red.mp3"
   ],

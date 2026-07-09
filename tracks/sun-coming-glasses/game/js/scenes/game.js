@@ -554,6 +554,7 @@ export class GameScene extends Phaser.Scene {
         this.field.react(plat);
         break;
       case 'suitcase':
+        playRandom(this, 'jump_on_one_time_boring_suitcase');
         this.field.crumble(plat); // отскока нет — проваливаемся
         break;
       case 'croc':

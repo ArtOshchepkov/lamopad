@@ -437,9 +437,9 @@ export class GameScene extends Phaser.Scene {
     this.updateJetPickups(cam);
     this.updateBubblePickups(cam);
 
-    // раз в секунду сносим декор, ушедший под нижнюю кромку
+    // раз в 500ms сносим декор, ушедший под нижнюю кромку
     if (time > this.decorSweepAt) {
-      this.decorSweepAt = time + 1000;
+      this.decorSweepAt = time + 500;
       const decorLimit = cam.scrollY + CONF.height + 300;
       for (let i = this.worldDecor.length - 1; i >= 0; i--) {
         if (this.worldDecor[i].y > decorLimit) {

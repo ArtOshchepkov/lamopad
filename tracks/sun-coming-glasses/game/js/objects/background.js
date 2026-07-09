@@ -109,6 +109,28 @@ export class Background {
     this.rainDim = scene.add.rectangle(
       CONF.width / 2, CONF.height / 2, CONF.width, CONF.height, 0x1a2238,
     ).setScrollFactor(0).setDepth(40).setAlpha(0);
+
+    // ── метель: снег летит вбок по ветру, пояс/направление задаёт game-сцена ──
+    this.windBand = null;
+    this.windDir = 1;
+    this.snow = [];
+    const snowCount = lowGfx ? 26 : 54;
+    for (let i = 0; i < snowCount; i++) {
+      const s = scene.add.image(
+        Phaser.Math.Between(0, CONF.width),
+        Phaser.Math.Between(0, CONF.height),
+        'spark',
+      ).setScrollFactor(0).setDepth(41).setTint(0xffffff).setAlpha(0)
+       .setScale(Phaser.Math.FloatBetween(1, 2.8));
+      s.speed = Phaser.Math.Between(70, 170); // боковой снос конкретной снежинки, px/s
+      s.fall = Phaser.Math.Between(16, 40);   // лёгкое проседание вниз, px/s
+      s.wob = Phaser.Math.FloatBetween(0, Math.PI * 2);
+      this.snow.push(s);
+    }
+    // белёсая дымка метели — легче дождевого сумрака
+    this.windDim = scene.add.rectangle(
+      CONF.width / 2, CONF.height / 2, CONF.width, CONF.height, 0xdceafa,
+    ).setScrollFactor(0).setDepth(39).setAlpha(0);
   }
 
   /** 0..1 — насколько мы внутри дождевого пояса (с плавными краями). */
@@ -118,10 +140,10 @@ export class Background {
 
   bandIntensity(band, curM) {
     if (!band) return 0;
-    const { from, to } = band;
+    const { from, to, edgeM = CONF.rain.edgeM } = band;
     if (curM < from || curM > to) return 0;
     return Phaser.Math.Clamp(
-      Math.min(curM - from, to - curM) / CONF.rain.edgeM, 0, 1);
+      Math.min(curM - from, to - curM) / edgeM, 0, 1);
   }
 
   /** Сгусток светлячков. inView — прямо на экране (для чит-кода). */
@@ -337,6 +359,21 @@ export class Background {
         d.y = -16;
         d.x = Phaser.Math.Between(0, CONF.width + 60);
       }
+    }
+
+    // метель: снег летит по ветру с лёгкой турбулентностью, пока мы в поясе
+    const wind = this.bandIntensity(this.windBand, curM);
+    this.windDim.setAlpha(wind * 0.3);
+    for (const s of this.snow) {
+      if (wind <= 0.01) { if (s.alpha !== 0) s.setAlpha(0); continue; }
+      s.setAlpha(wind);
+      s.wob += dt * 2.4;
+      s.x += this.windDir * s.speed * dt;
+      s.y += (s.fall + Math.sin(s.wob) * 14) * dt;
+      if (this.windDir > 0 && s.x > CONF.width + 8) s.x = -8;
+      else if (this.windDir < 0 && s.x < -8) s.x = CONF.width + 8;
+      if (s.y > CONF.height + 8) s.y = -8;
+      else if (s.y < -8) s.y = CONF.height + 8;
     }
 
     // светлячки: спавн по высоте, разлёт от игрока, чистка внизу

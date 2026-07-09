@@ -101,8 +101,12 @@ export class PlatformField {
       // что игрок долетает до яруса, успевает уехать, и честной опоры
       // рядом с хищником может не остаться (прыгать реально некуда, кроме
       // как в него) — хищник и «подвижная опора» на одной высоте нечестны
+      // метель 7000–7500 (см. CONF.wind): владелец просил ТОЛЬКО cloud/
+      // cloudMove/плюшки на этот период — добавки (хищники, Марио) тоже
+      // выключаем, а не только типы яруса, иначе список не строго «только»
+      const inWindZone = m >= CONF.wind.fromM && m <= CONF.wind.toM;
       const movingTier = !!CONF.platforms[type].speed;
-      if (type !== 'suitcase' && !movingTier && m > CONF.enemy.fromM) {
+      if (type !== 'suitcase' && !movingTier && !inWindZone && m > CONF.enemy.fromM) {
         let mult = 1;
         for (const step of CONF.enemy.boost) if (m >= step.fromM) mult = step.mult;
         for (const enemy in CONF.enemy.chance) {
@@ -118,7 +122,7 @@ export class PlatformField {
       // триггерит превращение, а сама лихорадка ниже 1500 м не разгоняется.
       const inFever = m < this.marioFeverUntilM;
       const marioChance = inFever ? CONF.mario.feverChance : CONF.mario.chance;
-      if ((inFever || m > CONF.mario.fromM) && Math.random() < marioChance) {
+      if (!inWindZone && (inFever || m > CONF.mario.fromM) && Math.random() < marioChance) {
         this.place('mario', this.apartX(x), this.lastY - R(20, 50));
       }
     }

@@ -71,6 +71,12 @@ export class GameScene extends Phaser.Scene {
     this.rainBand2 = { from: 5100, to: 5700, dimAlpha: 0.58 };
     this.bg.rainBand2 = this.rainBand2;
 
+    // метель 7000–7500: направление решаем один раз на весь забег
+    this.windDir = Math.random() < 0.5 ? -1 : 1;
+    this.windAnnounced = false;
+    this.bg.windDir = this.windDir;
+    this.bg.windBand = { from: CONF.wind.fromM, to: CONF.wind.toM, edgeM: CONF.wind.edgeM };
+
     // ворчание засиженного облака и причина смерти
     this.lastPlat = null;
     this.samePlatCount = 0;
@@ -306,7 +312,20 @@ export class GameScene extends Phaser.Scene {
     }
     if (this.state !== 'run') return;
 
-    this.player.update(dt, this.inputDir());
+    // метель 7000–7500: постоянный боковой снос, направление на весь забег.
+    // Сила плавно нарастает/спадает на краях (edgeM) — без рывка на входе
+    const W = CONF.wind;
+    const inWind = curM >= W.fromM && curM <= W.toM;
+    const windK = inWind
+      ? Phaser.Math.Clamp(Math.min(curM - W.fromM, W.toM - curM) / W.edgeM, 0, 1)
+      : 0;
+    const windVx = W.force * this.windDir * windK;
+    if (inWind && !this.windAnnounced) {
+      this.windAnnounced = true;
+      this.field.shout({ x: this.player.x, y: this.player.y - 20 },
+        this.windDir > 0 ? 'МЕТЕЛЬ →' : '← МЕТЕЛЬ');
+    }
+    this.player.update(dt, this.inputDir(), windVx);
 
     // первый рывок вверх проламывает офисный потолок
     if (!this.ceilingBroken && this.player.y < this.officeCeilingY + 10) this.breakCeiling();
@@ -767,19 +786,23 @@ export class GameScene extends Phaser.Scene {
 
   /** Спавн подбираемых ранцев по высоте + проверка подбора + чистка. */
   updateJetPickups(cam) {
+    const noJet = CONF.jet.noJetBand;
+    const inNoJet = noJet && this.maxM >= noJet.fromM && this.maxM <= noJet.toM;
     if (this.maxM >= this.nextJetM) {
       this.nextJetM = this.maxM +
         Phaser.Math.Between(CONF.jet.intervalM[0], CONF.jet.intervalM[1]);
-      const s = this.add.image(
-        Phaser.Math.Between(60, CONF.width - 60),
-        cam.scrollY - Phaser.Math.Between(200, 500),
-        'jetpack',
-      ).setDepth(4).setScale(0.9);
-      this.tweens.add({ // парит и манит
-        targets: s, y: s.y - 10, angle: 4,
-        yoyo: true, repeat: -1, duration: 900, ease: 'Sine.easeInOut',
-      });
-      this.jets.push(s);
+      if (!inNoJet) {
+        const s = this.add.image(
+          Phaser.Math.Between(60, CONF.width - 60),
+          cam.scrollY - Phaser.Math.Between(200, 500),
+          'jetpack',
+        ).setDepth(4).setScale(0.9);
+        this.tweens.add({ // парит и манит
+          targets: s, y: s.y - 10, angle: 4,
+          yoyo: true, repeat: -1, duration: 900, ease: 'Sine.easeInOut',
+        });
+        this.jets.push(s);
+      }
     }
     for (let i = this.jets.length - 1; i >= 0; i--) {
       const s = this.jets[i];

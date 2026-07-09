@@ -15,12 +15,14 @@ export class Player {
   get y() { return this.sprite.y; }
   get feetY() { return this.sprite.y + CONF.player.feetOffset; }
 
-  /** dir: -1 | 0 | 1 */
-  update(dt, dir) {
+  /** dir: -1 | 0 | 1. windVx: px/s, постоянная боковая тяга (метель) */
+  update(dt, dir, windVx = 0) {
     const P = CONF.physics;
 
-    // плавное горизонтальное управление (независимо от fps)
-    const targetVx = dir * P.moveSpeed;
+    // плавное горизонтальное управление (независимо от fps).
+    // Ветер прибавляется к цели, а не к самой vx — так игрок всё ещё
+    // может «догнать» его или частично погасить, а не просто едет юзом
+    const targetVx = dir * P.moveSpeed + windVx;
     const k = 1 - Math.exp(-P.moveLerp * dt);
     this.vx += (targetVx - this.vx) * k;
 

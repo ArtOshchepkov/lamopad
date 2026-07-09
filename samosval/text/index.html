@@ -239,6 +239,24 @@
       text-shadow: 0 0 10px var(--purple);
     }
 
+    /* ── play button ─────────────────────────────────── */
+    .play-cta {
+      display: inline-flex;
+      align-items: center;
+      gap: 8px;
+      font-size: clamp(11px, 2.2vw, 13px);
+      letter-spacing: .1em;
+      text-decoration: none;
+      color: var(--bg);
+      background: linear-gradient(90deg, var(--pink), var(--purple));
+      padding: 12px 20px;
+      border-radius: 4px;
+      margin-top: 24px;
+      box-shadow: 0 0 16px rgba(255,0,110,0.4);
+      transition: box-shadow .2s, transform .15s;
+    }
+    .play-cta:hover { box-shadow: 0 0 24px rgba(255,0,110,0.6); transform: translateY(-1px); }
+
     .copyright {
       font-size: 10px;
       letter-spacing: .12em;
@@ -313,6 +331,7 @@
     </h1>
     <div class="divider"></div>
     <p class="artist">Ламопад — текст песни</p>
+    <a class="play-cta" href="/samosval/game">&#x25B6; играть</a>
   </header>
 
   <div class="lyrics" itemscope itemtype="https://schema.org/MusicRecording">
@@ -421,7 +440,6 @@
       </a>
     </div>
     <div class="footer-nav">
-      <a href="/samosval/game">&#x25B6; играть</a>
       <a href="/">lamopad.ru</a>
       <a href="https://lamopad.ru/tracks/">Больше треков</a>
     </div>

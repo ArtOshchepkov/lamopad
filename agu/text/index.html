@@ -272,6 +272,25 @@
     }
     .footer a:hover { color: var(--red); }
 
+    /* ── play button ─────────────────────────────────── */
+    .play-cta {
+      display: inline-flex;
+      align-items: center;
+      gap: 8px;
+      font-family: 'Arial Black', Arial, sans-serif;
+      font-size: 14px;
+      letter-spacing: .2em;
+      text-transform: uppercase;
+      text-decoration: none;
+      color: var(--bg);
+      background: var(--red);
+      padding: 12px 22px;
+      border-radius: 4px;
+      margin-top: 24px;
+      transition: background .2s, transform .15s;
+    }
+    .play-cta:hover { background: var(--amber); transform: translateY(-1px); }
+
     .copyright {
       font-size: 10px;
       letter-spacing: .12em;
@@ -369,6 +388,7 @@
     </h1>
     <div class="divider"></div>
     <p class="artist">Ламопад — текст песни</p>
+    <a class="play-cta" href="/agu/game">&#x25B6; играть</a>
   </header>
 
   <div class="lyrics" itemscope itemtype="https://schema.org/MusicRecording">
@@ -419,7 +439,6 @@
   </div>
 
   <footer class="footer">
-    <a href="/agu/game">&#x25B6; играть</a>
     <a href="/">lamopad.ru</a>
     <a href="https://lamopad.ru/tracks/">Больше треков</a>
     <p class="copyright">© Ламопад — все права защищены</p>

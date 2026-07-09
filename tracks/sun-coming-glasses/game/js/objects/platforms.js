@@ -81,7 +81,7 @@ export class PlatformField {
           this.prevPlat && this.prevPlat.type === 'sticker') {
         type = 'cloud';
       }
-      const x = this.randX(type);
+      const x = this.randX(type, m);
       const plat = this.place(type, x, this.lastY);
       // закатик над закатиком — бегущая волна: фаза верхнего отстаёт на 0.6с,
       // он проявляется к твоему прилёту (противофаза запирала путь наверх)
@@ -136,10 +136,15 @@ export class PlatformField {
     return Phaser.Math.Clamp(nx, 60, CONF.width - 60);
   }
 
-  randX(type) {
+  randX(type, m) {
     const def = CONF.platforms[type];
     const w = def.variants ? def.variants[0].w : def.w;
-    const margin = w / 2 + 14;
+    // в аэротрубе хищники не должны оставлять безопасную полосу у самых
+    // краёв экрана — иначе можно просто прижаться к краю и лететь мимо
+    // всех опасностей. Только для хищников и только в этой зоне
+    const isPredator = type === 'croc' || type === 'snake';
+    const inAero = isPredator && m != null && m >= CONF.aero.fromM && m <= CONF.aero.toM;
+    const margin = inAero ? 6 : w / 2 + 14;
     return R(margin, CONF.width - margin);
   }
 

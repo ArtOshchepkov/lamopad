@@ -82,9 +82,14 @@ export class GameScene extends Phaser.Scene {
     this.bg.windDir = this.windDir;
     this.bg.windBand = { from: CONF.wind.fromM, to: CONF.wind.toM, edgeM: CONF.wind.edgeM };
 
-    // волшебная аэротруба 10000–10500: разовое объявление + светлячковый поток
+    // волшебная аэротруба: разовое объявление + светлячковый поток +
+    // несколько гарантированных джетов на выходе (см. updateJetPickups)
     this.aeroAnnounced = false;
+    this.aeroGuaranteedJetsDone = new Set();
     this.bg.aeroBand = { from: CONF.aero.fromM, to: CONF.aero.toM, edgeM: CONF.aero.edgeM };
+    // сглаженное кадрирование камеры — тянется к целевому lookAhead плавно,
+    // а не скачком (см. update(): цель зависит от скорости в трубе)
+    this.camLookAhead = CONF.camera.lookAhead;
 
     // ворчание засиженного облака и причина смерти
     this.lastPlat = null;
@@ -351,7 +356,10 @@ export class GameScene extends Phaser.Scene {
     // по инерции дальше (баг, пойман владельцем)
     const A = CONF.aero;
     const inAero = curM >= A.fromM && curM <= A.toM;
-    const liftVy = inAero ? A.liftVy : 0;
+    // скорость трубы линейно растёт по всей её длине (медленнее на входе,
+    // быстрее на выходе) — aeroT заодно двигает и кадрирование камеры ниже
+    const aeroT = inAero ? Phaser.Math.Clamp((curM - A.fromM) / (A.toM - A.fromM), 0, 1) : 0;
+    const liftVy = inAero ? Phaser.Math.Linear(A.liftVyStart, A.liftVyMax, aeroT) : 0;
     if (inAero && !this.aeroAnnounced) {
       this.aeroAnnounced = true;
       this.field.shout({ x: this.player.x, y: this.player.y - 20 }, 'АЭРОТРУБА!');
@@ -377,8 +385,17 @@ export class GameScene extends Phaser.Scene {
     // сработает, поэтому редких хищников ловим отдельной проверкой близости
     if (inAero) this.checkAeroDanger();
 
-    // камера тянется только вверх
-    const target = this.player.y - CONF.height * CONF.camera.lookAhead;
+    // камера тянется только вверх. В аэротрубе кадрирование зависит от
+    // скорости трубы: медленный вход — кадр отпущен ниже (игрок «опускается»
+    // к нижней трети экрана), к максимальной скорости стягивается к обычному
+    // lookAhead. Сглаживаем сам lookAhead лерпом — иначе смена цели скачком
+    // дёргает камеру рывком вместо плавного хода
+    const wantLookAhead = inAero
+      ? Phaser.Math.Linear(A.lookAheadEntry, CONF.camera.lookAhead, aeroT)
+      : CONF.camera.lookAhead;
+    const lak = 1 - Math.exp(-2.2 * dt);
+    this.camLookAhead += (wantLookAhead - this.camLookAhead) * lak;
+    const target = this.player.y - CONF.height * this.camLookAhead;
     if (target < cam.scrollY) cam.scrollY = target;
 
     // генерация и чистка мира
@@ -819,26 +836,74 @@ export class GameScene extends Phaser.Scene {
   // ─── Реактивный ранец ────────────────────────────────────────────────────
 
   /** Спавн подбираемых ранцев по высоте + проверка подбора + чистка. */
+  /** X подальше от ближайшего по высоте хищника — для гарантированных джетов
+   *  в аэротрубе: иначе рандомная X может воткнуть джет прямо за крокодилом. */
+  pickSafeJetX(y) {
+    let best = Phaser.Math.Between(60, CONF.width - 60);
+    let bestD = -1;
+    for (let i = 0; i < 8; i++) {
+      const cx = Phaser.Math.Between(60, CONF.width - 60);
+      let minD = Infinity;
+      for (const p of this.field.active) {
+        if ((p.type !== 'croc' && p.type !== 'snake') || p.dead) continue;
+        if (Math.abs(p.y - y) > 300) continue; // хищники не рядом по высоте — не считаем
+        minD = Math.min(minD, Math.abs(p.x - cx));
+      }
+      if (minD > bestD) { bestD = minD; best = cx; }
+    }
+    return best;
+  }
+
+  /** Спавн одного подбираемого ранца-джетпака в мире (без проверки зон). */
+  spawnJetPickup(x, y) {
+    const s = this.add.image(x, y, 'jetpack').setDepth(4).setScale(0.9);
+    this.tweens.add({ // парит и манит
+      targets: s, y: s.y - 10, angle: 4,
+      yoyo: true, repeat: -1, duration: 900, ease: 'Sine.easeInOut',
+    });
+    this.jets.push(s);
+  }
+
   updateJetPickups(cam) {
     const noJet = CONF.jet.noJetBand;
     const A = CONF.aero;
-    // в аэротрубе джетов вообще нет — только пузыри спасают от хищников
-    const inNoJet = (noJet && this.maxM >= noJet.fromM && this.maxM <= noJet.toM) ||
-      (this.maxM >= A.fromM && this.maxM <= A.toM);
+    const esc = CONF.jet.aeroEscape;
+    // последние marginM метров перед выходом из трубы — джетов НАОБОРОТ
+    // дофига, чтобы был явный способ вылететь на скорости
+    const nearAeroExit = this.maxM >= A.toM - esc.marginM && this.maxM <= A.toM;
+    // в аэротрубе джетов вообще нет — кроме самого выхода (nearAeroExit) —
+    // только пузыри спасают от хищников до этого момента
+    const inNoJet = !nearAeroExit && (
+      (noJet && this.maxM >= noJet.fromM && this.maxM <= noJet.toM) ||
+      (this.maxM >= A.fromM && this.maxM <= A.toM)
+    );
+    // вход в плотное окно — если план спавна был по редкой лесенке (в трубе
+    // джетов не было), не ждём его, а спавним сразу
+    if (nearAeroExit && this.nextJetM > this.maxM + esc.intervalM[1]) {
+      this.nextJetM = this.maxM;
+    }
     if (this.maxM >= this.nextJetM) {
-      this.nextJetM = this.maxM +
-        Phaser.Math.Between(CONF.jet.intervalM[0], CONF.jet.intervalM[1]);
+      const [lo, hi] = nearAeroExit ? esc.intervalM : CONF.jet.intervalM;
+      this.nextJetM = this.maxM + Phaser.Math.Between(lo, hi);
       if (!inNoJet) {
-        const s = this.add.image(
+        this.spawnJetPickup(
           Phaser.Math.Between(60, CONF.width - 60),
           cam.scrollY - Phaser.Math.Between(200, 500),
-          'jetpack',
-        ).setDepth(4).setScale(0.9);
-        this.tweens.add({ // парит и манит
-          targets: s, y: s.y - 10, angle: 4,
-          yoyo: true, repeat: -1, duration: 900, ease: 'Sine.easeInOut',
-        });
-        this.jets.push(s);
+        );
+      }
+    }
+    // несколько гарантированных джетов на конкретных отметках перед самым
+    // выходом — не полагаемся только на рандом плотного окна, иначе можно
+    // застрять на 11000 без единого джета под рукой
+    for (const backM of esc.guaranteedAt) {
+      const atM = A.toM - backM;
+      if (!this.aeroGuaranteedJetsDone.has(backM) && this.maxM >= atM) {
+        this.aeroGuaranteedJetsDone.add(backM);
+        // запас по высоте побольше обычного — на скорости трубы 100-250px
+        // хватало впритык, джет мог оказаться уже позади игрока к моменту
+        // появления. X подальше от ближайшего хищника — не за крокодилом
+        const y = cam.scrollY - Phaser.Math.Between(380, 560);
+        this.spawnJetPickup(this.pickSafeJetX(y), y);
       }
     }
     for (let i = this.jets.length - 1; i >= 0; i--) {

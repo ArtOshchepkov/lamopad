@@ -3,6 +3,9 @@ import { CONF } from '../config.js';
 
 const SKY_MAX_M = CONF.sky[CONF.sky.length - 1].m; // вершина лестницы неба
 const SKY_TEX_H = 2048;
+// запас по высоте перед ленивым созданием пулов дождя/метели/аэротрубы —
+// с этим отступом от начала каждого пояса, чтобы не было видно момента появления
+const FX_LEAD_M = 300;
 
 export class Background {
   /** @param {Phaser.Scene} scene */
@@ -395,11 +398,12 @@ export class Background {
   update(curM, maxM, player, dt = 0.016) {
     const cam = this.scene.cameras.main;
 
-    // ленивое создание пулов дождя/метели/аэротрубы — заранее с запасом,
-    // чтобы не было видно момента появления, но не с самого старта игры
-    if (!this.drops && curM >= 1600) this.ensureRainFx();
-    if (!this.snow && curM >= CONF.wind.fromM - 300) this.ensureWindFx();
-    if (!this.aero && curM >= CONF.aero.fromM - 300) this.ensureAeroFx();
+    // ленивое создание пулов дождя/метели/аэротрубы — заранее с запасом
+    // FX_LEAD_M, чтобы не было видно момента появления, но не с самого
+    // старта игры (см. ensure*Fx выше)
+    if (!this.drops && curM >= CONF.rain.minStartM - FX_LEAD_M) this.ensureRainFx();
+    if (!this.snow && curM >= CONF.wind.fromM - FX_LEAD_M) this.ensureWindFx();
+    if (!this.aero && curM >= CONF.aero.fromM - FX_LEAD_M) this.ensureAeroFx();
 
     // дождь: капли летят, пока мы в поясе
     if (this.drops) {

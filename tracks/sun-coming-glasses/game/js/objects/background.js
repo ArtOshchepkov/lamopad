@@ -90,8 +90,9 @@ export class Background {
     this.fireflies = [];
     this.nextFireM = 140;
 
-    // ── дождь: пояс задаёт game-сцена через this.rainBand ──
+    // ── дождь: пояс(а) задаёт game-сцена через this.rainBand/rainBand2 ──
     this.rainBand = null;
+    this.rainBand2 = null;
     this.drops = [];
     const dropCount = lowGfx ? 22 : 42;
     for (let i = 0; i < dropCount; i++) {
@@ -112,8 +113,12 @@ export class Background {
 
   /** 0..1 — насколько мы внутри дождевого пояса (с плавными краями). */
   rainIntensity(curM) {
-    if (!this.rainBand) return 0;
-    const { from, to } = this.rainBand;
+    return Math.max(this.bandIntensity(this.rainBand, curM), this.bandIntensity(this.rainBand2, curM));
+  }
+
+  bandIntensity(band, curM) {
+    if (!band) return 0;
+    const { from, to } = band;
     if (curM < from || curM > to) return 0;
     return Phaser.Math.Clamp(
       Math.min(curM - from, to - curM) / CONF.rain.edgeM, 0, 1);
@@ -313,8 +318,16 @@ export class Background {
     const cam = this.scene.cameras.main;
 
     // дождь: капли летят, пока мы в поясе
-    const rain = this.rainIntensity(curM);
-    this.rainDim.setAlpha(rain * 0.34); // мрачно, как перед настоящей грозой
+    const i1 = this.bandIntensity(this.rainBand, curM);
+    const i2 = this.bandIntensity(this.rainBand2, curM);
+    const rain = Math.max(i1, i2);
+    // тьма — каждый пояс может задать свою степень мрака (dimAlpha),
+    // второй пояс (гейтлет) обычно темнее базового
+    const dim = Math.max(
+      i1 * (this.rainBand?.dimAlpha ?? 0.34),
+      i2 * (this.rainBand2?.dimAlpha ?? 0.34),
+    );
+    this.rainDim.setAlpha(dim);
     for (const d of this.drops) {
       if (rain <= 0.01) { if (d.alpha !== 0) d.setAlpha(0); continue; }
       d.setAlpha(rain * 0.55);

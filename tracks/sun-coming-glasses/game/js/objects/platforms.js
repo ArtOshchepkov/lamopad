@@ -154,7 +154,12 @@ export class PlatformField {
       vx: 0,
       t: RF(0, 10), // фаза для синусоид/циклов
     };
-    if (type === 'cloudMove') p.vx = RF(def.speed[0], def.speed[1]) * this.speedMult(y) * (Math.random() < 0.5 ? -1 : 1);
+    if (type === 'cloudMove' || type === 'stormMove') {
+      const cb = def.chaosBand;
+      const m = -y / CONF.pxPerM;
+      const spd = (cb && m >= cb.fromM && m <= cb.toM) ? cb.speed : def.speed;
+      p.vx = RF(spd[0], spd[1]) * this.speedMult(y) * (Math.random() < 0.5 ? -1 : 1);
+    }
     if (type === 'bird') p.vx = RF(def.speed[0], def.speed[1]) * this.speedMult(y) * (Math.random() < 0.5 ? -1 : 1);
 
     // декор поверх платформы (хищник на облаке); редкий — не пулим
@@ -222,6 +227,11 @@ export class PlatformField {
   stormTick(dt, camBottomY) {
     const a = this.autoStrike;
     const L = CONF.lightning;
+    const m = -camBottomY / CONF.pxPerM;
+    const inFirst = L.denseBandFirst && m >= L.denseBandFirst.fromM && m <= L.denseBandFirst.toM;
+    const inGate = L.denseBand && m >= L.denseBand.fromM && m <= L.denseBand.toM;
+    const band = inFirst ? L.denseBandFirst : (inGate ? L.denseBand : null);
+    const inBand = !!band;
     if (a.target) {
       const p = a.target;
       if (p.dead || !this.active.includes(p)) { a.target = null; return; }
@@ -233,19 +243,24 @@ export class PlatformField {
       }
       p.sprite.clearTint();
       a.target = null;
-      // выше boost.fromM бьёт чаще — интервал сжимается тем же множителем
-      a.t = RF(L.interval[0], L.interval[1]) / this.speedMult(camBottomY);
+      // выше boost.fromM бьёт чаще — интервал сжимается тем же множителем;
+      // в хищном гейтлете (denseBand) интервал берётся ещё короче
+      const iv = inBand ? band.interval : L.interval;
+      a.t = RF(iv[0], iv[1]) / this.speedMult(camBottomY);
       const pts = this.strikeLightning(p);
       if (this.onLightning) this.onLightning(pts);
     } else {
+      // вход в гейтлет — режем слишком долгое ожидание, доставшееся снаружи
+      if (inBand && a.t > band.interval[1]) a.t = band.interval[1];
       a.t -= dt;
       if (a.t > 0) return;
       const camTop = camBottomY - CONF.height;
       const storms = this.active.filter(p =>
-        p.type === 'storm' && !p.dead && p.y > camTop + 60 && p.y < camBottomY - 90);
+        (p.type === 'storm' || p.type === 'stormMove') && !p.dead &&
+        p.y > camTop + 60 && p.y < camBottomY - 90);
       if (storms.length) {
         a.target = Phaser.Utils.Array.GetRandom(storms);
-        a.charge = L.telegraph;
+        a.charge = (inBand && band.telegraph) ? band.telegraph : L.telegraph;
       } else {
         a.t = 0.4; // туч на экране нет — заглянем позже
       }

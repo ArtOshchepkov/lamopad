@@ -62,6 +62,15 @@ export class GameScene extends Phaser.Scene {
     this.field.rainBand = this.rainBand;
     this.bg.rainBand = this.rainBand;
 
+    // второй ливень — только визуал, над хищным гейтлетом 5200–5700.
+    // Начинается на 100 м раньше самого гейтлета — дождь сгущается
+    // заранее, как предвестник. Геймплейный вес гроз там уже задан в
+    // zones/enemy — эту зону в "стену дождя" ensure() намеренно не
+    // переводим, чтобы не сбить уже подобранный баланс croc/snake/storm/stormMove.
+    // dimAlpha выше базового 0.34 — тут заметно темнее, чем в обычном ливне
+    this.rainBand2 = { from: 5100, to: 5700, dimAlpha: 0.58 };
+    this.bg.rainBand2 = this.rainBand2;
+
     // ворчание засиженного облака и причина смерти
     this.lastPlat = null;
     this.samePlatCount = 0;
@@ -442,6 +451,7 @@ export class GameScene extends Phaser.Scene {
         this.becomeShroom();
         break;
       case 'storm':
+      case 'stormMove':
         this.player.bounce(P.bounceVy * 0.95, 0.2);
         this.field.react(plat);
         // свой разряд бьёт вниз и игрока не достаёт, а вот хищникам — достаётся
@@ -651,20 +661,29 @@ export class GameScene extends Phaser.Scene {
 
   /** Спавн парящих пузырей по высоте + вход игрока + чистка. */
   updateBubblePickups(cam) {
+    const band = CONF.bubble.denseBand;
+    const inBand = band && this.maxM >= band.fromM && this.maxM <= band.toM;
+    // если следующий пузырь был запланирован ещё по редкой лесенке (до входа
+    // в плотную зону), его бросок мог перескочить всю зону целиком — режем
+    // план, чтобы вход в зону не остался без единого пузыря
+    if (inBand && this.nextBubbleM > this.maxM + band.intervalM[1]) {
+      this.nextBubbleM = this.maxM;
+    }
     if (this.maxM >= this.nextBubbleM) {
-      this.nextBubbleM = this.maxM +
-        Phaser.Math.Between(CONF.bubble.intervalM[0], CONF.bubble.intervalM[1]);
+      const [lo, hi] = inBand ? band.intervalM : CONF.bubble.intervalM;
+      this.nextBubbleM = this.maxM + Phaser.Math.Between(lo, hi);
       this.spawnBubble(cam.scrollY - Phaser.Math.Between(200, 500));
     }
     for (let i = this.bubbles.length - 1; i >= 0; i--) {
       const s = this.bubbles[i];
       const inReach = Math.abs(this.player.x - s.x) < 48 &&
                       Math.abs(this.player.y - s.y) < 48;
-      if (inReach && this.jetTime <= 0 && this.bubbleTime <= 0) {
+      if (inReach && this.jetTime <= 0) {
         this.tweens.killTweensOf(s);
         s.destroy();
         this.bubbles.splice(i, 1);
-        this.enterBubble();
+        if (this.bubbleTime > 0) this.extendBubble();
+        else this.enterBubble();
       } else if (s.y > cam.scrollY + CONF.height + 300) {
         this.tweens.killTweensOf(s);
         s.destroy();
@@ -692,6 +711,20 @@ export class GameScene extends Phaser.Scene {
     this.bubbleSprite = this.add.image(this.player.x, this.player.y, 'bubble')
       .setDepth(11).setScale(0.2).setAlpha(0.95);
     this.tweens.add({ targets: this.bubbleSprite, scale: 1, duration: 220, ease: 'Back.easeOut' });
+  }
+
+  /** Подобрал ещё один пузырь, уже летя в предыдущем — освежает полёт
+   *  (сброс на полную длительность, БЕЗ суммирования — иначе в плотной
+   *  зоне пузыри копятся и полёт растягивается на неадекватно долго).
+   *  Явно сообщаем об этом. */
+  extendBubble() {
+    playRandom(this, 'bubble_enter');
+    this.bubbleTime = CONF.bubble.duration;
+    this.field.shout({ x: this.player.x, y: this.player.y - 40 }, 'ДОЛЬШЕ!');
+    this.tweens.add({
+      targets: this.bubbleSprite, scaleX: 1.35, scaleY: 0.75,
+      duration: 140, yoyo: true, ease: 'Quad.easeOut',
+    });
   }
 
   updateBubble(dt) {

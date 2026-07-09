@@ -406,11 +406,6 @@ export class PlatformField {
   /** Визуальный отклик платформы на отскок очков. */
   react(p) {
     switch (p.type) {
-      case 'llama':
-        this.hop(p);
-        this.shout(p, 'Там хорошо!');
-        this.puff(p, 0xffb8dd, 8);
-        break;
       case 'backpack':
         this.squash(p, 1.14, 0.62);
         this.puff(p, 0xffd000, 7);
@@ -550,6 +545,28 @@ export class PlatformField {
     });
     this.shout(p, cry);
     this.puff(p, tint, 6);
+  }
+
+  /** Лама подкинула — и одноразово падает вслед за игроком, кувыркаясь.
+   *  Прыжок с ламы самый мощный в игре, камера рвётся вверх почти мгновенно
+   *  (см. game.js: cam.scrollY = target без сглаживания) — поэтому анимация
+   *  падения короткая и резкая, а не плавная: иначе она вся уходит за нижний
+   *  край экрана незамеченной. */
+  useLlama(p) {
+    this.shout(p, 'Там хорошо!');
+    this.puff(p, 0xffb8dd, 10);
+    p.dead = true;
+    this.scene.tweens.killTweensOf(p.sprite);
+    this.scene.tweens.add({
+      targets: p.sprite,
+      y: p.sprite.y + 90,
+      scaleX: p.baseScaleX * 0.5,
+      scaleY: 0.5,
+      angle: R(-140, 140),
+      alpha: 0,
+      duration: 260,
+      ease: 'Cubic.easeIn',
+    });
   }
 
   /** Чемодан проламывается: отскока нет. */

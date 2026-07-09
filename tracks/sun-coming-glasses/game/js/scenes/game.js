@@ -336,6 +336,7 @@ export class GameScene extends Phaser.Scene {
       }
       if (this.idleT >= 10) {
         this.deathCause = 'boredom';
+        playRandom(this, 'dead_of_boring');
         this.die();
         return;
       }
@@ -539,10 +540,12 @@ export class GameScene extends Phaser.Scene {
         break;
       case 'llama':
         this.player.bounce(P.llamaVy, 0.42);
-        this.field.react(plat);
+        playRandom(this, 'jump_on_llama');
+        this.field.useLlama(plat);
         break;
       case 'sunset':
         this.player.bounce(P.bounceVy * 1.08, 0.2);
+        playRandom(this, 'jump_on_cloud');
         this.field.react(plat);
         break;
       case 'bird':
@@ -559,6 +562,7 @@ export class GameScene extends Phaser.Scene {
         break;
       case 'mario':
         this.player.bounce(P.springVy * 0.95, 0.3);
+        playRandom(this, 'jump_on_mario');
         this.field.react(plat);
         this.becomeShroom();
         break;
@@ -571,6 +575,7 @@ export class GameScene extends Phaser.Scene {
         break;
       default: // облака
         this.player.bounce(P.bounceVy);
+        playRandom(this, 'jump_on_cloud');
         this.field.react(plat);
     }
   }

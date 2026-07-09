@@ -17,7 +17,8 @@
   ],
   "ceil_crush": [
     "ceil_crush_tydish.mp3",
-    "ceil_crush_utb.mp3"
+    "ceil_crush_utb.mp3",
+    "crush_nastya.mp3"
   ],
   "crocodile_ate": [
     "croco_eatan_strong.mp3",
@@ -27,20 +28,42 @@
   "crocodile_was_close": [
     "wom_pididum.mp3"
   ],
+  "dead_of_boring": [
+    "error.mp3",
+    "windows_xp.mp3"
+  ],
   "death_light": [
     "grom_and_lightting_dead.mp3",
     "svalis_s_nebes_death_light.mp3"
   ],
   "dubai_tower": [
+    "habibi.mp3",
     "my_sheih.mp3"
   ],
+  "fireflies_taken": [
+    "magic.mp3"
+  ],
   "gamer_fall": [
+    "sad_trombon.mp3",
     "upali.mp3",
     "vi_upali.mp3"
   ],
   "jet": [
     "vrrrrr.mp3",
     "vzhhhhh.mp3"
+  ],
+  "jump_on_cloud": [
+    "chipnk.mp3",
+    "pau.mp3",
+    "piu.mp3",
+    "piyau_nastya.mp3",
+    "whooshmp3.mp3"
+  ],
+  "jump_on_llama": [
+    "aaa.mp3"
+  ],
+  "jump_on_mario": [
+    "jump_on_mario.mp3"
   ],
   "jump_on_red_backpack_boost_cloud": [
     "jump_on_red.mp3"

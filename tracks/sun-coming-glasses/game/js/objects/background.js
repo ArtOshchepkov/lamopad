@@ -1,5 +1,6 @@
 // ─── Фон: градиент неба по высоте, солнце, параллакс-облака, звёзды, Сизиф ───
 import { CONF } from '../config.js';
+import { playRandom } from '../sound.js';
 
 const SKY_MAX_M = CONF.sky[CONF.sky.length - 1].m; // вершина лестницы неба
 const SKY_TEX_H = 2048;
@@ -246,6 +247,7 @@ export class Background {
   /** Игрок влетел в сгусток — светлячки прыскают в стороны. */
   scatterFireflies(cluster, px, py) {
     cluster.scattered = true;
+    playRandom(this.scene, 'fireflies_taken');
     for (const fly of cluster.flies) {
       this.scene.tweens.killTweensOf(fly);
       const dx = fly.x - px, dy = fly.y - py;

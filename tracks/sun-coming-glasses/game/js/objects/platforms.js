@@ -10,6 +10,7 @@ export class PlatformField {
     this.scene = scene;
     this.active = [];   // платформы в мире
     this.pool = [];     // спрайты на переиспользование
+    this.puffPool = [];  // пул точек для puff() — на каждом отскоке их 5-9, не аллоцировать заново
     this.lastY = 0;     // отметка последнего спавна (мир, вверх = минус)
     this.marioFeverUntilM = 0; // лихорадка: марио повсюду до этой высоты
     this.rainBand = null;      // дождевой пояс задаёт game-сцена
@@ -590,11 +591,13 @@ export class PlatformField {
     });
   }
 
-  /** Всплеск частиц. */
+  /** Всплеск частиц — на каждом отскоке, поэтому спрайты из пула, а не заново. */
   puff(p, tint, n) {
     for (let i = 0; i < n; i++) {
-      const d = this.scene.add.image(p.x, p.y - 8, 'dot').setDepth(9)
-        .setTint(tint).setScale(RF(1, 2.2));
+      let d = this.puffPool.pop();
+      if (!d) d = this.scene.add.image(0, 0, 'dot').setDepth(9);
+      d.setPosition(p.x, p.y - 8).setTint(tint).setScale(RF(1, 2.2))
+        .setAlpha(1).setActive(true).setVisible(true);
       this.scene.tweens.add({
         targets: d,
         x: d.x + R(-46, 46),
@@ -602,7 +605,10 @@ export class PlatformField {
         alpha: 0,
         duration: R(320, 560),
         ease: 'Cubic.easeOut',
-        onComplete: () => d.destroy(),
+        onComplete: () => {
+          d.setActive(false).setVisible(false);
+          this.puffPool.push(d);
+        },
       });
     }
   }

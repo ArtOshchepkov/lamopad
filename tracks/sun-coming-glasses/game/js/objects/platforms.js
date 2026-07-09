@@ -95,8 +95,14 @@ export class PlatformField {
         this.place('cloud', this.apartX(x), this.lastY - R(4, 18));
       }
       // хищное облако — добавка к ярусу: честный путь не занимает.
-      // Шанс умножается по лесенке boost — выше опаснее
-      if (type !== 'suitcase' && m > CONF.enemy.fromM) {
+      // Шанс умножается по лесенке boost — выше опаснее.
+      // НЕ вешаем хищника рядом с движущейся платформой (cloudMove/
+      // stormMove/bird, у них всех есть def.speed) — она за то время,
+      // что игрок долетает до яруса, успевает уехать, и честной опоры
+      // рядом с хищником может не остаться (прыгать реально некуда, кроме
+      // как в него) — хищник и «подвижная опора» на одной высоте нечестны
+      const movingTier = !!CONF.platforms[type].speed;
+      if (type !== 'suitcase' && !movingTier && m > CONF.enemy.fromM) {
         let mult = 1;
         for (const step of CONF.enemy.boost) if (m >= step.fromM) mult = step.mult;
         for (const enemy in CONF.enemy.chance) {

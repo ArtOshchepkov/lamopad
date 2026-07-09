@@ -131,6 +131,36 @@ export class Background {
     this.windDim = scene.add.rectangle(
       CONF.width / 2, CONF.height / 2, CONF.width, CONF.height, 0xdceafa,
     ).setScrollFactor(0).setDepth(39).setAlpha(0);
+
+    // ── аэротруба: рой светлячков течёт вверх и несёт игрока, пояс задаёт game-сцена ──
+    this.aeroBand = null;
+    this.aero = [];
+    const aeroCount = lowGfx ? 22 : 46;
+    for (let i = 0; i < aeroCount; i++) {
+      const tint = Math.random() < 0.6 ? 0xffe9a0 : 0xbfe8ff;
+      // мягкое гало под каждой искрой — само свечение, не просто точка
+      const glow = scene.add.image(0, 0, 'glowball')
+        .setScrollFactor(0).setDepth(40.5).setBlendMode(Phaser.BlendModes.ADD)
+        .setTint(tint).setAlpha(0).setScale(Phaser.Math.FloatBetween(0.3, 0.55));
+      const a = scene.add.image(
+        Phaser.Math.Between(0, CONF.width),
+        Phaser.Math.Between(0, CONF.height),
+        'spark',
+      ).setScrollFactor(0).setDepth(41).setBlendMode(Phaser.BlendModes.ADD)
+       .setTint(tint).setAlpha(0)
+       .setScale(Phaser.Math.FloatBetween(0.8, 1.8));
+      a.glow = glow;
+      a.rise = Phaser.Math.Between(90, 220);   // скорость подъёма конкретной искры, px/s
+      a.wob = Phaser.Math.FloatBetween(0, Math.PI * 2);
+      a.wobSpeed = Phaser.Math.FloatBetween(1.4, 2.6);
+      a.wobAmp = Phaser.Math.Between(10, 28);
+      a.pulse = Phaser.Math.FloatBetween(0, Math.PI * 2); // мерцание яркости
+      this.aero.push(a);
+    }
+    // тёмный волшебный сумрак аэротрубы — контраст, на котором светлячки сияют ярче
+    this.aeroDim = scene.add.rectangle(
+      CONF.width / 2, CONF.height / 2, CONF.width, CONF.height, 0x05030f,
+    ).setScrollFactor(0).setDepth(38).setAlpha(0);
   }
 
   /** 0..1 — насколько мы внутри дождевого пояса (с плавными краями). */
@@ -374,6 +404,28 @@ export class Background {
       else if (this.windDir < 0 && s.x < -8) s.x = CONF.width + 8;
       if (s.y > CONF.height + 8) s.y = -8;
       else if (s.y < -8) s.y = CONF.height + 8;
+    }
+
+    // аэротруба: рой светлячков течёт вверх мимо экрана, унося с собой игрока.
+    // Тёмный фон (aeroDim) — контраст, на котором свечение искр читается сильнее
+    const aero = this.bandIntensity(this.aeroBand, curM);
+    this.aeroDim.setAlpha(aero * 0.52);
+    for (const a of this.aero) {
+      if (aero <= 0.01) { if (a.alpha !== 0) { a.setAlpha(0); a.glow.setAlpha(0); } continue; }
+      a.wob += dt * a.wobSpeed;
+      a.pulse += dt * 3.1;
+      const flicker = 0.78 + Math.sin(a.pulse) * 0.22; // мерцание яркости
+      a.setAlpha(aero * flicker);
+      a.glow.setAlpha(aero * flicker * 0.85);
+      a.y -= a.rise * dt;
+      a.x += Math.sin(a.wob) * a.wobAmp * dt;
+      if (a.y < -8) {
+        a.y = CONF.height + 8;
+        a.x = Phaser.Math.Between(0, CONF.width);
+      }
+      if (a.x < -8) a.x = CONF.width + 8;
+      else if (a.x > CONF.width + 8) a.x = -8;
+      a.glow.setPosition(a.x, a.y);
     }
 
     // светлячки: спавн по высоте, разлёт от игрока, чистка внизу

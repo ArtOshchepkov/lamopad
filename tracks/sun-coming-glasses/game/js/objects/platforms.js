@@ -122,7 +122,9 @@ export class PlatformField {
       // триггерит превращение, а сама лихорадка ниже 1500 м не разгоняется.
       const inFever = m < this.marioFeverUntilM;
       const marioChance = inFever ? CONF.mario.feverChance : CONF.mario.chance;
-      if (!inWindZone && (inFever || m > CONF.mario.fromM) && Math.random() < marioChance) {
+      // волшебная аэротруба 10000–10500 (см. CONF.aero): тоже только хищники
+      const inAeroZone = m >= CONF.aero.fromM && m <= CONF.aero.toM;
+      if (!inWindZone && !inAeroZone && (inFever || m > CONF.mario.fromM) && Math.random() < marioChance) {
         this.place('mario', this.apartX(x), this.lastY - R(20, 50));
       }
     }

@@ -26,6 +26,11 @@ export class GameScene extends Phaser.Scene {
     if (recordBonus) this.clearRecordBonusPending();
     this.startBonusJet = everyBonus || recordBonus;
 
+    // секретный ?start=N — для тестирования: после нажатия «Погнали!»
+    // сразу закидывает на высоту N метров (см. startRun())
+    const startParam = parseInt(new URLSearchParams(window.location.search).get('start'), 10);
+    this.debugStartM = Number.isFinite(startParam) && startParam > 0 ? startParam : null;
+
     // камера — до фона: параллакс-слои позиционируются от стартового скролла
     this.cameras.main.setScroll(0, -(CONF.height - 150));
 
@@ -76,6 +81,10 @@ export class GameScene extends Phaser.Scene {
     this.windAnnounced = false;
     this.bg.windDir = this.windDir;
     this.bg.windBand = { from: CONF.wind.fromM, to: CONF.wind.toM, edgeM: CONF.wind.edgeM };
+
+    // волшебная аэротруба 10000–10500: разовое объявление + светлячковый поток
+    this.aeroAnnounced = false;
+    this.bg.aeroBand = { from: CONF.aero.fromM, to: CONF.aero.toM, edgeM: CONF.aero.edgeM };
 
     // ворчание засиженного облака и причина смерти
     this.lastPlat = null;
@@ -157,6 +166,10 @@ export class GameScene extends Phaser.Scene {
         else if (this.cheatBuf.endsWith('mario')) {
           this.field.place('mario',
             Phaser.Math.Between(70, CONF.width - 70), this.cameras.main.scrollY + 180);
+          this.cheatBuf = '';
+        }
+        else if (this.cheatBuf.endsWith('height0')) {
+          this.teleportToHeight(10000); // «0» после 1..9 — десятка, не ноль
           this.cheatBuf = '';
         }
         else {
@@ -262,6 +275,10 @@ export class GameScene extends Phaser.Scene {
     this.player.sprite.clearTint().setAlpha(1); // если успел подрастаять в серости
     this.player.bounce(CONF.physics.bounceVy);
     this.game.events.emit('scg-start');
+    if (this.debugStartM) {
+      this.teleportToHeight(this.debugStartM);
+      this.debugStartM = null; // разово — дальше игра обычная
+    }
   }
 
   inputDir() {
@@ -325,7 +342,21 @@ export class GameScene extends Phaser.Scene {
       this.field.shout({ x: this.player.x, y: this.player.y - 20 },
         this.windDir > 0 ? 'МЕТЕЛЬ →' : '← МЕТЕЛЬ');
     }
-    this.player.update(dt, this.inputDir(), windVx);
+    // волшебная аэротруба: несёт вверх сама (см. player.js liftVy).
+    // ВАЖНО: тяга включена/выключена жёстко по границам зоны, БЕЗ отдельного
+    // затухания к краям — плавный лерп в player.js и так сглаживает переход
+    // за счёт инерции. Раньше тут была ещё и растяжка цели к 0 у краёв —
+    // это гасило вертикальную скорость игрока ДО фактического выхода из
+    // трубы, и на выходе он повисал в невесомости вместо того, чтобы лететь
+    // по инерции дальше (баг, пойман владельцем)
+    const A = CONF.aero;
+    const inAero = curM >= A.fromM && curM <= A.toM;
+    const liftVy = inAero ? A.liftVy : 0;
+    if (inAero && !this.aeroAnnounced) {
+      this.aeroAnnounced = true;
+      this.field.shout({ x: this.player.x, y: this.player.y - 20 }, 'АЭРОТРУБА!');
+    }
+    this.player.update(dt, this.inputDir(), windVx, liftVy);
 
     // первый рывок вверх проламывает офисный потолок
     if (!this.ceilingBroken && this.player.y < this.officeCeilingY + 10) this.breakCeiling();
@@ -342,6 +373,9 @@ export class GameScene extends Phaser.Scene {
     if (plat) this.onLand(plat);
 
     this.checkCrocProximity(dt);
+    // в аэротрубе vy почти всегда отрицательный (подъём) — landing() тут не
+    // сработает, поэтому редких хищников ловим отдельной проверкой близости
+    if (inAero) this.checkAeroDanger();
 
     // камера тянется только вверх
     const target = this.player.y - CONF.height * CONF.camera.lookAhead;
@@ -787,7 +821,10 @@ export class GameScene extends Phaser.Scene {
   /** Спавн подбираемых ранцев по высоте + проверка подбора + чистка. */
   updateJetPickups(cam) {
     const noJet = CONF.jet.noJetBand;
-    const inNoJet = noJet && this.maxM >= noJet.fromM && this.maxM <= noJet.toM;
+    const A = CONF.aero;
+    // в аэротрубе джетов вообще нет — только пузыри спасают от хищников
+    const inNoJet = (noJet && this.maxM >= noJet.fromM && this.maxM <= noJet.toM) ||
+      (this.maxM >= A.fromM && this.maxM <= A.toM);
     if (this.maxM >= this.nextJetM) {
       this.nextJetM = this.maxM +
         Phaser.Math.Between(CONF.jet.intervalM[0], CONF.jet.intervalM[1]);
@@ -996,6 +1033,16 @@ export class GameScene extends Phaser.Scene {
         this.crocCloseCd = CONF.crocClose.cooldown;
         break;
       }
+    }
+  }
+
+  /** Аэротруба: хищника не «приземляют», а задевают на лету — смерть по близости. */
+  checkAeroDanger() {
+    if (this.jetTime > 0 || this.bubbleTime > 0) return; // ранец/пузырь — неприкосновенность, как везде
+    for (const p of this.field.active) {
+      if ((p.type !== 'croc' && p.type !== 'snake') || p.dead) continue;
+      const d = Phaser.Math.Distance.Between(this.player.x, this.player.y, p.x, p.y);
+      if (d < CONF.aero.hitR) { this.eaten(p); return; }
     }
   }
 

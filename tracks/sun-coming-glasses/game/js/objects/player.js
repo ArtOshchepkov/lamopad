@@ -15,8 +15,12 @@ export class Player {
   get y() { return this.sprite.y; }
   get feetY() { return this.sprite.y + CONF.player.feetOffset; }
 
-  /** dir: -1 | 0 | 1. windVx: px/s, постоянная боковая тяга (метель) */
-  update(dt, dir, windVx = 0) {
+  /**
+   * dir: -1 | 0 | 1. windVx: px/s, постоянная боковая тяга (метель).
+   * liftVy: px/s > 0 — аэротруба (см. CONF.aero): вместо гравитации vy
+   * плавно тянется к -liftVy, гравитация в это время не действует
+   */
+  update(dt, dir, windVx = 0, liftVy = 0) {
     const P = CONF.physics;
 
     // плавное горизонтальное управление (независимо от fps).
@@ -27,7 +31,12 @@ export class Player {
     this.vx += (targetVx - this.vx) * k;
 
     this.prevFeetY = this.feetY;
-    this.vy += P.gravity * dt;
+    if (liftVy > 0) {
+      const kv = 1 - Math.exp(-CONF.aero.liftLerp * dt);
+      this.vy += (-liftVy - this.vy) * kv;
+    } else {
+      this.vy += P.gravity * dt;
+    }
     this.sprite.x += this.vx * dt;
     this.sprite.y += this.vy * dt;
 

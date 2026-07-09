@@ -86,9 +86,20 @@ export class GameScene extends Phaser.Scene {
     // управление
     this.cursors = this.input.keyboard.createCursorKeys();
     this.keys = this.input.keyboard.addKeys('A,D');
-    this.input.on('pointerdown', () => {
+    // на тач-устройствах удержание пальца слева/справа = рулёжка (inputDir),
+    // поэтому лопать пузырь должен именно КОРОТКИЙ тап, а не любой pointerdown —
+    // иначе на мобиле пузырь рвётся от каждого нажатия для руления
+    this.tapStart = null;
+    this.input.on('pointerdown', (p) => {
       this.startRun();
-      if (this.bubbleTime > 0) this.popBubble(); // свежий тап лопает пузырь
+      this.tapStart = { t: this.time.now, x: p.x, y: p.y };
+    });
+    this.input.on('pointerup', (p) => {
+      if (!this.tapStart) return;
+      const held = this.time.now - this.tapStart.t;
+      const dist = Phaser.Math.Distance.Between(this.tapStart.x, this.tapStart.y, p.x, p.y);
+      this.tapStart = null;
+      if (this.bubbleTime > 0 && held < 220 && dist < 16) this.popBubble();
     });
     // чит-коды: набери fire — светлячки, plane — самолёт,
     // height1..height9 — телепорт на N километров

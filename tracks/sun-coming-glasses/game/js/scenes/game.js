@@ -4,6 +4,7 @@ import { Player } from '../objects/player.js';
 import { PlatformField } from '../objects/platforms.js';
 import { Background } from '../objects/background.js';
 import { playRandom } from '../sound.js';
+import { Debug } from '../debug.js';
 
 const LOW_GFX = ('ontouchstart' in window) || navigator.maxTouchPoints > 0;
 
@@ -301,6 +302,13 @@ export class GameScene extends Phaser.Scene {
     const cam = this.cameras.main;
     const curM = Math.max(0, Math.round(-this.player.y / CONF.pxPerM));
     this.bg.update(curM, this.maxM, this.player, dt);
+
+    // ?debug=true — живые внутренности игры поверх экрана (см. debug.js)
+    Debug.set('state', this.state);
+    Debug.set('height', `${curM} м (макс ${this.maxM})`);
+    Debug.set('platforms', this.field.active.length);
+    Debug.set('vy/vx', `${Math.round(this.player.vy)} / ${Math.round(this.player.vx)}`);
+    Debug.set('jet/coast/bubble', `${Math.round(this.jetTime * 100) / 100}/${Math.round(this.jetCoastTime * 100) / 100}/${Math.round(this.bubbleTime * 100) / 100}`);
 
     // секретная концовка: 5 сек простоя без прорыва потолка — комната гаснет
     // в почти чёрную серость, и сам игрок постепенно растворяется в ней

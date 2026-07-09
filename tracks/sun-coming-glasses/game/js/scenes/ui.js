@@ -1,10 +1,12 @@
 // ─── UI-сцена поверх игры: высота, рекорд, плашки вех ────────────────────────
 import { CONF } from '../config.js';
+import { Debug } from '../debug.js';
 
 export class UIScene extends Phaser.Scene {
   constructor() { super('ui'); }
 
   create() {
+    Debug.mount(this); // ?debug=true — FPS-оверлей, живёт поверх всей игры
     const res = Math.min(window.devicePixelRatio || 1, 2);
     const cx = CONF.width / 2;
 
@@ -96,6 +98,7 @@ export class UIScene extends Phaser.Scene {
   }
 
   update(time) {
+    Debug.update(time);
     if (this.pendingCur === null || time - this.lastHudAt < this.hudInterval) return;
     this.lastHudAt = time;
     this.heightText.setText(String(this.pendingCur));

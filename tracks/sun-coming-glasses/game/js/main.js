@@ -1,8 +1,12 @@
 // ─── Точка входа: Phaser + связка с DOM-оверлеями и звуком ───────────────────
 import { CONF } from './config.js';
+import { Debug } from './debug.js';
 import { BootScene } from './scenes/boot.js';
 import { GameScene } from './scenes/game.js';
 import { UIScene } from './scenes/ui.js';
+
+// ?debug=true — FPS-оверлей + дебаг-строки из игры (см. debug.js), до старта Phaser
+Debug.init();
 
 // Телефоны: подгоняем высоту поля под реальный вьюпорт, иначе FIT оставляет
 // поля по бокам. Ширина мира не меняется — геймплей одинаковый. Страница не

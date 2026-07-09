@@ -298,6 +298,9 @@ export class GameScene extends Phaser.Scene {
   }
 
   update(time, deltaMs) {
+    // TEMP profiling (?debug=true) — diagnosing a jank report, remove once fixed
+    const __prof = Debug.enabled;
+    const __t0 = __prof ? performance.now() : 0;
     const dt = Math.min(deltaMs / 1000, CONF.physics.maxDt);
     const cam = this.cameras.main;
     const curM = Math.max(0, Math.round(-this.player.y / CONF.pxPerM));
@@ -384,9 +387,18 @@ export class GameScene extends Phaser.Scene {
     if (this.bubbleTime > 0) this.updateBubble(dt);
 
     // приземление (в ранце и пузыре коллизий нет)
+    const __tLand0 = __prof ? performance.now() : 0;
     const plat = (this.jetTime > 0 || this.bubbleTime > 0)
       ? null : this.field.landing(this.player);
+    const __tLand1 = __prof ? performance.now() : 0;
     if (plat) this.onLand(plat);
+    if (__prof) {
+      const onLandMs = performance.now() - __tLand1;
+      const landingMs = __tLand1 - __tLand0;
+      if (landingMs > 1 || onLandMs > 1) {
+        console.warn(`[perf] landing=${landingMs.toFixed(2)}ms onLand=${onLandMs.toFixed(2)}ms plat=${plat ? plat.type : '-'}`);
+      }
+    }
 
     this.checkCrocProximity(dt);
     // в аэротрубе vy почти всегда отрицательный (подъём) — landing() тут не
@@ -407,8 +419,19 @@ export class GameScene extends Phaser.Scene {
     if (target < cam.scrollY) cam.scrollY = target;
 
     // генерация и чистка мира
+    const __tEnsure0 = __prof ? performance.now() : 0;
+    const __countBefore = __prof ? this.field.active.length : 0;
     this.field.ensure(cam.scrollY - CONF.spawn.ahead);
+    const __tEnsure1 = __prof ? performance.now() : 0;
     this.field.update(dt, cam.scrollY + CONF.height, this.player);
+    if (__prof) {
+      const ensureMs = __tEnsure1 - __tEnsure0;
+      const fieldUpdateMs = performance.now() - __tEnsure1;
+      const spawned = this.field.active.length - __countBefore;
+      if (ensureMs > 1 || fieldUpdateMs > 1) {
+        console.warn(`[perf] ensure=${ensureMs.toFixed(2)}ms (+${spawned} platforms) fieldUpdate=${fieldUpdateMs.toFixed(2)}ms`);
+      }
+    }
     this.spawnLyrics(cam);
     this.spawnFlags(cam);
     this.updateJetPickups(cam);
@@ -454,6 +477,11 @@ export class GameScene extends Phaser.Scene {
 
     // падение
     if (this.player.y > cam.scrollY + CONF.height + CONF.camera.deathMargin) this.fallDeath();
+
+    if (__prof) {
+      const totalMs = performance.now() - __t0;
+      if (totalMs > 8) console.warn(`[perf] TOTAL update=${totalMs.toFixed(2)}ms vy=${Math.round(this.player.vy)}`);
+    }
   }
 
   /** Обычное падение мимо всех платформ: кувырок вниз и затемнение, потом экран смерти. */

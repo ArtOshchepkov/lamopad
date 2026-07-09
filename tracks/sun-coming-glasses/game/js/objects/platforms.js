@@ -1,5 +1,6 @@
 // ─── Платформы: пул, data-driven спавн по зонам, поведение и реакции ─────────
 import { CONF } from '../config.js';
+import { Debug } from '../debug.js'; // TEMP profiling — remove once lag diagnosed
 
 const R = Phaser.Math.Between;
 const RF = Phaser.Math.FloatBetween;
@@ -11,6 +12,7 @@ export class PlatformField {
     this.active = [];   // платформы в мире
     this.pool = [];     // спрайты на переиспользование
     this.puffPool = [];  // пул точек для puff() — на каждом отскоке их 5-9, не аллоцировать заново
+    this.shoutPool = []; // пул текста для shout() — не создавать Text-объект заново на каждый крик
     this.lastY = 0;     // отметка последнего спавна (мир, вверх = минус)
     this.marioFeverUntilM = 0; // лихорадка: марио повсюду до этой высоты
     this.rainBand = null;      // дождевой пояс задаёт game-сцена
@@ -182,6 +184,7 @@ export class PlatformField {
 
     // декор поверх платформы (хищник на облаке); редкий — не пулим
     if (def.deco) {
+      const __tDeco0 = Debug.enabled ? performance.now() : 0; // TEMP profiling
       p.deco = this.scene.add.image(x, y - p.h / 2 - 12, def.deco)
         .setDepth(6).setFlipX(Math.random() < 0.5);
       this.scene.tweens.add({ // лениво покачивает хвостом
@@ -214,6 +217,10 @@ export class PlatformField {
           repeatDelay: R(700, 2200), // пауза между высовываниями
           ease: 'Quad.easeOut',
         });
+      }
+      if (Debug.enabled) { // TEMP profiling
+        const decoMs = performance.now() - __tDeco0;
+        if (decoMs > 0.5) console.warn(`[perf] enemy deco alloc (${type}) = ${decoMs.toFixed(2)}ms`);
       }
     }
     this.active.push(p);
@@ -615,14 +622,20 @@ export class PlatformField {
 
   /** Крик платформы: всплывающий текст в мире. */
   shout(p, text) {
-    const t = this.scene.add.text(p.x, p.y - 34, text, {
-      fontFamily: 'Unbounded, sans-serif', fontSize: '17px', fontStyle: '700',
-      color: CONF.colors.gold, stroke: '#3a0d18', strokeThickness: 5,
-    }).setOrigin(0.5).setDepth(11)
-      .setResolution(Math.min(window.devicePixelRatio || 1, 2));
+    let t = this.shoutPool.pop();
+    if (!t) {
+      t = this.scene.add.text(0, 0, '', {
+        fontFamily: 'Unbounded, sans-serif', fontSize: '17px', fontStyle: '700',
+        color: CONF.colors.gold, stroke: '#3a0d18', strokeThickness: 5,
+      }).setOrigin(0.5).setDepth(11)
+        .setResolution(Math.min(window.devicePixelRatio || 1, 2));
+    }
+    t.setText(text).setPosition(p.x, p.y - 34).setAlpha(1)
+      .setActive(true).setVisible(true);
     this.scene.tweens.add({
       targets: t, y: t.y - 70, alpha: 0, duration: 1100,
-      ease: 'Cubic.easeOut', onComplete: () => t.destroy(),
+      ease: 'Cubic.easeOut',
+      onComplete: () => { t.setActive(false).setVisible(false); this.shoutPool.push(t); },
     });
   }
 }

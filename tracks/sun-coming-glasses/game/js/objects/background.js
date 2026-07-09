@@ -90,11 +90,31 @@ export class Background {
     this.fireflies = [];
     this.nextFireM = 140;
 
-    // ── дождь: пояс(а) задаёт game-сцена через this.rainBand/rainBand2 ──
+    // ── дождь/метель/аэротруба: пулы частиц создаются ЛЕНИВО (см. ensure*Fx
+    // ниже, вызываются из update() по приближению высоты) — без этого все
+    // ~150 объектов существовали бы с самой первой секунды игры и платили
+    // бы за проверку рендера каждый кадр всю раннюю игру, где они не нужны.
+    // Пояс(а)/направление задаёт game-сцена через this.rainBand/rainBand2/windBand/windDir/aeroBand
     this.rainBand = null;
     this.rainBand2 = null;
+    this.drops = null;
+    this.rainDim = null;
+
+    this.windBand = null;
+    this.windDir = 1;
+    this.snow = null;
+    this.windDim = null;
+
+    this.aeroBand = null;
+    this.aero = null;
+    this.aeroDim = null;
+  }
+
+  ensureRainFx() {
+    if (this.drops) return;
+    const scene = this.scene;
     this.drops = [];
-    const dropCount = lowGfx ? 14 : 42;
+    const dropCount = this.lowGfx ? 14 : 42;
     for (let i = 0; i < dropCount; i++) {
       const d = scene.add.image(
         Phaser.Math.Between(0, CONF.width),
@@ -109,12 +129,13 @@ export class Background {
     this.rainDim = scene.add.rectangle(
       CONF.width / 2, CONF.height / 2, CONF.width, CONF.height, 0x1a2238,
     ).setScrollFactor(0).setDepth(40).setAlpha(0);
+  }
 
-    // ── метель: снег летит вбок по ветру, пояс/направление задаёт game-сцена ──
-    this.windBand = null;
-    this.windDir = 1;
+  ensureWindFx() {
+    if (this.snow) return;
+    const scene = this.scene;
     this.snow = [];
-    const snowCount = lowGfx ? 14 : 54;
+    const snowCount = this.lowGfx ? 14 : 54;
     for (let i = 0; i < snowCount; i++) {
       const s = scene.add.image(
         Phaser.Math.Between(0, CONF.width),
@@ -131,9 +152,12 @@ export class Background {
     this.windDim = scene.add.rectangle(
       CONF.width / 2, CONF.height / 2, CONF.width, CONF.height, 0xdceafa,
     ).setScrollFactor(0).setDepth(39).setAlpha(0);
+  }
 
-    // ── аэротруба: рой светлячков течёт вверх и несёт игрока, пояс задаёт game-сцена ──
-    this.aeroBand = null;
+  ensureAeroFx() {
+    if (this.aero) return;
+    const scene = this.scene;
+    const lowGfx = this.lowGfx;
     this.aero = [];
     const aeroCount = lowGfx ? 12 : 46;
     for (let i = 0; i < aeroCount; i++) {
@@ -371,63 +395,75 @@ export class Background {
   update(curM, maxM, player, dt = 0.016) {
     const cam = this.scene.cameras.main;
 
+    // ленивое создание пулов дождя/метели/аэротрубы — заранее с запасом,
+    // чтобы не было видно момента появления, но не с самого старта игры
+    if (!this.drops && curM >= 1600) this.ensureRainFx();
+    if (!this.snow && curM >= CONF.wind.fromM - 300) this.ensureWindFx();
+    if (!this.aero && curM >= CONF.aero.fromM - 300) this.ensureAeroFx();
+
     // дождь: капли летят, пока мы в поясе
-    const i1 = this.bandIntensity(this.rainBand, curM);
-    const i2 = this.bandIntensity(this.rainBand2, curM);
-    const rain = Math.max(i1, i2);
-    // тьма — каждый пояс может задать свою степень мрака (dimAlpha),
-    // второй пояс (гейтлет) обычно темнее базового
-    const dim = Math.max(
-      i1 * (this.rainBand?.dimAlpha ?? 0.34),
-      i2 * (this.rainBand2?.dimAlpha ?? 0.34),
-    );
-    this.rainDim.setAlpha(dim);
-    for (const d of this.drops) {
-      if (rain <= 0.01) { if (d.alpha !== 0) d.setAlpha(0); continue; }
-      d.setAlpha(rain * 0.55);
-      d.y += d.vy * dt;
-      d.x -= d.vy * 0.14 * dt; // лёгкий косой снос
-      if (d.y > CONF.height + 16) {
-        d.y = -16;
-        d.x = Phaser.Math.Between(0, CONF.width + 60);
+    if (this.drops) {
+      const i1 = this.bandIntensity(this.rainBand, curM);
+      const i2 = this.bandIntensity(this.rainBand2, curM);
+      const rain = Math.max(i1, i2);
+      // тьма — каждый пояс может задать свою степень мрака (dimAlpha),
+      // второй пояс (гейтлет) обычно темнее базового
+      const dim = Math.max(
+        i1 * (this.rainBand?.dimAlpha ?? 0.34),
+        i2 * (this.rainBand2?.dimAlpha ?? 0.34),
+      );
+      this.rainDim.setAlpha(dim);
+      for (const d of this.drops) {
+        if (rain <= 0.01) { if (d.alpha !== 0) d.setAlpha(0); continue; }
+        d.setAlpha(rain * 0.55);
+        d.y += d.vy * dt;
+        d.x -= d.vy * 0.14 * dt; // лёгкий косой снос
+        if (d.y > CONF.height + 16) {
+          d.y = -16;
+          d.x = Phaser.Math.Between(0, CONF.width + 60);
+        }
       }
     }
 
     // метель: снег летит по ветру с лёгкой турбулентностью, пока мы в поясе
-    const wind = this.bandIntensity(this.windBand, curM);
-    this.windDim.setAlpha(wind * 0.3);
-    for (const s of this.snow) {
-      if (wind <= 0.01) { if (s.alpha !== 0) s.setAlpha(0); continue; }
-      s.setAlpha(wind);
-      s.wob += dt * 2.4;
-      s.x += this.windDir * s.speed * dt;
-      s.y += (s.fall + Math.sin(s.wob) * 14) * dt;
-      if (this.windDir > 0 && s.x > CONF.width + 8) s.x = -8;
-      else if (this.windDir < 0 && s.x < -8) s.x = CONF.width + 8;
-      if (s.y > CONF.height + 8) s.y = -8;
-      else if (s.y < -8) s.y = CONF.height + 8;
+    if (this.snow) {
+      const wind = this.bandIntensity(this.windBand, curM);
+      this.windDim.setAlpha(wind * 0.3);
+      for (const s of this.snow) {
+        if (wind <= 0.01) { if (s.alpha !== 0) s.setAlpha(0); continue; }
+        s.setAlpha(wind);
+        s.wob += dt * 2.4;
+        s.x += this.windDir * s.speed * dt;
+        s.y += (s.fall + Math.sin(s.wob) * 14) * dt;
+        if (this.windDir > 0 && s.x > CONF.width + 8) s.x = -8;
+        else if (this.windDir < 0 && s.x < -8) s.x = CONF.width + 8;
+        if (s.y > CONF.height + 8) s.y = -8;
+        else if (s.y < -8) s.y = CONF.height + 8;
+      }
     }
 
     // аэротруба: рой светлячков течёт вверх мимо экрана, унося с собой игрока.
     // Тёмный фон (aeroDim) — контраст, на котором свечение искр читается сильнее
-    const aero = this.bandIntensity(this.aeroBand, curM);
-    this.aeroDim.setAlpha(aero * 0.52);
-    for (const a of this.aero) {
-      if (aero <= 0.01) { if (a.alpha !== 0) { a.setAlpha(0); if (a.glow) a.glow.setAlpha(0); } continue; }
-      a.wob += dt * a.wobSpeed;
-      a.pulse += dt * 3.1;
-      const flicker = 0.78 + Math.sin(a.pulse) * 0.22; // мерцание яркости
-      a.setAlpha(aero * flicker);
-      if (a.glow) a.glow.setAlpha(aero * flicker * 0.85);
-      a.y -= a.rise * dt;
-      a.x += Math.sin(a.wob) * a.wobAmp * dt;
-      if (a.y < -8) {
-        a.y = CONF.height + 8;
-        a.x = Phaser.Math.Between(0, CONF.width);
+    if (this.aero) {
+      const aero = this.bandIntensity(this.aeroBand, curM);
+      this.aeroDim.setAlpha(aero * 0.52);
+      for (const a of this.aero) {
+        if (aero <= 0.01) { if (a.alpha !== 0) { a.setAlpha(0); if (a.glow) a.glow.setAlpha(0); } continue; }
+        a.wob += dt * a.wobSpeed;
+        a.pulse += dt * 3.1;
+        const flicker = 0.78 + Math.sin(a.pulse) * 0.22; // мерцание яркости
+        a.setAlpha(aero * flicker);
+        if (a.glow) a.glow.setAlpha(aero * flicker * 0.85);
+        a.y -= a.rise * dt;
+        a.x += Math.sin(a.wob) * a.wobAmp * dt;
+        if (a.y < -8) {
+          a.y = CONF.height + 8;
+          a.x = Phaser.Math.Between(0, CONF.width);
+        }
+        if (a.x < -8) a.x = CONF.width + 8;
+        else if (a.x > CONF.width + 8) a.x = -8;
+        if (a.glow) a.glow.setPosition(a.x, a.y);
       }
-      if (a.x < -8) a.x = CONF.width + 8;
-      else if (a.x > CONF.width + 8) a.x = -8;
-      if (a.glow) a.glow.setPosition(a.x, a.y);
     }
 
     // светлячки: спавн по высоте, разлёт от игрока, чистка внизу

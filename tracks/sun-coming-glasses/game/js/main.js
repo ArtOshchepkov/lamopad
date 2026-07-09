@@ -12,10 +12,6 @@ const vw = window.innerWidth, vh = window.innerHeight;
 const aspect = Math.min(vw, vh) / Math.max(vw, vh);
 CONF.height = Phaser.Math.Clamp(Math.round(CONF.width / aspect), 780, 1150);
 
-// на тач-устройствах антиалиасинг WebGL ощутимо ест fill-rate почти без
-// видимой пользы для этой игры (мягкие формы уже сглажены в самих текстурах)
-const isTouch = ('ontouchstart' in window) || navigator.maxTouchPoints > 0;
-
 const game = new Phaser.Game({
   type: Phaser.AUTO,
   parent: 'game',
@@ -27,7 +23,7 @@ const game = new Phaser.Game({
     mode: Phaser.Scale.FIT,
     autoCenter: Phaser.Scale.CENTER_BOTH,
   },
-  render: { antialias: !isTouch, roundPixels: false },
+  render: { antialias: true, roundPixels: false },
 });
 
 // ─── DOM ─────────────────────────────────────────────────────────────────────

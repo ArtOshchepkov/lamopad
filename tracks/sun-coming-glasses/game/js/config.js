@@ -7,7 +7,7 @@ export const CONF = {
   version: 'медвежонок о', // вручную — для проверки, что задеплоена актуальная версия
 
   music: {
-    volume: 0.3, // трек тише SFX
+    volume: 0.2, // трек тише SFX
   },
 
   physics: {

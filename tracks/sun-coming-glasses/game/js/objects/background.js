@@ -49,6 +49,7 @@ export class Background {
     // ── дальние полупрозрачные облака (параллакс-слой) ──
     this.decorSf = 0.35;
     this.decor = [];
+    this.lastDecorFade = -1; // не дёргать setAlpha каждый кадр, если фейд не менялся
     const texKeys = ['p-cloud-a', 'p-cloud-b', 'p-cloud-c'];
     const n = lowGfx ? 3 : 6;
     for (let i = 0; i < n; i++) {
@@ -494,12 +495,16 @@ export class Background {
     // закатик остаётся до стратосферы, дальше тает — в космосе закатов нет
     this.sun.setAlpha(1 - Phaser.Math.Clamp((curM - 7600) / 1200, 0, 1));
 
-    // дальние облака: ушли вниз — вернулись сверху; в космосе тают
+    // дальние облака: ушли вниз — вернулись сверху; в космосе тают.
+    // decorFade почти всё время одно и то же значение (0 или 1) — не трогаем
+    // alpha каждого облака каждый кадр, если он не сдвинулся
     const decorFade = 1 - Phaser.Math.Clamp((curM - 7500) / 1200, 0, 1);
+    const decorFadeChanged = Math.abs(decorFade - this.lastDecorFade) > 0.01;
+    if (decorFadeChanged) this.lastDecorFade = decorFade;
     for (const c of this.decor) {
       const screenY = c.y - cam.scrollY * this.decorSf;
       if (screenY > CONF.height + 90) this.respawnDecor(c, true);
-      c.setAlpha(c.baseAlpha * decorFade);
+      if (decorFadeChanged) c.setAlpha(c.baseAlpha * decorFade);
     }
 
     // звёзды проявляются после ~7500 м

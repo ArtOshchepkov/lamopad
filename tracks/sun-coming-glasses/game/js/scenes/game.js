@@ -73,6 +73,7 @@ export class GameScene extends Phaser.Scene {
     this.jets = [];
     this.nextJetM = CONF.jet.fromM;
     this.jetTime = 0;
+    this.jetCoastTime = 0;
     this.jetSprite = null;
     this.flameAcc = 0;
 
@@ -292,6 +293,7 @@ export class GameScene extends Phaser.Scene {
 
     // реактивный ранец: взлёт мимо всех препятствий
     if (this.jetTime > 0) this.updateJet(dt);
+    else if (this.jetCoastTime > 0) this.updateJetCoast(dt);
     // пузырь: плавный подъём
     if (this.bubbleTime > 0) this.updateBubble(dt);
 
@@ -827,7 +829,8 @@ export class GameScene extends Phaser.Scene {
 
   endJet() {
     this.jetTime = 0;
-    this.player.vy = -260; // мягкая передача в обычную физику
+    // тяга гаснет не мгновенно, а плавным выбегом — updateJetCoast()
+    this.jetCoastTime = CONF.jet.coastTime;
     if (this.jetGlow) {
       const glow = this.jetGlow;
       this.jetGlow = null;
@@ -845,6 +848,14 @@ export class GameScene extends Phaser.Scene {
         onComplete: () => s.destroy(),
       });
     }
+  }
+
+  /** Плавный выбег скорости после отключения ранца (инерция вместо резкого обрыва тяги). */
+  updateJetCoast(dt) {
+    this.jetCoastTime -= dt;
+    const k = 1 - Math.exp(-CONF.jet.coastLerp * dt);
+    this.player.vy += (-CONF.jet.coastVy - this.player.vy) * k;
+    if (this.jetCoastTime <= 0) this.jetCoastTime = 0;
   }
 
   checkMilestones() {

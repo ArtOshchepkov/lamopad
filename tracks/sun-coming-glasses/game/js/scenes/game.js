@@ -134,7 +134,9 @@ export class GameScene extends Phaser.Scene {
       const held = this.time.now - this.tapStart.t;
       const dist = Phaser.Math.Distance.Between(this.tapStart.x, this.tapStart.y, p.x, p.y);
       this.tapStart = null;
-      if (this.bubbleTime > 0 && held < 220 && dist < 16) this.popBubble();
+      if (this.bubbleTime > 0 && held < 220 && dist < 16 && this.tapHitsBubble(p)) {
+        this.popBubble();
+      }
     });
     // чит-коды: набери fire — светлячки, plane — самолёт,
     // height1..height9 — телепорт на N километров
@@ -853,6 +855,16 @@ export class GameScene extends Phaser.Scene {
     this.bubbleSprite.setPosition(this.player.x, this.player.y)
       .setScale(1 + w, 1 - w);
     if (this.bubbleTime <= 0) this.popBubble();
+  }
+
+  /** Тап попал по пузырю? Радиус текстуры 50px + запас под палец. */
+  tapHitsBubble(p) {
+    if (!this.bubbleSprite) return false;
+    const cam = this.cameras.main;
+    const wx = p.x + cam.scrollX;
+    const wy = p.y + cam.scrollY;
+    const r = 50 * this.bubbleSprite.scaleX + 20;
+    return Phaser.Math.Distance.Between(wx, wy, this.bubbleSprite.x, this.bubbleSprite.y) <= r;
   }
 
   /** ПЫК! Разлёт капель, лёгкий остаточный подъём. */

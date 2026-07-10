@@ -78,6 +78,32 @@ muteSfxBtn.addEventListener('click', () => {
   renderMute();
 });
 
+// ─── iOS: держим аудиосессию, чтобы SFX жили в бесшумном режиме ──────────────
+// Бесшумный переключатель iPhone глушит WebAudio (все SFX Phaser), но не
+// <audio>. Пока играет неглушёный <audio>, сессия — «playback» и SFX слышны;
+// стоит замутить музыку (audio.muted) — сессия отпускается и SFX пропадают,
+// хотя иконка «звуки вкл». Трюк unmute.js: гоняем по кругу крошечный
+// ДЕЙСТВИТЕЛЬНО беззвучный wav (не muted!) — он держит сессию, ничего не звуча
+const isIOS = /iPhone|iPad|iPod/.test(navigator.userAgent)
+  || (navigator.platform === 'MacIntel' && navigator.maxTouchPoints > 1);
+if (isIOS) {
+  const silence = 'data:audio/wav;base64,UklGRmQGAABXQVZFZm10IBAAAAABAAEAQB8AAIA+AAACABAAZGF0YUAG'
+    + 'A'.repeat(2136); // 0.1с тишины, 8кГц mono 16-bit
+  const keeper = new Audio(silence);
+  keeper.loop = true;
+  keeper.setAttribute('playsinline', '');
+  const holdSession = () => {
+    if (!document.hidden && keeper.paused) keeper.play().catch(() => {});
+  };
+  // первый жест разлочивает элемент, дальше play() работает и без жеста
+  document.addEventListener('pointerdown', holdSession, true);
+  document.addEventListener('keydown', holdSession, true);
+  document.addEventListener('visibilitychange', () => {
+    if (document.hidden) keeper.pause();
+    else holdSession();
+  });
+}
+
 // ─── Стартовый экран: звук, полноэкранный режим, ориентация ─────────────────
 const startOverlay = $('start');
 const optMusic = $('opt-music');

@@ -122,18 +122,14 @@ export class GameScene extends Phaser.Scene {
     this.cursors = this.input.keyboard.createCursorKeys();
     this.keys = this.input.keyboard.addKeys('A,D');
     // на тач-устройствах удержание пальца слева/справа = рулёжка (inputDir),
-    // поэтому лопать пузырь должен именно КОРОТКИЙ тап, а не любой pointerdown —
-    // иначе на мобиле пузырь рвётся от каждого нажатия для руления
-    this.tapStart = null;
-    this.input.on('pointerdown', (p) => {
-      this.startRun();
-      this.tapStart = { t: this.time.now, x: p.x, y: p.y };
-    });
+    // поэтому лопать пузырь должен именно КОРОТКИЙ тап ПО ПУЗЫРЮ, а не любой
+    // pointerdown — иначе на мобиле пузырь рвётся от каждого нажатия для руления.
+    // Время/координаты берём из нативных таймстемпов поинтера, а не time.now:
+    // при просевших кадрах down и up могут попасть в один шаг игры
+    this.input.on('pointerdown', () => this.startRun());
     this.input.on('pointerup', (p) => {
-      if (!this.tapStart) return;
-      const held = this.time.now - this.tapStart.t;
-      const dist = Phaser.Math.Distance.Between(this.tapStart.x, this.tapStart.y, p.x, p.y);
-      this.tapStart = null;
+      const held = p.upTime - p.downTime;
+      const dist = Phaser.Math.Distance.Between(p.downX, p.downY, p.x, p.y);
       if (this.bubbleTime > 0 && held < 220 && dist < 16 && this.tapHitsBubble(p)) {
         this.popBubble();
       }

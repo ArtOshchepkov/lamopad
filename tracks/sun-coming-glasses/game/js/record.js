@@ -16,39 +16,43 @@ const STYLE = `
 }
 .rec-tap { position: absolute; width: 0; height: 0; }
 .rec-tap i { position: absolute; display: block; }
-/* тёплое ядро-вспышка (палитра HUD-градиента: #fff6ec → #ffcf3f → #ff7d1e) */
+/* ядро — маленькое солнышко (палитра HUD: #fff6ec → #ffcf3f → #ff7d1e):
+   плотный золотой диск с белым бликом и тёплым гало вокруг */
 .rec-core {
-  width: 34px; height: 34px; left: -17px; top: -17px; border-radius: 50%;
-  background: radial-gradient(circle,
-    #fff6ec 0%, rgba(255,207,63,.85) 45%, rgba(255,125,30,0) 72%);
-  animation: rec-core .42s ease-out forwards;
+  width: 68px; height: 68px; left: -34px; top: -34px; border-radius: 50%;
+  background: radial-gradient(circle at 44% 40%,
+    #fff6ec 0%, #ffe27a 26%, #ffcf3f 52%,
+    rgba(255,166,48,.9) 58%, rgba(255,125,30,.45) 68%, rgba(255,125,30,0) 80%);
+  animation: rec-core .5s ease-out forwards;
 }
 @keyframes rec-core {
-  0% { transform: scale(.4); opacity: 0; }
-  18% { opacity: 1; }
-  100% { transform: scale(1.45); opacity: 0; }
+  0% { transform: scale(.35); opacity: 0; }
+  16% { opacity: 1; }
+  62% { transform: scale(1.06); opacity: 1; }
+  100% { transform: scale(1.2); opacity: 0; }
 }
 /* расходящееся золотое кольцо — то же, что у вех; тёмная кромка снаружи,
    чтобы читалось и на светлом (офис, закат), и в тёмном небе */
 .rec-ring {
-  width: 26px; height: 26px; left: -13px; top: -13px; border-radius: 50%;
-  border: 3px solid #ffcf3f;
-  box-shadow: 0 0 12px rgba(255,207,63,.8), 0 0 0 1px rgba(59,59,70,.25);
+  width: 52px; height: 52px; left: -26px; top: -26px; border-radius: 50%;
+  border: 4px solid #ffcf3f;
+  box-shadow: 0 0 16px rgba(255,207,63,.8), 0 0 0 1px rgba(59,59,70,.25);
   animation: rec-ring .55s cubic-bezier(.2,.7,.3,1) forwards;
 }
 @keyframes rec-ring {
   0% { transform: scale(.5); opacity: .95; }
-  100% { transform: scale(2.6); opacity: 0; }
+  100% { transform: scale(2.4); opacity: 0; }
 }
-/* лучи-искры, разлетаются как у золотого burst на вехах */
+/* лучики солнышка — как на детском рисунке: торчат из диска и разлетаются */
 .rec-ray {
-  width: 4px; height: 13px; left: -2px; top: -6px; border-radius: 2px;
-  background: linear-gradient(#fff6ec, #ffcf3f);
-  animation: rec-ray .5s ease-out forwards;
+  width: 6px; height: 24px; left: -3px; top: -12px; border-radius: 3px;
+  background: linear-gradient(#fff6ec, #ffcf3f 55%, rgba(255,166,48,.9));
+  animation: rec-ray .55s ease-out forwards;
 }
 @keyframes rec-ray {
-  0% { transform: rotate(var(--a)) translateY(-15px) scaleY(.6); opacity: 1; }
-  100% { transform: rotate(var(--a)) translateY(-36px) scaleY(.25); opacity: 0; }
+  0% { transform: rotate(var(--a)) translateY(-32px) scaleY(.6); opacity: 1; }
+  70% { opacity: 1; }
+  100% { transform: rotate(var(--a)) translateY(-74px) scaleY(.3); opacity: 0; }
 }
 /* свечение под удержанным пальцем: показывает рулёжку; проявляется с задержкой,
    чтобы короткий тап оставался чистой вспышкой */
@@ -87,7 +91,7 @@ export function initRecordMode() {
     };
     mk('rec-ring');
     mk('rec-core');
-    for (let i = 0; i < 6; i++) mk('rec-ray', i * 60 + (Math.random() * 22 - 11));
+    for (let i = 0; i < 8; i++) mk('rec-ray', i * 45 + (Math.random() * 16 - 8));
     layer.appendChild(tap);
     setTimeout(() => tap.remove(), 620);
   };

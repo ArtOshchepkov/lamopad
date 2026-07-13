@@ -9,5 +9,8 @@ module.exports = merge(common, {
     hot: true,
     open: true,
     static: ['./'],
+    // доступ с телефона в локальной сети: http://zenbook.local:8080 (mDNS/Avahi)
+    host: '0.0.0.0',
+    allowedHosts: ['.local'],
   },
 });

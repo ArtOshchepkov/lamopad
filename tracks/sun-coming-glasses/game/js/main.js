@@ -87,8 +87,10 @@ muteSfxBtn.addEventListener('click', () => {
 const isIOS = /iPhone|iPad|iPod/.test(navigator.userAgent)
   || (navigator.platform === 'MacIntel' && navigator.maxTouchPoints > 1);
 if (isIOS) {
-  const silence = 'data:audio/wav;base64,UklGRmQGAABXQVZFZm10IBAAAAABAAEAQB8AAIA+AAACABAAZGF0YUAG'
-    + 'A'.repeat(2136); // 0.1с тишины, 8кГц mono 16-bit
+  // 10с тишины, 8кГц mono 16-bit. Не короче: каждый заворот loop — seek в
+  // медиастеке iOS, у 0.1с-файла это 10 раз/сек и телефон постоянно подлагивал
+  const silence = 'data:audio/wav;base64,UklGRiRxAgBXQVZFZm10IBAAAAABAAEAQB8AAIA+AAACABAAZGF0YQBxAg'
+    + 'A'.repeat(213334);
   const keeper = new Audio(silence);
   keeper.loop = true;
   keeper.setAttribute('playsinline', '');

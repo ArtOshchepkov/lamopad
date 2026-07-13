@@ -10,6 +10,9 @@ export function registerSoundFolders(map) {
 }
 
 /** Играет случайный сэмпл из папки folder; не повторяет подряд один и тот же. */
+// НЕ «оптимизировать» ранним выходом по scene.sound.mute: getter mute в Phaser
+// читает gain.value, который не отражает setValueAtTime (проверено в Chrome) —
+// после мут→анмут залипает и звуки пропадают насовсем
 export function playRandom(scene, folder, config) {
   const keys = keysByFolder[folder];
   if (!keys || !keys.length) return;

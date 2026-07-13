@@ -97,6 +97,9 @@ if (isIOS) {
   const keeper = new Audio(silence);
   keeper.loop = true;
   keeper.setAttribute('playsinline', '');
+  // keeper крутится ВСЕГДА, пока страница видима. Не гейтить по состоянию
+  // музыки: play() вне контекста жеста на iOS ненадёжен — комбинация мутов
+  // (SFX выкл → музыка выкл → SFX вкл) отпускала сессию и SFX умирали
   const holdSession = () => {
     if (!document.hidden && keeper.paused) keeper.play().catch(() => {});
   };

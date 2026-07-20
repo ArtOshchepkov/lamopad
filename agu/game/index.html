@@ -41,7 +41,7 @@
     #_loading_dots span:nth-child(3){animation:_ldot 1.2s ease-in-out infinite .8s}
   </style>
 </div>
-<script src="https://cdn.jsdelivr.net/npm/phaser@3.60.0/dist/phaser.min.js"></script>
+<script src="../../lib/phaser.min.js"></script>
 <!-- общий экран заказа «хочу игру под свой трек»: тексты в LAMOPAD_ORDER -->
 <script src="../../lib/order-widget.js"></script>
 <script>
@@ -199,11 +199,15 @@ class GameScene extends Phaser.Scene {
   constructor() { super({ key: 'GameScene' }); }
 
   preload() {
-    this.load.image('snake_sprite', 'snake_sprite.png');
-    this.load.image('soska', 'soska.png');
-    for (let i = 1; i <= 5; i++) this.load.image(`money${i}`, `money${i}.png`);
-    ['building1','building1big','building2','building3','building4','building5','building6','building7','building8']
-      .forEach(k => this.load.image(k, `${k}.png`));
+    // preload() перевызывается на каждом scene.restart(), а TextureManager
+    // глобальный — без проверки Phaser на каждый рестарт сыпал в консоль
+    // «Texture key already in use» и заново тянул те же файлы.
+    const img = (k, f) => { if (!this.textures.exists(k)) this.load.image(k, f); };
+    img('snake_sprite', 'snake_sprite.png');
+    img('soska', 'soska.png');
+    for (let i = 1; i <= 5; i++) img(`money${i}`, `money${i}.png`);
+    ['building1','building2','building3','building4','building5','building6','building7','building8']
+      .forEach(k => img(k, `${k}.png`));
   }
 
   create() {
@@ -787,6 +791,14 @@ class GameScene extends Phaser.Scene {
     const BAR_X     = BAR_RIGHT - BAR_W;
     const LBL_X     = BAR_X - 62;    // x надписи HP / $
     this.barGfx = this.add.graphics().setDepth(40);
+    // Инстанс сцены переиспользуется при scene.restart(), а все её объекты
+    // уничтожаются — поэтому ленивые ссылки на HUD сбрасываем руками. Иначе
+    // после рестарта setText() уходит в уже уничтоженный Text (Frame.data ===
+    // null) и валит игровой цикл: «Cannot read properties of null (reading 'cut')».
+    this._debtTxt    = null;
+    this._moneyPrev  = undefined;
+    this._moneyShown = undefined;
+    this._moneyFlash = null;
     this.add.text(LBL_X, BAR_Y + BAR_H / 2, 'ЗДОРОВЬЕ', {
       fontSize: '11px', fontFamily: 'Arial Black, Arial, sans-serif', fontStyle: 'bold',
       color: '#ff6666', stroke: '#000000', strokeThickness: 3,
@@ -1567,6 +1579,7 @@ class GameScene extends Phaser.Scene {
     document.body.appendChild(lblContainer);
     this.events.once('shutdown', () => lblContainer.remove());
     this._btnLblContainer = lblContainer;
+    this._btnZones = [];
 
     const mkBtn = (i, label, onDown, onUp) => {
       const by  = startY + i * (BH + GAP);
@@ -1620,6 +1633,7 @@ class GameScene extends Phaser.Scene {
       zone.on('pointerdown', () => { draw(true);  onDown(); });
       zone.on('pointerup',   () => { draw(false); onUp();   });
       zone.on('pointerout',  () => { hovered = false; draw(false); onUp(); });
+      this._btnZones.push(zone);
 
       return { setText: (t) => { lbl.textContent = t; } };
     };
@@ -2303,8 +2317,19 @@ class GameScene extends Phaser.Scene {
     overlay.fillRect(0, 0, W, H);
     this.tweens.add({ targets: overlay, alpha: 0.82, duration: 1400, ease: 'Sine.In' });
 
-    // Приглушить подписи основных кнопок
+    // Приглушить подписи основных кнопок и погасить их зоны: подписи — HTML
+    // с pointer-events:none, кликается сама Phaser-зона, поэтому одного
+    // opacity мало — иначе кнопки жмутся сквозь экран смерти.
     if (this._btnLblContainer) this._btnLblContainer.style.opacity = '0';
+    if (this._btnZones) this._btnZones.forEach(z => z.disableInteractive());
+    // Зоны погашены — pointerup/pointerout по ним уже не придёт, поэтому
+    // «залипшие» зажатыми кнопки снимаем сами. endBow() тут звать нельзя:
+    // его onComplete перезапускает walk-твины, которые мы только что погасили.
+    this.state.isBowing    = false;
+    this.state.isSprinting = false;
+    if (this._bowTweenBody) { this._bowTweenBody.stop(); this._bowTweenBody = null; }
+    if (this._bowTweenHead) { this._bowTweenHead.stop(); this._bowTweenHead = null; }
+    if (this._bowTweenLegs) { this._bowTweenLegs.stop(); this._bowTweenLegs = null; }
 
     this.time.delayedCall(700, () => {
       const DEPTH = 62;

@@ -254,7 +254,7 @@
       z-index: 2;
       max-width: 980px;
       margin: 0 auto;
-      padding: 24px 12px 18vh;
+      padding: 10px 12px 18vh;
     }
 
     .ticket {
@@ -471,6 +471,19 @@
       text-decoration: line-through;
     }
     .check-body { padding: 4px 14px 16px 44px; }
+
+    /* CTA-пульс на «Послушать трек», пока галочка не стоит */
+    .cta-live { animation: itemglow 2.6s ease-in-out infinite; }
+    @keyframes itemglow {
+      0%, 100% { border-color: var(--j-border); }
+      50%      { border-color: #ee333388; }
+    }
+    .cta-live .play-btn:not(.playing) { animation: attract 1.8s ease-out infinite; }
+    @keyframes attract {
+      0%   { box-shadow: 0 0 0 0 #ee333355; transform: scale(1); }
+      45%  { transform: scale(1.1); }
+      100% { box-shadow: 0 0 0 18px #ee333300; transform: scale(1); }
+    }
 
     /* плеер */
     .player {
@@ -699,14 +712,14 @@
       padding-top: 18px;
     }
     .t-side h2 {
-      font-size: 12px;
+      font-size: 11px;
       font-weight: 700;
       text-transform: uppercase;
       letter-spacing: .06em;
       color: var(--j-dim);
-      margin-bottom: 12px;
+      margin-bottom: 10px;
     }
-    .fields { display: grid; grid-template-columns: auto 1fr; gap: 10px 16px; font-size: 13px; }
+    .fields { display: grid; grid-template-columns: auto 1fr; gap: 7px 10px; font-size: 12px; }
     .fields dt { color: var(--j-dim); white-space: nowrap; }
     .fields dd { color: var(--j-text); font-weight: 600; min-width: 0; }
     .fields dd a { color: var(--j-blue); text-decoration: none; font-weight: 600; }
@@ -716,8 +729,8 @@
       background: var(--j-soft);
       box-shadow: inset 0 0 0 1px var(--j-border);
       border-radius: 3px;
-      padding: 2px 7px;
-      font-size: 11px;
+      padding: 1px 6px;
+      font-size: 10px;
       font-weight: 700;
       color: #42526e;
       margin: 0 4px 4px 0;
@@ -756,21 +769,21 @@
 
     /* ── desktop ──────────────────────────────────────── */
     @media (min-width: 760px) {
-      .board { padding: 40px 24px 16vh; }
+      .board { padding: 14px 24px 16vh; }
       .ticket { padding: 28px 32px 36px; }
       .ticket-cols {
         display: grid;
-        grid-template-columns: 1fr 260px;
-        gap: 40px;
+        grid-template-columns: 1fr 190px;
+        gap: 28px;
       }
       .t-side {
         margin-top: 0;
         border-top: none;
         padding-top: 0;
         border-left: 1px solid var(--j-border);
-        padding-left: 24px;
+        padding-left: 16px;
       }
-      .fields { grid-template-columns: 110px 1fr; }
+      .fields { grid-template-columns: 86px 1fr; }
       .platforms { grid-template-columns: 1fr 1fr; }
     }
     @media (min-width: 980px) {
@@ -786,6 +799,7 @@
       .game-cta:hover .ltr { transform: none; }
       .platform:hover::after { animation: none; }
       .check-bar-fill { transition: none; }
+      .cta-live, .cta-live .play-btn:not(.playing) { animation: none; }
     }
   </style>
   <script data-goatcounter="https://lamopad.goatcounter.com/count"
@@ -853,17 +867,17 @@
 
     <div class="ticket-top">
       <div class="jira-crumb">
-        <a href="/">Проекты</a><span class="jsep">/</span><a href="/tracks/">ЛАМОПАД (ЛАМ)</a><span class="jsep">/</span><span class="issue-key">ЛАМ-2007</span>
+        <a href="/">Проекты</a><span class="jsep">/</span><a href="/tracks/">ЛАМОПАД</a><span class="jsep">/</span><span class="issue-key">ЛАМ-2026</span>
       </div>
       <span class="loz loz-new" id="newBadge" hidden>Новое</span>
     </div>
 
-    <h1 class="summary"><span class="r">А</span><span class="g">Т</span><span class="r">Г</span><span class="r">У</span><span class="g">Л</span> — послушать новый трек Ламопад</h1>
+    <h1 class="summary"><span class="r">А</span><span class="g">Т</span><span class="r">Г</span><span class="r">У</span><span class="g">Л</span>: послушать новый трек Ламопад</h1>
 
     <div class="status-row">
       <span class="loz loz-progress" id="statusLoz">В работе</span>
       <span class="priority"><span class="arr">⇈</span>Наивысший</span>
-      <span>Тип: <b>Отгул</b></span>
+      <span>Тип: <b>инди</b></span>
     </div>
 
     <div class="ticket-cols">
@@ -964,6 +978,40 @@
           <h2><span class="sec-ico" style="background:#0052cc">💬</span>Комментарии</h2>
 
           <div class="comment">
+            <span class="avatar" style="background:#5e6c84">Д</span>
+            <div class="comment-body">
+              <div class="comment-head"><b>СЕРЬЁЗНЫЙ ДЯДЬКА</b>сегодня</div>
+              м-да, молодёжь нынче вообщ жизни не знает. На завод бы, уму-разуму быстро бы научили, умник блин.
+            </div>
+          </div>
+
+          <div class="comment">
+            <span class="avatar" style="background:#de5b76">М</span>
+            <div class="comment-body">
+              <div class="comment-head"><b>МАТЬ ДВОИХ АНГЕЛОЧКОВ</b>сегодня</div>
+              вот будут дети, поймёшь, что такое заботы.
+            </div>
+          </div>
+
+          <div class="comment">
+            <span class="avatar" style="background:#a34f4f">К</span>
+            <div class="comment-body">
+              <div class="comment-head"><b>Конь БоДжек</b>сегодня</div>
+              вот дааа. реально сложно, когда наконец ничего не надо. лежишь весь такой свободный
+              и ждёшь, что станет легче. а легче не становится, потому что дело было не в работе.
+              ну, за отгул.
+            </div>
+          </div>
+
+          <div class="comment">
+            <span class="avatar" style="background:#00875a">Р</span>
+            <div class="comment-body">
+              <div class="comment-head"><b>Ровный Чел</b>сегодня</div>
+              ничё не понял, не качаеет херня короче
+            </div>
+          </div>
+
+          <div class="comment">
             <span class="avatar av-user">С</span>
             <div class="comment-body">
               <div class="comment-head"><b>Слушатель</b>сегодня</div>
@@ -991,7 +1039,7 @@
             <span class="avatar av-lam">Л</span>
             <div class="comment-body">
               <div class="comment-head"><b>Ламопад</b>сегодня</div>
-              Релиз состоялся 20 июля 2026 года — трек доступен на всех основных стриминговых площадках.
+              Релиз состоялся 20 июля 2026 года. Трек доступен на всех основных стриминговых площадках.
             </div>
           </div>
 
@@ -1006,7 +1054,7 @@
             <span class="avatar av-lam">Л</span>
             <div class="comment-body">
               <div class="comment-head"><b>Ламопад</b>сегодня</div>
-              Прямо на этой странице — или на Яндекс Музыке, Spotify, VK Музыке, Звуке, КИОН Музыке и Wink.
+              Прямо на этой странице. Или на Яндекс Музыке, Spotify, VK Музыке, Звуке, КИОН Музыке и Wink.
             </div>
           </div>
 
@@ -1026,6 +1074,7 @@
               <a href="/agu/game/">Играется бесплатно, без установки</a>.
             </div>
           </div>
+
         </section>
 
         <!-- ── СВЯЗАННЫЕ ЗАДАЧИ ── -->
@@ -1045,7 +1094,7 @@
         <h2>Детали</h2>
         <dl class="fields">
           <dt>Исполнитель</dt><dd>Ты</dd>
-          <dt>Автор</dt><dd>Ламопад</dd>
+          <dt>Автор</dt><dd><a href="/">Ламопад</a></dd>
           <dt>Аранжировка</dt><dd><a href="https://vk.ru/produser_muziki" target="_blank" rel="noopener">Артём Маркелов</a></dd>
           <dt>Сведение</dt><dd><a href="https://vk.ru/id2072557" target="_blank" rel="noopener">Михаил Хацко</a></dd>
           <dt>Метки</dt>
@@ -1056,7 +1105,7 @@
           </dd>
           <dt>Релиз</dt><dd>20 июля 2026</dd>
           <dt>Оценка</dt><dd>2 мин 56 с</dd>
-          <dt>Спринт</dt><dd>Отпуск Q3 2026</dd>
+          <dt>Спринт</dt><dd>Q3 2026</dd>
         </dl>
       </aside>
     </div>
@@ -1168,6 +1217,7 @@
       statusLoz.classList.remove('loz-done');
       statusLoz.classList.add('loz-progress');
     }
+    boxes[0].closest('.check-item').classList.toggle('cta-live', !boxes[0].checked);
     try { localStorage.setItem(STORE_KEY, JSON.stringify(boxes.map(cb => cb.checked))); } catch (e) {}
   }
 

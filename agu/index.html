@@ -104,16 +104,24 @@
       --amber:     #d4900a;
       --blue-cold: #4060a0;
       --soska:     #7a6fd0;
-      --text:      #b0aaa8;
-      --text-dim:  #665f5c;
+      /* джира */
+      --j-text:    #172b4d;
+      --j-dim:     #6b778c;
+      --j-blue:    #0052cc;
+      --j-blue-dk: #0747a6;
+      --j-border:  #dfe1e6;
+      --j-soft:    #f4f5f7;
+      --j-green:   #006644;
+      --j-green-bg:#e3fcef;
+      --j-navy-bg: #deebff;
     }
 
     html { scroll-behavior: smooth; }
 
     body {
       background: var(--bg);
-      color: var(--text);
-      font-family: Arial, sans-serif;
+      color: var(--j-text);
+      font-family: -apple-system, 'Segoe UI', Roboto, Arial, sans-serif;
       min-height: 100vh;
       overflow-x: hidden;
       position: relative;
@@ -190,7 +198,7 @@
       left: 0; right: 0;
       height: 22vh;
       pointer-events: none;
-      z-index: 1;
+      z-index: 0;
       overflow: hidden;
     }
     .buildings svg {
@@ -234,176 +242,255 @@
       100% { transform: translate(var(--bx), 60vh) rotate(220deg); opacity: 0; }
     }
 
-    /* ── page layout (mobile-first) ───────────────────── */
-    .page {
-      position: relative;
-      z-index: 2;
-      max-width: 680px;
-      margin: 0 auto;
-      padding: 6vh 20px 30vh;
-    }
-
-    /* ── КРОШКИ ── */
-    .crumbs { position: relative; z-index: 100; padding: 0.9rem 1.5rem 0; font-size: 0.7rem; letter-spacing: 0.1em; text-transform: uppercase; color: var(--text); }
+    /* ── КРОШКИ (сайт, на тёмном фоне) ── */
+    .crumbs { position: relative; z-index: 100; padding: 0.9rem 1.5rem 0; font-size: 0.7rem; letter-spacing: 0.1em; text-transform: uppercase; color: #b0aaa8; }
     .crumbs a { color: inherit; text-decoration: none; transition: color 0.15s; }
     .crumbs a:hover { color: var(--amber); }
     .crumbs .sep { margin: 0 0.5ch; opacity: 0.35; }
 
-    /* ── hero ─────────────────────────────────────────── */
-    .hero {
-      text-align: center;
-      margin-bottom: 40px;
-    }
-
-    .cover-wrap {
-      display: inline-block;
+    /* ── ТИКЕТ ────────────────────────────────────────── */
+    .board {
       position: relative;
-      margin-bottom: 24px;
+      z-index: 2;
+      max-width: 980px;
+      margin: 0 auto;
+      padding: 24px 12px 18vh;
     }
-    .cover {
-      display: block;
-      width: min(64vw, 240px);
-      height: auto;
+
+    .ticket {
+      background: #fff;
       border-radius: 6px;
-      box-shadow: 0 0 0 1px #1a1a22, 0 12px 48px #000c;
-      transition: transform .35s ease, box-shadow .35s ease;
-      cursor: url('/img/lamopad_cursor_48px.png') 0 0, pointer;
-    }
-    .cover-wrap:hover .cover {
-      transform: rotate(-1.5deg) scale(1.02);
-      box-shadow: 0 0 0 1px #2a1a1a, 0 12px 48px #000c, 0 0 34px #ee333322;
-    }
-    .cover-hint {
-      display: block;
-      margin-top: 8px;
-      font-size: 10px;
-      letter-spacing: .14em;
-      text-transform: uppercase;
-      color: #3a3540;
-      user-select: none;
+      box-shadow: 0 20px 60px #000000aa, 0 0 0 1px #ffffff14;
+      padding: 20px 20px 28px;
     }
 
-    .title {
-      font-family: 'Arial Black', Arial, sans-serif;
-      font-weight: 900;
-      font-size: clamp(56px, 15vw, 104px);
-      letter-spacing: .12em;
-      line-height: 1;
-      margin-bottom: 14px;
-      user-select: none;
-    }
-    .title .r { color: var(--red); }
-    .title .g { color: var(--grey); }
-    .title span {
-      display: inline-block;
-      animation: flicker 7s infinite;
-    }
-    .title span:nth-child(1) { animation-delay: 0s; }
-    .title span:nth-child(2) { animation-delay: 2.8s; }
-    .title span:nth-child(3) { animation-delay: 1.3s; }
-    .title span:nth-child(4) { animation-delay: 4.6s; }
-    .title span:nth-child(5) { animation-delay: 3.7s; }
-    @keyframes flicker {
-      0%, 92%, 96%, 100% { opacity: 1; }
-      94% { opacity: .55; }
-    }
-
-    .artist {
-      font-family: 'Arial Black', Arial, sans-serif;
-      font-size: clamp(11px, 2.8vw, 16px);
-      letter-spacing: .35em;
-      text-transform: uppercase;
-      color: var(--text-dim);
-    }
-
-    .chips {
-      margin-top: 18px;
-      display: flex;
-      flex-wrap: wrap;
-      gap: 8px;
-      justify-content: center;
-    }
-    .chip {
-      font-size: 11px;
-      letter-spacing: .14em;
-      text-transform: uppercase;
-      color: var(--text-dim);
-      border: 1px solid #2a2a32;
-      padding: 5px 12px;
-      border-radius: 999px;
-      transition: color .3s, border-color .3s;
-    }
-    .chip:hover { color: var(--amber); border-color: #d4900a55; }
-
-    .divider {
-      margin: 36px auto;
-      width: 48px;
-      height: 2px;
-      background: var(--red);
-      opacity: .55;
-    }
-
-    /* ── description ──────────────────────────────────── */
-    .about {
-      font-size: clamp(16px, 4.2vw, 19px);
-      line-height: 1.75;
-      color: var(--text);
-      display: flex;
-      flex-direction: column;
-      gap: 16px;
-      transition: color 5s ease-out, text-shadow 5s ease-out;
-    }
-    .about-lead { color: #ddd6d2; font-weight: 700; }
-    /* «серьёзные» слова подчёркнуты детским карандашом */
-    .crayon {
-      text-decoration: underline wavy var(--red);
-      text-decoration-thickness: 2px;
-      text-underline-offset: 5px;
-    }
-
-    /* ── burnout hover (выгорание) ────────────────────── */
-    @keyframes burnout {
-      0%   { color: inherit; text-shadow: none; }
-      25%  { color: #c07840; text-shadow: 0 0 6px #a05820; }
-      60%  { color: #7a4828; text-shadow: 0 0 2px #5a2800; }
-      100% { color: #3a3532; text-shadow: none; }
-    }
-    .burning { animation: burnout 3.5s ease-in forwards; }
-
-    /* ── section shell ────────────────────────────────── */
-    .section { margin-top: 52px; }
-    .section-label {
-      font-family: 'Arial Black', Arial, sans-serif;
-      font-size: 13px;
-      letter-spacing: .3em;
-      text-transform: uppercase;
-      color: var(--text-dim);
-      margin-bottom: 20px;
-    }
-    .section-label::before {
-      content: '▸ ';
-      color: var(--red);
-    }
-
-    /* ── player ───────────────────────────────────────── */
-    .player {
-      border: 1px solid #1c1c24;
-      background: #0a0a10cc;
-      border-radius: 8px;
-      padding: 18px;
+    .ticket-top {
       display: flex;
       align-items: center;
-      gap: 16px;
+      justify-content: space-between;
+      gap: 12px;
+      flex-wrap: wrap;
+      font-size: 13px;
+      color: var(--j-dim);
+      margin-bottom: 14px;
+    }
+    .jira-crumb a { color: var(--j-blue); text-decoration: none; }
+    .jira-crumb a:hover { text-decoration: underline; }
+    .jira-crumb .jsep { margin: 0 6px; color: #97a0af; }
+    .issue-key {
+      font-weight: 700;
+      color: var(--j-dim);
+      letter-spacing: .02em;
+    }
+
+    .summary {
+      font-size: clamp(22px, 5.4vw, 30px);
+      font-weight: 700;
+      line-height: 1.25;
+      margin-bottom: 14px;
+    }
+    .summary .r { color: var(--red); }
+    .summary .g { color: var(--grey); }
+
+    /* лозенджи */
+    .loz {
+      display: inline-block;
+      font-size: 11px;
+      font-weight: 800;
+      letter-spacing: .04em;
+      text-transform: uppercase;
+      padding: 3px 8px;
+      border-radius: 3px;
+      white-space: nowrap;
+    }
+    .loz-progress { background: var(--j-navy-bg); color: var(--j-blue-dk); }
+    .loz-done     { background: var(--j-green-bg); color: var(--j-green); }
+    .loz-todo     { background: #f4f5f7; color: #42526e; box-shadow: inset 0 0 0 1px var(--j-border); }
+    .loz-new      { background: var(--j-green-bg); color: var(--j-green); }
+
+    .status-row {
+      display: flex;
+      align-items: center;
+      gap: 14px;
+      flex-wrap: wrap;
+      padding-bottom: 16px;
+      border-bottom: 1px solid var(--j-border);
+      margin-bottom: 20px;
+      font-size: 13px;
+      color: var(--j-dim);
+    }
+    .priority { color: #cd1316; font-weight: 700; }
+    .priority .arr { letter-spacing: -2px; margin-right: 4px; }
+
+    /* колонки */
+    .ticket-cols { display: block; }
+    .t-main { min-width: 0; }
+
+    .t-section { margin-bottom: 28px; }
+    .t-section > h2 {
+      font-size: 14px;
+      font-weight: 700;
+      color: var(--j-text);
+      margin-bottom: 12px;
+      display: flex;
+      align-items: center;
+      gap: 8px;
+    }
+    .sec-ico {
+      flex: none;
+      width: 18px; height: 18px;
+      border-radius: 4px;
+      display: inline-flex;
+      align-items: center;
+      justify-content: center;
+      font-size: 11px;
+      color: #fff;
+      font-weight: 800;
+    }
+
+    /* описание */
+    .about {
+      font-size: 15px;
+      line-height: 1.7;
+      color: var(--j-text);
+      display: flex;
+      flex-direction: column;
+      gap: 12px;
+    }
+    .about-lead { font-weight: 700; }
+
+    /* описание + вложение в один ряд */
+    .desc-row { min-width: 0; }
+    @media (min-width: 560px) {
+      .desc-row {
+        display: grid;
+        grid-template-columns: 1fr auto;
+        gap: 0 28px;
+        align-items: start;
+      }
+    }
+
+    /* вложение — обложка */
+    .attachment {
+      display: inline-block;
+      border: 1px solid var(--j-border);
+      border-radius: 4px;
+      overflow: hidden;
+      max-width: 160px;
+      background: #fff;
+      cursor: url('/img/lamopad_cursor_48px.png') 0 0, pointer;
+      transition: box-shadow .2s, transform .2s;
+    }
+    .attachment:hover {
+      box-shadow: 0 4px 14px #091e4225;
+      transform: translateY(-2px);
+    }
+    .attachment img { display: block; width: 100%; height: auto; }
+    .attachment figcaption {
+      padding: 8px 10px;
+      font-size: 12px;
+      color: var(--j-text);
+      border-top: 1px solid var(--j-border);
+    }
+    .attachment figcaption small { display: block; color: var(--j-dim); margin-top: 2px; }
+
+    /* чек-лист */
+    .check-progress {
+      display: flex;
+      align-items: center;
+      gap: 10px;
+      margin-bottom: 14px;
+      font-size: 12px;
+      color: var(--j-dim);
+      font-variant-numeric: tabular-nums;
+    }
+    .check-bar {
+      flex: 1;
+      height: 6px;
+      border-radius: 3px;
+      background: var(--j-soft);
+      overflow: hidden;
+    }
+    .check-bar-fill {
+      height: 100%;
+      width: 0%;
+      background: #36b37e;
+      border-radius: 3px;
+      transition: width .4s ease;
+    }
+
+    .checklist { list-style: none; }
+    .check-item {
+      border: 1px solid var(--j-border);
+      border-radius: 4px;
+      margin-bottom: 12px;
+      overflow: hidden;
+    }
+    .check-row {
+      display: flex;
+      align-items: center;
+      gap: 12px;
+      padding: 12px 14px;
+      cursor: url('/img/lamopad_cursor_48px.png') 0 0, pointer;
+      user-select: none;
+      transition: background .15s;
+    }
+    .check-row:hover { background: var(--j-soft); }
+    .check-row input {
+      position: absolute;
+      opacity: 0;
+      pointer-events: none;
+    }
+    .cb-box {
+      flex: none;
+      width: 18px; height: 18px;
+      border: 2px solid #b3bac5;
+      border-radius: 3px;
+      display: inline-flex;
+      align-items: center;
+      justify-content: center;
+      color: transparent;
+      font-size: 13px;
+      font-weight: 900;
+      transition: background .2s, border-color .2s, color .2s;
+    }
+    .check-row input:checked + .cb-box {
+      background: var(--j-blue);
+      border-color: var(--j-blue);
+      color: #fff;
+    }
+    .check-row input:focus-visible + .cb-box { outline: 2px solid var(--j-blue); outline-offset: 2px; }
+    .cb-label {
+      font-size: 15px;
+      font-weight: 600;
+      color: var(--j-text);
+      transition: color .2s;
+    }
+    .check-row input:checked ~ .cb-label {
+      color: var(--j-dim);
+      text-decoration: line-through;
+    }
+    .check-body { padding: 4px 14px 16px 44px; }
+
+    /* плеер */
+    .player {
+      border: 1px solid var(--j-border);
+      background: #fafbfc;
+      border-radius: 4px;
+      padding: 14px;
+      display: flex;
+      align-items: center;
+      gap: 14px;
     }
     .play-btn {
       flex: none;
-      width: 58px;
-      height: 58px;
+      width: 52px;
+      height: 52px;
       border-radius: 50%;
       border: 2px solid var(--red);
       background: transparent;
       color: var(--red);
-      font-size: 20px;
+      font-size: 18px;
       line-height: 1;
       cursor: url('/img/lamopad_cursor_48px.png') 0 0, pointer;
       transition: background .25s, color .25s, transform .15s, box-shadow .25s;
@@ -415,37 +502,30 @@
     .play-btn.paused { padding-left: 0; }
     .play-btn:hover {
       background: var(--red);
-      color: var(--bg);
-      box-shadow: 0 0 24px #ee333355;
+      color: #fff;
+      box-shadow: 0 0 18px #ee333355;
       transform: scale(1.06);
     }
-    .play-btn.playing {
-      animation: heartbeat 2.4s ease-in-out infinite;
-    }
+    .play-btn.playing { animation: heartbeat 2.4s ease-in-out infinite; }
     @keyframes heartbeat {
       0%, 100% { box-shadow: 0 0 0 0 #ee333344; }
       50%      { box-shadow: 0 0 0 10px #ee333300; }
     }
-
     .player-body { flex: 1; min-width: 0; }
     .player-track-name {
-      font-family: 'Arial Black', Arial, sans-serif;
       font-size: 13px;
-      letter-spacing: .18em;
-      text-transform: uppercase;
-      color: var(--text);
-      margin-bottom: 10px;
+      font-weight: 700;
+      color: var(--j-text);
+      margin-bottom: 8px;
       white-space: nowrap;
       overflow: hidden;
       text-overflow: ellipsis;
     }
     .player-track-name .r { color: var(--red); }
-
     .progress {
-      height: 10px;
-      border: 1px solid #2a2a32;
-      border-radius: 2px;
-      background: #101016;
+      height: 8px;
+      border-radius: 4px;
+      background: #ebecf0;
       cursor: url('/img/lamopad_cursor_48px.png') 0 0, pointer;
       position: relative;
       overflow: hidden;
@@ -454,7 +534,8 @@
       position: absolute;
       inset: 0 auto 0 0;
       width: 0%;
-      background: linear-gradient(to right, #a06a08, var(--amber));
+      background: var(--j-blue);
+      border-radius: 4px;
       transition: width .15s linear;
     }
     .player-meta {
@@ -463,84 +544,74 @@
       justify-content: space-between;
       align-items: baseline;
       gap: 12px;
-      font-size: 11px;
-      letter-spacing: .1em;
-      color: var(--text-dim);
+      font-size: 12px;
+      color: var(--j-dim);
       font-variant-numeric: tabular-nums;
     }
-    .player-meta a {
-      color: var(--text-dim);
-      text-decoration: underline;
-      text-underline-offset: 3px;
-      transition: color .2s;
-    }
-    .player-meta a:hover { color: var(--amber); }
+    .player-meta a { color: var(--j-blue); text-decoration: none; }
+    .player-meta a:hover { text-decoration: underline; }
 
-    /* ── game CTA ─────────────────────────────────────── */
+    /* кнопка-игра */
     .game-cta {
       display: block;
       text-align: center;
       text-decoration: none;
-      font-family: 'Arial Black', Arial, sans-serif;
-      font-weight: 900;
-      font-size: clamp(17px, 4.6vw, 26px);
-      letter-spacing: .1em;
+      font-weight: 800;
+      font-size: clamp(16px, 4.2vw, 22px);
+      letter-spacing: .08em;
       text-transform: uppercase;
-      color: var(--bg);
-      background: var(--red);
-      border-radius: 6px;
-      padding: 22px 18px;
-      box-shadow: 0 6px 0 #7a1414, 0 10px 30px #ee333322;
+      color: #fff;
+      background: var(--j-blue);
+      border-radius: 4px;
+      padding: 18px 16px;
+      box-shadow: 0 5px 0 var(--j-blue-dk), 0 10px 24px #0052cc33;
       transition: transform .15s, box-shadow .15s, background .3s;
     }
-    .game-cta .word { display: inline-block; white-space: nowrap; margin: 0 .22em; }
+    .game-cta .word { display: inline-block; white-space: nowrap; margin: 0 .2em; }
     .game-cta .ltr {
       display: inline-block;
       transition: transform .4s cubic-bezier(.34, 1.3, .5, 1);
     }
-    .game-cta:hover { background: #ff4040; }
+    .game-cta:hover { background: #0959d6; }
     .game-cta:hover .ltr { transform: translateY(var(--dy, 0)); }
     .game-cta:active {
       transform: translateY(4px);
-      box-shadow: 0 2px 0 #7a1414, 0 6px 18px #ee333322;
+      box-shadow: 0 1px 0 var(--j-blue-dk), 0 6px 14px #0052cc33;
     }
     .game-note {
-      margin-top: 16px;
-      font-size: clamp(14px, 3.8vw, 16px);
-      line-height: 1.65;
-      color: var(--text-dim);
-      text-align: center;
+      margin-top: 12px;
+      font-size: 13px;
+      line-height: 1.6;
+      color: var(--j-dim);
     }
-    .game-note b { color: var(--text); font-weight: 700; }
+    .game-note b { color: var(--j-text); }
 
-    /* ── platforms ────────────────────────────────────── */
+    /* площадки */
     .platforms-note {
-      font-size: 14px;
-      color: var(--text-dim);
-      margin: -8px 0 18px;
+      font-size: 13px;
+      color: var(--j-dim);
+      margin-bottom: 12px;
       line-height: 1.6;
     }
     .platforms {
       list-style: none;
       display: grid;
       grid-template-columns: 1fr 1fr;
-      gap: 10px;
+      gap: 8px;
     }
     .platform {
       position: relative;
       display: block;
       text-decoration: none;
-      border: 1px solid #1c1c24;
-      background: #0a0a10cc;
-      border-radius: 6px;
-      padding: 14px 14px 14px 26px;
-      font-family: 'Arial Black', Arial, sans-serif;
-      font-size: 12px;
-      letter-spacing: .1em;
-      text-transform: uppercase;
-      color: var(--text);
+      border: 1px solid var(--j-border);
+      background: #fff;
+      border-radius: 4px;
+      padding: 12px 12px 12px 22px;
+      font-size: 13px;
+      font-weight: 700;
+      color: var(--j-text);
       overflow: hidden;
-      transition: border-color .25s, color .25s, transform .2s;
+      transition: border-color .25s, box-shadow .25s, transform .2s;
     }
     .platform::before {
       content: '';
@@ -548,12 +619,12 @@
       left: 0; top: 0; bottom: 0;
       width: 4px;
       background: var(--pc, var(--grey));
-      opacity: .75;
+      opacity: .85;
       transition: width .25s;
     }
     .platform:hover {
-      border-color: #2e2e3a;
-      color: #fff;
+      border-color: #c1c7d0;
+      box-shadow: 0 3px 10px #091e4220;
       transform: translateY(-2px);
     }
     .platform:hover::before { width: 7px; }
@@ -561,7 +632,7 @@
     .platform::after {
       content: '';
       position: absolute;
-      top: 6px; right: 12px;
+      top: 4px; right: 12px;
       width: 4px; height: 4px;
       background: var(--amber);
       opacity: 0;
@@ -572,110 +643,137 @@
       15%  { opacity: 1; }
       100% { opacity: 0; transform: translateY(30px); }
     }
-    .platform small {
-      display: block;
-      margin-top: 3px;
-      font-family: Arial, sans-serif;
-      font-size: 10px;
-      letter-spacing: .08em;
-      color: var(--text-dim);
-      text-transform: none;
-    }
 
-    /* ── FAQ ──────────────────────────────────────────── */
-    .faq details {
-      border-bottom: 1px solid #16161c;
-      padding: 4px 0;
-    }
-    .faq summary {
-      cursor: url('/img/lamopad_cursor_48px.png') 0 0, pointer;
-      list-style: none;
-      padding: 12px 0;
-      font-size: 15px;
-      font-weight: 700;
-      color: var(--text);
-      transition: color .2s;
-    }
-    .faq summary::-webkit-details-marker { display: none; }
-    .faq summary::before {
-      content: '+';
-      display: inline-block;
-      color: var(--red);
-      margin-right: 10px;
-      font-family: 'Arial Black', Arial, sans-serif;
-      transition: transform .25s;
-    }
-    .faq details[open] summary::before { transform: rotate(45deg); }
-    .faq summary:hover { color: var(--amber); }
-    .faq p {
-      padding: 0 0 14px 24px;
-      font-size: 14px;
-      line-height: 1.7;
-      color: var(--text-dim);
-    }
-    .faq a { color: var(--amber); text-decoration: underline; text-underline-offset: 3px; }
-
-    /* ── credits ──────────────────────────────────────── */
-    .credits-list {
-      list-style: none;
+    /* комментарии */
+    .comment {
       display: flex;
-      flex-direction: column;
-      gap: 8px;
-      font-size: 14px;
-      color: var(--text-dim);
+      gap: 10px;
+      margin-bottom: 14px;
     }
-    .credits-list a {
-      color: var(--text);
-      text-decoration: underline;
-      text-decoration-color: #d4900a55;
-      text-underline-offset: 3px;
-      transition: color .2s, text-decoration-color .2s;
+    .comment.reply { margin-left: 38px; }
+    .avatar {
+      flex: none;
+      width: 28px; height: 28px;
+      border-radius: 50%;
+      display: inline-flex;
+      align-items: center;
+      justify-content: center;
+      font-size: 13px;
+      font-weight: 800;
+      color: #fff;
     }
-    .credits-list a:hover { color: var(--amber); text-decoration-color: transparent; }
+    .av-user { background: #6b778c; }
+    .av-lam  { background: var(--red); }
+    .comment-body { min-width: 0; font-size: 14px; line-height: 1.6; }
+    .comment-head { font-size: 12px; color: var(--j-dim); margin-bottom: 2px; }
+    .comment-head b { color: var(--j-text); font-size: 13px; margin-right: 6px; }
+    .comment-body a { color: var(--j-blue); text-decoration: none; }
+    .comment-body a:hover { text-decoration: underline; }
 
-    /* ── footer ───────────────────────────────────────── */
-    .footer {
-      margin-top: 72px;
-      padding-top: 24px;
-      border-top: 1px solid #1a1a1f;
+    /* связанные задачи */
+    .linked { list-style: none; }
+    .linked li {
+      display: flex;
+      align-items: center;
+      gap: 10px;
+      border: 1px solid var(--j-border);
+      border-radius: 4px;
+      padding: 10px 12px;
+      margin-bottom: 8px;
+      font-size: 13px;
+    }
+    .linked .lkey { color: var(--j-dim); font-weight: 700; white-space: nowrap; }
+    .linked a {
+      color: var(--j-blue);
+      text-decoration: none;
+      font-weight: 600;
+      flex: 1;
+      min-width: 0;
+    }
+    .linked a:hover { text-decoration: underline; }
+
+    /* сайдбар */
+    .t-side {
+      margin-top: 6px;
+      border-top: 1px solid var(--j-border);
+      padding-top: 18px;
+    }
+    .t-side h2 {
+      font-size: 12px;
+      font-weight: 700;
+      text-transform: uppercase;
+      letter-spacing: .06em;
+      color: var(--j-dim);
+      margin-bottom: 12px;
+    }
+    .fields { display: grid; grid-template-columns: auto 1fr; gap: 10px 16px; font-size: 13px; }
+    .fields dt { color: var(--j-dim); white-space: nowrap; }
+    .fields dd { color: var(--j-text); font-weight: 600; min-width: 0; }
+    .fields dd a { color: var(--j-blue); text-decoration: none; font-weight: 600; }
+    .fields dd a:hover { text-decoration: underline; }
+    .label-chip {
+      display: inline-block;
+      background: var(--j-soft);
+      box-shadow: inset 0 0 0 1px var(--j-border);
+      border-radius: 3px;
+      padding: 2px 7px;
+      font-size: 11px;
+      font-weight: 700;
+      color: #42526e;
+      margin: 0 4px 4px 0;
+    }
+
+    /* футер под тикетом (тёмный фон) */
+    .site-footer {
+      max-width: 980px;
+      margin: 0 auto;
+      padding: 26px 20px 0;
+      position: relative;
+      z-index: 2;
       display: flex;
       gap: 24px;
       flex-wrap: wrap;
       align-items: center;
     }
-    .footer a {
+    .site-footer a {
       font-family: 'Arial Black', Arial, sans-serif;
-      font-size: 14px;
+      font-size: 13px;
       letter-spacing: .2em;
       text-transform: uppercase;
       color: #8a7a72;
       text-decoration: none;
       transition: color .2s;
     }
-    .footer a:hover { color: var(--red); }
+    .site-footer a:hover { color: var(--red); }
     .copyright {
       font-size: 10px;
       letter-spacing: .12em;
-      color: #2e2b29;
+      color: #55504d;
       margin-top: 8px;
       user-select: none;
       width: 100%;
     }
 
     /* ── desktop ──────────────────────────────────────── */
-    @media (min-width: 720px) {
-      .page { padding-top: 8vh; }
-      .hero {
+    @media (min-width: 760px) {
+      .board { padding: 40px 24px 16vh; }
+      .ticket { padding: 28px 32px 36px; }
+      .ticket-cols {
         display: grid;
-        grid-template-columns: auto 1fr;
-        gap: 36px;
-        align-items: center;
-        text-align: left;
+        grid-template-columns: 1fr 260px;
+        gap: 40px;
       }
-      .cover-wrap { margin-bottom: 0; }
-      .cover { width: 240px; }
-      .title { font-size: 72px; }
-      .chips { justify-content: flex-start; }
+      .t-side {
+        margin-top: 0;
+        border-top: none;
+        padding-top: 0;
+        border-left: 1px solid var(--j-border);
+        padding-left: 24px;
+      }
+      .fields { grid-template-columns: 110px 1fr; }
+      .platforms { grid-template-columns: 1fr 1fr; }
+    }
+    @media (min-width: 980px) {
       .platforms { grid-template-columns: 1fr 1fr 1fr; }
     }
 
@@ -683,12 +781,11 @@
     @media (prefers-reduced-motion: reduce) {
       html { scroll-behavior: auto; }
       .ring, .ring-burst { display: none; }
-      .title span { animation: none; }
       .play-btn.playing { animation: none; }
       .game-cta .ltr { transition: none; }
       .game-cta:hover .ltr { transform: none; }
       .platform:hover::after { animation: none; }
-      .burning { animation: none; }
+      .check-bar-fill { transition: none; }
     }
   </style>
   <script data-goatcounter="https://lamopad.goatcounter.com/count"
@@ -751,123 +848,234 @@
   </svg>
 </div>
 
-<main class="page">
+<main class="board">
+  <article class="ticket">
 
-  <header class="hero">
-    <div class="cover-wrap" id="coverWrap">
-      <img class="cover" src="/tracks/agu_cover.jpg" alt="Обложка трека АТГУЛ — Ламопад: артист с соской и падающими грызунками" width="1280" height="1280">
-      <span class="cover-hint">нажми — грызунки посыплются</span>
-    </div>
-    <div>
-      <h1 class="title" aria-label="АТГУЛ">
-        <span class="r">А</span><span class="g">Т</span><span class="r">Г</span><span class="r">У</span><span class="g">Л</span>
-      </h1>
-      <p class="artist">Ламопад<span id="newBadge" hidden> · новый трек</span></p>
-      <div class="chips">
-        <span class="chip">выгорание</span>
-        <span class="chip">офисный абсурд</span>
-        <span class="chip">агу-агу</span>
+    <div class="ticket-top">
+      <div class="jira-crumb">
+        <a href="/">Проекты</a><span class="jsep">/</span><a href="/tracks/">ЛАМОПАД (ЛАМ)</a><span class="jsep">/</span><span class="issue-key">ЛАМ-2007</span>
       </div>
+      <span class="loz loz-new" id="newBadge" hidden>Новое</span>
     </div>
-  </header>
 
-  <div class="divider"></div>
+    <h1 class="summary"><span class="r">А</span><span class="g">Т</span><span class="r">Г</span><span class="r">У</span><span class="g">Л</span> — послушать новый трек Ламопад</h1>
 
-  <div class="about">
-    <p class="about-lead">В работах-заботах? Что останется от тебя, когда решишь проблемы?</p>
-    <p>«<span class="crayon">Взрослостью</span>» иногда называют боязнь свободы. Под «<span class="crayon">серьёзностью</span>» мне втюхивают экзистенциальную прокрастинацию.</p>
-    <p>Трек про формально зрелое, но детское по сути, мышление.</p>
-  </div>
+    <div class="status-row">
+      <span class="loz loz-progress" id="statusLoz">В работе</span>
+      <span class="priority"><span class="arr">⇈</span>Наивысший</span>
+      <span>Тип: <b>Отгул</b></span>
+    </div>
 
-  <!-- ── ПЛЕЕР ── -->
-  <section class="section" aria-label="Слушать трек">
-    <h2 class="section-label">Слушать здесь</h2>
-    <div class="player">
-      <button class="play-btn" id="playBtn" aria-label="Слушать трек АТГУЛ">&#9654;</button>
-      <div class="player-body">
-        <div class="player-track-name"><span class="r">Ламопад</span> — Атгул</div>
-        <div class="progress" id="progress" role="slider" aria-label="Прогресс воспроизведения" aria-valuemin="0" aria-valuemax="100" aria-valuenow="0">
-          <div class="progress-fill" id="progressFill"></div>
+    <div class="ticket-cols">
+      <div class="t-main">
+
+        <!-- ── ОПИСАНИЕ + ВЛОЖЕНИЯ ── -->
+        <div class="desc-row">
+          <section class="t-section" aria-label="Описание">
+            <h2><span class="sec-ico" style="background:#8993a4">≡</span>Описание</h2>
+            <div class="about">
+              <p class="about-lead">В работах-заботах? Что останется от тебя, когда решишь проблемы?</p>
+              <p>«Взрослостью» иногда называют боязнь свободы. Под «серьёзностью» мне втюхивают экзистенциальную прокрастинацию.</p>
+              <p>Трек про формально зрелое, но детское по сути, мышление.</p>
+            </div>
+          </section>
+
+          <section class="t-section" aria-label="Вложения">
+            <h2><span class="sec-ico" style="background:#6b778c">📎</span>Вложения <span style="color:var(--j-dim);font-weight:400">(1)</span></h2>
+            <figure class="attachment" id="coverWrap">
+              <img src="/tracks/agu_cover.jpg" alt="Обложка трека АТГУЛ — Ламопад: артист с соской и падающими грызунками" width="1280" height="1280">
+              <figcaption>agu_cover.jpg<small>1280×1280 · 111 КБ</small></figcaption>
+            </figure>
+          </section>
         </div>
-        <div class="player-meta">
-          <span id="timeLabel">0:00 / –:––</span>
-          <a href="/tracks/Ламопад%20--%20Атгул.mp3" download>скачать mp3</a>
-        </div>
+
+        <!-- ── ЧЕК-ЛИСТ ── -->
+        <section class="t-section" aria-label="Чек-лист">
+          <h2><span class="sec-ico" style="background:#36b37e">✓</span>Чек-лист</h2>
+          <div class="check-progress">
+            <span id="checkCount">0/3</span>
+            <div class="check-bar"><div class="check-bar-fill" id="checkFill"></div></div>
+            <span id="checkPct">0%</span>
+          </div>
+          <ol class="checklist">
+
+            <li class="check-item">
+              <label class="check-row">
+                <input type="checkbox" class="cb" data-idx="0">
+                <span class="cb-box" aria-hidden="true">✓</span>
+                <span class="cb-label">Послушать трек</span>
+              </label>
+              <div class="check-body">
+                <div class="player">
+                  <button class="play-btn" id="playBtn" aria-label="Слушать трек АТГУЛ">&#9654;</button>
+                  <div class="player-body">
+                    <div class="player-track-name"><span class="r">Ламопад</span> — Атгул</div>
+                    <div class="progress" id="progress" role="slider" aria-label="Прогресс воспроизведения" aria-valuemin="0" aria-valuemax="100" aria-valuenow="0">
+                      <div class="progress-fill" id="progressFill"></div>
+                    </div>
+                    <div class="player-meta">
+                      <span id="timeLabel">0:00 / –:––</span>
+                      <a href="/tracks/Ламопад%20--%20Атгул.mp3" download>скачать mp3</a>
+                    </div>
+                  </div>
+                </div>
+                <audio id="audio" preload="metadata" src="/tracks/Ламопад%20--%20Атгул.mp3"></audio>
+              </div>
+            </li>
+
+            <li class="check-item">
+              <label class="check-row">
+                <input type="checkbox" class="cb" data-idx="1">
+                <span class="cb-box" aria-hidden="true">✓</span>
+                <span class="cb-label">Поиграть в игру</span>
+              </label>
+              <div class="check-body">
+                <a class="game-cta" id="gameCta" href="/agu/game/" data-text="Поиграть в АТГУЛ онлайн">Поиграть в АТГУЛ онлайн</a>
+                <p class="game-note">Про этот трек я сделал <b>игру</b>: лама-бурлак тащит корпоративный корабль
+                через ночные панельки, прогибается за банкнотами и стареет от выгорания.
+                Запускается онлайн прямо в браузере — без установки, бесплатно.</p>
+              </div>
+            </li>
+
+            <li class="check-item">
+              <label class="check-row">
+                <input type="checkbox" class="cb" data-idx="2">
+                <span class="cb-box" aria-hidden="true">✓</span>
+                <span class="cb-label">Поставить лайк на стриминге</span>
+              </label>
+              <div class="check-body">
+                <p class="platforms-note">Выбирай свою площадку — «Атгул» уже там. Добавляй в библиотеку и плейлисты: денежка кап-кап.</p>
+                <ul class="platforms">
+                  <li><a class="platform" style="--pc:#ffcc00" href="https://music.yandex.ru/album/42824529?utm_source=bandlink&utm_medium=%D0%9B%D0%B0%D0%BC%D0%BE%D0%BF%D0%B0%D0%B4&utm_campaign=%D0%90%D1%82%D0%B3%D1%83%D0%BB&utm_term=zlOEY" target="_blank" rel="noopener">Яндекс Музыка</a></li>
+                  <li><a class="platform" style="--pc:#0077ff" href="https://music.vk.com/link/iuI9E" target="_blank" rel="noopener">VK Музыка</a></li>
+                  <li><a class="platform" style="--pc:#1db954" href="https://open.spotify.com/album/51Mdz5hEkdnhl9cpZIQGqI" target="_blank" rel="noopener">Spotify</a></li>
+                  <li><a class="platform" style="--pc:#8993a4" href="https://zvuk.com/release/51327011" target="_blank" rel="noopener">Звук</a></li>
+                  <li><a class="platform" style="--pc:#e30611" href="https://music.mts.ru/album/42824529" target="_blank" rel="noopener">КИОН Музыка</a></li>
+                  <li><a class="platform" style="--pc:#7a6fd0" href="https://music.wink.ru/release/51327011" target="_blank" rel="noopener">Wink Music</a></li>
+                </ul>
+              </div>
+            </li>
+
+          </ol>
+        </section>
+
+        <!-- ── КОММЕНТАРИИ (FAQ) ── -->
+        <section class="t-section" aria-label="Комментарии">
+          <h2><span class="sec-ico" style="background:#0052cc">💬</span>Комментарии</h2>
+
+          <div class="comment">
+            <span class="avatar av-user">С</span>
+            <div class="comment-body">
+              <div class="comment-head"><b>Слушатель</b>сегодня</div>
+              О чём трек «Атгул»?
+            </div>
+          </div>
+          <div class="comment reply">
+            <span class="avatar av-lam">Л</span>
+            <div class="comment-body">
+              <div class="comment-head"><b>Ламопад</b>сегодня</div>
+              Про формально зрелое, но детское по сути мышление. «Взрослостью» иногда называют
+              боязнь свободы, а под «серьёзностью» втюхивают экзистенциальную прокрастинацию.
+              Отсюда и припев: «агу агу, хочу отгул».
+            </div>
+          </div>
+
+          <div class="comment">
+            <span class="avatar av-user">С</span>
+            <div class="comment-body">
+              <div class="comment-head"><b>Слушатель</b>сегодня</div>
+              Когда вышел трек «Атгул»?
+            </div>
+          </div>
+          <div class="comment reply">
+            <span class="avatar av-lam">Л</span>
+            <div class="comment-body">
+              <div class="comment-head"><b>Ламопад</b>сегодня</div>
+              Релиз состоялся 20 июля 2026 года — трек доступен на всех основных стриминговых площадках.
+            </div>
+          </div>
+
+          <div class="comment">
+            <span class="avatar av-user">С</span>
+            <div class="comment-body">
+              <div class="comment-head"><b>Слушатель</b>сегодня</div>
+              Где послушать «Атгул»?
+            </div>
+          </div>
+          <div class="comment reply">
+            <span class="avatar av-lam">Л</span>
+            <div class="comment-body">
+              <div class="comment-head"><b>Ламопад</b>сегодня</div>
+              Прямо на этой странице — или на Яндекс Музыке, Spotify, VK Музыке, Звуке, КИОН Музыке и Wink.
+            </div>
+          </div>
+
+          <div class="comment">
+            <span class="avatar av-user">С</span>
+            <div class="comment-body">
+              <div class="comment-head"><b>Слушатель</b>сегодня</div>
+              Что за игра АТГУЛ онлайн?
+            </div>
+          </div>
+          <div class="comment reply">
+            <span class="avatar av-lam">Л</span>
+            <div class="comment-body">
+              <div class="comment-head"><b>Ламопад</b>сегодня</div>
+              Браузерная игра по треку: лама-бурлак тащит корпоративный корабль через ночной город
+              из панелек, прогибается за банкнотами и стареет от выгорания.
+              <a href="/agu/game/">Играется бесплатно, без установки</a>.
+            </div>
+          </div>
+        </section>
+
+        <!-- ── СВЯЗАННЫЕ ЗАДАЧИ ── -->
+        <section class="t-section" aria-label="Связанные задачи">
+          <h2><span class="sec-ico" style="background:#6554c0">⛓</span>Связанные задачи</h2>
+          <ul class="linked">
+            <li><span class="lkey">ЛАМ-2005</span><a href="/agu/text/">Прочитать текст песни «АТГУЛ»</a><span class="loz loz-done">Готово</span></li>
+            <li><span class="lkey">ЛАМ-2006</span><a href="/agu/game/">Пройти игру АТГУЛ онлайн</a><span class="loz loz-progress">В работе</span></li>
+            <li><span class="lkey">ЛАМ-1</span><a href="/tracks/">Послушать другие треки Ламопад</a><span class="loz loz-todo">Бэклог</span></li>
+          </ul>
+        </section>
+
       </div>
+
+      <!-- ── САЙДБАР ── -->
+      <aside class="t-side" aria-label="Детали задачи">
+        <h2>Детали</h2>
+        <dl class="fields">
+          <dt>Исполнитель</dt><dd>Ты</dd>
+          <dt>Автор</dt><dd>Ламопад</dd>
+          <dt>Аранжировка</dt><dd><a href="https://vk.ru/produser_muziki" target="_blank" rel="noopener">Артём Маркелов</a></dd>
+          <dt>Сведение</dt><dd><a href="https://vk.ru/id2072557" target="_blank" rel="noopener">Михаил Хацко</a></dd>
+          <dt>Метки</dt>
+          <dd>
+            <span class="label-chip">выгорание</span>
+            <span class="label-chip">офисный-абсурд</span>
+            <span class="label-chip">агу-агу</span>
+          </dd>
+          <dt>Релиз</dt><dd>20 июля 2026</dd>
+          <dt>Оценка</dt><dd>2 мин 56 с</dd>
+          <dt>Спринт</dt><dd>Отпуск Q3 2026</dd>
+        </dl>
+      </aside>
     </div>
-    <audio id="audio" preload="metadata" src="/tracks/Ламопад%20--%20Атгул.mp3"></audio>
-  </section>
 
-  <!-- ── ИГРА ── -->
-  <section class="section" aria-label="Игра по треку">
-    <a class="game-cta" id="gameCta" href="/agu/game/" data-text="Поиграть в АТГУЛ онлайн">Поиграть в АТГУЛ онлайн</a>
-    <p class="game-note">Про этот трек я сделал <b>игру</b>: лама-бурлак тащит корпоративный корабль
-    через ночные панельки, прогибается за банкнотами и стареет от выгорания.
-    Запускается онлайн прямо в браузере — без установки, бесплатно.</p>
-  </section>
+  </article>
 
-  <!-- ── ПЛОЩАДКИ ── -->
-  <section class="section" aria-label="Добавить трек к себе">
-    <h2 class="section-label">Добавить трек к себе</h2>
-    <p class="platforms-note">Выбирай свою площадку — «Атгул» уже там. Добавляй в библиотеку и плейлисты: денежка кап-кап.</p>
-    <ul class="platforms">
-      <li><a class="platform" style="--pc:#ffcc00" href="https://music.yandex.ru/album/42824529?utm_source=bandlink&utm_medium=%D0%9B%D0%B0%D0%BC%D0%BE%D0%BF%D0%B0%D0%B4&utm_campaign=%D0%90%D1%82%D0%B3%D1%83%D0%BB&utm_term=zlOEY" target="_blank" rel="noopener">Яндекс Музыка</a></li>
-      <li><a class="platform" style="--pc:#0077ff" href="https://music.vk.com/link/iuI9E" target="_blank" rel="noopener">VK Музыка</a></li>
-      <li><a class="platform" style="--pc:#1db954" href="https://open.spotify.com/album/51Mdz5hEkdnhl9cpZIQGqI" target="_blank" rel="noopener">Spotify</a></li>
-      <li><a class="platform" style="--pc:#f2f2f2" href="https://zvuk.com/release/51327011" target="_blank" rel="noopener">Звук</a></li>
-      <li><a class="platform" style="--pc:#e30611" href="https://music.mts.ru/album/42824529" target="_blank" rel="noopener">КИОН Музыка</a></li>
-      <li><a class="platform" style="--pc:#7a6fd0" href="https://music.wink.ru/release/51327011" target="_blank" rel="noopener">Wink Music</a></li>
-    </ul>
-  </section>
-
-  <!-- ── FAQ ── -->
-  <section class="section faq" aria-label="Вопросы про трек">
-    <h2 class="section-label">Вопросы про трек</h2>
-    <details>
-      <summary>О чём трек «Атгул»?</summary>
-      <p>Про формально зрелое, но детское по сути мышление. «Взрослостью» иногда называют
-      боязнь свободы, а под «серьёзностью» втюхивают экзистенциальную прокрастинацию.
-      Отсюда и припев: «агу агу, хочу отгул».</p>
-    </details>
-    <details>
-      <summary>Когда вышел трек «Атгул»?</summary>
-      <p>Релиз состоялся 20 июля 2026 года — трек доступен на всех основных стриминговых площадках.</p>
-    </details>
-    <details>
-      <summary>Где послушать «Атгул»?</summary>
-      <p>Прямо на этой странице — или на Яндекс Музыке, Spotify, VK Музыке, Звуке, КИОН Музыке и Wink.</p>
-    </details>
-    <details>
-      <summary>Что за игра АТГУЛ онлайн?</summary>
-      <p>Браузерная игра по треку: лама-бурлак тащит корпоративный корабль через ночной город
-      из панелек, прогибается за банкнотами и стареет от выгорания.
-      <a href="/agu/game/">Играется бесплатно, без установки</a>.</p>
-    </details>
-  </section>
-
-  <!-- ── БЛАГОДАРНОСТИ ── -->
-  <section class="section credits" aria-label="Благодарности">
-    <h2 class="section-label">Благодарности</h2>
-    <ul class="credits-list">
-      <li>Аранжировка — <a href="https://vk.ru/produser_muziki" target="_blank" rel="noopener">Артём Маркелов</a></li>
-      <li>Сведение — <a href="https://vk.ru/id2072557" target="_blank" rel="noopener">Михаил Хацко</a></li>
-    </ul>
-  </section>
-
-  <footer class="footer">
+  <footer class="site-footer">
     <a href="/agu/text/">Текст песни</a>
     <a href="/tracks/">Другие треки</a>
     <a href="/">lamopad.ru</a>
     <p class="copyright">© Ламопад — все права защищены</p>
   </footer>
-
 </main>
 
 <script>
 (function () {
   const reduceMotion = matchMedia('(prefers-reduced-motion: reduce)').matches;
 
-  /* ── «новый трек» — только первый месяц после релиза ── */
+  /* ── «Новое» — только первый месяц после релиза ────── */
   const RELEASE = new Date('2026-07-20');
   if (Date.now() - RELEASE.getTime() < 31 * 24 * 3600 * 1000) {
     document.getElementById('newBadge').hidden = false;
@@ -892,21 +1100,25 @@
     }
   }
 
-  /* клик по обложке — грызунки сыплются */
-  document.getElementById('coverWrap').addEventListener('click', (e) => {
+  function burstRings(x, y, count) {
     if (reduceMotion) return;
-    for (let i = 0; i < 6; i++) {
+    for (let i = 0; i < count; i++) {
       const b = document.createElement('span');
       const size = 10 + Math.random() * 18;
       b.className = 'ring-burst';
-      b.style.left = e.clientX + 'px';
-      b.style.top = e.clientY + 'px';
+      b.style.left = x + 'px';
+      b.style.top = y + 'px';
       b.style.width = b.style.height = size + 'px';
       b.style.border = (3 + Math.random() * 3).toFixed(1) + 'px solid ' + RING_COLORS[i % RING_COLORS.length];
       b.style.setProperty('--bx', ((Math.random() - 0.5) * 240).toFixed(0) + 'px');
       ringsHost.appendChild(b);
       b.addEventListener('animationend', () => b.remove());
     }
+  }
+
+  /* клик по вложению-обложке — грызунки сыплются */
+  document.getElementById('coverWrap').addEventListener('click', (e) => {
+    burstRings(e.clientX, e.clientY, 6);
   });
 
   /* ── кнопка ПОИГРАТЬ: прогибается побуквенно ───────── */
@@ -922,28 +1134,56 @@
       const s = document.createElement('span');
       s.className = 'ltr';
       s.textContent = ch;
-      s.style.setProperty('--dy', (Math.sin((li / (total - 1)) * Math.PI) * 9).toFixed(1) + 'px');
+      s.style.setProperty('--dy', (Math.sin((li / (total - 1)) * Math.PI) * 8).toFixed(1) + 'px');
       w.appendChild(s);
       li++;
     }
     cta.appendChild(w);
   });
 
-  /* ── выгорание описания при наведении ──────────────── */
-  const about = document.querySelector('.about');
-  about.addEventListener('mouseenter', () => {
-    about.style.color = '';
-    about.classList.remove('burning');
-    void about.offsetWidth;
-    about.classList.add('burning');
-  });
-  about.addEventListener('mouseleave', () => {
-    const color = getComputedStyle(about).color;
-    about.classList.remove('burning');
-    about.style.color = color;
-    void about.offsetWidth;
-    about.style.color = '';
-  });
+  /* ── чек-лист ──────────────────────────────────────── */
+  const STORE_KEY = 'agu-jira-checklist';
+  const boxes = [...document.querySelectorAll('.cb')];
+  const statusLoz = document.getElementById('statusLoz');
+  let saved = [];
+  try { saved = JSON.parse(localStorage.getItem(STORE_KEY)) || []; } catch (e) {}
+  boxes.forEach((cb, i) => { cb.checked = !!saved[i]; });
+
+  function refreshChecklist(celebrate) {
+    const done = boxes.filter(cb => cb.checked).length;
+    const pct = Math.round((done / boxes.length) * 100);
+    document.getElementById('checkCount').textContent = done + '/' + boxes.length;
+    document.getElementById('checkPct').textContent = pct + '%';
+    document.getElementById('checkFill').style.width = pct + '%';
+    if (done === boxes.length) {
+      statusLoz.textContent = 'Готово';
+      statusLoz.classList.remove('loz-progress');
+      statusLoz.classList.add('loz-done');
+      if (celebrate) {
+        const r = statusLoz.getBoundingClientRect();
+        burstRings(r.left + r.width / 2, r.top + r.height / 2, 12);
+      }
+    } else {
+      statusLoz.textContent = 'В работе';
+      statusLoz.classList.remove('loz-done');
+      statusLoz.classList.add('loz-progress');
+    }
+    try { localStorage.setItem(STORE_KEY, JSON.stringify(boxes.map(cb => cb.checked))); } catch (e) {}
+  }
+
+  function check(idx) {
+    if (!boxes[idx].checked) {
+      boxes[idx].checked = true;
+      refreshChecklist(true);
+    }
+  }
+
+  boxes.forEach(cb => cb.addEventListener('change', () => refreshChecklist(true)));
+  refreshChecklist(false);
+
+  /* авто-отметки: дослушал / ушёл в игру / ушёл на стриминг */
+  document.getElementById('gameCta').addEventListener('click', () => check(1));
+  document.querySelectorAll('.platform').forEach(a => a.addEventListener('click', () => check(2)));
 
   /* ── плеер ─────────────────────────────────────────── */
   const audio = document.getElementById('audio');
@@ -979,7 +1219,10 @@
   });
   audio.addEventListener('timeupdate', refreshTime);
   audio.addEventListener('loadedmetadata', refreshTime);
-  audio.addEventListener('ended', () => { audio.currentTime = 0; });
+  audio.addEventListener('ended', () => {
+    audio.currentTime = 0;
+    check(0);
+  });
 
   progress.addEventListener('click', (e) => {
     if (!audio.duration) return;

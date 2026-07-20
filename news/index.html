@@ -1,0 +1,214 @@
+<!DOCTYPE html>
+<html lang="ru">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>Чё нового | Ламопад</title>
+  <meta name="description" content="Новости и апдейты Ламопада: кто-что вышло, а что вошло.">
+  <meta name="author" content="Ламопад">
+  <meta name="robots" content="index, follow">
+  <link rel="canonical" href="https://lamopad.ru/news/">
+  <link rel="icon" href="/img/slon_96px.png" type="image/png" sizes="96x96">
+
+  <meta property="og:type" content="website">
+  <meta property="og:title" content="Чё нового | Ламопад">
+  <meta property="og:description" content="Новости и апдейты Ламопада: кто-что вышло, а что вошло.">
+  <meta property="og:url" content="https://lamopad.ru/news/">
+  <meta property="og:locale" content="ru_RU">
+  <meta property="og:site_name" content="Ламопад">
+
+  <link rel="preconnect" href="https://fonts.googleapis.com">
+  <link href="https://fonts.googleapis.com/css2?family=Nunito:ital,wght@0,400;0,600;0,700;1,400&family=Unbounded:wght@900&display=swap" rel="stylesheet">
+
+  <style>
+    *, *::before, *::after { box-sizing: border-box; margin: 0; padding: 0; }
+
+    :root {
+      --bg:    #f8f4ed;
+      --ink:   #1e1810;
+      --faded: #7a6e62;
+      --red:   #c8281e;
+    }
+
+    body {
+      background: var(--bg);
+      color: var(--ink);
+      font-family: 'Nunito', sans-serif;
+      font-size: clamp(15px, 3vw, 18px);
+      line-height: 1.75;
+      min-height: 100vh;
+      cursor: url('/img/lamopad_cursor_48px.png'), auto;
+    }
+
+    .page {
+      position: relative;
+      z-index: 1;
+      max-width: 600px;
+      margin: 0 auto;
+      padding: clamp(40px, 8vw, 80px) 24px clamp(60px, 10vw, 100px);
+    }
+
+    /* ── breadcrumbs ── */
+    .crumbs {
+      padding: 0.9rem 1.5rem 0;
+      font-size: 0.7rem;
+      letter-spacing: 0.1em;
+      text-transform: uppercase;
+      color: var(--faded);
+      font-weight: 600;
+    }
+    .crumbs a { color: inherit; text-decoration: none; transition: color 0.15s; }
+    .crumbs a:hover { color: var(--red); }
+    .crumbs .sep { margin: 0 0.5ch; opacity: 0.35; }
+
+    /* ── header ── */
+    .header { margin-bottom: 48px; }
+
+    h1 {
+      font-family: 'Unbounded', sans-serif;
+      font-size: clamp(32px, 10vw, 56px);
+      font-weight: 900;
+      color: var(--red);
+      line-height: 1;
+      letter-spacing: .01em;
+    }
+
+    .header-sub {
+      margin-top: 10px;
+      font-size: 13px;
+      letter-spacing: .22em;
+      text-transform: uppercase;
+      color: var(--faded);
+      font-weight: 700;
+    }
+
+    /* ── news list ── */
+    .news-list { list-style: none; }
+
+    .news-list li {
+      border-top: 1px solid rgba(0,0,0,0.08);
+      padding: 26px 0;
+    }
+
+    .news-list li:last-child { border-bottom: 1px solid rgba(0,0,0,0.08); }
+
+    .news-date {
+      display: block;
+      font-size: 12px;
+      font-weight: 700;
+      letter-spacing: .14em;
+      text-transform: uppercase;
+      color: var(--red);
+      margin-bottom: 8px;
+    }
+
+    .news-title {
+      font-family: 'Unbounded', sans-serif;
+      font-size: clamp(18px, 4.5vw, 24px);
+      font-weight: 900;
+      color: var(--ink);
+      line-height: 1.3;
+      letter-spacing: .01em;
+      margin-bottom: 12px;
+    }
+
+    .news-body p {
+      margin-bottom: 0.9em;
+      color: var(--ink);
+    }
+    .news-body p:last-child { margin-bottom: 0; }
+
+    .news-body a {
+      color: var(--ink);
+      text-decoration: underline;
+      text-decoration-color: rgba(200, 40, 30, 0.35);
+      text-underline-offset: 3px;
+      transition: color 0.15s, text-decoration-color 0.15s;
+    }
+    .news-body a:hover {
+      color: var(--red);
+      text-decoration-color: var(--red);
+    }
+
+    /* ── tracks link ── */
+    .tracks-wrap { margin-top: 48px; }
+
+    .tracks-link {
+      display: inline-block;
+      font-size: 13px;
+      font-weight: 700;
+      letter-spacing: .18em;
+      text-transform: uppercase;
+      color: var(--red);
+      text-decoration: none;
+      padding: 10px 20px;
+      border: 1px solid var(--red);
+      border-radius: 2px;
+      transition: background 0.15s, color 0.15s;
+    }
+
+    .tracks-link:hover { background: var(--red); color: var(--bg); }
+
+    /* ── footer ── */
+    footer {
+      margin-top: 64px;
+      padding-top: 20px;
+      border-top: 1px solid rgba(0,0,0,0.10);
+      font-size: 12px;
+      letter-spacing: .08em;
+      color: #bbb;
+    }
+  </style>
+  <script data-goatcounter="https://lamopad.goatcounter.com/count"
+          async src="//gc.zgo.at/count.js"></script>
+</head>
+<body>
+
+  <nav class="crumbs" aria-label="Навигация">
+    <a href="/">Ламопад</a>
+    <span class="sep">/</span>
+    <span>Чё нового</span>
+  </nav>
+
+  <main class="page">
+
+    <div class="header">
+      <h1>Чё нового</h1>
+      <p class="header-sub">новости и апдейты &nbsp;·&nbsp; Ламопад</p>
+    </div>
+
+    <ul class="news-list">
+
+      <li id="2026-07-20">
+        <time class="news-date" datetime="2026-07-20">20 июля 2026</time>
+        <div class="news-title">Вышел трек «АТГУЛ»</div>
+        <div class="news-body">
+          <p>Это о выгорании и философской ерунде взросления. Когда взрослостью называют боязнь свободы. Можно играть в браузерную <a href="/agu/game/">игру</a> по треку.</p>
+          А вообще описание норм по ссылке ниже, там сайт как задача в джира
+          <p><a href="/agu/">Слушать «АТГУЛ» →</a></p>
+        </div>
+      </li>
+
+      <li id="2026-07-19">
+        <time class="news-date" datetime="2026-07-19">19 июля 2026</time>
+        <div class="news-title">indie.by написали про мои игры!</div>
+        <div class="news-body">
+          <p><a href="https://www.indie.by/" target="_blank" rel="noopener">indie.by</a> — сайт об инди-играх с душой. Его автор, Максим, программист из Минска, обозревает независимые игры разных жанров — блог он завёл в поддержку всех, кто делает игры сам, без издателя за спиной.</p>
+          <p>Максиму понравился <a href="/samosval/game/">Самосвал</a> и <a href="/tracks/sun-coming-glasses/game/">Солнценаступательные очки</a>. Спасибо, Максим!</p>
+          <p><a href="https://www.indie.by/2026/07/lamopad-games.html" target="_blank" rel="noopener">Оригинал публикации на indie.by →</a></p>
+        </div>
+      </li>
+
+    </ul>
+
+    <div class="tracks-wrap">
+      <a class="tracks-link" href="/tracks/">Треки Ламопад →</a>
+    </div>
+
+    <footer>&copy; Ламопад &mdash; все права защищены</footer>
+
+  </main>
+
+<script src="/js/lamopad-fall.js"></script>
+</body>
+</html>

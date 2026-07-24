@@ -32,8 +32,11 @@ description: Чеклист для создания промо-страницы 
   ТОТ ЖЕ slug для преемственности.
 - Один самодостаточный index.html: vanilla HTML/CSS/JS, без сборки
   (webpack эту папку не трогает — как и /tracks/, /stories/, /games/).
-- Свои копии рядом: promo/<slug>/<slug>.mp3, promo/<slug>/<slug>-cover.jpg
-  (или .png). Не ссылаться на /tracks/ — тех файлов может не быть.
+- mp3/обложка: ПРОВЕРИТЬ сначала, есть ли уже файлы в /tracks/ (сам
+  /tracks/<slug>/ или хотя бы /tracks/<slug>.mp3 + /tracks/<slug>-cover.jpg).
+  Если есть — ссылаться на них напрямую, копию в /promo/<slug>/ не класть.
+  Если нет (трек ещё не вышел) — тогда положить свои копии рядом:
+  promo/<slug>/<slug>.mp3, promo/<slug>/<slug>-cover.jpg (или .png).
 - Курсор страницы: cursor: url('/img/lamopad_cursor_48px.png'), auto.
 - Favicon — обложка релиза (как на страницах треков).
 - Фон — переиспользовать общую анимацию падающих лам:

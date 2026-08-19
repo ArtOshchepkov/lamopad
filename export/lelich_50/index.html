@@ -51,7 +51,7 @@ html{-webkit-text-size-adjust:100%}
 body{
   position:relative;
   color:var(--ink);
-  font:400 clamp(19px,4.8vw,23px)/1.6 system-ui,-apple-system,'Segoe UI',Roboto,'Helvetica Neue',Arial,sans-serif;
+  font:400 clamp(21px,5.2vw,25px)/1.58 system-ui,-apple-system,'Segoe UI',Roboto,'Helvetica Neue',Arial,sans-serif;
   overflow-x:hidden;
   /* конец августа: небо сверху, солнце над заголовком, скошенное поле снизу.
      всё градиентами и без background-attachment:fixed - на слабых телефонах он дёргает скролл */
@@ -103,7 +103,7 @@ body{
 .share-btn{
   display:inline-flex;align-items:center;gap:10px;
   padding:13px 26px;border:0;border-radius:999px;
-  font:700 clamp(15px,3.6vw,17px)/1 system-ui,-apple-system,'Segoe UI',Roboto,sans-serif;
+  font:700 clamp(16px,4vw,19px)/1 system-ui,-apple-system,'Segoe UI',Roboto,sans-serif;
   letter-spacing:.09em;
   background:var(--leaf);color:#fbfaf2;
   box-shadow:0 8px 18px -10px rgba(70,100,30,.9);
@@ -122,7 +122,7 @@ body{
   overflow-y:auto;
 }
 .sheet__card{
-  width:100%;max-width:440px;
+  width:100%;max-width:490px;
   background:var(--paper);
   border-radius:22px;
   padding:clamp(22px,5vw,32px);
@@ -130,26 +130,26 @@ body{
   box-shadow:0 30px 70px -30px #000;
 }
 .sheet__qr{
-  display:block;width:min(230px,62vw);height:auto;margin:0 auto;
-  background:#fff;border-radius:12px;padding:10px;
+  display:block;width:min(330px,76vw);height:auto;margin:0 auto;
+  background:#fff;border-radius:14px;padding:12px;
   box-shadow:0 0 0 1px var(--edge);
 }
 .sheet__hint{
   margin-top:16px;
   font-family:var(--hand);font-weight:600;
-  font-size:clamp(24px,5.8vw,30px);line-height:1.12;
+  font-size:clamp(26px,6.2vw,33px);line-height:1.12;
   color:var(--ink);
 }
 .sheet__or{
   display:flex;align-items:center;gap:12px;
   margin:22px 0 18px;color:var(--dim);
-  font-size:clamp(16px,4vw,18px);
+  font-size:clamp(17px,4.2vw,19px);
 }
 .sheet__or::before,.sheet__or::after{content:'';flex:1;height:1px;background:var(--edge)}
 .sheet__copy{
   display:block;width:100%;
   padding:16px 18px;border:0;border-radius:14px;
-  font:700 clamp(15px,3.8vw,17px)/1.25 system-ui,-apple-system,'Segoe UI',Roboto,sans-serif;
+  font:700 clamp(16px,4.2vw,19px)/1.25 system-ui,-apple-system,'Segoe UI',Roboto,sans-serif;
   letter-spacing:.07em;
   background:var(--sun);color:#2a1c07;
   cursor:pointer;-webkit-tap-highlight-color:transparent;
@@ -158,7 +158,7 @@ body{
   display:none;
   margin-top:14px;padding:13px 15px;
   border-radius:12px;
-  font:700 clamp(14px,3.5vw,16px)/1.35 system-ui,-apple-system,'Segoe UI',Roboto,sans-serif;
+  font:700 clamp(15px,3.8vw,17px)/1.35 system-ui,-apple-system,'Segoe UI',Roboto,sans-serif;
   letter-spacing:.04em;
   background:#e8f3dd;color:#3f6320;
   border:1px solid #c8dfae;
@@ -169,7 +169,7 @@ body{
 .sheet__close{
   margin-top:20px;padding:11px 22px;
   border:0;border-radius:999px;background:none;
-  font:600 clamp(15px,3.8vw,17px)/1 system-ui,sans-serif;
+  font:600 clamp(16px,4vw,18px)/1 system-ui,sans-serif;
   color:var(--dim);cursor:pointer;
 }
 
@@ -209,7 +209,7 @@ body{
 }
 .hero__hi{
   margin-top:clamp(10px,2.4vw,18px);
-  font-size:clamp(20px,5vw,25px);
+  font-size:clamp(22px,5.4vw,27px);
   animation:wave .9s .16s cubic-bezier(.2,1.2,.4,1) both;
 }
 @keyframes wave{from{opacity:0;transform:translate3d(0,22px,0) rotate(-2deg) scale(.94)}to{opacity:1;transform:none}}
@@ -231,7 +231,7 @@ body{
 
 .intro{max-width:660px;margin:clamp(20px,4.6vw,32px) auto 0;text-align:center}
 .intro p{margin-top:clamp(12px,2.4vw,18px)}
-.intro .roles{color:var(--dim);font-size:.94em}
+.intro .roles{color:#4f4232}
 .intro b{
   font-family:var(--hand);font-weight:700;
   font-size:1.55em;line-height:.9;
@@ -240,7 +240,7 @@ body{
 }
 .intro .lead{
   font-family:var(--hand);font-weight:600;
-  font-size:1.6em;line-height:1.15;
+  font-size:1.68em;line-height:1.15;
   color:var(--ink);
   margin-top:clamp(18px,3.4vw,26px);
 }
@@ -249,8 +249,8 @@ body{
 .pair{margin:clamp(46px,12vw,96px) 0 0}
 
 .line{
-  font-size:clamp(24px,6.4vw,34px);
-  line-height:1.5;
+  font-size:clamp(27px,7vw,38px);
+  line-height:1.45;
   margin:0 0 clamp(22px,4.5vw,34px);
   text-wrap:balance;
 }
@@ -370,22 +370,11 @@ body{
 .fx--heart{color:#c8452f;font-size:17px}
 .fx--conf{width:10px;height:10px;border-radius:0 100% 0 100%}
 
-/* ---------- рельса с фотками ---------- */
+/* ---------- фотки ---------- */
+/* на телефоне просто одна под другой: сначала ДО, потом ПОСЛЕ */
 .rail{
-  display:flex;
-  gap:10px;
-  overflow-x:auto;
-  scroll-snap-type:x mandatory;
-  overscroll-behavior-x:contain;
-  -webkit-overflow-scrolling:touch;
-  scrollbar-width:none;
-}
-.rail::-webkit-scrollbar{display:none}
-
-.shot{
-  flex:0 0 90%;
-  scroll-snap-align:start;
-  scroll-snap-stop:always;
+  display:grid;
+  gap:clamp(18px,4.5vw,30px);
 }
 
 /* карточка-«полароид» */
@@ -402,11 +391,6 @@ body{
 .frame img{display:block;width:100%;height:auto;border-radius:4px;background:#e6ddcb}
 .frame:focus-visible{outline:3px solid var(--sun);outline-offset:3px}
 
-.dots{display:flex;justify-content:center;gap:8px;margin-top:14px}
-.dots i{width:28px;height:5px;border-radius:3px;background:var(--sun);opacity:.22;transition:opacity .25s}
-.dots i:first-child{opacity:.9}
-.dots[data-i="1"] i:first-child{opacity:.22}
-.dots[data-i="1"] i:last-child{opacity:.9}
 
 /* ---------- финал ---------- */
 .finale{position:relative;margin-top:clamp(48px,12vw,96px);text-align:center;padding:clamp(20px,5vw,36px) 0 clamp(10px,3vw,20px)}
@@ -418,15 +402,66 @@ body{
   text-shadow:2px 3px 0 rgba(255,255,255,.9),0 10px 26px rgba(200,69,47,.2);
   transform:rotate(-2deg);
 }
+.finale__btn{
+  display:inline-block;
+  border:0;background:none;padding:0;margin:0;
+  font:inherit;color:inherit;
+  cursor:pointer;-webkit-tap-highlight-color:transparent;
+  animation:nudge 6s ease-in-out infinite;
+}
+.finale__btn:focus-visible{outline:3px solid var(--sun);outline-offset:8px;border-radius:10px}
+.finale__btn.is-used{animation:none}
+.finale__btn.is-fired{animation:fxWiggle .9s ease}
+.finale__sign{
+  margin-top:clamp(16px,3.4vw,26px);
+  font-family:var(--hand);font-weight:600;
+  font-size:clamp(28px,6.4vw,38px);line-height:1.1;
+  color:var(--ink);
+  transform:rotate(-1deg);
+}
+.finale__date{
+  margin-top:clamp(4px,1.2vw,10px);
+  font-family:var(--hand);font-weight:600;
+  font-size:clamp(21px,4.8vw,27px);line-height:1;
+  color:var(--dim);
+}
 
 .confetti{position:absolute;inset:0;pointer-events:none;overflow:hidden}
 .confetti i{position:absolute;top:46%;left:50%;width:10px;height:10px;border-radius:0 100% 0 100%;opacity:0}
-.finale.is-in .confetti i{animation:burst 1.6s cubic-bezier(.15,.75,.35,1) forwards}
+.finale.is-boom .confetti i{animation:burst 1.6s cubic-bezier(.15,.75,.35,1) forwards}
 @keyframes burst{
   0%{opacity:0;transform:translate3d(0,0,0) scale(.3)}
   10%{opacity:1}
   100%{opacity:0;transform:translate3d(var(--x),var(--y),0) rotate(var(--r)) scale(1)}
 }
+
+/* ---------- альбом ---------- */
+.album{margin-top:clamp(58px,14vw,116px);text-align:center}
+.album__title{
+  font-family:var(--hand);font-weight:700;
+  font-size:clamp(48px,13vw,96px);line-height:1;
+  color:var(--sun);
+  text-shadow:2px 3px 0 rgba(255,255,255,.9);
+  transform:rotate(-1.5deg);
+}
+.album__lead{
+  max-width:680px;
+  margin:clamp(16px,3.4vw,26px) auto clamp(26px,5vw,44px);
+}
+/* на телефоне по одной фотке в столбик: листаешь сверху вниз, и всё */
+.album__grid{
+  column-count:1;
+  column-gap:clamp(12px,2.4vw,20px);
+}
+.album__grid .frame{
+  -webkit-column-break-inside:avoid;
+  break-inside:avoid;
+  margin-bottom:clamp(16px,4vw,22px);
+  padding:9px;
+}
+@media (min-width:620px){.album__grid{column-count:2}}
+@media (min-width:900px){.album__grid{column-count:3}}
+@media (min-width:1150px){.album__grid{column-count:4}}
 
 /* ---------- появление при скролле ---------- */
 .reveal{opacity:0;transform:translate3d(0,22px,0)}
@@ -452,7 +487,7 @@ body{
 .lb__btn{
   display:inline-flex;align-items:center;gap:8px;
   padding:13px 22px;border:0;border-radius:999px;
-  font:600 clamp(16px,4vw,18px)/1 system-ui,sans-serif;
+  font:600 clamp(17px,4.3vw,20px)/1 system-ui,sans-serif;
   background:#e8952a;color:#2a1c07;
   text-decoration:none;cursor:pointer;
 }
@@ -462,12 +497,7 @@ body{
 /* ---------- десктоп: до слева, после справа ---------- */
 @media (min-width:760px){
   .ob{opacity:.5}                    /* на десктопе объекты живут в полях, можно ярче */
-  .rail{
-    display:grid;grid-template-columns:1fr 1fr;gap:clamp(18px,2.6vw,32px);
-    overflow:visible;scroll-snap-type:none;
-  }
-  .shot{flex:none}
-  .dots{display:none}
+  .rail{grid-template-columns:1fr 1fr;gap:clamp(18px,2.6vw,32px)}
   .shot .line{min-height:2.6em}
   /* фотки на столе - слегка вразнобой */
   .shot--before .frame{transform:rotate(-1.1deg)}
@@ -675,7 +705,7 @@ body{
 
     <!-- 1 -->
     <figure class="pair reveal">
-      <div class="rail" data-rail>
+      <div class="rail">
         <div class="shot shot--before">
           <p class="line">Вот наша фотка лет эдак 15 назад.</p>
           <button class="frame" type="button">
@@ -689,13 +719,12 @@ body{
           </button>
         </div>
       </div>
-      <div class="dots" data-i="0" aria-hidden="true"><i></i><i></i></div>
     </figure>
 
     <!-- 2 -->
     <figure class="pair reveal">
       <p class="line line--shared">Ты мой <button class="word word--uchitel" type="button" data-fx="chalk"><span>Учитель</span></button></p>
-      <div class="rail" data-rail>
+      <div class="rail">
         <div class="shot shot--before"><button class="frame" type="button">
           <img src="img/uchitel-before.jpg" width="612" height="408" alt="Учитель, до" loading="lazy" decoding="async">
         </button></div>
@@ -703,13 +732,12 @@ body{
           <img src="img/uchitel-after.jpg" width="1100" height="732" alt="Учитель, после" loading="lazy" decoding="async">
         </button></div>
       </div>
-      <div class="dots" data-i="0" aria-hidden="true"><i></i><i></i></div>
     </figure>
 
     <!-- 3 -->
     <figure class="pair reveal">
       <p class="line line--shared"><button class="word word--mudryi" type="button" data-fx="spark"><span>Мудрый</span></button></p>
-      <div class="rail" data-rail>
+      <div class="rail">
         <div class="shot shot--before"><button class="frame" type="button">
           <img src="img/mudrost-before.jpg" width="1100" height="825" alt="Мудрость, до" loading="lazy" decoding="async">
         </button></div>
@@ -717,13 +745,12 @@ body{
           <img src="img/mudrost-after.jpg" width="1100" height="825" alt="Мудрость, после" loading="lazy" decoding="async">
         </button></div>
       </div>
-      <div class="dots" data-i="0" aria-hidden="true"><i></i><i></i></div>
     </figure>
 
     <!-- 4 -->
     <figure class="pair reveal">
       <p class="line line--shared"><button class="word word--reshit" type="button" data-fx="dash"><span>решительный</span></button></p>
-      <div class="rail" data-rail>
+      <div class="rail">
         <div class="shot shot--before"><button class="frame" type="button">
           <img src="img/lider-before.jpg" width="640" height="480" alt="Решительный, до" loading="lazy" decoding="async">
         </button></div>
@@ -731,13 +758,12 @@ body{
           <img src="img/lider-after.jpg" width="1100" height="825" alt="Решительный, после" loading="lazy" decoding="async">
         </button></div>
       </div>
-      <div class="dots" data-i="0" aria-hidden="true"><i></i><i></i></div>
     </figure>
 
     <!-- 5 -->
     <figure class="pair reveal">
       <p class="line line--shared"><button class="word word--shchedryi" type="button" data-fx="coin"><span>щедрый.</span></button></p>
-      <div class="rail" data-rail>
+      <div class="rail">
         <div class="shot shot--before"><button class="frame" type="button">
           <img src="img/dobytchik-before.jpg" width="640" height="480" alt="Щедрый, до" loading="lazy" decoding="async">
         </button></div>
@@ -745,13 +771,12 @@ body{
           <img src="img/dobytchik-after.jpg" width="1100" height="825" alt="Щедрый, после" loading="lazy" decoding="async">
         </button></div>
       </div>
-      <div class="dots" data-i="0" aria-hidden="true"><i></i><i></i></div>
     </figure>
 
     <!-- 6 -->
     <figure class="pair reveal">
       <p class="line line--shared">Ты для меня пример <button class="word word--semya" type="button" data-fx="heart"><span>заботы о семье</span></button></p>
-      <div class="rail" data-rail>
+      <div class="rail">
         <div class="shot shot--before"><button class="frame" type="button">
           <img src="img/semyanin-before.jpg" width="1100" height="825" alt="Семья, до" loading="lazy" decoding="async">
         </button></div>
@@ -759,13 +784,12 @@ body{
           <img src="img/semyanin-after.jpg" width="1100" height="825" alt="Семья, после" loading="lazy" decoding="async">
         </button></div>
       </div>
-      <div class="dots" data-i="0" aria-hidden="true"><i></i><i></i></div>
     </figure>
 
     <!-- 7 -->
     <figure class="pair reveal">
       <p class="line line--shared">А твоё появление всегда <button class="word word--prazdnik" type="button" data-fx="conf"><span>праздник</span></button></p>
-      <div class="rail" data-rail>
+      <div class="rail">
         <div class="shot shot--before"><button class="frame" type="button">
           <img src="img/veselyi-before.jpg" width="1100" height="825" alt="Праздник, до" loading="lazy" decoding="async">
         </button></div>
@@ -773,7 +797,6 @@ body{
           <img src="img/veselyi-after.jpg" width="1100" height="825" alt="Праздник, после" loading="lazy" decoding="async">
         </button></div>
       </div>
-      <div class="dots" data-i="0" aria-hidden="true"><i></i><i></i></div>
     </figure>
 
   </main>
@@ -782,7 +805,46 @@ body{
 
   <section class="finale reveal">
     <div class="confetti" aria-hidden="true"></div>
-    <h2>С ДНЁМ<br>РОЖДЕНИЯ!</h2>
+    <h2><button class="finale__btn" type="button">С ДНЁМ<br>РОЖДЕНИЯ!</button></h2>
+    <p class="finale__sign">Пельмень, Артём, Тёмыч</p>
+    <p class="finale__date">20 августа 2026</p>
+  </section>
+
+  <section class="album reveal">
+    <h2 class="album__title">ДАЛЬШЕ</h2>
+    <p class="album__lead">Ностальгические фотографии многих из гостей, которые я нашёл, пока готовил поздравление.</p>
+    <div class="album__grid">
+      <button class="frame" type="button"><img src="album/s/albom-01.jpg" data-full="album/albom-01.jpg" width="640" height="480" alt="Фотография из семейного архива" loading="lazy" decoding="async"></button>
+      <button class="frame" type="button"><img src="album/s/albom-02.jpg" data-full="album/albom-02.jpg" width="700" height="420" alt="Фотография из семейного архива" loading="lazy" decoding="async"></button>
+      <button class="frame" type="button"><img src="album/s/albom-03.jpg" data-full="album/albom-03.jpg" width="700" height="525" alt="Фотография из семейного архива" loading="lazy" decoding="async"></button>
+      <button class="frame" type="button"><img src="album/s/albom-04.jpg" data-full="album/albom-04.jpg" width="640" height="480" alt="Фотография из семейного архива" loading="lazy" decoding="async"></button>
+      <button class="frame" type="button"><img src="album/s/albom-05.jpg" data-full="album/albom-05.jpg" width="700" height="525" alt="Фотография из семейного архива" loading="lazy" decoding="async"></button>
+      <button class="frame" type="button"><img src="album/s/albom-06.jpg" data-full="album/albom-06.jpg" width="700" height="525" alt="Фотография из семейного архива" loading="lazy" decoding="async"></button>
+      <button class="frame" type="button"><img src="album/s/albom-07.jpg" data-full="album/albom-07.jpg" width="700" height="525" alt="Фотография из семейного архива" loading="lazy" decoding="async"></button>
+      <button class="frame" type="button"><img src="album/s/albom-08.jpg" data-full="album/albom-08.jpg" width="700" height="525" alt="Фотография из семейного архива" loading="lazy" decoding="async"></button>
+      <button class="frame" type="button"><img src="album/s/albom-09.jpg" data-full="album/albom-09.jpg" width="700" height="525" alt="Фотография из семейного архива" loading="lazy" decoding="async"></button>
+      <button class="frame" type="button"><img src="album/s/albom-10.jpg" data-full="album/albom-10.jpg" width="640" height="480" alt="Фотография из семейного архива" loading="lazy" decoding="async"></button>
+      <button class="frame" type="button"><img src="album/s/albom-11.jpg" data-full="album/albom-11.jpg" width="480" height="640" alt="Фотография из семейного архива" loading="lazy" decoding="async"></button>
+      <button class="frame" type="button"><img src="album/s/albom-12.jpg" data-full="album/albom-12.jpg" width="640" height="480" alt="Фотография из семейного архива" loading="lazy" decoding="async"></button>
+      <button class="frame" type="button"><img src="album/s/albom-13.jpg" data-full="album/albom-13.jpg" width="640" height="426" alt="Фотография из семейного архива" loading="lazy" decoding="async"></button>
+      <button class="frame" type="button"><img src="album/s/albom-14.jpg" data-full="album/albom-14.jpg" width="640" height="426" alt="Фотография из семейного архива" loading="lazy" decoding="async"></button>
+      <button class="frame" type="button"><img src="album/s/albom-15.jpg" data-full="album/albom-15.jpg" width="640" height="480" alt="Фотография из семейного архива" loading="lazy" decoding="async"></button>
+      <button class="frame" type="button"><img src="album/s/albom-16.jpg" data-full="album/albom-16.jpg" width="640" height="480" alt="Фотография из семейного архива" loading="lazy" decoding="async"></button>
+      <button class="frame" type="button"><img src="album/s/albom-17.jpg" data-full="album/albom-17.jpg" width="640" height="480" alt="Фотография из семейного архива" loading="lazy" decoding="async"></button>
+      <button class="frame" type="button"><img src="album/s/albom-18.jpg" data-full="album/albom-18.jpg" width="640" height="480" alt="Фотография из семейного архива" loading="lazy" decoding="async"></button>
+      <button class="frame" type="button"><img src="album/s/albom-19.jpg" data-full="album/albom-19.jpg" width="700" height="525" alt="Фотография из семейного архива" loading="lazy" decoding="async"></button>
+      <button class="frame" type="button"><img src="album/s/albom-20.jpg" data-full="album/albom-20.jpg" width="700" height="525" alt="Фотография из семейного архива" loading="lazy" decoding="async"></button>
+      <button class="frame" type="button"><img src="album/s/albom-21.jpg" data-full="album/albom-21.jpg" width="700" height="525" alt="Фотография из семейного архива" loading="lazy" decoding="async"></button>
+      <button class="frame" type="button"><img src="album/s/albom-22.jpg" data-full="album/albom-22.jpg" width="700" height="525" alt="Фотография из семейного архива" loading="lazy" decoding="async"></button>
+      <button class="frame" type="button"><img src="album/s/albom-23.jpg" data-full="album/albom-23.jpg" width="700" height="525" alt="Фотография из семейного архива" loading="lazy" decoding="async"></button>
+      <button class="frame" type="button"><img src="album/s/albom-24.jpg" data-full="album/albom-24.jpg" width="700" height="525" alt="Фотография из семейного архива" loading="lazy" decoding="async"></button>
+      <button class="frame" type="button"><img src="album/s/albom-25.jpg" data-full="album/albom-25.jpg" width="700" height="525" alt="Фотография из семейного архива" loading="lazy" decoding="async"></button>
+      <button class="frame" type="button"><img src="album/s/albom-26.jpg" data-full="album/albom-26.jpg" width="700" height="525" alt="Фотография из семейного архива" loading="lazy" decoding="async"></button>
+      <button class="frame" type="button"><img src="album/s/albom-27.jpg" data-full="album/albom-27.jpg" width="640" height="480" alt="Фотография из семейного архива" loading="lazy" decoding="async"></button>
+      <button class="frame" type="button"><img src="album/s/albom-28.jpg" data-full="album/albom-28.jpg" width="640" height="480" alt="Фотография из семейного архива" loading="lazy" decoding="async"></button>
+      <button class="frame" type="button"><img src="album/s/albom-29.jpg" data-full="album/albom-29.jpg" width="640" height="480" alt="Фотография из семейного архива" loading="lazy" decoding="async"></button>
+      <button class="frame" type="button"><img src="album/s/albom-30.jpg" data-full="album/albom-30.jpg" width="700" height="525" alt="Фотография из семейного архива" loading="lazy" decoding="async"></button>
+    </div>
   </section>
 
 </div>
@@ -823,7 +885,7 @@ body{
 
 <div class="sheet" id="sheet" hidden role="dialog" aria-modal="true" aria-label="Поделиться поздравлением">
   <div class="sheet__card">
-    <img class="sheet__qr" src="qr.svg" width="230" height="230" alt="QR-код со ссылкой на поздравление">
+    <img class="sheet__qr" src="qr.svg" width="330" height="330" alt="QR-код со ссылкой на поздравление">
     <p class="sheet__hint">Наведи камеру гостя сюда, чтобы у него тоже открылось поздравление</p>
     <div class="sheet__or"><span>или</span></div>
     <button class="sheet__copy" id="share-copy" type="button">СКОПИРОВАТЬ ССЫЛКУ</button>
@@ -879,6 +941,28 @@ body{
     conf.appendChild(cf);
   }
 
+  /* --- финал: конфетти при появлении и по клику --- */
+  var finale = document.querySelector('.finale'),
+      finaleBtn = document.querySelector('.finale__btn');
+
+  function boom(){
+    if(calm) return;
+    finale.classList.remove('is-boom');
+    void finale.offsetWidth;            /* перезапуск анимации конфетти */
+    finale.classList.add('is-boom');
+  }
+
+  finaleBtn.addEventListener('click', function(){
+    finaleBtn.classList.add('is-used');
+    finaleBtn.classList.remove('is-fired');
+    void finaleBtn.offsetWidth;
+    finaleBtn.classList.add('is-fired');
+    boom();
+  });
+  finaleBtn.addEventListener('animationend', function(e){
+    if(e.target === finaleBtn) finaleBtn.classList.remove('is-fired');
+  });
+
   /* --- появление при скролле --- */
   var targets = document.querySelectorAll('.reveal');
   if('IntersectionObserver' in window){
@@ -886,6 +970,7 @@ body{
       for(var k=0;k<entries.length;k++){
         if(entries[k].isIntersecting){
           entries[k].target.classList.add('is-in');
+          if(entries[k].target === finale) boom();
           io.unobserve(entries[k].target);
         }
       }
@@ -893,6 +978,7 @@ body{
     for(var t=0;t<targets.length;t++) io.observe(targets[t]);
   } else {
     for(var f=0;f<targets.length;f++) targets[f].classList.add('is-in');
+    boom();
   }
 
   /* --- слова: своя анимация под смысл + поздравление --- */
@@ -944,18 +1030,6 @@ body{
     });
   });
 
-  /* --- точки ДО/ПОСЛЕ --- */
-  Array.prototype.forEach.call(document.querySelectorAll('[data-rail]'), function(rail){
-    var dots = rail.parentNode.querySelector('.dots'), busy = 0;
-    rail.addEventListener('scroll', function(){
-      if(busy) return;
-      busy = requestAnimationFrame(function(){
-        busy = 0;
-        if(!rail.clientWidth) return;
-        dots.dataset.i = rail.scrollLeft > rail.clientWidth * 0.35 ? '1' : '0';
-      });
-    }, {passive:true});
-  });
 
   /* --- увеличение фотки по клику + скачивание --- */
   var lb = document.getElementById('lb'),
@@ -965,11 +1039,13 @@ body{
       opener = null;
 
   function openShot(img){
+    /* у альбомных превью полный кадр лежит отдельно и тянется только по клику */
+    var full = img.getAttribute('data-full') || img.currentSrc || img.src;
     opener = img.parentNode;
-    lbImg.src = img.currentSrc || img.src;
+    lbImg.src = full;
     lbImg.alt = img.alt;
-    lbDl.href = img.src;
-    lbDl.setAttribute('download', 'lelich-' + img.src.split('/').pop());
+    lbDl.href = full;
+    lbDl.setAttribute('download', 'lelich-' + full.split('/').pop());
     lb.hidden = false;
     document.body.style.overflow = 'hidden';
     lbClose.focus();

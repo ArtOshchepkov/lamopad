@@ -1,0 +1,1084 @@
+<!DOCTYPE html>
+<html lang="ru">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1, viewport-fit=cover">
+<meta name="robots" content="noindex,nofollow">
+<meta name="theme-color" content="#f7ecd2">
+<title>С ДНЁМ РОЖДЕНИЯ, ЛЁЛИЧ!</title>
+
+<meta property="og:type" content="website">
+<meta property="og:title" content="С ДНЁМ РОЖДЕНИЯ, ЛЁЛИЧ!">
+<meta property="og:description" content="На связи Пельмень евро-2.">
+<meta property="og:url" content="https://lamopad.ru/export/lelich_50/">
+<meta property="og:image" content="https://lamopad.ru/export/lelich_50/og.jpg">
+<meta property="og:image:width" content="1200">
+<meta property="og:image:height" content="630">
+<meta property="og:locale" content="ru_RU">
+<meta name="twitter:card" content="summary_large_image">
+<meta name="twitter:title" content="С ДНЁМ РОЖДЕНИЯ, ЛЁЛИЧ!">
+<meta name="twitter:description" content="На связи Пельмень евро-2.">
+<meta name="twitter:image" content="https://lamopad.ru/export/lelich_50/og.jpg">
+
+<link rel="icon" type="image/png" sizes="32x32" href="icon-32.png">
+<link rel="icon" type="image/png" sizes="180x180" href="icon-180.png">
+<link rel="apple-touch-icon" href="icon-180.png">
+
+<link rel="preconnect" href="https://fonts.googleapis.com">
+<link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+<link href="https://fonts.googleapis.com/css2?family=Caveat:wght@600;700&display=swap" rel="stylesheet">
+
+<style>
+*,*::before,*::after{margin:0;padding:0;box-sizing:border-box}
+
+:root{
+  --sky:#e8f1ea;
+  --field:#f7ecd2;
+  --paper:#fffdf7;
+  --ink:#3d3126;
+  --dim:#8a7862;
+  --sun:#d97d1a;
+  --leaf:#6f9a33;
+  --berry:#c8452f;
+  --board:#2f4739;
+  --edge:rgba(61,49,38,.14);
+  --pad:clamp(16px,5vw,28px);
+  --hand:'Caveat',cursive;
+}
+
+html{-webkit-text-size-adjust:100%}
+
+body{
+  position:relative;
+  color:var(--ink);
+  font:400 clamp(19px,4.8vw,23px)/1.6 system-ui,-apple-system,'Segoe UI',Roboto,'Helvetica Neue',Arial,sans-serif;
+  overflow-x:hidden;
+  /* конец августа: небо сверху, солнце над заголовком, скошенное поле снизу.
+     всё градиентами и без background-attachment:fixed - на слабых телефонах он дёргает скролл */
+  background:
+    radial-gradient(rgba(122,96,58,.085) 1.2px, transparent 1.3px) 0 0/26px 26px,
+    radial-gradient(rgba(122,96,58,.06) 1px, transparent 1.1px) 13px 13px/26px 26px,
+    radial-gradient(62% 11% at 50% 0%, rgba(255,205,115,.55), transparent 72%),
+    linear-gradient(180deg,#e6f1e5 0%,#f3efdb 17%,#f8eed4 44%,#f6e5c4 74%,#efd9ae 100%),
+    #efd9ae;
+  background-repeat:repeat,repeat,no-repeat,no-repeat;
+}
+
+.page{position:relative;z-index:2;max-width:1120px;margin:0 auto;padding:0 var(--pad) clamp(16px,4vw,36px)}
+
+/* ---------- деревенский натюрморт на фоне ---------- */
+.scene{position:absolute;top:0;left:0;width:100%;height:100%;overflow:hidden;pointer-events:none;z-index:0}
+.ob{
+  position:absolute;
+  top:var(--t);left:var(--l);
+  width:calc(var(--base,clamp(52px,13vw,96px)) * var(--s,1));
+  height:auto;
+  transform:rotate(var(--r,0deg));
+  opacity:.19;                       /* на мобилке они прямо за текстом - держим мягко */
+}
+.ob[data-side="r"]{left:auto;right:var(--l)}
+
+/* ---------- падающие листья ---------- */
+.leaves{position:fixed;inset:0;pointer-events:none;overflow:hidden;z-index:1}
+.leaves i{
+  position:absolute;top:0;
+  width:15px;height:15px;
+  border-radius:0 100% 0 100%;
+  opacity:0;
+  animation:fall linear infinite;
+  will-change:transform;
+}
+@keyframes fall{
+  0%  {transform:translate3d(0,-14vh,0) rotate(0deg);opacity:0}
+  7%  {opacity:.85}
+  25% {transform:translate3d(26px,22vh,0) rotate(95deg)}
+  50% {transform:translate3d(-20px,50vh,0) rotate(195deg)}
+  75% {transform:translate3d(24px,78vh,0) rotate(290deg)}
+  93% {opacity:.85}
+  100%{transform:translate3d(-12px,114vh,0) rotate(390deg);opacity:0}
+}
+
+/* ---------- поделиться ---------- */
+.topbar{display:flex;justify-content:center;padding-top:clamp(14px,3vw,22px)}
+.share-btn{
+  display:inline-flex;align-items:center;gap:10px;
+  padding:13px 26px;border:0;border-radius:999px;
+  font:700 clamp(15px,3.6vw,17px)/1 system-ui,-apple-system,'Segoe UI',Roboto,sans-serif;
+  letter-spacing:.09em;
+  background:var(--leaf);color:#fbfaf2;
+  box-shadow:0 8px 18px -10px rgba(70,100,30,.9);
+  cursor:pointer;-webkit-tap-highlight-color:transparent;
+}
+.share-btn svg{width:19px;height:19px;fill:none;stroke:currentColor;stroke-width:2;stroke-linecap:round;stroke-linejoin:round}
+.share-btn:active{transform:translateY(1px)}
+
+.sheet[hidden]{display:none}
+.sheet{
+  position:fixed;inset:0;z-index:60;
+  display:flex;align-items:center;justify-content:center;
+  padding:16px;
+  background:rgba(38,30,22,.9);
+  animation:fadein .2s ease;
+  overflow-y:auto;
+}
+.sheet__card{
+  width:100%;max-width:440px;
+  background:var(--paper);
+  border-radius:22px;
+  padding:clamp(22px,5vw,32px);
+  text-align:center;
+  box-shadow:0 30px 70px -30px #000;
+}
+.sheet__qr{
+  display:block;width:min(230px,62vw);height:auto;margin:0 auto;
+  background:#fff;border-radius:12px;padding:10px;
+  box-shadow:0 0 0 1px var(--edge);
+}
+.sheet__hint{
+  margin-top:16px;
+  font-family:var(--hand);font-weight:600;
+  font-size:clamp(24px,5.8vw,30px);line-height:1.12;
+  color:var(--ink);
+}
+.sheet__or{
+  display:flex;align-items:center;gap:12px;
+  margin:22px 0 18px;color:var(--dim);
+  font-size:clamp(16px,4vw,18px);
+}
+.sheet__or::before,.sheet__or::after{content:'';flex:1;height:1px;background:var(--edge)}
+.sheet__copy{
+  display:block;width:100%;
+  padding:16px 18px;border:0;border-radius:14px;
+  font:700 clamp(15px,3.8vw,17px)/1.25 system-ui,-apple-system,'Segoe UI',Roboto,sans-serif;
+  letter-spacing:.07em;
+  background:var(--sun);color:#2a1c07;
+  cursor:pointer;-webkit-tap-highlight-color:transparent;
+}
+.sheet__done,.sheet__url{
+  display:none;
+  margin-top:14px;padding:13px 15px;
+  border-radius:12px;
+  font:700 clamp(14px,3.5vw,16px)/1.35 system-ui,-apple-system,'Segoe UI',Roboto,sans-serif;
+  letter-spacing:.04em;
+  background:#e8f3dd;color:#3f6320;
+  border:1px solid #c8dfae;
+}
+.sheet__url{background:#fdf1dd;color:#7a5410;border-color:#e6cd9c;font-weight:400;word-break:break-all;user-select:all}
+.sheet.is-copied .sheet__done{display:block}
+.sheet.is-manual .sheet__url{display:block}
+.sheet__close{
+  margin-top:20px;padding:11px 22px;
+  border:0;border-radius:999px;background:none;
+  font:600 clamp(15px,3.8vw,17px)/1 system-ui,sans-serif;
+  color:var(--dim);cursor:pointer;
+}
+
+/* ---------- гирлянда флажков ---------- */
+.bunting{display:block;width:100%;height:clamp(46px,11vw,64px)}
+.bunting--top{margin:0 calc(var(--pad) * -1)}
+.bunting--finale{margin:0 calc(var(--pad) * -1) clamp(18px,4vw,30px);transform:scaleX(-1)}
+
+/* ---------- шапка ---------- */
+.hero{position:relative;text-align:center;padding:clamp(20px,5vw,44px) 0 clamp(16px,4vw,32px)}
+.hero > *{position:relative;z-index:1}
+
+/* солнце конца августа */
+.sunburst{
+  position:absolute;z-index:0;
+  top:-22%;left:50%;
+  width:min(1150px,165vw);aspect-ratio:1;
+  transform:translateX(-50%);
+  background:repeating-conic-gradient(from 8deg,rgba(255,199,98,.22) 0deg 5deg,transparent 5deg 13deg);
+  -webkit-mask-image:radial-gradient(closest-side,#000 10%,rgba(0,0,0,.42) 34%,transparent 62%);
+  mask-image:radial-gradient(closest-side,#000 10%,rgba(0,0,0,.42) 34%,transparent 62%);
+  pointer-events:none;
+}
+
+/* ---------- деревенский горизонт в конце ---------- */
+.ground{position:relative;z-index:2;margin-top:clamp(4px,1.5vw,14px)}
+.ground svg{display:block;width:100%;height:clamp(124px,19vw,240px)}
+
+.hero h1{
+  font-family:var(--hand);
+  font-weight:700;
+  font-size:clamp(84px,26vw,200px);
+  line-height:.86;
+  color:#e8912a;
+  text-shadow:2px 3px 0 rgba(255,255,255,.9),0 8px 22px rgba(200,120,20,.22);
+  animation:wave .9s cubic-bezier(.2,1.5,.4,1) both;
+}
+.hero__hi{
+  margin-top:clamp(10px,2.4vw,18px);
+  font-size:clamp(20px,5vw,25px);
+  animation:wave .9s .16s cubic-bezier(.2,1.2,.4,1) both;
+}
+@keyframes wave{from{opacity:0;transform:translate3d(0,22px,0) rotate(-2deg) scale(.94)}to{opacity:1;transform:none}}
+
+/* пельмень евро-2 - так он меня зовёт, поэтому в тесте как пельмешка */
+.pelmen{
+  display:inline-block;
+  font-family:var(--hand);font-weight:700;
+  font-size:1.55em;line-height:1;
+  padding:.12em .55em .2em;
+  color:#8a5a12;
+  background:#fbeecb;
+  border:2px dashed #e0aa4c;
+  border-radius:999px;
+  animation:bob 2.8s ease-in-out infinite;
+}
+.pelmen__i{width:1.1em;height:1.1em;vertical-align:-.18em;margin-right:.25em}
+@keyframes bob{0%,100%{transform:rotate(-2deg) translateY(0)}50%{transform:rotate(2deg) translateY(-4px)}}
+
+.intro{max-width:660px;margin:clamp(20px,4.6vw,32px) auto 0;text-align:center}
+.intro p{margin-top:clamp(12px,2.4vw,18px)}
+.intro .roles{color:var(--dim);font-size:.94em}
+.intro b{
+  font-family:var(--hand);font-weight:700;
+  font-size:1.55em;line-height:.9;
+  color:var(--berry);
+  display:inline-block;transform:rotate(-1.5deg);
+}
+.intro .lead{
+  font-family:var(--hand);font-weight:600;
+  font-size:1.6em;line-height:1.15;
+  color:var(--ink);
+  margin-top:clamp(18px,3.4vw,26px);
+}
+
+/* ---------- пары фоток ---------- */
+.pair{margin:clamp(46px,12vw,96px) 0 0}
+
+.line{
+  font-size:clamp(24px,6.4vw,34px);
+  line-height:1.5;
+  margin:0 0 clamp(10px,2vw,14px);
+  text-wrap:balance;
+}
+.line--shared{text-align:center}
+
+/* ---------- слова с характером ---------- */
+.word{
+  display:inline-block;position:relative;
+  border:0;background:none;padding:0;margin:0 .06em;
+  font:inherit;color:inherit;
+  cursor:pointer;-webkit-tap-highlight-color:transparent;
+  vertical-align:baseline;
+}
+.word span{
+  display:inline-block;
+  font-family:var(--hand);font-weight:700;
+  font-size:1.9em;line-height:1;
+  animation:nudge 6s ease-in-out infinite;
+}
+.word:focus-visible{outline:3px solid var(--sun);outline-offset:4px;border-radius:6px}
+@keyframes nudge{
+  0%,90%,100%{transform:none}
+  93%{transform:translateY(-4px) rotate(-3deg)}
+  96%{transform:translateY(0) rotate(2deg)}
+}
+
+/* Учитель - школьная доска в деревянной раме */
+.word--uchitel{transform:rotate(-1.2deg)}
+.word--uchitel span{
+  color:#f4f7f2;
+  background:var(--board);
+  padding:.04em .3em .14em;
+  border-radius:4px;
+  box-shadow:0 0 0 4px #b07b3f,0 6px 14px -7px rgba(0,0,0,.5);
+  text-shadow:0 1px 0 rgba(0,0,0,.35);
+}
+
+/* Мудрый - золотое свечение */
+.word--mudryi span{
+  color:#c08411;
+  text-shadow:0 0 20px rgba(240,190,90,.9),0 0 4px rgba(255,235,180,.9),0 2px 0 #fff;
+  animation-delay:1s;
+}
+
+/* решительный - красный транспарант */
+.word--reshit{transform:skewX(-8deg) rotate(-1.2deg)}
+.word--reshit span{
+  color:#fff;
+  background:linear-gradient(#d64430,#b8341f);
+  padding:.04em .34em .14em;
+  border-radius:3px;
+  box-shadow:3px 4px 0 rgba(140,40,25,.3);
+  text-shadow:0 1px 1px rgba(0,0,0,.25);
+  animation-delay:2s;
+}
+
+/* щедрый - золото, которое льётся через край */
+.word--shchedryi span{
+  background:linear-gradient(100deg,#d98d13,#f4cf5e 42%,#c9760f);
+  -webkit-background-clip:text;background-clip:text;
+  color:transparent;
+  filter:drop-shadow(0 2px 0 rgba(255,255,255,.95));
+  animation-delay:3s;
+}
+
+/* забота о семье - тёплый очаг */
+.word--semya span{
+  color:var(--berry);
+  background:radial-gradient(90% 130% at 50% 115%,rgba(232,145,42,.3),transparent 70%);
+  padding:.04em .28em .12em;
+  border-radius:10px;
+  animation-delay:4s;
+}
+
+/* праздник - разноцветный */
+.word--prazdnik span{
+  background:linear-gradient(92deg,#c8452f,#e8952a 22%,#7ea63e 46%,#2f8fbf 70%,#9d4f9c);
+  -webkit-background-clip:text;background-clip:text;
+  color:transparent;
+  filter:drop-shadow(0 2px 0 rgba(255,255,255,.95));
+  animation-delay:5s;
+}
+
+.word.is-used span{animation:none}
+
+.word--uchitel.is-fired  span{animation:fxShake .6s ease}
+.word--mudryi.is-fired   span{animation:fxGlow .8s ease}
+.word--reshit.is-fired   span{animation:fxLunge .7s cubic-bezier(.3,1.4,.5,1)}
+.word--shchedryi.is-fired span{animation:fxBounce .8s cubic-bezier(.3,1.3,.5,1)}
+.word--semya.is-fired    span{animation:fxBeat .9s ease}
+.word--prazdnik.is-fired span{animation:fxWiggle .8s ease}
+
+@keyframes fxShake{0%,100%{transform:none}20%{transform:translateX(-4px) rotate(-2.5deg)}40%{transform:translateX(4px) rotate(2.5deg)}60%{transform:translateX(-3px)}80%{transform:translateX(3px)}}
+@keyframes fxGlow{0%,100%{transform:scale(1)}45%{transform:scale(1.16)}}
+@keyframes fxLunge{0%,100%{transform:translateX(0)}28%{transform:translateX(-7px)}62%{transform:translateX(16px)}}
+@keyframes fxBounce{0%,100%{transform:translateY(0)}28%{transform:translateY(-14px)}52%{transform:translateY(0) scaleY(.9)}74%{transform:translateY(-6px) scaleY(1)}}
+@keyframes fxBeat{0%,100%{transform:scale(1)}14%{transform:scale(1.2)}28%{transform:scale(1)}42%{transform:scale(1.2)}56%{transform:scale(1)}}
+@keyframes fxWiggle{0%,100%{transform:rotate(0)}20%{transform:rotate(-7deg)}40%{transform:rotate(6deg)}60%{transform:rotate(-4deg)}80%{transform:rotate(3deg)}}
+
+/* частицы вылетают из слова */
+.fx{
+  position:absolute;left:50%;top:50%;
+  pointer-events:none;opacity:0;
+  font:15px/1 system-ui,sans-serif;
+  animation:fxOut 1.1s cubic-bezier(.15,.7,.35,1) forwards;
+  will-change:transform;
+}
+@keyframes fxOut{
+  0%{opacity:0;transform:translate3d(-50%,-50%,0) scale(.35)}
+  14%{opacity:1}
+  100%{opacity:0;transform:translate3d(calc(-50% + var(--x)),calc(-50% + var(--y)),0) rotate(var(--r)) scale(1)}
+}
+.fx--chalk{width:6px;height:6px;border-radius:1px;background:#fff}
+.fx--spark{color:#e6a91d;font-size:18px;text-shadow:0 0 8px rgba(240,190,90,.9)}
+.fx--dash{width:20px;height:3px;border-radius:2px;background:#c8452f}
+.fx--coin{width:11px;height:11px;border-radius:50%;background:radial-gradient(circle at 35% 30%,#ffe9a8,#d99a16 70%,#a86f08)}
+.fx--heart{color:#c8452f;font-size:17px}
+.fx--conf{width:10px;height:10px;border-radius:0 100% 0 100%}
+
+/* ---------- поздравление под словом ---------- */
+.wish{
+  display:flex;align-items:center;justify-content:center;
+  min-height:3.1em;
+  margin:0 0 clamp(8px,1.8vw,14px);
+  text-align:center;
+}
+.wish span{
+  position:relative;
+  display:inline-block;
+  max-width:34ch;
+  font-family:var(--hand);font-weight:600;
+  font-size:clamp(24px,5.8vw,31px);line-height:1.15;
+  color:var(--ink);
+  background:var(--paper);
+  padding:.3em .95em .38em;
+  border-radius:16px;
+  box-shadow:0 8px 18px -12px rgba(61,49,38,.6),0 0 0 1px var(--edge);
+  opacity:0;transform:translateY(-8px) scale(.94);
+  transition:opacity .35s ease,transform .35s cubic-bezier(.2,1.3,.4,1);
+}
+.wish span::before{
+  content:'';position:absolute;top:-7px;left:50%;margin-left:-8px;
+  border:8px solid transparent;border-top:0;border-bottom-color:var(--paper);
+}
+.wish.is-on span{opacity:1;transform:none}
+
+/* ---------- рельса с фотками ---------- */
+.rail{
+  display:flex;
+  gap:10px;
+  overflow-x:auto;
+  scroll-snap-type:x mandatory;
+  overscroll-behavior-x:contain;
+  -webkit-overflow-scrolling:touch;
+  scrollbar-width:none;
+}
+.rail::-webkit-scrollbar{display:none}
+
+.shot{
+  flex:0 0 90%;
+  scroll-snap-align:start;
+  scroll-snap-stop:always;
+}
+
+/* карточка-«полароид» */
+.frame{
+  display:block;width:100%;
+  padding:9px;
+  border:0;border-radius:10px;
+  background:var(--paper);
+  box-shadow:0 1px 0 rgba(255,255,255,.9) inset,0 10px 22px -12px rgba(61,49,38,.5),0 0 0 1px var(--edge);
+  cursor:zoom-in;
+  font:inherit;color:inherit;
+  -webkit-tap-highlight-color:transparent;
+}
+.frame img{display:block;width:100%;height:auto;border-radius:4px;background:#e6ddcb}
+.frame:focus-visible{outline:3px solid var(--sun);outline-offset:3px}
+
+.dots{display:flex;justify-content:center;gap:8px;margin-top:14px}
+.dots i{width:28px;height:5px;border-radius:3px;background:var(--sun);opacity:.22;transition:opacity .25s}
+.dots i:first-child{opacity:.9}
+.dots[data-i="1"] i:first-child{opacity:.22}
+.dots[data-i="1"] i:last-child{opacity:.9}
+
+/* ---------- финал ---------- */
+.finale{position:relative;margin-top:clamp(48px,12vw,96px);text-align:center;padding:clamp(20px,5vw,36px) 0 clamp(10px,3vw,20px)}
+.finale h2{
+  font-family:var(--hand);font-weight:700;
+  font-size:clamp(56px,16vw,138px);
+  line-height:1.04;
+  color:var(--berry);
+  text-shadow:2px 3px 0 rgba(255,255,255,.9),0 10px 26px rgba(200,69,47,.2);
+  transform:rotate(-2deg);
+}
+
+.confetti{position:absolute;inset:0;pointer-events:none;overflow:hidden}
+.confetti i{position:absolute;top:46%;left:50%;width:10px;height:10px;border-radius:0 100% 0 100%;opacity:0}
+.finale.is-in .confetti i{animation:burst 1.6s cubic-bezier(.15,.75,.35,1) forwards}
+@keyframes burst{
+  0%{opacity:0;transform:translate3d(0,0,0) scale(.3)}
+  10%{opacity:1}
+  100%{opacity:0;transform:translate3d(var(--x),var(--y),0) rotate(var(--r)) scale(1)}
+}
+
+/* ---------- появление при скролле ---------- */
+.reveal{opacity:0;transform:translate3d(0,22px,0)}
+.reveal.is-in{opacity:1;transform:none;transition:opacity .7s ease,transform .7s cubic-bezier(.2,.8,.3,1)}
+
+/* ---------- увеличение по клику ---------- */
+.lb[hidden]{display:none}
+.lb{
+  position:fixed;inset:0;z-index:50;
+  display:flex;flex-direction:column;align-items:center;justify-content:center;
+  gap:16px;padding:16px;
+  background:rgba(38,30,22,.93);
+  animation:fadein .2s ease;
+}
+@keyframes fadein{from{opacity:0}to{opacity:1}}
+.lb img{
+  max-width:100%;max-height:calc(100vh - 150px);max-height:calc(100dvh - 150px);
+  width:auto;height:auto;
+  border-radius:8px;background:#26201a;
+  box-shadow:0 22px 60px -24px #000;
+}
+.lb__bar{display:flex;gap:10px;align-items:center}
+.lb__btn{
+  display:inline-flex;align-items:center;gap:8px;
+  padding:13px 22px;border:0;border-radius:999px;
+  font:600 clamp(16px,4vw,18px)/1 system-ui,sans-serif;
+  background:#e8952a;color:#2a1c07;
+  text-decoration:none;cursor:pointer;
+}
+.lb__btn--ghost{background:rgba(255,255,255,.14);color:#f6efe2}
+.lb__btn svg{width:19px;height:19px;fill:none;stroke:currentColor;stroke-width:2;stroke-linecap:round;stroke-linejoin:round}
+
+/* ---------- десктоп: до слева, после справа ---------- */
+@media (min-width:760px){
+  .ob{opacity:.5}                    /* на десктопе объекты живут в полях, можно ярче */
+  .rail{
+    display:grid;grid-template-columns:1fr 1fr;gap:clamp(18px,2.6vw,32px);
+    overflow:visible;scroll-snap-type:none;
+  }
+  .shot{flex:none}
+  .dots{display:none}
+  .shot .line{min-height:2.6em}
+  /* фотки на столе - слегка вразнобой */
+  .shot--before .frame{transform:rotate(-1.1deg)}
+  .shot--after  .frame{transform:rotate(1.1deg)}
+  .frame{transition:transform .4s cubic-bezier(.2,.8,.3,1),box-shadow .4s}
+  .frame:hover{transform:rotate(0) translateY(-5px) scale(1.015);box-shadow:0 1px 0 rgba(255,255,255,.9) inset,0 20px 34px -16px rgba(61,49,38,.55),0 0 0 1px var(--edge)}
+}
+
+@media (prefers-reduced-motion:reduce){
+  *,*::before,*::after{animation:none!important;transition:none!important}
+  .reveal{opacity:1;transform:none}
+  .wish span{opacity:1;transform:none}
+}
+</style>
+</head>
+<body>
+
+<!-- деревенский набор: рисуем сами, чтобы не зависеть от эмодзи на старых телефонах -->
+<svg width="0" height="0" style="position:absolute" aria-hidden="true" focusable="false"><defs>
+
+  <pattern id="p-flags" width="240" height="64" patternUnits="userSpaceOnUse">
+      <path d="M0 6 Q120 40 240 6" fill="none" stroke="#a8845a" stroke-width="2.6" stroke-linecap="round"/>
+      <path d="M10.5 11.2 L29.5 11.2 L20.0 38.2 Z" fill="#c8452f"/>
+      <path d="M50.5 18.8 L69.5 18.8 L60.0 45.8 Z" fill="#e8952a"/>
+      <path d="M90.5 22.5 L109.5 22.5 L100.0 49.5 Z" fill="#7ea63e"/>
+      <path d="M130.5 22.5 L149.5 22.5 L140.0 49.5 Z" fill="#2f8fbf"/>
+      <path d="M170.5 18.8 L189.5 18.8 L180.0 45.8 Z" fill="#d9a72a"/>
+      <path d="M210.5 11.2 L229.5 11.2 L220.0 38.2 Z" fill="#9d4f9c"/>
+    </pattern>
+
+  <pattern id="p-shtaket" width="54" height="70" patternUnits="userSpaceOnUse">
+      <path d="M20 12h14v58H20z" fill="#d3ab78"/>
+      <path d="M27 5l7 7H20z" fill="#d3ab78"/>
+      <rect y="24" width="54" height="6" fill="#bf9560"/>
+      <rect y="48" width="54" height="6" fill="#bf9560"/>
+    </pattern>
+
+  <symbol id="i-gantel" viewBox="0 0 32 32">
+    <rect x="12" y="14.6" width="8" height="2.8" fill="#8f959c"/>
+    <rect x="8.5" y="10.5" width="4" height="11" rx="1.4" fill="#4c525a"/>
+    <rect x="19.5" y="10.5" width="4" height="11" rx="1.4" fill="#4c525a"/>
+    <rect x="4" y="8.5" width="5" height="15" rx="2.2" fill="#333940"/>
+    <rect x="23" y="8.5" width="5" height="15" rx="2.2" fill="#333940"/>
+  </symbol>
+
+  <symbol id="i-bereza" viewBox="0 0 32 32">
+    <ellipse cx="16" cy="10" rx="10" ry="8.5" fill="#7ea63e"/>
+    <ellipse cx="9.5" cy="13" rx="6" ry="5" fill="#8fb84a"/>
+    <ellipse cx="22.5" cy="13" rx="6" ry="5" fill="#6f9a33"/>
+    <rect x="14.4" y="16" width="3.2" height="15" fill="#fbf8ef" stroke="#b0a48a" stroke-width=".7"/>
+    <rect x="14.4" y="19" width="3.2" height="1.5" fill="#40382c"/>
+    <rect x="14.4" y="23" width="2.2" height="1.4" fill="#40382c"/>
+    <rect x="15.6" y="27" width="2" height="1.3" fill="#40382c"/>
+  </symbol>
+
+  <symbol id="i-shashlyk" viewBox="0 0 32 32">
+    <rect x="1" y="14.6" width="30" height="2" rx="1" fill="#9aa0a6"/>
+    <rect x="5" y="9.5" width="7" height="12" rx="3.2" fill="#a8532c"/>
+    <rect x="13" y="10.5" width="5.5" height="10" rx="2.6" fill="#cf6a2e"/>
+    <rect x="19.5" y="9.5" width="7" height="12" rx="3.2" fill="#8f4523"/>
+  </symbol>
+
+  <symbol id="i-plov" viewBox="0 0 32 32">
+    <path d="M2 15h28a14 12 0 0 1-28 0z" fill="#4f4034"/>
+    <path d="M4.5 15a11.5 6.5 0 0 1 23 0z" fill="#eacd8e"/>
+    <rect x="9" y="11.5" width="5.5" height="2" rx="1" fill="#e08a2a" transform="rotate(-8 11.7 12.5)"/>
+    <rect x="17" y="12.6" width="5.5" height="2" rx="1" fill="#e08a2a" transform="rotate(7 19.7 13.6)"/>
+    <circle cx="15.5" cy="10.6" r="1.4" fill="#8f4523"/>
+  </symbol>
+
+  <symbol id="i-stopka" viewBox="0 0 32 32">
+    <path d="M8.5 11h15l-2 16h-11z" fill="#e4eef4" stroke="#b3c6d0" stroke-width="1.2"/>
+    <path d="M10 18.5h12l-1.1 8.5h-9.8z" fill="#efe3bd"/>
+    <ellipse cx="16" cy="11" rx="7.5" ry="1.8" fill="#f6fafc" stroke="#b3c6d0" stroke-width="1.2"/>
+  </symbol>
+
+  <symbol id="i-luk" viewBox="0 0 32 32">
+    <path d="M12.5 22C10.5 15 8.5 9 6 4" stroke="#6f9a33" stroke-width="3" fill="none" stroke-linecap="round"/>
+    <path d="M16 22V3" stroke="#8fb84a" stroke-width="3" fill="none" stroke-linecap="round"/>
+    <path d="M19.5 22c2-7 4-13 6.5-18" stroke="#7ea63e" stroke-width="3" fill="none" stroke-linecap="round"/>
+    <path d="M11.5 20h9v5.5a4.5 4.5 0 0 1-9 0z" fill="#f4efdd"/>
+  </symbol>
+
+  <symbol id="i-banya" viewBox="0 0 32 32">
+    <rect x="21" y="3" width="3.4" height="8" fill="#8a5a2b"/>
+    <circle cx="22.7" cy="2.2" r="2.2" fill="#e3ddcd"/>
+    <circle cx="26" cy="1" r="1.5" fill="#e3ddcd"/>
+    <path d="M16 7 30 16H2z" fill="#a8532c"/>
+    <rect x="5" y="16" width="22" height="13" fill="#c08b53"/>
+    <rect x="5" y="19" width="22" height="1.3" fill="#a3703f"/>
+    <rect x="5" y="22.5" width="22" height="1.3" fill="#a3703f"/>
+    <rect x="5" y="26" width="22" height="1.3" fill="#a3703f"/>
+    <rect x="12.5" y="20" width="7" height="9" rx="1" fill="#6b4a2a"/>
+  </symbol>
+
+  <symbol id="i-pivo" viewBox="0 0 32 32">
+    <rect x="6" y="11" width="14" height="18" rx="2.5" fill="#e8a91d"/>
+    <path d="M20 15h4a3.5 3.5 0 0 1 0 7h-4z" fill="none" stroke="#cfc9b8" stroke-width="2.4"/>
+    <rect x="4.6" y="7" width="16.8" height="5.6" rx="2.8" fill="#fdf8ec"/>
+    <circle cx="8.5" cy="7" r="2.6" fill="#fdf8ec"/>
+    <circle cx="17.5" cy="6.6" r="3" fill="#fdf8ec"/>
+  </symbol>
+
+  <symbol id="i-pelmen1" viewBox="0 0 32 32">
+    <path d="M4 20a12 12 0 0 1 24 0a2 2 0 0 1-4 0a2 2 0 0 1-4 0a2 2 0 0 1-4 0a2 2 0 0 1-4 0a2 2 0 0 1-4 0z"
+          fill="#f0dcae" stroke="#a97f3c" stroke-width="1.8" stroke-linejoin="round"/>
+    <path d="M9 19.5a7 7 0 0 1 14 0" fill="none" stroke="#c39a52" stroke-width="1.5"/>
+  </symbol>
+
+  <symbol id="i-pelmeni" viewBox="0 0 32 32">
+    <ellipse cx="16" cy="24" rx="14" ry="4.6" fill="#e3dbc8"/>
+    <path d="M4 22.5a6 6 0 0 1 12 0z" fill="#f0dcae" stroke="#b8944f" stroke-width="1.2"/>
+    <path d="M16 22.5a6 6 0 0 1 12 0z" fill="#f0dcae" stroke="#b8944f" stroke-width="1.2"/>
+    <path d="M10 17a6 6 0 0 1 12 0z" fill="#f7e7c2" stroke="#b8944f" stroke-width="1.2"/>
+  </symbol>
+
+  <symbol id="i-cola" viewBox="0 0 32 32">
+    <rect x="13" y="1.5" width="6" height="3" rx="1" fill="#9c3028"/>
+    <path d="M13 4.5h6v2.5l2.4 4.5V28a2.5 2.5 0 0 1-2.5 2.5h-5.8A2.5 2.5 0 0 1 10.6 28V11.5L13 7z" fill="#6f1c14"/>
+    <rect x="10.6" y="14" width="10.8" height="7.5" fill="#c82318"/>
+    <rect x="12.4" y="17" width="7.2" height="1.6" rx=".8" fill="#fdf6e6"/>
+  </symbol>
+
+  <symbol id="i-kirpich" viewBox="0 0 32 32">
+    <rect x="2" y="11" width="28" height="11" rx="1.5" fill="#b4553a"/>
+    <rect x="2" y="11" width="28" height="3.2" fill="#c66c4d"/>
+    <rect x="2" y="18" width="28" height="1.3" fill="#9a4530"/>
+    <rect x="15" y="14.2" width="1.3" height="3.8" fill="#9a4530"/>
+  </symbol>
+
+  <symbol id="i-drel" viewBox="0 0 32 32">
+    <rect x="4" y="8" width="16" height="9.5" rx="4" fill="#e0a020"/>
+    <rect x="7.5" y="16.5" width="6" height="11" rx="2.4" fill="#4a4a4a"/>
+    <rect x="6.5" y="24" width="8" height="4" rx="1.6" fill="#3a3a3a"/>
+    <rect x="20" y="10.5" width="4.5" height="4.5" rx="1.2" fill="#8a8a8a"/>
+    <rect x="24" y="11.8" width="7.5" height="2" rx="1" fill="#a6adb3"/>
+  </symbol>
+
+  <symbol id="i-avto" viewBox="0 0 32 32">
+    <path d="M1 22v-4.5l3.5-1.2 3.5-4.8h13l4.4 5.4 5.6 1.4V22z" fill="#4f86c6"/>
+    <path d="M9.5 13h5v3.6H7zM16 13h4.5l2.8 3.6H16z" fill="#d4e7f5"/>
+    <circle cx="8.5" cy="23" r="3.4" fill="#3a332a"/>
+    <circle cx="8.5" cy="23" r="1.3" fill="#b9b2a4"/>
+    <circle cx="23" cy="23" r="3.4" fill="#3a332a"/>
+    <circle cx="23" cy="23" r="1.3" fill="#b9b2a4"/>
+  </symbol>
+
+  <symbol id="i-mangal" viewBox="0 0 32 32">
+    <path d="M11.5 13c.4-3.2 2.6-4 1.4-6.6 3.4 2 4.6 4.6 3.4 6.6zM17.5 13c.3-2.2 2.2-3.2 1.4-5.2 2.6 1.6 3.4 3.6 2.4 5.2z" fill="#e8952a"/>
+    <path d="M13.6 13c.2-1.6 1.4-2.2.9-3.6 1.8 1.1 2.3 2.5 1.6 3.6z" fill="#f2c14e"/>
+    <path d="M3 14h26l-3.2 9.5H6.2z" fill="#585858"/>
+    <path d="M7.5 23.5 4 30M24.5 23.5 28 30" stroke="#585858" stroke-width="2.6" stroke-linecap="round"/>
+    <rect x="2" y="13" width="28" height="2" rx="1" fill="#9aa0a6"/>
+  </symbol>
+
+</defs></svg>
+
+<div class="scene" aria-hidden="true">
+  <svg class="ob" style="--t:3%;--l:1%;--s:1.5;--r:-5deg"><use href="#i-bereza"/></svg>
+  <svg class="ob" data-side="r" style="--t:9%;--l:1%;--s:1.35;--r:4deg"><use href="#i-mangal"/></svg>
+  <svg class="ob" style="--t:17%;--l:2%;--s:1.3;--r:8deg"><use href="#i-shashlyk"/></svg>
+  <svg class="ob" data-side="r" style="--t:18%;--l:2%;--s:1.1;--r:-6deg"><use href="#i-pivo"/></svg>
+  <svg class="ob" style="--t:24%;--l:1%;--s:1.25;--r:-4deg"><use href="#i-pelmeni"/></svg>
+  <svg class="ob" data-side="r" style="--t:30%;--l:3%;--s:.95;--r:7deg"><use href="#i-stopka"/></svg>
+  <svg class="ob" style="--t:36%;--l:2%;--s:1.4;--r:3deg"><use href="#i-bereza"/></svg>
+  <svg class="ob" data-side="r" style="--t:42%;--l:1%;--s:1.3;--r:-5deg"><use href="#i-plov"/></svg>
+  <svg class="ob" style="--t:48%;--l:3%;--s:1.05;--r:6deg"><use href="#i-luk"/></svg>
+  <svg class="ob" data-side="r" style="--t:54%;--l:1%;--s:1.45;--r:2deg"><use href="#i-banya"/></svg>
+  <svg class="ob" style="--t:60%;--l:2%;--s:1;--r:-7deg"><use href="#i-cola"/></svg>
+  <svg class="ob" data-side="r" style="--t:66%;--l:3%;--s:1.15;--r:5deg"><use href="#i-kirpich"/></svg>
+  <svg class="ob" style="--t:70%;--l:1%;--s:1.2;--r:-9deg"><use href="#i-drel"/></svg>
+  <svg class="ob" data-side="r" style="--t:74%;--l:2%;--s:1.2;--r:-4deg"><use href="#i-kirpich"/></svg>
+  <svg class="ob" style="--t:76%;--l:2%;--s:1.3;--r:6deg"><use href="#i-gantel"/></svg>
+  <svg class="ob" data-side="r" style="--t:78%;--l:1%;--s:1.5;--r:3deg"><use href="#i-avto"/></svg>
+  <svg class="ob" style="--t:84%;--l:2%;--s:1.35;--r:-3deg"><use href="#i-bereza"/></svg>
+  <svg class="ob" data-side="r" style="--t:86%;--l:3%;--s:1.15;--r:7deg"><use href="#i-gantel"/></svg>
+  <svg class="ob" data-side="r" style="--t:90%;--l:2%;--s:1.25;--r:-6deg"><use href="#i-shashlyk"/></svg>
+  <svg class="ob" style="--t:95%;--l:3%;--s:1.05;--r:8deg"><use href="#i-pelmeni"/></svg>
+</div>
+
+<div class="leaves" aria-hidden="true"></div>
+
+<div class="page">
+
+  <svg class="bunting bunting--top" preserveAspectRatio="none" aria-hidden="true"><rect width="100%" height="100%" fill="url(#p-flags)"/></svg>
+
+  <div class="topbar">
+    <button class="share-btn" id="share-open" type="button">
+      <svg viewBox="0 0 24 24"><circle cx="18" cy="5" r="3"/><circle cx="6" cy="12" r="3"/><circle cx="18" cy="19" r="3"/><path d="M8.6 10.6 15.4 6.4M8.6 13.4l6.8 4.2"/></svg>
+      ПОДЕЛИТЬСЯ
+    </button>
+  </div>
+
+  <header class="hero">
+    <div class="sunburst" aria-hidden="true"></div>
+    <h1>Лёлич!</h1>
+    <p class="hero__hi">На связи <span class="pelmen"><svg class="pelmen__i" viewBox="0 0 32 32" aria-hidden="true"><use href="#i-pelmen1"/></svg>Пельмень евро-2</span>.</p>
+    <div class="intro">
+      <p class="roles">Для гостей ты Сын, муж, отец, зять, дед, шурин, сват, брат, коллега, друг.</p>
+      <p>А для меня ты <b>лучший любимый дядя</b>. С самого детства ты поддерживал, радовал, баловал меня, дарил радость и семейное тепло.</p>
+      <p class="lead">Я собрал фотки, покажу каким тебя видела камера и каким вижу тебя я.</p>
+    </div>
+  </header>
+
+  <main>
+
+    <!-- 1 -->
+    <figure class="pair reveal">
+      <div class="rail" data-rail>
+        <div class="shot shot--before">
+          <p class="line">Вот наша фотка лет эдак 15 назад.</p>
+          <button class="frame" type="button">
+            <img src="img/pelmen-before.jpg" width="640" height="480" alt="Старая фотография" fetchpriority="high" decoding="async">
+          </button>
+        </div>
+        <div class="shot shot--after">
+          <p class="line">Но знай, что с самого детства я тебя вижу так:</p>
+          <button class="frame" type="button">
+            <img src="img/pelmen-after.jpg" width="1100" height="825" alt="Та же сцена, только эпично" loading="lazy" decoding="async">
+          </button>
+        </div>
+      </div>
+      <div class="dots" data-i="0" aria-hidden="true"><i></i><i></i></div>
+    </figure>
+
+    <!-- 2 -->
+    <figure class="pair reveal">
+      <p class="line line--shared">Ты мой <button class="word word--uchitel" type="button" data-fx="chalk"><span>Учитель</span></button></p>
+      <p class="wish" aria-live="polite"><span>Спасибо за всё, чему научил!</span></p>
+      <div class="rail" data-rail>
+        <div class="shot shot--before"><button class="frame" type="button">
+          <img src="img/uchitel-before.jpg" width="612" height="408" alt="Учитель, до" loading="lazy" decoding="async">
+        </button></div>
+        <div class="shot shot--after"><button class="frame" type="button">
+          <img src="img/uchitel-after.jpg" width="1100" height="732" alt="Учитель, после" loading="lazy" decoding="async">
+        </button></div>
+      </div>
+      <div class="dots" data-i="0" aria-hidden="true"><i></i><i></i></div>
+    </figure>
+
+    <!-- 3 -->
+    <figure class="pair reveal">
+      <p class="line line--shared"><button class="word word--mudryi" type="button" data-fx="spark"><span>Мудрый</span></button></p>
+      <p class="wish" aria-live="polite"><span>Пусть мысли всегда будут золотыми!</span></p>
+      <div class="rail" data-rail>
+        <div class="shot shot--before"><button class="frame" type="button">
+          <img src="img/mudrost-before.jpg" width="1100" height="825" alt="Мудрость, до" loading="lazy" decoding="async">
+        </button></div>
+        <div class="shot shot--after"><button class="frame" type="button">
+          <img src="img/mudrost-after.jpg" width="1100" height="825" alt="Мудрость, после" loading="lazy" decoding="async">
+        </button></div>
+      </div>
+      <div class="dots" data-i="0" aria-hidden="true"><i></i><i></i></div>
+    </figure>
+
+    <!-- 4 -->
+    <figure class="pair reveal">
+      <p class="line line--shared"><button class="word word--reshit" type="button" data-fx="dash"><span>решительный</span></button></p>
+      <p class="wish" aria-live="polite"><span>Вперёд, к новым победам!</span></p>
+      <div class="rail" data-rail>
+        <div class="shot shot--before"><button class="frame" type="button">
+          <img src="img/lider-before.jpg" width="640" height="480" alt="Решительный, до" loading="lazy" decoding="async">
+        </button></div>
+        <div class="shot shot--after"><button class="frame" type="button">
+          <img src="img/lider-after.jpg" width="1100" height="825" alt="Решительный, после" loading="lazy" decoding="async">
+        </button></div>
+      </div>
+      <div class="dots" data-i="0" aria-hidden="true"><i></i><i></i></div>
+    </figure>
+
+    <!-- 5 -->
+    <figure class="pair reveal">
+      <p class="line line--shared"><button class="word word--shchedryi" type="button" data-fx="coin"><span>щедрый.</span></button></p>
+      <p class="wish" aria-live="polite"><span>Пусть всё доброе возвращается сторицей!</span></p>
+      <div class="rail" data-rail>
+        <div class="shot shot--before"><button class="frame" type="button">
+          <img src="img/dobytchik-before.jpg" width="640" height="480" alt="Щедрый, до" loading="lazy" decoding="async">
+        </button></div>
+        <div class="shot shot--after"><button class="frame" type="button">
+          <img src="img/dobytchik-after.jpg" width="1100" height="825" alt="Щедрый, после" loading="lazy" decoding="async">
+        </button></div>
+      </div>
+      <div class="dots" data-i="0" aria-hidden="true"><i></i><i></i></div>
+    </figure>
+
+    <!-- 6 -->
+    <figure class="pair reveal">
+      <p class="line line--shared">Ты для меня пример <button class="word word--semya" type="button" data-fx="heart"><span>заботы о семье</span></button></p>
+      <p class="wish" aria-live="polite"><span>Тепла и здоровья твоему дому!</span></p>
+      <div class="rail" data-rail>
+        <div class="shot shot--before"><button class="frame" type="button">
+          <img src="img/semyanin-before.jpg" width="1100" height="825" alt="Семья, до" loading="lazy" decoding="async">
+        </button></div>
+        <div class="shot shot--after"><button class="frame" type="button">
+          <img src="img/semyanin-after.jpg" width="1100" height="825" alt="Семья, после" loading="lazy" decoding="async">
+        </button></div>
+      </div>
+      <div class="dots" data-i="0" aria-hidden="true"><i></i><i></i></div>
+    </figure>
+
+    <!-- 7 -->
+    <figure class="pair reveal">
+      <p class="line line--shared">А твоё появление всегда <button class="word word--prazdnik" type="button" data-fx="conf"><span>праздник</span></button></p>
+      <p class="wish" aria-live="polite"><span>Пусть праздник не кончается!</span></p>
+      <div class="rail" data-rail>
+        <div class="shot shot--before"><button class="frame" type="button">
+          <img src="img/veselyi-before.jpg" width="1100" height="825" alt="Праздник, до" loading="lazy" decoding="async">
+        </button></div>
+        <div class="shot shot--after"><button class="frame" type="button">
+          <img src="img/veselyi-after.jpg" width="1100" height="825" alt="Праздник, после" loading="lazy" decoding="async">
+        </button></div>
+      </div>
+      <div class="dots" data-i="0" aria-hidden="true"><i></i><i></i></div>
+    </figure>
+
+  </main>
+
+  <svg class="bunting bunting--finale" preserveAspectRatio="none" aria-hidden="true"><rect width="100%" height="100%" fill="url(#p-flags)"/></svg>
+
+  <section class="finale reveal">
+    <div class="confetti" aria-hidden="true"></div>
+    <h2>С ДНЁМ<br>РОЖДЕНИЯ!</h2>
+  </section>
+
+</div>
+
+<footer class="ground" aria-hidden="true">
+  <svg viewBox="0 0 1200 230" preserveAspectRatio="xMidYMax slice">
+    <!-- дальние холмы -->
+    <path d="M0 118 Q160 78 320 106 T640 92 T960 112 T1200 84 L1200 230 L0 230Z" fill="#cfe0b4"/>
+    <!-- ближние холмы -->
+    <path d="M0 150 Q220 116 460 144 T880 138 T1200 124 L1200 230 L0 230Z" fill="#a8c884"/>
+    <!-- деревня на дальнем плане -->
+    <use href="#i-banya" x="900" y="62" width="94" height="94"/>
+    <use href="#i-bereza" x="120" y="46" width="96" height="96"/>
+    <use href="#i-bereza" x="196" y="66" width="72" height="72"/>
+    <use href="#i-bereza" x="1010" y="58" width="84" height="84"/>
+    <use href="#i-mangal" x="694" y="86" width="80" height="80"/>
+    <use href="#i-avto" x="392" y="96" width="92" height="92"/>
+    <!-- скошенное поле -->
+    <path d="M0 176 Q300 164 600 172 T1200 166 L1200 230 L0 230Z" fill="#e3c88a"/>
+    <!-- штакетник -->
+    <rect y="164" width="1200" height="66" fill="url(#p-shtaket)"/>
+  </svg>
+</footer>
+
+<div class="lb" id="lb" hidden role="dialog" aria-modal="true" aria-label="Фотография">
+  <img id="lb-img" alt="">
+  <div class="lb__bar">
+    <a class="lb__btn" id="lb-dl" download href="#">
+      <svg viewBox="0 0 24 24"><path d="M12 3v12m0 0 4.5-4.5M12 15l-4.5-4.5M4 19h16"/></svg>
+      Скачать
+    </a>
+    <button class="lb__btn lb__btn--ghost" id="lb-close" type="button">
+      <svg viewBox="0 0 24 24"><path d="M5 5l14 14M19 5L5 19"/></svg>
+      Закрыть
+    </button>
+  </div>
+</div>
+
+<div class="sheet" id="sheet" hidden role="dialog" aria-modal="true" aria-label="Поделиться поздравлением">
+  <div class="sheet__card">
+    <img class="sheet__qr" src="qr.svg" width="230" height="230" alt="QR-код со ссылкой на поздравление">
+    <p class="sheet__hint">Наведи камеру гостя сюда, чтобы у него тоже открылось поздравление</p>
+    <div class="sheet__or"><span>или</span></div>
+    <button class="sheet__copy" id="share-copy" type="button">СКОПИРОВАТЬ ССЫЛКУ</button>
+    <p class="sheet__done">ССЫЛКА СКОПИРОВАНА, ВСТАВЛЯЙ В ВОТСАП ИЛИ КУДА-НИБУДЬ И ОТПРАВЛЯЙ</p>
+    <p class="sheet__url">https://lamopad.ru/export/lelich_50/</p>
+    <button class="sheet__close" id="share-close" type="button">Закрыть</button>
+  </div>
+</div>
+
+<script>
+(function(){
+  'use strict';
+  var SHARE_URL = 'https://lamopad.ru/export/lelich_50/';
+  var calm = window.matchMedia && matchMedia('(prefers-reduced-motion: reduce)').matches;
+  /* зелени много, красного и жёлтого совсем чуть-чуть */
+  var leafy = ['#6f9a33','#7ea63e','#8fb84a','#5f8c2c','#9ac455','#7aa73c','#6b9a38','#88b247',
+               '#5c8a2a','#93bd4f','#74a138','#82ad42','#6a9634','#8bb548','#c9a227','#c8452f'];
+  var party = ['#7ea63e','#c9a227','#e8952a','#c8452f','#a8721f','#9bbf4a'];
+
+  function drop(el){ if(el && el.parentNode) el.parentNode.removeChild(el); }
+
+  /* --- падающие листья --- */
+  if(!calm){
+    var box = document.querySelector('.leaves'), frag = document.createDocumentFragment();
+    for(var l=0;l<18;l++){
+      var leaf = document.createElement('i'),
+          sz = (12 + Math.random()*13).toFixed(0) + 'px';
+      leaf.style.left = (Math.random()*96).toFixed(1) + '%';
+      leaf.style.width = leaf.style.height = sz;
+      leaf.style.background = leafy[l % leafy.length];
+      leaf.style.animationDuration = (11 + Math.random()*11).toFixed(1) + 's';
+      leaf.style.animationDelay = (-Math.random()*22).toFixed(1) + 's';
+      frag.appendChild(leaf);
+    }
+    box.appendChild(frag);
+  }
+
+  /* --- конфетти-листья в финале --- */
+  var conf = document.querySelector('.confetti');
+  if(conf && !calm){
+    var cf = document.createDocumentFragment();
+    for(var c=0;c<28;c++){
+      var p = document.createElement('i'),
+          a = (c/28)*Math.PI*2 + Math.random()*0.3,
+          d = 130 + Math.random()*230;
+      p.style.setProperty('--x', (Math.cos(a)*d).toFixed(0) + 'px');
+      p.style.setProperty('--y', (Math.sin(a)*d*0.7 - 40).toFixed(0) + 'px');
+      p.style.setProperty('--r', (Math.random()*720-360).toFixed(0) + 'deg');
+      p.style.background = party[c % party.length];
+      p.style.animationDelay = (Math.random()*0.35).toFixed(2) + 's';
+      cf.appendChild(p);
+    }
+    conf.appendChild(cf);
+  }
+
+  /* --- появление при скролле --- */
+  var targets = document.querySelectorAll('.reveal');
+  if('IntersectionObserver' in window){
+    var io = new IntersectionObserver(function(entries){
+      for(var k=0;k<entries.length;k++){
+        if(entries[k].isIntersecting){
+          entries[k].target.classList.add('is-in');
+          io.unobserve(entries[k].target);
+        }
+      }
+    },{rootMargin:'0px 0px -10% 0px'});
+    for(var t=0;t<targets.length;t++) io.observe(targets[t]);
+  } else {
+    for(var f=0;f<targets.length;f++) targets[f].classList.add('is-in');
+  }
+
+  /* --- слова: своя анимация под смысл + поздравление --- */
+  /* угол 0 = вправо, 90 = вниз */
+  var FX = {
+    chalk:{n:14, from:20,  to:160, r:150, cls:'fx--chalk'},              /* меловая пыль сыплется вниз */
+    spark:{n:12, from:0,   to:360, r:125, cls:'fx--spark', ch:'✦'}, /* золотые искры вокруг */
+    dash: {n:9,  from:-22, to:22,  r:175, cls:'fx--dash'},               /* линии скорости вперёд */
+    coin: {n:13, from:30,  to:150, r:170, cls:'fx--coin'},               /* монеты сыплются */
+    heart:{n:12, from:200, to:340, r:140, cls:'fx--heart', ch:'♥'}, /* сердечки вверх */
+    conf: {n:18, from:0,   to:360, r:155, cls:'fx--conf'}                /* конфетти во все стороны */
+  };
+
+  function burst(word, kind){
+    var cfg = FX[kind];
+    if(!cfg || calm) return;
+    var old = word.querySelectorAll('.fx'), i;
+    for(i=0;i<old.length;i++) drop(old[i]);
+
+    var bag = document.createDocumentFragment(), made = [];
+    for(i=0;i<cfg.n;i++){
+      var p = document.createElement('i'),
+          a = (cfg.from + Math.random()*(cfg.to - cfg.from)) * Math.PI / 180,
+          d = cfg.r * (0.45 + Math.random()*0.55);
+      p.className = 'fx ' + cfg.cls;
+      if(cfg.ch) p.textContent = cfg.ch;
+      if(kind === 'conf') p.style.background = party[i % party.length];
+      p.style.setProperty('--x', (Math.cos(a)*d).toFixed(0) + 'px');
+      p.style.setProperty('--y', (Math.sin(a)*d).toFixed(0) + 'px');
+      p.style.setProperty('--r', (Math.random()*540 - 270).toFixed(0) + 'deg');
+      p.style.animationDelay = (Math.random()*0.18).toFixed(2) + 's';
+      bag.appendChild(p);
+      made.push(p);
+    }
+    word.appendChild(bag);
+    setTimeout(function(){ for(var j=0;j<made.length;j++) drop(made[j]); }, 1500);
+  }
+
+  Array.prototype.forEach.call(document.querySelectorAll('.word'), function(w){
+    w.addEventListener('click', function(){
+      w.classList.add('is-used');
+      w.classList.remove('is-fired');
+      void w.offsetWidth;                       /* перезапуск анимации при повторном клике */
+      w.classList.add('is-fired');
+      burst(w, w.getAttribute('data-fx'));
+      var wish = w.parentNode.parentNode.querySelector('.wish');
+      if(wish) wish.classList.add('is-on');
+    });
+    w.addEventListener('animationend', function(e){
+      if(e.target === w.firstElementChild) w.classList.remove('is-fired');
+    });
+  });
+
+  /* --- точки ДО/ПОСЛЕ --- */
+  Array.prototype.forEach.call(document.querySelectorAll('[data-rail]'), function(rail){
+    var dots = rail.parentNode.querySelector('.dots'), busy = 0;
+    rail.addEventListener('scroll', function(){
+      if(busy) return;
+      busy = requestAnimationFrame(function(){
+        busy = 0;
+        if(!rail.clientWidth) return;
+        dots.dataset.i = rail.scrollLeft > rail.clientWidth * 0.35 ? '1' : '0';
+      });
+    }, {passive:true});
+  });
+
+  /* --- увеличение фотки по клику + скачивание --- */
+  var lb = document.getElementById('lb'),
+      lbImg = document.getElementById('lb-img'),
+      lbDl = document.getElementById('lb-dl'),
+      lbClose = document.getElementById('lb-close'),
+      opener = null;
+
+  function openShot(img){
+    opener = img.parentNode;
+    lbImg.src = img.currentSrc || img.src;
+    lbImg.alt = img.alt;
+    lbDl.href = img.src;
+    lbDl.setAttribute('download', 'lelich-' + img.src.split('/').pop());
+    lb.hidden = false;
+    document.body.style.overflow = 'hidden';
+    lbClose.focus();
+  }
+  function closeShot(){
+    lb.hidden = true;
+    lbImg.removeAttribute('src');
+    document.body.style.overflow = '';
+    if(opener) opener.focus();
+  }
+
+  Array.prototype.forEach.call(document.querySelectorAll('.frame'), function(btn){
+    btn.addEventListener('click', function(){ openShot(btn.querySelector('img')); });
+  });
+
+  lbClose.addEventListener('click', closeShot);
+  lb.addEventListener('click', function(e){ if(e.target === lb || e.target === lbImg) closeShot(); });
+
+  /* --- поделиться --- */
+  var sheet = document.getElementById('sheet'),
+      shareOpen = document.getElementById('share-open'),
+      shareCopy = document.getElementById('share-copy'),
+      shareClose = document.getElementById('share-close');
+
+  function openSheet(){
+    sheet.classList.remove('is-copied','is-manual');
+    sheet.hidden = false;
+    document.body.style.overflow = 'hidden';
+    shareCopy.focus();
+  }
+  function closeSheet(){
+    sheet.hidden = true;
+    document.body.style.overflow = '';
+    shareOpen.focus();
+  }
+  function copied(){ sheet.classList.add('is-copied'); sheet.classList.remove('is-manual'); }
+  function manual(){ sheet.classList.add('is-manual'); sheet.classList.remove('is-copied'); }
+
+  function copyOldWay(){
+    var ta = document.createElement('textarea'), ok = false;
+    ta.value = SHARE_URL;
+    ta.setAttribute('readonly','');
+    ta.style.cssText = 'position:fixed;top:0;left:0;width:1px;height:1px;opacity:0';
+    document.body.appendChild(ta);
+    ta.select();
+    if(ta.setSelectionRange) ta.setSelectionRange(0, 99999);
+    try { ok = document.execCommand('copy'); } catch(err) { ok = false; }
+    drop(ta);
+    ok ? copied() : manual();
+  }
+
+  shareOpen.addEventListener('click', openSheet);
+  shareClose.addEventListener('click', closeSheet);
+  sheet.addEventListener('click', function(e){ if(e.target === sheet) closeSheet(); });
+  shareCopy.addEventListener('click', function(){
+    var settled = false;
+    function ok(){ if(!settled){ settled = true; copied(); } }
+    function fallback(){ if(!settled){ settled = true; copyOldWay(); } }
+
+    if(navigator.clipboard && navigator.clipboard.writeText){
+      navigator.clipboard.writeText(SHARE_URL).then(ok, fallback);
+      setTimeout(fallback, 700);   /* бывает, что промис просто виснет - тогда копируем по-старому */
+    } else {
+      fallback();
+    }
+  });
+
+  document.addEventListener('keydown', function(e){
+    if(e.key !== 'Escape') return;
+    if(!lb.hidden) closeShot();
+    else if(!sheet.hidden) closeSheet();
+  });
+})();
+</script>
+</body>
+</html>

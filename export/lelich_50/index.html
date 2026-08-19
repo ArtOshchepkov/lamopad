@@ -88,6 +88,7 @@ body{
   animation:fall linear infinite;
   will-change:transform;
 }
+.leaves i.cf{border-radius:2px}   /* конфетти летит вместе с листьями - отдельный слой не нужен */
 @keyframes fall{
   0%  {transform:translate3d(0,-14vh,0) rotate(0deg);opacity:0}
   7%  {opacity:.85}
@@ -177,6 +178,7 @@ body{
 .bunting{display:block;width:100%;height:clamp(46px,11vw,64px)}
 .bunting--top{margin:0 calc(var(--pad) * -1)}
 .bunting--finale{margin:0 calc(var(--pad) * -1) clamp(18px,4vw,30px);transform:scaleX(-1)}
+.bunting--album{margin:clamp(46px,11vw,90px) calc(var(--pad) * -1) 0}
 
 /* ---------- шапка ---------- */
 .hero{position:relative;text-align:center;padding:clamp(20px,5vw,44px) 0 clamp(16px,4vw,32px)}
@@ -370,6 +372,158 @@ body{
 .fx--heart{color:#c8452f;font-size:17px}
 .fx--conf{width:10px;height:10px;border-radius:0 100% 0 100%}
 
+/* ---------- мигающая гирлянда между парами ---------- */
+/* провод и лампочки нарисованы css, мигание идёт ступеньками:
+   значение меняется 2 раза за цикл, а не каждый кадр - для старых телефонов это почти бесплатно */
+.garland{
+  position:relative;
+  display:flex;justify-content:space-around;align-items:flex-start;
+  margin:clamp(30px,7vw,54px) calc(var(--pad) * -1);
+  padding:14px 2% 0;
+  height:clamp(38px,8vw,52px);
+}
+.garland::before{
+  content:'';position:absolute;left:0;right:0;top:12px;
+  height:3px;border-radius:2px;background:#a8845a;
+}
+.garland b{
+  position:relative;
+  width:clamp(12px,2.6vw,16px);
+  height:clamp(16px,3.4vw,21px);
+  border-radius:50% 50% 54% 54% / 42% 42% 58% 58%;
+  animation:blink 2.1s steps(1,end) infinite;
+}
+.garland b::before{
+  content:'';position:absolute;left:50%;top:-6px;margin-left:-2.5px;
+  width:5px;height:7px;border-radius:1px;background:#8a7862;
+}
+@keyframes blink{0%,49.9%{opacity:1}50%,100%{opacity:.34}}
+.garland b:nth-child(3n+2){animation-delay:-.7s}
+.garland b:nth-child(3n+3){animation-delay:-1.4s}
+.garland b:nth-child(6n+1){background:#e8452f}
+.garland b:nth-child(6n+2){background:#f0a92b}
+.garland b:nth-child(6n+3){background:#7ea63e}
+.garland b:nth-child(6n+4){background:#3d8fbf}
+.garland b:nth-child(6n+5){background:#e8c320}
+.garland b:nth-child(6n+6){background:#a85ba0}
+@media (max-width:559px){.garland b:nth-child(n+8){display:none}}
+
+/* ---------- фейерверк ---------- */
+/* весь залп это одна точка с кучей box-shadow: браузер рисует её один раз,
+   а дальше только масштабирует и гасит - ни одной лишней ноды */
+.fw{position:relative;height:clamp(96px,22vw,150px);margin:clamp(14px,3vw,24px) 0}
+.fw i{
+  position:absolute;top:50%;
+  width:7px;height:7px;border-radius:50%;
+  opacity:0;
+  animation:fwBoom 6.5s ease-out infinite;
+}
+.fw i:nth-child(1){box-shadow:
+    85px -1px 0 1px #5f9c2c,
+    85px 30px 0 0px #2f8fbf,
+    67px 51px 0 2px #a85ba0,
+    35px 68px 0 0px #e8452f,
+    19px 82px 0 -1px #c98a08,
+    -15px 80px 0 1px #c8452f,
+    -45px 73px 0 0px #e8752a,
+    -70px 56px 0 -1px #d9a013,
+    -71px 32px 0 0px #5f9c2c,
+    -88px -1px 0 0px #2f8fbf,
+    -85px -30px 0 2px #a85ba0,
+    -63px -49px 0 -1px #e8452f,
+    -40px -73px 0 0px #c98a08,
+    -16px -83px 0 -1px #c8452f,
+    17px -79px 0 0px #e8752a,
+    38px -65px 0 2px #d9a013,
+    65px -50px 0 0px #5f9c2c,
+    86px -33px 0 -1px #2f8fbf,
+    50px -4px 0 0px #e8452f,
+    40px 33px 0 1px #c98a08,
+    9px 44px 0 0px #c8452f,
+    -23px 34px 0 0px #e8752a,
+    -34px 14px 0 1px #d9a013,
+    -35px -16px 0 0px #5f9c2c,
+    -17px -33px 0 1px #2f8fbf,
+    10px -38px 0 2px #a85ba0,
+    31px -31px 0 2px #e8452f}
+.fw i:nth-child(2){box-shadow:
+    81px 1px 0 2px #a85ba0,
+    80px 26px 0 0px #e8452f,
+    58px 47px 0 -1px #c98a08,
+    46px 69px 0 0px #c8452f,
+    10px 76px 0 1px #e8752a,
+    -13px 85px 0 1px #d9a013,
+    -43px 66px 0 0px #5f9c2c,
+    -65px 60px 0 2px #2f8fbf,
+    -79px 29px 0 1px #a85ba0,
+    -84px 3px 0 0px #e8452f,
+    -84px -36px 0 1px #c98a08,
+    -67px -57px 0 0px #c8452f,
+    -42px -75px 0 1px #e8752a,
+    -11px -89px 0 -1px #d9a013,
+    19px -88px 0 0px #5f9c2c,
+    41px -77px 0 -1px #2f8fbf,
+    60px -49px 0 1px #a85ba0,
+    86px -32px 0 0px #e8452f,
+    50px -2px 0 2px #c8452f,
+    31px 34px 0 2px #e8752a,
+    2px 40px 0 1px #d9a013,
+    -18px 44px 0 1px #5f9c2c,
+    -49px 11px 0 0px #2f8fbf,
+    -39px -13px 0 0px #a85ba0,
+    -19px -46px 0 2px #e8452f,
+    2px -46px 0 0px #c98a08,
+    31px -34px 0 0px #c8452f}
+.fw i:nth-child(3){box-shadow:
+    82px -2px 0 1px #c98a08,
+    74px 28px 0 1px #c8452f,
+    59px 48px 0 1px #e8752a,
+    44px 81px 0 -1px #d9a013,
+    19px 90px 0 1px #5f9c2c,
+    -16px 73px 0 0px #2f8fbf,
+    -40px 68px 0 2px #a85ba0,
+    -63px 53px 0 0px #e8452f,
+    -74px 33px 0 0px #c98a08,
+    -85px -1px 0 0px #c8452f,
+    -85px -27px 0 -1px #e8752a,
+    -61px -46px 0 2px #d9a013,
+    -44px -72px 0 0px #5f9c2c,
+    -21px -88px 0 0px #2f8fbf,
+    22px -87px 0 0px #a85ba0,
+    38px -67px 0 1px #e8452f,
+    67px -55px 0 0px #c98a08,
+    85px -25px 0 2px #c8452f,
+    42px 5px 0 2px #d9a013,
+    35px 22px 0 1px #5f9c2c,
+    11px 46px 0 0px #2f8fbf,
+    -24px 39px 0 0px #a85ba0,
+    -38px 15px 0 2px #e8452f,
+    -40px -21px 0 1px #c98a08,
+    -24px -31px 0 2px #c8452f,
+    10px -37px 0 1px #e8752a,
+    35px -29px 0 1px #d9a013}
+
+.fw--a i:nth-child(1){left:22%;animation-delay:.4s}
+.fw--a i:nth-child(2){left:72%;animation-delay:3.1s}
+.fw--a i:nth-child(3){left:47%;animation-delay:5.2s}
+.fw--b i:nth-child(1){left:66%;animation-delay:1.7s}
+.fw--b i:nth-child(2){left:26%;animation-delay:4.3s}
+.fw--b i:nth-child(3){left:50%;animation-delay:.2s}
+.fw--c i:nth-child(1){left:38%;animation-delay:2.4s}
+.fw--c i:nth-child(2){left:80%;animation-delay:5.6s}
+.fw--c i:nth-child(3){left:14%;animation-delay:.9s}
+.fw--d i:nth-child(1){left:58%;animation-delay:3.8s}
+.fw--d i:nth-child(2){left:18%;animation-delay:1.1s}
+.fw--d i:nth-child(3){left:84%;animation-delay:6s}
+@keyframes fwBoom{
+  0%{transform:scale(.06);opacity:0}
+  4%{opacity:1}
+  11%{transform:scale(.55)}
+  24%{transform:scale(.92);opacity:.95}
+  35%{transform:scale(1.1);opacity:0}
+  100%{transform:scale(1.1);opacity:0}
+}
+
 /* ---------- фотки ---------- */
 /* на телефоне просто одна под другой: сначала ДО, потом ПОСЛЕ */
 .rail{
@@ -463,6 +617,34 @@ body{
 @media (min-width:900px){.album__grid{column-count:3}}
 @media (min-width:1150px){.album__grid{column-count:4}}
 
+/* ---------- конец ---------- */
+.outro{margin-top:clamp(46px,11vw,88px);text-align:center}
+.outro__title{
+  font-family:var(--hand);font-weight:700;
+  font-size:clamp(44px,12vw,88px);line-height:1;
+  color:var(--berry);
+  text-shadow:2px 3px 0 rgba(255,255,255,.9);
+  transform:rotate(-1.5deg);
+}
+.outro__hi{
+  margin-top:clamp(10px,2.4vw,18px);
+  font-family:var(--hand);font-weight:600;
+  font-size:clamp(26px,6vw,36px);line-height:1.15;
+  color:var(--ink);
+}
+.to-top{
+  display:inline-flex;align-items:center;gap:10px;
+  margin-top:clamp(24px,5vw,38px);
+  padding:14px 28px;border:0;border-radius:999px;
+  font:700 clamp(16px,4vw,19px)/1 system-ui,-apple-system,'Segoe UI',Roboto,sans-serif;
+  letter-spacing:.06em;
+  background:var(--leaf);color:#fbfaf2;
+  box-shadow:0 8px 18px -10px rgba(70,100,30,.9);
+  cursor:pointer;-webkit-tap-highlight-color:transparent;
+}
+.to-top svg{width:19px;height:19px;fill:none;stroke:currentColor;stroke-width:2.2;stroke-linecap:round;stroke-linejoin:round}
+.to-top:active{transform:translateY(1px)}
+
 /* ---------- появление при скролле ---------- */
 .reveal{opacity:0;transform:translate3d(0,22px,0)}
 .reveal.is-in{opacity:1;transform:none;transition:opacity .7s ease,transform .7s cubic-bezier(.2,.8,.3,1)}
@@ -533,6 +715,35 @@ body{
       <rect y="24" width="54" height="6" fill="#bf9560"/>
       <rect y="48" width="54" height="6" fill="#bf9560"/>
     </pattern>
+
+  <symbol id="i-tort" viewBox="0 0 32 32">
+    <ellipse cx="11" cy="9.4" rx="1.5" ry="2.3" fill="#f0a92b"/>
+    <ellipse cx="16" cy="8.2" rx="1.5" ry="2.3" fill="#f0a92b"/>
+    <ellipse cx="21" cy="9.4" rx="1.5" ry="2.3" fill="#f0a92b"/>
+    <rect x="10.2" y="11.4" width="1.6" height="5.6" fill="#c8452f"/>
+    <rect x="15.2" y="10.2" width="1.6" height="6.8" fill="#7ea63e"/>
+    <rect x="20.2" y="11.4" width="1.6" height="5.6" fill="#2f8fbf"/>
+    <rect x="4" y="17" width="24" height="10" rx="2" fill="#e0bd8f"/>
+    <path d="M4 20c2 2.2 4 2.2 6 0s4-2.2 6 0 4 2.2 6 0 4-2.2 6 0v-3.4H4z" fill="#f6efe0"/>
+    <rect x="4" y="24" width="24" height="3" fill="#cfa974"/>
+  </symbol>
+
+  <symbol id="i-shariki" viewBox="0 0 32 32">
+    <path d="M11 18.5c1.2 4.6 3.2 7.5 5 12.5M21 17.5c-1.2 4.8-3.2 8.5-5 13.5" fill="none" stroke="#ad9f85" stroke-width="1.1"/>
+    <ellipse cx="10.6" cy="10.5" rx="6.4" ry="7.8" fill="#c8452f"/>
+    <ellipse cx="21" cy="12" rx="5.8" ry="7.2" fill="#3d8fbf"/>
+    <ellipse cx="8.4" cy="7.6" rx="1.7" ry="2.3" fill="#e79286"/>
+    <ellipse cx="19.1" cy="9.4" rx="1.5" ry="2" fill="#8cc0dd"/>
+  </symbol>
+
+  <symbol id="i-gitara" viewBox="0 0 32 32">
+    <rect x="13.6" y="1.5" width="4.8" height="4" rx="1.2" fill="#5a3d20"/>
+    <rect x="14.9" y="4.5" width="2.2" height="12" fill="#8a5a2b"/>
+    <ellipse cx="16" cy="19" rx="5.8" ry="5.2" fill="#d99a3a"/>
+    <ellipse cx="16" cy="25" rx="7.4" ry="5.8" fill="#d99a3a"/>
+    <circle cx="16" cy="20" r="2.3" fill="#6b4a2a"/>
+    <rect x="15.5" y="16" width="1" height="12" fill="#b07c36"/>
+  </symbol>
 
   <symbol id="i-gantel" viewBox="0 0 32 32">
     <rect x="12" y="14.6" width="8" height="2.8" fill="#8f959c"/>
@@ -675,6 +886,14 @@ body{
   <svg class="ob" data-side="r" style="--t:86%;--l:3%;--s:1.15;--r:7deg"><use href="#i-gantel"/></svg>
   <svg class="ob" data-side="r" style="--t:90%;--l:2%;--s:1.25;--r:-6deg"><use href="#i-shashlyk"/></svg>
   <svg class="ob" style="--t:95%;--l:3%;--s:1.05;--r:8deg"><use href="#i-pelmeni"/></svg>
+  <svg class="ob" style="--t:12%;--l:3%;--s:1.2;--r:5deg"><use href="#i-tort"/></svg>
+  <svg class="ob" style="--t:21%;--l:2%;--s:1.3;--r:-6deg"><use href="#i-shariki"/></svg>
+  <svg class="ob" data-side="r" style="--t:27%;--l:2%;--s:1.15;--r:4deg"><use href="#i-gitara"/></svg>
+  <svg class="ob" data-side="r" style="--t:39%;--l:3%;--s:1.05;--r:-7deg"><use href="#i-tort"/></svg>
+  <svg class="ob" data-side="r" style="--t:51%;--l:2%;--s:1.25;--r:6deg"><use href="#i-shariki"/></svg>
+  <svg class="ob" style="--t:63%;--l:1%;--s:1.2;--r:-5deg"><use href="#i-gitara"/></svg>
+  <svg class="ob" style="--t:81%;--l:2%;--s:1.1;--r:7deg"><use href="#i-shariki"/></svg>
+  <svg class="ob" style="--t:93%;--l:3%;--s:1.15;--r:-4deg"><use href="#i-tort"/></svg>
 </div>
 
 <div class="leaves" aria-hidden="true"></div>
@@ -721,6 +940,8 @@ body{
       </div>
     </figure>
 
+    <div class="fw fw--c reveal" aria-hidden="true"><i></i><i></i><i></i></div>
+
     <!-- 2 -->
     <figure class="pair reveal">
       <p class="line line--shared">Ты мой <button class="word word--uchitel" type="button" data-fx="chalk"><span>Учитель</span></button></p>
@@ -733,6 +954,8 @@ body{
         </button></div>
       </div>
     </figure>
+
+    <div class="garland reveal" aria-hidden="true"><b></b><b></b><b></b><b></b><b></b><b></b><b></b><b></b><b></b><b></b><b></b><b></b></div>
 
     <!-- 3 -->
     <figure class="pair reveal">
@@ -747,6 +970,8 @@ body{
       </div>
     </figure>
 
+    <div class="fw fw--a reveal" aria-hidden="true"><i></i><i></i><i></i></div>
+
     <!-- 4 -->
     <figure class="pair reveal">
       <p class="line line--shared"><button class="word word--reshit" type="button" data-fx="dash"><span>решительный</span></button></p>
@@ -759,6 +984,8 @@ body{
         </button></div>
       </div>
     </figure>
+
+    <div class="fw fw--d reveal" aria-hidden="true"><i></i><i></i><i></i></div>
 
     <!-- 5 -->
     <figure class="pair reveal">
@@ -773,6 +1000,8 @@ body{
       </div>
     </figure>
 
+    <div class="garland reveal" aria-hidden="true"><b></b><b></b><b></b><b></b><b></b><b></b><b></b><b></b><b></b><b></b><b></b><b></b></div>
+
     <!-- 6 -->
     <figure class="pair reveal">
       <p class="line line--shared">Ты для меня пример <button class="word word--semya" type="button" data-fx="heart"><span>заботы о семье</span></button></p>
@@ -785,6 +1014,8 @@ body{
         </button></div>
       </div>
     </figure>
+
+    <div class="fw fw--b reveal" aria-hidden="true"><i></i><i></i><i></i></div>
 
     <!-- 7 -->
     <figure class="pair reveal">
@@ -809,6 +1040,8 @@ body{
     <p class="finale__sign">Пельмень, Артём, Тёмыч</p>
     <p class="finale__date">20 августа 2026</p>
   </section>
+
+  <svg class="bunting bunting--album" preserveAspectRatio="none" aria-hidden="true"><rect width="100%" height="100%" fill="url(#p-flags)"/></svg>
 
   <section class="album reveal">
     <h2 class="album__title">ДАЛЬШЕ</h2>
@@ -845,6 +1078,15 @@ body{
       <button class="frame" type="button"><img src="album/s/albom-29.jpg" data-full="album/albom-29.jpg" width="640" height="480" alt="Фотография из семейного архива" loading="lazy" decoding="async"></button>
       <button class="frame" type="button"><img src="album/s/albom-30.jpg" data-full="album/albom-30.jpg" width="700" height="525" alt="Фотография из семейного архива" loading="lazy" decoding="async"></button>
     </div>
+  </section>
+
+  <section class="outro reveal">
+    <p class="outro__title">ЭТО ВСЁ!</p>
+    <p class="outro__hi">Всем большой привет от Артёма!</p>
+    <button class="to-top" id="to-top" type="button">
+      <svg viewBox="0 0 24 24"><path d="M12 20V5m0 0-6.5 6.5M12 5l6.5 6.5"/></svg>
+      В НАЧАЛО
+    </button>
   </section>
 
 </div>
@@ -919,6 +1161,18 @@ body{
       leaf.style.animationDuration = (11 + Math.random()*11).toFixed(1) + 's';
       leaf.style.animationDelay = (-Math.random()*22).toFixed(1) + 's';
       frag.appendChild(leaf);
+    }
+    /* конфетти подмешиваем в тот же слой: быстрее листьев и ярче */
+    for(var q=0;q<10;q++){
+      var bit = document.createElement('i');
+      bit.className = 'cf';
+      bit.style.left = (Math.random()*96).toFixed(1) + '%';
+      bit.style.width = (6 + Math.random()*4).toFixed(0) + 'px';
+      bit.style.height = (10 + Math.random()*6).toFixed(0) + 'px';
+      bit.style.background = party[q % party.length];
+      bit.style.animationDuration = (7 + Math.random()*7).toFixed(1) + 's';
+      bit.style.animationDelay = (-Math.random()*14).toFixed(1) + 's';
+      frag.appendChild(bit);
     }
     box.appendChild(frag);
   }
@@ -1111,6 +1365,13 @@ body{
     } else {
       fallback();
     }
+  });
+
+  /* --- наверх --- */
+  document.getElementById('to-top').addEventListener('click', function(){
+    /* плавно, но если браузер старый и не умеет - просто прыгнет наверх */
+    try { window.scrollTo({top:0, behavior: calm ? 'auto' : 'smooth'}); }
+    catch(err) { window.scrollTo(0, 0); }
   });
 
   document.addEventListener('keydown', function(e){

@@ -251,7 +251,7 @@ body{
 .line{
   font-size:clamp(24px,6.4vw,34px);
   line-height:1.5;
-  margin:0 0 clamp(10px,2vw,14px);
+  margin:0 0 clamp(22px,4.5vw,34px);
   text-wrap:balance;
 }
 .line--shared{text-align:center}
@@ -370,33 +370,6 @@ body{
 .fx--heart{color:#c8452f;font-size:17px}
 .fx--conf{width:10px;height:10px;border-radius:0 100% 0 100%}
 
-/* ---------- поздравление под словом ---------- */
-.wish{
-  display:flex;align-items:center;justify-content:center;
-  min-height:3.1em;
-  margin:0 0 clamp(8px,1.8vw,14px);
-  text-align:center;
-}
-.wish span{
-  position:relative;
-  display:inline-block;
-  max-width:34ch;
-  font-family:var(--hand);font-weight:600;
-  font-size:clamp(24px,5.8vw,31px);line-height:1.15;
-  color:var(--ink);
-  background:var(--paper);
-  padding:.3em .95em .38em;
-  border-radius:16px;
-  box-shadow:0 8px 18px -12px rgba(61,49,38,.6),0 0 0 1px var(--edge);
-  opacity:0;transform:translateY(-8px) scale(.94);
-  transition:opacity .35s ease,transform .35s cubic-bezier(.2,1.3,.4,1);
-}
-.wish span::before{
-  content:'';position:absolute;top:-7px;left:50%;margin-left:-8px;
-  border:8px solid transparent;border-top:0;border-bottom-color:var(--paper);
-}
-.wish.is-on span{opacity:1;transform:none}
-
 /* ---------- рельса с фотками ---------- */
 .rail{
   display:flex;
@@ -506,7 +479,6 @@ body{
 @media (prefers-reduced-motion:reduce){
   *,*::before,*::after{animation:none!important;transition:none!important}
   .reveal{opacity:1;transform:none}
-  .wish span{opacity:1;transform:none}
 }
 </style>
 </head>
@@ -723,7 +695,6 @@ body{
     <!-- 2 -->
     <figure class="pair reveal">
       <p class="line line--shared">Ты мой <button class="word word--uchitel" type="button" data-fx="chalk"><span>Учитель</span></button></p>
-      <p class="wish" aria-live="polite"><span>Спасибо за всё, чему научил!</span></p>
       <div class="rail" data-rail>
         <div class="shot shot--before"><button class="frame" type="button">
           <img src="img/uchitel-before.jpg" width="612" height="408" alt="Учитель, до" loading="lazy" decoding="async">
@@ -738,7 +709,6 @@ body{
     <!-- 3 -->
     <figure class="pair reveal">
       <p class="line line--shared"><button class="word word--mudryi" type="button" data-fx="spark"><span>Мудрый</span></button></p>
-      <p class="wish" aria-live="polite"><span>Пусть мысли всегда будут золотыми!</span></p>
       <div class="rail" data-rail>
         <div class="shot shot--before"><button class="frame" type="button">
           <img src="img/mudrost-before.jpg" width="1100" height="825" alt="Мудрость, до" loading="lazy" decoding="async">
@@ -753,7 +723,6 @@ body{
     <!-- 4 -->
     <figure class="pair reveal">
       <p class="line line--shared"><button class="word word--reshit" type="button" data-fx="dash"><span>решительный</span></button></p>
-      <p class="wish" aria-live="polite"><span>Вперёд, к новым победам!</span></p>
       <div class="rail" data-rail>
         <div class="shot shot--before"><button class="frame" type="button">
           <img src="img/lider-before.jpg" width="640" height="480" alt="Решительный, до" loading="lazy" decoding="async">
@@ -768,7 +737,6 @@ body{
     <!-- 5 -->
     <figure class="pair reveal">
       <p class="line line--shared"><button class="word word--shchedryi" type="button" data-fx="coin"><span>щедрый.</span></button></p>
-      <p class="wish" aria-live="polite"><span>Пусть всё доброе возвращается сторицей!</span></p>
       <div class="rail" data-rail>
         <div class="shot shot--before"><button class="frame" type="button">
           <img src="img/dobytchik-before.jpg" width="640" height="480" alt="Щедрый, до" loading="lazy" decoding="async">
@@ -783,7 +751,6 @@ body{
     <!-- 6 -->
     <figure class="pair reveal">
       <p class="line line--shared">Ты для меня пример <button class="word word--semya" type="button" data-fx="heart"><span>заботы о семье</span></button></p>
-      <p class="wish" aria-live="polite"><span>Тепла и здоровья твоему дому!</span></p>
       <div class="rail" data-rail>
         <div class="shot shot--before"><button class="frame" type="button">
           <img src="img/semyanin-before.jpg" width="1100" height="825" alt="Семья, до" loading="lazy" decoding="async">
@@ -798,7 +765,6 @@ body{
     <!-- 7 -->
     <figure class="pair reveal">
       <p class="line line--shared">А твоё появление всегда <button class="word word--prazdnik" type="button" data-fx="conf"><span>праздник</span></button></p>
-      <p class="wish" aria-live="polite"><span>Пусть праздник не кончается!</span></p>
       <div class="rail" data-rail>
         <div class="shot shot--before"><button class="frame" type="button">
           <img src="img/veselyi-before.jpg" width="1100" height="825" alt="Праздник, до" loading="lazy" decoding="async">
@@ -972,8 +938,6 @@ body{
       void w.offsetWidth;                       /* перезапуск анимации при повторном клике */
       w.classList.add('is-fired');
       burst(w, w.getAttribute('data-fx'));
-      var wish = w.parentNode.parentNode.querySelector('.wish');
-      if(wish) wish.classList.add('is-on');
     });
     w.addEventListener('animationend', function(e){
       if(e.target === w.firstElementChild) w.classList.remove('is-fired');

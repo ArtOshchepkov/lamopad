@@ -1,0 +1,1401 @@
+<!DOCTYPE html>
+<html lang="ru">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1, viewport-fit=cover">
+<title>Музыкальные медиа — контакты для питча</title>
+<style>
+  :root {
+    --bg: #F1EEF4;
+    --surface: #FFFFFF;
+    --ink: #1E1B24;
+    --ink-muted: #6E6878;
+    --hairline: #DEDAE6;
+    --accent: #4B3F9E;
+    --accent-ink: #FFFFFF;
+    --accent-soft: #E7E2F7;
+    --type-email: #9C6A00;
+    --type-tg: #1E6FA6;
+    --type-vk: #167486;
+    --type-whatsapp: #2E7F4F;
+    --good: #2E7F4F;
+    --good-ink: #256B41;
+    --good-soft: #E3F2E9;
+    --bad: #B23B3B;
+    --bad-ink: #96302F;
+    --bad-soft: #FBEAE8;
+    --shadow: 0 12px 32px -12px rgba(30, 27, 36, 0.28);
+    --radius: 14px;
+    color-scheme: light;
+  }
+
+  @media (prefers-color-scheme: dark) {
+    :root {
+      --bg: #17151D;
+      --surface: #211E29;
+      --ink: #EDEAF2;
+      --ink-muted: #9C96A6;
+      --hairline: #34303F;
+      --accent: #A896FF;
+      --accent-ink: #17151D;
+      --accent-soft: #322C49;
+      --type-email: #E3B24C;
+      --type-tg: #74B8EA;
+      --type-vk: #5FC7DB;
+      --type-whatsapp: #79D19A;
+      --good: #79D19A;
+      --good-ink: #8FDCAA;
+      --good-soft: #213328;
+      --bad: #E38585;
+      --bad-ink: #E89A9A;
+      --bad-soft: #3A2323;
+      --shadow: 0 12px 32px -12px rgba(0, 0, 0, 0.55);
+      color-scheme: dark;
+    }
+  }
+
+  :root[data-theme="dark"] {
+    --bg: #17151D;
+    --surface: #211E29;
+    --ink: #EDEAF2;
+    --ink-muted: #9C96A6;
+    --hairline: #34303F;
+    --accent: #A896FF;
+    --accent-ink: #17151D;
+    --accent-soft: #322C49;
+    --type-email: #E3B24C;
+    --type-tg: #74B8EA;
+    --type-vk: #5FC7DB;
+    --type-whatsapp: #79D19A;
+    --good: #79D19A;
+    --good-ink: #8FDCAA;
+    --good-soft: #213328;
+    --bad: #E38585;
+    --bad-ink: #E89A9A;
+    --bad-soft: #3A2323;
+    --shadow: 0 12px 32px -12px rgba(0, 0, 0, 0.55);
+    color-scheme: dark;
+  }
+
+  :root[data-theme="light"] {
+    --bg: #F1EEF4;
+    --surface: #FFFFFF;
+    --ink: #1E1B24;
+    --ink-muted: #6E6878;
+    --hairline: #DEDAE6;
+    --accent: #4B3F9E;
+    --accent-ink: #FFFFFF;
+    --accent-soft: #E7E2F7;
+    --type-email: #9C6A00;
+    --type-tg: #1E6FA6;
+    --type-vk: #167486;
+    --type-whatsapp: #2E7F4F;
+    --good: #2E7F4F;
+    --good-ink: #256B41;
+    --good-soft: #E3F2E9;
+    --bad: #B23B3B;
+    --bad-ink: #96302F;
+    --bad-soft: #FBEAE8;
+    --shadow: 0 12px 32px -12px rgba(30, 27, 36, 0.28);
+    color-scheme: light;
+  }
+
+  * { box-sizing: border-box; }
+
+  html {
+    font-size: 17.5px;
+  }
+
+  html, body {
+    margin: 0;
+    padding: 0;
+    background: var(--bg);
+    color: var(--ink);
+  }
+
+  body {
+    font-family: ui-sans-serif, -apple-system, "Segoe UI", Roboto, "Helvetica Neue", Arial, sans-serif;
+    -webkit-font-smoothing: antialiased;
+    min-height: 100vh;
+    min-height: 100dvh;
+  }
+
+  .mono {
+    font-family: ui-monospace, "SF Mono", "Cascadia Mono", "Roboto Mono", Menlo, Consolas, monospace;
+  }
+
+  .wrap {
+    max-width: 1040px;
+    margin: 0 auto;
+    min-height: 100dvh;
+    display: flex;
+    flex-direction: column;
+  }
+
+  header {
+    position: sticky;
+    top: 0;
+    z-index: 5;
+    background: var(--bg);
+    padding: 18px 16px 0;
+  }
+
+  h1 {
+    font-size: 1.2rem;
+    font-weight: 700;
+    letter-spacing: -0.01em;
+    margin: 0 0 2px;
+    text-wrap: balance;
+  }
+
+  .subtitle {
+    font-size: 0.8rem;
+    color: var(--ink-muted);
+    margin: 0 0 12px;
+    line-height: 1.5;
+  }
+
+  .tabs {
+    display: flex;
+    gap: 4px;
+    background: var(--surface);
+    border: 1px solid var(--hairline);
+    border-radius: 10px;
+    padding: 3px;
+    margin-bottom: 10px;
+  }
+  .tab {
+    flex: 1;
+    text-align: center;
+    padding: 8px 4px;
+    border-radius: 7px;
+    font-size: 0.75rem;
+    font-weight: 600;
+    font-family: ui-monospace, "SF Mono", "Cascadia Mono", "Roboto Mono", Menlo, Consolas, monospace;
+    color: var(--ink-muted);
+    cursor: pointer;
+    border: none;
+    background: none;
+    transition: background 0.15s ease, color 0.15s ease;
+  }
+  .tab:focus-visible { outline: 2px solid var(--accent); outline-offset: 2px; }
+  .tab[aria-selected="true"] { background: var(--accent); color: var(--accent-ink); }
+
+  .header-actions {
+    display: flex;
+    align-items: center;
+    justify-content: space-between;
+    gap: 8px;
+    flex-wrap: wrap;
+    margin-bottom: 6px;
+  }
+  .counter { font-size: 0.76rem; color: var(--ink-muted); }
+  .counter strong { color: var(--ink); font-weight: 700; }
+  .btn-row { display: flex; gap: 6px; }
+  .btn {
+    font-size: 0.72rem;
+    font-weight: 600;
+    padding: 7px 11px;
+    border-radius: 8px;
+    border: 1px solid var(--hairline);
+    background: var(--surface);
+    color: var(--ink-muted);
+    cursor: pointer;
+    font-family: ui-monospace, "SF Mono", "Cascadia Mono", "Roboto Mono", Menlo, Consolas, monospace;
+    transition: border-color 0.15s ease, color 0.15s ease;
+  }
+  .btn:hover { border-color: var(--accent); color: var(--ink); }
+  .btn:focus-visible { outline: 2px solid var(--accent); outline-offset: 2px; }
+
+  .import-status {
+    font-size: 0.72rem;
+    margin: 4px 0 0;
+    color: var(--ink-muted);
+  }
+  .import-status.error { color: var(--bad); }
+
+  .filters {
+    display: flex;
+    gap: 6px;
+    overflow-x: auto;
+    padding: 10px 0 12px;
+    -ms-overflow-style: none;
+    scrollbar-width: none;
+  }
+  .filters::-webkit-scrollbar { display: none; }
+
+  .chip {
+    flex: 0 0 auto;
+    font-family: ui-monospace, "SF Mono", "Cascadia Mono", "Roboto Mono", Menlo, Consolas, monospace;
+    font-size: 0.72rem;
+    text-transform: uppercase;
+    letter-spacing: 0.04em;
+    font-weight: 600;
+    color: var(--ink-muted);
+    background: var(--surface);
+    border: 1px solid var(--hairline);
+    border-radius: 999px;
+    padding: 7px 13px;
+    cursor: pointer;
+    white-space: nowrap;
+    transition: background 0.15s ease, color 0.15s ease, border-color 0.15s ease;
+  }
+  .chip:hover { border-color: var(--accent); }
+  .chip:focus-visible { outline: 2px solid var(--accent); outline-offset: 2px; }
+  .chip[aria-pressed="true"] {
+    background: var(--accent);
+    border-color: var(--accent);
+    color: var(--accent-ink);
+  }
+  .chip .dot { display: inline-block; width: 6px; height: 6px; border-radius: 50%; margin-right: 6px; vertical-align: middle; }
+
+  .toggles {
+    display: flex;
+    flex-wrap: wrap;
+    gap: 6px;
+    padding-bottom: 14px;
+  }
+
+  .toggle {
+    display: inline-flex;
+    align-items: center;
+    gap: 7px;
+    font-size: 0.76rem;
+    font-weight: 500;
+    color: var(--ink-muted);
+    background: var(--surface);
+    border: 1px solid var(--hairline);
+    border-radius: 8px;
+    padding: 6px 11px 6px 8px;
+    cursor: pointer;
+    transition: background 0.15s ease, color 0.15s ease, border-color 0.15s ease;
+  }
+  .toggle:hover { border-color: var(--accent); }
+  .toggle:focus-visible { outline: 2px solid var(--accent); outline-offset: 2px; }
+  .toggle-box {
+    flex: 0 0 auto;
+    width: 15px;
+    height: 15px;
+    border-radius: 4px;
+    border: 1.5px solid var(--ink-muted);
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    color: transparent;
+    transition: background 0.15s ease, border-color 0.15s ease, color 0.15s ease;
+  }
+  .toggle-box svg { width: 10px; height: 10px; }
+  .toggle[aria-pressed="true"] {
+    color: var(--ink);
+    border-color: var(--accent);
+    background: var(--accent-soft);
+  }
+  .toggle[aria-pressed="true"] .toggle-box {
+    background: var(--accent);
+    border-color: var(--accent);
+    color: var(--accent-ink);
+  }
+
+  .take-check { padding: 8px; border-radius: 8px; flex: 0 0 auto; }
+  .take-check .toggle-box { margin: 0; }
+
+  main {
+    flex: 1;
+    padding: 4px 16px 40px;
+  }
+
+  .list {
+    border-top: 1px solid var(--hairline);
+  }
+
+  .row {
+    border-bottom: 1px solid var(--hairline);
+  }
+
+  .row-top {
+    display: flex;
+    align-items: center;
+    gap: 6px;
+  }
+
+  .row-head {
+    display: flex;
+    align-items: center;
+    gap: 12px;
+    flex: 1;
+    min-width: 0;
+    padding: 13px 2px;
+    background: none;
+    border: none;
+    text-align: left;
+    cursor: pointer;
+    font: inherit;
+    color: inherit;
+  }
+  .row-head:focus-visible { outline: 2px solid var(--accent); outline-offset: -2px; border-radius: 6px; }
+
+  .dots {
+    display: flex;
+    flex: 0 0 auto;
+    gap: 4px;
+    width: 30px;
+  }
+  .dots .dot { width: 7px; height: 7px; border-radius: 50%; }
+
+  .row-main { flex: 1; min-width: 0; }
+
+  .row-name {
+    font-size: 0.97rem;
+    font-weight: 600;
+    line-height: 1.3;
+    white-space: nowrap;
+    overflow: hidden;
+    text-overflow: ellipsis;
+  }
+
+  .row-meta {
+    font-size: 0.76rem;
+    color: var(--ink-muted);
+    margin-top: 1px;
+    white-space: nowrap;
+    overflow: hidden;
+    text-overflow: ellipsis;
+  }
+
+  .chevron {
+    flex: 0 0 auto;
+    color: var(--ink-muted);
+    transition: transform 0.2s ease;
+  }
+  .row[data-open="true"] .chevron,
+  .notes-block[data-open="true"] .chevron { transform: rotate(90deg); color: var(--accent); }
+
+  .row-detail {
+    display: grid;
+    grid-template-rows: 0fr;
+    visibility: hidden;
+    transition: grid-template-rows 0.22s ease, visibility 0.22s;
+  }
+  .row[data-open="true"] .row-detail,
+  .notes-block[data-open="true"] .row-detail {
+    grid-template-rows: 1fr;
+    visibility: visible;
+  }
+  .row-detail-inner {
+    overflow: hidden;
+  }
+
+  .detail-pad {
+    padding: 2px 2px 18px 42px;
+  }
+  .detail-pad-sm {
+    padding: 8px 2px 6px;
+  }
+
+  .editor-row-head {
+    display: flex;
+    align-items: center;
+    justify-content: space-between;
+    gap: 10px;
+    margin-bottom: 2px;
+  }
+  .notes-toggle {
+    flex: 0 0 auto;
+    display: inline-flex;
+    align-items: center;
+    gap: 4px;
+    font-size: 0.74rem;
+    font-family: inherit;
+    color: var(--ink-muted);
+    background: none;
+    border: none;
+    cursor: pointer;
+    padding: 4px 0;
+  }
+  .notes-toggle:hover { color: var(--accent); }
+  .notes-toggle:focus-visible { outline: 2px solid var(--accent); outline-offset: 2px; border-radius: 4px; }
+
+  .site-link {
+    display: inline-block;
+    font-size: 0.78rem;
+    color: var(--accent);
+    text-decoration: none;
+    margin-bottom: 10px;
+    word-break: break-word;
+  }
+  .site-link:hover { text-decoration: underline; }
+
+  .contact-list {
+    display: flex;
+    flex-wrap: wrap;
+    gap: 7px;
+    margin: 8px 0 12px;
+  }
+
+  .contact-pill {
+    display: inline-flex;
+    align-items: center;
+    gap: 7px;
+    padding: 7px 12px;
+    border-radius: 10px;
+    background: var(--surface);
+    border: 1px solid var(--hairline);
+    text-decoration: none;
+    color: var(--ink);
+    font-size: 0.83rem;
+    max-width: 100%;
+  }
+  .contact-pill:hover { border-color: var(--accent); }
+  .contact-pill:focus-visible { outline: 2px solid var(--accent); outline-offset: 1px; }
+
+  .contact-pill .dot { flex: 0 0 auto; width: 7px; height: 7px; border-radius: 50%; }
+  .contact-pill .ctype {
+    font-family: ui-monospace, "SF Mono", "Cascadia Mono", "Roboto Mono", Menlo, Consolas, monospace;
+    font-size: 0.65rem;
+    text-transform: uppercase;
+    letter-spacing: 0.04em;
+    color: var(--ink-muted);
+    flex: 0 0 auto;
+  }
+  .contact-pill .cval {
+    overflow: hidden;
+    text-overflow: ellipsis;
+    white-space: nowrap;
+  }
+
+  .notes {
+    font-size: 0.87rem;
+    line-height: 1.6;
+    color: var(--ink);
+    max-width: 65ch;
+  }
+
+  .empty {
+    padding: 60px 2px;
+    text-align: center;
+    color: var(--ink-muted);
+    font-size: 0.9rem;
+  }
+
+  footer {
+    padding: 18px 16px 34px;
+    text-align: center;
+    font-size: 0.72rem;
+    color: var(--ink-muted);
+  }
+  footer a { color: var(--ink-muted); }
+
+  /* Step 2/3 shared: editor rows, fields */
+  .field-label {
+    font-size: 0.76rem;
+    font-weight: 600;
+    color: var(--ink-muted);
+    margin-bottom: 6px;
+    display: block;
+  }
+  .field {
+    width: 100%;
+    border: 1px solid var(--hairline);
+    border-radius: 10px;
+    padding: 10px 12px;
+    font-size: 0.87rem;
+    line-height: 1.5;
+    font-family: inherit;
+    color: var(--ink);
+    background: var(--surface);
+    resize: vertical;
+  }
+  .field:focus-visible, .field:focus {
+    outline: 2px solid var(--accent);
+    outline-offset: 1px;
+    border-color: var(--accent);
+  }
+  .hint {
+    font-size: 0.74rem;
+    color: var(--ink-muted);
+    margin: 6px 0 12px;
+    line-height: 1.5;
+  }
+  .hint code {
+    font-family: ui-monospace, "SF Mono", "Cascadia Mono", "Roboto Mono", Menlo, Consolas, monospace;
+    background: var(--accent-soft);
+    padding: 1px 5px;
+    border-radius: 4px;
+    color: var(--accent);
+  }
+
+  .template-box { margin-bottom: 20px; }
+
+  .step-empty {
+    padding: 50px 2px;
+    text-align: center;
+    color: var(--ink-muted);
+    font-size: 0.88rem;
+    line-height: 1.6;
+  }
+  .step3-note {
+    font-size: 0.82rem;
+    color: var(--ink-muted);
+    background: var(--accent-soft);
+    border-radius: 10px;
+    padding: 12px 14px;
+    line-height: 1.55;
+    margin: 4px 0 16px;
+  }
+
+  .editor-row {
+    border: 1px solid var(--hairline);
+    border-radius: var(--radius);
+    padding: 14px;
+    margin-bottom: 12px;
+    background: var(--surface);
+  }
+  .editor-name { font-weight: 600; font-size: 0.95rem; margin-bottom: 2px; }
+  .msg-reset {
+    font-size: 0.72rem;
+    color: var(--accent);
+    background: none;
+    border: none;
+    cursor: pointer;
+    padding: 8px 0 0;
+    font-family: inherit;
+  }
+  .msg-reset:hover { text-decoration: underline; }
+
+  .msg-row-footer {
+    display: flex;
+    align-items: baseline;
+    justify-content: space-between;
+    gap: 10px;
+  }
+  .char-count {
+    font-size: 0.7rem;
+    color: var(--ink-muted);
+    padding-top: 8px;
+    flex: 0 0 auto;
+  }
+
+  .send-row {
+    display: flex;
+    gap: 10px;
+    margin-top: 12px;
+    flex-wrap: wrap;
+  }
+
+  .progress-stats {
+    display: flex;
+    gap: 18px;
+    margin: 6px 0 16px;
+    flex-wrap: wrap;
+  }
+  .stat { font-size: 0.78rem; color: var(--ink-muted); }
+  .stat strong {
+    display: block;
+    color: var(--ink);
+    font-size: 1.05rem;
+    font-family: ui-monospace, "SF Mono", "Cascadia Mono", "Roboto Mono", Menlo, Consolas, monospace;
+  }
+
+  /* Promo recommendations */
+  .promo {
+    border: 1px solid var(--hairline);
+    border-radius: var(--radius);
+    margin-bottom: 20px;
+    overflow: hidden;
+    background: var(--surface);
+  }
+  .promo-toggle {
+    width: 100%;
+    display: flex;
+    align-items: center;
+    justify-content: space-between;
+    padding: 14px 16px;
+    background: none;
+    border: none;
+    cursor: pointer;
+    font: inherit;
+    color: inherit;
+    text-align: left;
+  }
+  .promo-toggle:focus-visible { outline: 2px solid var(--accent); outline-offset: -2px; }
+  .promo-toggle-title { font-weight: 700; font-size: 0.92rem; }
+  #promoChevron { transition: transform 0.2s ease; color: var(--ink-muted); flex: 0 0 auto; }
+  .promo-body { padding: 0 16px 20px; }
+  .promo-intro {
+    font-size: 0.85rem;
+    color: var(--ink-muted);
+    line-height: 1.65;
+    margin: 0 0 16px;
+  }
+  .promo-group-title {
+    font-size: 0.78rem;
+    font-weight: 700;
+    text-transform: uppercase;
+    letter-spacing: 0.03em;
+    margin: 18px 0 10px;
+    color: var(--ink);
+  }
+  .promo-good-title { color: var(--good-ink); }
+  .promo-bad-title { color: var(--bad-ink); }
+  .promo-item {
+    padding: 10px 12px;
+    border-radius: 10px;
+    margin-bottom: 8px;
+    font-size: 0.85rem;
+    line-height: 1.55;
+  }
+  .promo-item b { display: block; margin-bottom: 2px; }
+  .promo-item.good { background: var(--good-soft); }
+  .promo-item.bad { background: var(--bad-soft); }
+  .promo-list {
+    margin: 0;
+    padding-left: 18px;
+    font-size: 0.85rem;
+    line-height: 1.8;
+    color: var(--ink);
+  }
+  .promo-quote {
+    margin-top: 14px;
+    padding: 14px;
+    border-radius: 10px;
+    background: var(--accent-soft);
+    border: 1px dashed var(--accent);
+    font-size: 0.85rem;
+    line-height: 1.6;
+    font-style: italic;
+  }
+
+  /* Celebration */
+  #confettiHost {
+    position: fixed;
+    top: 0;
+    left: 0;
+    width: 100%;
+    height: 0;
+    z-index: 49;
+    pointer-events: none;
+  }
+  .confetti-dot {
+    position: fixed;
+    width: 7px;
+    height: 7px;
+    border-radius: 2px;
+    animation: confetti-burst 0.9s ease-out forwards;
+  }
+  @keyframes confetti-burst {
+    0% { transform: translate(-50%, -50%) rotate(0deg) scale(1); opacity: 1; }
+    100% { transform: translate(calc(-50% + var(--dx)), calc(-50% + var(--dy))) rotate(var(--rot)) scale(0.4); opacity: 0; }
+  }
+
+  .celebrate {
+    position: fixed;
+    top: 24px;
+    left: 50%;
+    transform: translateX(-50%) scale(0.5);
+    background: var(--accent);
+    color: var(--accent-ink);
+    padding: 18px 32px;
+    border-radius: 18px;
+    font-weight: 800;
+    font-size: 1.2rem;
+    letter-spacing: -0.01em;
+    box-shadow: var(--shadow), 0 0 0 6px var(--accent-soft);
+    z-index: 50;
+    opacity: 0;
+    pointer-events: none;
+    transition: opacity 0.2s ease;
+    text-align: center;
+    max-width: calc(100% - 32px);
+  }
+  .celebrate.show {
+    opacity: 1;
+    animation: celebrate-pop 0.6s cubic-bezier(.34, 1.56, .64, 1) forwards;
+  }
+  @keyframes celebrate-pop {
+    0%   { transform: translateX(-50%) scale(0.5) rotate(-3deg); }
+    55%  { transform: translateX(-50%) scale(1.12) rotate(2deg); }
+    78%  { transform: translateX(-50%) scale(0.96) rotate(-1deg); }
+    100% { transform: translateX(-50%) scale(1) rotate(0deg); }
+  }
+
+  @media (prefers-reduced-motion: reduce) {
+    .chevron, .row-detail, .chip, .tab, #promoChevron { transition: none; }
+    .confetti-dot { display: none; }
+    .celebrate { transition: opacity 0.2s ease; transform: translateX(-50%) scale(1); }
+    .celebrate.show { animation: none; transform: translateX(-50%) scale(1); }
+  }
+</style>
+</head>
+<body>
+<div class="wrap">
+  <header>
+    <h1>Музыкальные медиа</h1>
+    <p class="subtitle">61 издание и телеграм-канал — контакты, правила подачи и твой личный трекер рассылки.</p>
+    <div class="tabs" id="tabs" role="tablist" aria-label="Шаги"></div>
+    <div class="header-actions">
+      <span class="counter mono" id="sentCounter">Отправлено: <strong>0</strong></span>
+      <div class="btn-row">
+        <button type="button" class="btn" id="exportBtn">Экспорт JSON</button>
+        <button type="button" class="btn" id="importBtn">Импорт JSON</button>
+        <input type="file" id="importFile" accept="application/json" hidden>
+      </div>
+    </div>
+    <p class="import-status" id="importStatus" hidden></p>
+  </header>
+  <main>
+    <section id="step1">
+      <p class="counter mono"><span id="selectedCounter"></span><span id="visibleCount"></span></p>
+      <div class="filters" id="filters" role="group" aria-label="Фильтр по типу контакта"></div>
+      <div class="toggles" id="toggles" role="group" aria-label="Дополнительные фильтры"></div>
+      <div class="list" id="list"></div>
+      <div class="empty" id="emptyState" hidden>Нет изданий с таким типом контакта.</div>
+    </section>
+
+    <section id="step2" hidden>
+      <div class="step-empty" id="step2Empty" hidden>Пока никого не выбрано — вернись на шаг 1 и отметь подходящих редакторов «Брать».</div>
+      <section class="promo" id="promo">
+        <button type="button" class="promo-toggle" id="promoToggle" aria-expanded="false" aria-controls="promoBody">
+          <span class="promo-toggle-title">💡 Рекомендации о промо</span>
+          <svg id="promoChevron" width="16" height="16" viewBox="0 0 16 16" fill="none" aria-hidden="true"><path d="M4 6l4 4 4-4" stroke="currentColor" stroke-width="1.6" stroke-linecap="round" stroke-linejoin="round"/></svg>
+        </button>
+        <div class="promo-body" id="promoBody" hidden>
+          <p class="promo-intro">Собрано на основе прогона требований десятков медиа и каналов через LLM: summary их реальных требований. Я просмотрел мнения редакторов и свёл повторяющиеся паттерны. Ниже — то, что встречается снова и снова практически независимо от жанра и размера медиа. Основано на ответах десятков редакторов из подборки.</p>
+
+          <p class="promo-group-title promo-good-title">✅ Обязательно (must have)</p>
+          <div class="promo-item good"><b>1. Короткое сообщение</b>Большинство хотят сообщение, которое можно прочитать за 20–30 секунд. Идеально: кто вы; что вышло; чем релиз интересен; ссылки. Не присылайте длинный пресс-релиз в первом сообщении.</div>
+          <div class="promo-item good"><b>2. Сразу дать возможность послушать</b>Если релиз вышел — BandLink / стриминги. Если не вышел — предпрослушивание, Google Drive / Яндекс.Диск, приватная ссылка. Не заставляйте человека искать музыку самому.</div>
+          <div class="promo-item good"><b>3. Объяснить, почему релиз достоин внимания</b>Практически все хотят ответ на вопрос «Почему именно этот релиз мне стоит открыть?» — необычная идея, история создания, интересный контекст, необычный звук, реакция аудитории, первые результаты.</div>
+          <div class="promo-item good"><b>4. Минимум информации об артисте</b>Почти всегда желательно: кто вы, город, жанр, 2–3 предложения о проекте. Не заставлять редактора гуглить.</div>
+          <div class="promo-item good"><b>5. Фото и обложка</b>Очень часто просят пресс-фото, обложку, иногда облако с материалами. Медиа регулярно используют их в постах.</div>
+          <div class="promo-item good"><b>6. Писать именно тем, кому музыка подходит</b>Редакторов раздражает массовая рассылка. Нужно понимать жанр, аудиторию, формат канала — иначе письмо почти гарантированно уйдёт в корзину.</div>
+          <div class="promo-item good"><b>7. Если есть цифры — показать</b>TikTok, YouTube, стриминги, концерты, публикации — стоит привести со ссылками. Но только реальные цифры.</div>
+          <div class="promo-item good"><b>8. Писать как человеку</b>Вежливо. Без продажного тона. Без давления. Это буквально повторяется десятки раз.</div>
+
+          <p class="promo-group-title">👍 Желательно</p>
+          <ul class="promo-list">
+            <li>персонализировать сообщение</li>
+            <li>упомянуть, почему обращаетесь именно к этому медиа</li>
+            <li>отправлять заранее до релиза</li>
+            <li>иметь мультиссылку</li>
+            <li>оставить контакты</li>
+            <li>разделять текст абзацами</li>
+            <li>прислать mp3, если площадка его предпочитает</li>
+            <li>после выхода можно один раз мягко напомнить (если это допускает конкретный редактор)</li>
+          </ul>
+
+          <p class="promo-group-title promo-bad-title">❌ Точно не надо</p>
+          <div class="promo-item bad"><b>Голосовые сообщения</b>Это самый часто повторяющийся пункт. Практически все их ненавидят.</div>
+          <div class="promo-item bad"><b>Просто кинуть ссылку</b>Сообщение вида «Вот трек» или «Зацени» — почти гарантированный отказ.</div>
+          <div class="promo-item bad"><b>Огромные пресс-релизы</b>Большинство их не читает. Лучше дать ссылкой или приложением, а в сообщении оставить короткую выжимку.</div>
+          <div class="promo-item bad"><b>Писать как лучшему другу</b>Не стоит начинать с «бро», «чувак», «брат», «хитяра», «огонь». Редакторы регулярно называют это раздражающим.</div>
+          <div class="promo-item bad"><b>Навязчивость</b>Не писать каждый день, по пять сообщений, «ну как?», «послушали?», «почему не ответили?» — один из главных red flag.</div>
+          <div class="promo-item bad"><b>Давить на публикацию</b>Не требовать ответа, объяснения отказа, обязательного поста. Несколько редакторов прямо говорят, что не обязаны объяснять причины отказа.</div>
+          <div class="promo-item bad"><b>Массовая рассылка без персонализации</b>Редакторы быстро понимают, что сообщение шаблонное. Это снижает шанс публикации.</div>
+          <div class="promo-item bad"><b>Отправлять неподходящий жанр</b>Второй по частоте red flag после голосовых. Если канал пишет про инди — не отправлять кальянный рэп. Если про хип-хоп — не слать дрим-поп. И наоборот.</div>
+          <div class="promo-item bad"><b>Присылать архивы и тяжёлые файлы</b>Не архивы, не огромные вложения, не заставлять скачивать. Лучше облако или стриминги.</div>
+          <div class="promo-item bad"><b>Лесть и клише</b>«Трек о чувствах», «мы долго искали звук», «очень важный релиз», «если бы Земфира играла техно...» — редакторы хотят конкретику, а не рекламные штампы.</div>
+        </div>
+      </section>
+
+      <div class="template-box">
+        <label class="field-label" for="templateField">Шаблон сообщения (общий для всех выбранных)</label>
+        <textarea class="field" id="templateField" rows="5"></textarea>
+        <p class="hint">Плейсхолдеры: <code>{{editor_name}}</code> — имя редактора (если известно, иначе «редакция [название]»), <code>{{outlet_name}}</code> — название издания.</p>
+        <button type="button" class="btn" id="fillEmptyBtn">Заполнить пустые сообщения по шаблону</button>
+      </div>
+
+      <div class="list" id="step2List"></div>
+    </section>
+
+    <section id="step3" hidden>
+      <div class="step-empty" id="step3Empty" hidden>Пока никого не выбрано — вернись на шаг 1 и отметь подходящих редакторов «Брать».</div>
+      <p class="step3-note">Ничего не отправляется автоматически: жми на email/Telegram/VK в карточке, чтобы открыть свою почту или мессенджер и отправить сообщение самостоятельно. Галочки ниже — просто твой трекер прогресса.</p>
+      <div class="progress-stats" id="step3Stats"></div>
+      <div class="list" id="step3List"></div>
+    </section>
+  </main>
+  <footer>
+    По материалам <a href="https://i-m-i.ru/post/pravila-pitcha-v-56-muzykalnyh-media-ot-ih-avtorov" target="_blank" rel="noopener noreferrer">i-m-i.ru</a> · выбери редакторов, заполни сообщения, рассылай сам
+  </footer>
+</div>
+
+<div id="confettiHost"></div>
+<div class="celebrate" id="celebrate" role="status" aria-live="polite"></div>
+
+<script>
+const DATA = {"article": "Правила питча в 62 музыкальных медиа — от их авторов", "url": "https://i-m-i.ru/post/pravila-pitcha-v-56-muzykalnyh-media-ot-ih-avtorov", "outlets": [{"name": "«Афиша Dailу»", "site": "https://daily.afisha.ru/", "source": "https://i-m-i.ru/sources/websites/afisha-daily", "contacts": [{"type": "email", "value": "a.gorbash@afisha.ru", "url": "mailto:a.gorbash@afisha.ru"}, {"type": "tg", "value": "https://t.me/afishadaily", "url": "https://t.me/afishadaily"}, {"type": "tg", "value": "@afisha", "url": "https://t.me/afisha"}], "notes": "«Афиша Dailу» Сайт, Telegram Музыкальный редактор: Леша Горбаш Можно ли прислать релиз: да, на почту Леши Горбаша «Если чуть пошуршать, можно найти и личный контакт в телеге. Если грамотно составить сообщение и внятно общаться, у второго подхода явно больше шансов на успех, чем у первого».Требования к питчу: краткость. Не присылать большие файлы и пресс-релизы, не отправлять голосовые сообщения, не писать ночью. Напоминать о себе можно, присылать новые релизы, если о предыдущих не написали, — тоже. Можно ли купить рекламу релиза: нет", "accepts_pitches": true, "accepts_unknown_artists": null, "genre_fit_ru_indie": null, "editor_name": "Леша Горбаш"}, {"name": "Forbes Young", "site": "https://www.forbes.ru/young", "source": "https://i-m-i.ru/sources/telegram/forbes-young", "contacts": [{"type": "email", "value": "fomichev@forbes.ru", "url": "mailto:fomichev@forbes.ru"}, {"type": "tg", "value": "https://t.me/forbes_young", "url": "https://t.me/forbes_young"}, {"type": "tg", "value": "@forbes", "url": "https://t.me/forbes"}], "notes": "Forbes Young Cайт, Telegram Музыкальный редактор: Максимилиан ФомичевМожно ли прислать релиз: да, на рабочую почту Требования к релизу: «Главное понимать, что у нас не узкопрофильное музыкальное СМИ, поэтому некоторые треки могут быть просто не особо релевантными аудитории, даже если они понравятся мне». Требования к питчу: «Иногда молодые (а иногда и не молодые) исполнители просто присылают трек на Google Drive с просьбой поддержать — и все. Ни пресс-релиза, ни имени, ни фамилии, ни какой-то биографической справки — это, как мне кажется, не сильно уважительно по отношению к журналисту. Где все это искать? Почему человек ничего не хочет рассказать о себе и о композиции — что мне писать об этой новинке?»Напоминать о себе не стоит. А вот присылать новые релизы, если о предыдущих не написали, можно. «А еще прошу не обижаться, если я не отвечаю, а, например, просто ставлю реакцию на сообщение. Я могу просто в потоке не успевать. Не считывайте это, пожалуйста, за безразличие». Можно ли купить рекламу релиза: нетДелюкс-рекомендации: «Я очень хочу, чтобы все пиарщики стали грамотно оформлять пресс-релизы. Что нужно журналисту, чтобы трек с большей вероятностью поддержали? Это точно не „Бро, этот трек — просто огонь! Поддержите нас и сделайте с нами плейлист! Сделаете же? Да?” Нужны сведения о новинке, о самом исполнителе, в идеале — цитата. И, конечно, цифры. Если он уже стрелял в ТикТоке — каким треком и какое количество видео снято с использованием этого звука. Если это 2 млн на YouTube — ссылку на видео, пожалуйста. А если это сумма прослушиваний по нескольким видео — дайте ссылки на все видео. Не из вредности, а чтобы просто быть достоверным для читателей. И главное, если вас не поддержали сейчас — это не значит, что в следующий раз снова не поддержат. Никогда не расслабляйтесь!»", "accepts_pitches": true, "accepts_unknown_artists": null, "genre_fit_ru_indie": null, "editor_name": "Максимилиан Фомичев"}, {"name": "Studio 21", "site": "https://studio21.ru", "source": "https://i-m-i.ru/profiles/studio-21", "contacts": [{"type": "email", "value": "sapa13@studio21.ru", "url": "mailto:sapa13@studio21.ru"}, {"type": "email", "value": "promo@studio21.ru", "url": "mailto:promo@studio21.ru"}, {"type": "tg", "value": "https://t.me/studio21ru", "url": "https://t.me/studio21ru"}, {"type": "tg", "value": "@studio21", "url": "https://t.me/studio21"}], "notes": "Studio 21 Сайт, Telegram На вопросы отвечал ведущий Sapa13Можно ли прислать релиз: да, на почту Требования к релизу: уже состоявшийся хит, либо быстро набирающий популярность хип-хоп-трек Требования к питчу: приложить трек, пресс-релиз, промо материалы«Мы не отвечаем на письма по типу: „Йо, зацени трек”, „Чувак, чекни, это хитяра”». Напоминать о себе не стоит. Присылать новые релизы, если предыдущие не попали в эфир, — можно.Можно ли купить рекламу релиза: по вопросам рекламы писать на почту Делюкс-рекомендации: «Радиостанция — это довольно тонкий формат, рассчитанный на большую аудиторию, и, соответственно, идет очень строгая выборка музыкального продукта. В связи с этим 90% треков мы находим сами, так как мы чутко держим руку на пульсе, и мало треков которые набирают и подходят под формат, ускользнут от нас. Хотя, конечно, всякое бывает».", "accepts_pitches": true, "accepts_unknown_artists": false, "genre_fit_ru_indie": false, "editor_name": "Sapa13"}, {"name": "The Flow", "site": "https://the-flow.ru", "source": "https://i-m-i.ru/sources/websites/the-flow", "contacts": [{"type": "email", "value": "flownewsbox@gmail.com", "url": "mailto:flownewsbox@gmail.com"}, {"type": "tg", "value": "https://t.me/superslowflow", "url": "https://t.me/superslowflow"}, {"type": "tg", "value": "@gmail", "url": "https://t.me/gmail"}], "notes": "The Flow Сайт, Telegram Главный редактор: Андрей Никитин Можно ли прислать релиз: да, на почтуТребования к релизу: жанр — любой из тех, о которых пишет сайт«Думаю, что мы, и не только мы, часто ориентируемся на успех, на резонанс. Даже на небольшой. То есть, обратить внимание аудитории на Джона Гарика гораздо проще, когда более известные рэперы уже записали с ним фит — или даже просто сказали о нем что-то хорошее». Требования к питчу: «Если релиз еще не вышел, то была бы полезна ссылка на предпрослушивание. Как и пресс-релиз — мы их часто цитируем: „артист говорит о новом альбоме то-то и то-то”. Если релиз уже вышел, то присылайте ссылку на бэндлинк. Что еще? Обложка, фотки. Если вы отправите нам просто демо, чтобы познакомить нас с вашим творчеством; если вы артист пока еще без концертов и аудитории, то, к сожалению, с огромной вероятностью мы не станем ничего слушать. Такая специфика, что новостнику нужно писать новости, а не слушать демки. Но с большой вероятностью мы отреагируем, если потом эту же самую песню нам пришлет лейбл, с которым есть устойчивый контакт, с подводкой, условно „это наш новый артист, видим потенциал, делаем ставку”. Перенос коммуникации в имейл сильно помогает беречь психику. Советую всем. Присылайте письмо ночью в выходные — дежурный все равно откроет его в свое рабочее время.В советских толстых литературных журналах на странице с выходными данными была информация: „Редакция рукописи не рецензирует и в переписку не вступает”. Мне кажется, это полезное правило. Если мы опубликовали ваш материал, то вы это видите. Также уверен, редактор новостей имеет право не объяснять ни артисту, ни его пиарщице, почему о нем не написали (или написали не так, как ожидалось)».Можно ли купить рекламу релиза: нет Делюкс-рекомендации: «Присылать или не присылать нам релизы, если про вас не пишут — решаете только вы. Тут, наверное, две стратегии. Первая: обидеться, …, профит. Вторая — продолжать присылать информацию о своей деятельности». Телеграм-каналы с аудиторией до 1000 подписчиков", "accepts_pitches": true, "accepts_unknown_artists": false, "genre_fit_ru_indie": null, "editor_name": "Андрей Никитин"}, {"name": "«ДК Данс»", "site": null, "source": "https://i-m-i.ru/sources/telegram/dk-dans", "contacts": [{"type": "tg", "value": "https://t.me/dkdanceblog", "url": "https://t.me/dkdanceblog"}], "notes": "«ДК Данс» Telegram Автор канала: Никита ЗинченкоМожно ли прислать релиз: да, в предложку канала Требования к релизу: «Главное, чтобы сам артист хотел, чтобы его услышали и это не было механической рассылкой лейбла». Требования к питчу: краткая информация о релизе с жанровым обозначением (или рассказом о том, чем интересен релиз) и ссылкой на стриминги (автор слушает музыку в Spotify и на «Яндекс Музыке»)Что раздражает: «1.Когда менеджеры или представители лейблов начинают пользоваться тем, что я ответил и респектанул, и уже в открытую пользуются контактом: „А может, еще это зацените? А про это, может, напишете?”2. Войсы — это провал3. Когда пишут слишком навязчиво и много4. Когда скидывают ссылку без объяснений вообще5. Когда кидают файл с пресс-релизом (вы серьезно?)»Напомнить о себе можно при отсутствии ответа, но спустя время (через месяц). А вот присылать новые релизы, если автор отказался писать о предыдущих, не стоит. Можно ли купить рекламу релиза: да, стоимость — от 3000 рублей.«[Реклама возможна] при условии, что артист близок мне по ценностям и мне нравится его творчество. И это должна быть не реклама в духе „классный релиз” (продажа мнения), а информирование — концерты, мерч, события, сам выход альбома (безоценочно)».Делюкс-рекомендации: «Не наглейте, будьте людьми, пишите по-человечески, не навязывайтесь. Вместо дефолтного описания в духе „Если бы Земфира* (Рамазанова Земфира Талгатовна внесена Минюстом РФ в список иноагентов) родилась в Хабаровске и писала техно-поп-рэп”, лучше напишите, что вы любите в своем треке больше всего».", "accepts_pitches": true, "accepts_unknown_artists": null, "genre_fit_ru_indie": false, "editor_name": "Никита Зинченко"}, {"name": "«надеюсь, тебе понравится»", "site": null, "source": "https://i-m-i.ru/sources/telegram/tebe-ponra", "contacts": [{"type": "tg", "value": "https://t.me/tebe_ponra", "url": "https://t.me/tebe_ponra"}], "notes": "«надеюсь, тебе понравится» Telegram Можно ли прислать релиз: нетМожно ли купить рекламу релиза: нет", "accepts_pitches": false, "accepts_unknown_artists": null, "genre_fit_ru_indie": null, "editor_name": null}, {"name": "Evól Magazine", "site": null, "source": "https://i-m-i.ru/sources/telegram/evol-magazine", "contacts": [{"type": "tg", "value": "https://t.me/evol_magazine", "url": "https://t.me/evol_magazine"}], "notes": "Evól Magazine Telegram Главный редактор: Максим Грек Можно ли прислать релиз: даТребования к релизу: Подходящие жанры: хип-хоп, электроника, инди, легкая альтернатива. Неподходящие: поп и «рокешный тяжеляк». «Главный критерий — наличие стиля или, как говорит Конад, соуса». Требования к питчу: Что раздражает: «1. Когда кидают музыку, явно неподходящую для нашей аудитории2. Отсутствие индивидуального подхода в сообщении3. Если первое сообщение — войс, то это тоже минус»Напоминать о себе можно. Присылать новые релизы в том же стиле, если автор отказался писать о предыдущих, не стоит. Можно ли купить рекламу релиза: нет Делюкс-рекомендации: «Не бойтесь делиться своим творчеством, главное — находите для него подходящую аудиторию»", "accepts_pitches": true, "accepts_unknown_artists": null, "genre_fit_ru_indie": true, "editor_name": "Максим Грек"}, {"name": "Urban Noises", "site": null, "source": null, "contacts": [{"type": "tg", "value": "https://t.me/urbanoises", "url": "https://t.me/urbanoises"}], "notes": "Urban Noises Telegram Автор канала пожелал остаться анонимнымМожно ли прислать релиз: да Требования к релизу: «У меня должны быть хоть какие-то эмоции от этой музыки, чтобы я смог написать текст для канала. Все-таки тут особый формат: нужно что-то, на основе чего реально придумать зарисовку.Довольно далек от хип-хопа (но готов сделать исключение, если будет что-то близкое к „Макулатуре”, „Он Юн”, „Аигел” или 2H Company по ощущениям, хотя вряд ли это хип-хоп в традиционном смысле), никакого шансона, вряд ли буду полезен создателям техно и смежных жанров». Требования к питчу: отталкивают «хамство и диаметрально противоположные взгляды» по значимым для автора вопросам.Напоминать о себе можно через неделю–две после первого сообщения. Присылать новые релизы, если о предыдущих не написали в канале, можно. Можно ли купить рекламу релиза: нет, возможно только размещение анонса концерта. Цена договорная, «в целом символическая». Телеграм-каналы с аудиторией от 1000 до 5000 подписчиков", "accepts_pitches": true, "accepts_unknown_artists": null, "genre_fit_ru_indie": true, "editor_name": null}, {"name": "«Биг бэйби тейк»", "site": null, "source": "https://i-m-i.ru/sources/telegram/big-beybi-teyk", "contacts": [{"type": "tg", "value": "https://t.me/bigbabytake", "url": "https://t.me/bigbabytake"}], "notes": "«Биг бэйби тейк» Telegram Автор канала: Кирилл БусаренкоМожно ли прислать релиз: да, в сообщения канала «Засылать музыку стоит либо энтузиастам, которым интересно открывать новые имена, либо A&R-менеджерам лейблов, у которых такая работа — находить новые имена. Я к этим категориям не отношусь, но и бухтеть, что никогда ничего мне не присылайте не буду. Потому что ну мало ли, вдруг заинтересует».Требования к релизу: жанр — один из тех, о которых пишет автор Требования к питчу: краткость, ссылка на стриминги. Если автор отказал или ничего не ответил, напоминать о себе не стоит. После отказа также нет смысла присылать новые релизы. Можно ли купить рекламу релиза: нет Делюкс-рекомендации: «Не хамите и не пишите как лучшему другу — да и окей.Пишите такое, чтобы было интересно включить. Не стесняйтесь заходить через сравнения („звучит вот так вот”, „похоже на вот такое”) и известные имена („нам такой вот респектнул”, „чел из такой-то тусовки”). Если ничего такого нет или не придумывается, то дайте прикол какой-то, ради которого захочется включить послушать. Как пример. Мне как-то прислали послушать Фортуну 812 до его хайпа, так там питч состоял из того, что человек делает какой-то странный архивкор („Это что еще такое?” — вот такая мысль у меня сразу была), что у него есть пока что локальная популярность, но она может перерасти в большее, потому что уже есть преданные фанаты. Вот такое интересно».", "accepts_pitches": true, "accepts_unknown_artists": null, "genre_fit_ru_indie": null, "editor_name": "Кирилл Бусаренко"}, {"name": "«вирши»", "site": null, "source": "https://i-m-i.ru/sources/telegram/virshi", "contacts": [{"type": "tg", "value": "https://t.me/wiershy", "url": "https://t.me/wiershy"}], "notes": "«вирши» Telegram Автор канала: Григорий МинаевМожно ли прислать релиз: да, в сообщения канала Требования к релизу: Жанры: хип-хоп, альтернатива, гитарная музыка, R&B, электроника, авант-поп и «любые выкрутасы». Коммерческую, мейнстримную музыку присылать не стоит. Требования к питчу: «Можно хоть просто закидывать ссылки на треки с небольшим описанием, почему мне надо это заценить, хоть делать большие таблички с описанием, ссылками, но в идеале без пресс-релизов». Что раздражает: «Когда очень навязчиво рекламят музыку, спамят в лс/комменты. И пресс-релизы, конечно, потому что они всегда мертвые, пустые, слишком формальные и только отталкивают».Напоминать о себе можно. Присылать новые релизы, если о предыдущих в канале не писали, — тоже.Можно ли купить рекламу релиза: да, стоимость — от 5000 рублей", "accepts_pitches": true, "accepts_unknown_artists": null, "genre_fit_ru_indie": true, "editor_name": "Григорий Минаев"}, {"name": "«Другое поле»", "site": null, "source": "https://i-m-i.ru/sources/telegram/drugoe-pole", "contacts": [{"type": "tg", "value": "https://t.me/rifmabit", "url": "https://t.me/rifmabit"}], "notes": "«Другое поле» Telegram Автор канала: Полина ДругомиловаМожно ли прислать релиз: даТребования к релизу: жанр — рэп («Если вы саундклауд-игрок, то тоже приходите») Требования к питчу: если релиз состоялся, нужна ссылка на стриминги. Если нет — ссылка на файлообменник или сайт, где можно послушать музыку, не скачивая ее. Фрешменам нужно дать описание проекта и релиза. Что раздражает: «1. Когда напоминают о себе больше 3 раз 2. Слишком длинные пресс-релизы 3. Когда присылают много сообщений, а не единый текст одним сообщением 4. Когда не принимают отказ в рекламе музыки и продолжают писать и настаивать 5. Скидывают архивы, которые стремно распаковывать». Напоминать о себе можно, а вот присылать новые релизы, если автор отказался писать о предыдущих, не стоит. Можно ли купить рекламу релиза: нет", "accepts_pitches": true, "accepts_unknown_artists": true, "genre_fit_ru_indie": false, "editor_name": "Полина Другомилова"}, {"name": "«канал про рэп»", "site": null, "source": "https://i-m-i.ru/sources/telegram/rap-channel", "contacts": [{"type": "tg", "value": "https://t.me/rapetokal", "url": "https://t.me/rapetokal"}], "notes": "«канал про рэп» Telegram Автор канала: Карина БычковаМожно ли прислать релиз: да Требования к релизу: жанр — рэп Требования к питчу: если релиз уже состоялся, нужна ссылка на стриминги. Если нет — можно прислать файлы прямо в беседу.«Стоит соблюдать универсальные правила вежливости: писать по делу и в рабочее время в будние дни, а еще не присылать ничего лишнего — музыки, питча и ссылки на любую соцсеть будет достаточно».Напоминать о себе не стоит: «Цель коммуникации — показать свою музыку автору канала, а не договориться о посте». Присылать новые релизы, если о предыдущих не написали, — можно. Можно ли купить рекламу релиза: нетДелюкс-рекомендации: «Главная просьба — не забывать, что на том конце провода — такой же живой человек, как и вы, просто с телеграм-каналом. Поэтому давайте жить дружно и общаться вежливо».", "accepts_pitches": true, "accepts_unknown_artists": null, "genre_fit_ru_indie": false, "editor_name": "Карина Бычкова"}, {"name": "«Мне приснился сон и Walkman»", "site": null, "source": "https://i-m-i.ru/sources/telegram/walkmansdream", "contacts": [{"type": "tg", "value": "https://t.me/walkmansdream", "url": "https://t.me/walkmansdream"}], "notes": "«Мне приснился сон и Walkman» Telegram Автор канала: Егор Ежов Можно ли прислать релиз: даТребования к релизу: «У некоторых артистов, у которых цифры едва перевалили двузначное число, треки звучат интереснее, чем у „больших” артистов. Жанрами стараюсь себя не ограничивать, учитывая нынешний тренд на их смешение. Но несколько направлений все же проходит мимо меня давно: метал-рок (и близкое к очень тяжелому року) и „рэпчик” в двух неразгаданных мной ипостасях: „пацанский” и „кальянный”».Требования к питчу: если релиз состоялся, нужна ссылка на стриминги. Если нет — на файлообменник. «Если делитесь релизом, то было бы здорово иметь к нему какое-то описание (да, я из тех, кто любит пресс-релизы) и медиафайлы (не только чтобы красиво оформить пост — да просто на артиста посмотреть).То, что я точно не открою: неправильное обращение (перепутали имя/название канала: если человеку было лень поменять в своей рассылке имя, то почему мне не должно быть лень послушать его релиз?), ссылка без какого-либо описания (если кроме линка будет только «артист — название релиза», то тоже нет)».Напоминать о себе смысла нет, потому что автор просматривает все входящие сообщения. Присылать новые релизы, если о предыдущих не написали в канале, можно. «Не всегда бывает любовь с первого взгляда. Понимаю, что для многих артистов это выглядит как броски камней в стену, но кто его знает, когда это попадет в нужную мишень». Можно ли купить рекламу релиза: нет «Если что-то нравится, то на это хочется потратить время, чтобы написать об этом в канал, либо еще больше — связаться с артистом и попросить его дать небольшой комментарий про релиз. Пишу про релизы и добавляю треки только по любви».Делюкс-рекомендации: «Артисты и музжуры/блогеры/критики делают одно общее дело — создают интерес к индустрии в целом. Безусловно, в разных соотношениях и формах, но все идет к одному. Хочется, чтобы к коммуникации был доступ. У маленьких артистов встречаю следующее: „Обо мне никто не пишет”. Но как связаться с самим артистом — непонятно. Поэтому оставляйте контакты для связи — личные, менеджера, кого угодно».", "accepts_pitches": true, "accepts_unknown_artists": true, "genre_fit_ru_indie": true, "editor_name": "Егор Ежов"}, {"name": "«Музыковеточка»", "site": null, "source": "https://i-m-i.ru/sources/telegram/muzicovetochka", "contacts": [{"type": "tg", "value": "https://t.me/muzicovetochka", "url": "https://t.me/muzicovetochka"}, {"type": "tg", "value": "https://t.me/Muzicovetochka_release_bot", "url": "https://t.me/Muzicovetochka_release_bot"}], "notes": "«Музыковеточка» Telegram На вопросы отвечала один из авторов канала Диана Проценко Можно ли прислать релиз: да, в ботТребования к релизу: в подборки популярные артисты обычно не попадают («про них и без нас расскажут, а мы больше стараемся поддерживать небольших музыкантов»). «Присылать стоит музыку в любом жанре, везде есть свои бриллианты: постили и инструментальный рок, и олдскульный рэп, и радио-поп. Главное, чтобы релиз был интересным, актуальным, выделяющимся по звучанию». Требования к питчу: указывать название релиза, артиста, дату выхода, пресс-релиз/ссылку на него, давать ссылку на предпрослушивание (файл в Google Drive или на «Яндекс Диске») или мультиссылку на пресейв/прослушивание «Не раз бывали ситуации, когда релиз понравился, а человек не скинул мультилинк. Искать ссылку времени не было — и взяли другой релиз, потому что другой человек позаботился и дал все ссылочки». «Голосовые и wavки прямо в чате слушать не хочется. в этом смысле бот помогает унифицировать питчи — полезно и нам, и артистам». Напоминать о себе можно в день релиза утром или накануне. Присылать новые релизы, если о предыдущих не написали в канале, можно. Можно ли купить рекламу релиза: нет Делюкс-рекомендации: «Писать вежливо, грамотно, по делу. Не быть навязчивым („Ну как, послушали?”). Питчить каждый релиз везде, делать это заранее, до дня выхода. Не расстраиваться, если не взяли, продолжать питчить релизы. Приглашать на концерты (это козырь в арсенале артиста при общении с медиа)».", "accepts_pitches": true, "accepts_unknown_artists": true, "genre_fit_ru_indie": true, "editor_name": "Диана Проценко"}, {"name": "«мьюзик нердс»", "site": null, "source": "https://i-m-i.ru/sources/telegram/musicnerds", "contacts": [{"type": "tg", "value": "https://t.me/musicnerdss", "url": "https://t.me/musicnerdss"}], "notes": "«мьюзик нердс» Telegram Автор канала: Данила Карзанов Можно ли прислать релиз: да, но вероятность публикации присланной музыки мала. Автору нравится «самому откапывать имена: в рилсах, предложках друзей, самому натыкаться на стримингах, чем писать по просьбе». Требования к релизу: жанр — любой, кроме инди, метала, тяжелого рока и «слишком экспериментальной музыки». Требования к питчу: «пара слов о проекте (без воды)» с визуалом (например, рилсами) и ссылкой на стримингиНе писать в выходные. Не присылать большие пресс-релизы. Не отправлять голосовые сообщения. Напоминать о себе можно — примерно через неделю после первого сообщения. Присылать новые релизы, если автор отказался писать о предыдущих, не стоит. Можно ли купить рекламу релиза: нет Делюкс-рекомендации: «Просьба понимать контекст канала и что туда публикуют. Если канал про электронную музыку, рэп, тусовки и урбан-сцену, то нет смысла кидать инди-фолк или рок и гитарную музыку».", "accepts_pitches": true, "accepts_unknown_artists": null, "genre_fit_ru_indie": false, "editor_name": "Данила Карзанов"}, {"name": "«Нормальный инди-рок»", "site": null, "source": "https://i-m-i.ru/sources/telegram/normalnyy-indi-rok", "contacts": [{"type": "tg", "value": "https://t.me/normalindierock", "url": "https://t.me/normalindierock"}], "notes": "«Нормальный инди-рок» Telegram Автор канала: Дмитрий ХанчинМожно ли прислать релиз: да, но автор «оставляет за собой право не послушать и не ответить, если у него сильный загруз делами — иногда бывает и не до музыки совсем»Требования к релизу: «Однозначно стоит присылать шугейз, дрим-поп, мидвест-эмо! Пост-панк – тоже. Если вы играете что-то такое, вы – мои клиенты. Что-то близкое к традиционному русскому року, панк в чистом виде, рэп, поп присылать не стоит – есть другие каналы, специализирующиеся на такой музыке».Требования к питчу: нужны обложка и mp3-файл «Ред флаг — когда присылающий музыку человек чрезвычайно велеречив, [пишет] длинные подводки, пускается в рассуждения, хвалит какой-нибудь из моих постов, чтобы показать, что он читал канал — все это ни к чему, меня интересует жанр, город, какой-то минимальный контекст релиза. Еще бывает когда пишут: „У нас вышел релиз, вам интересно?” — это как-то странно».Напоминать о себе не стоит. А вот присылать новую музыку, если о предыдущей не написали в канале, можно. Но если был получен отказ, то не стоит. «Обращаюсь к тем, кому не ответил, кого не прочитал, не послушал: прошу прощения, это не со зла, просто не хватает на все внимания и сил».Можно ли купить рекламу релиза: нет, возможна только реклама концерта, фестиваля, канала, подкаста или лекции. Стоимость — от 2000 рублей.", "accepts_pitches": true, "accepts_unknown_artists": null, "genre_fit_ru_indie": true, "editor_name": "Дмитрий Ханчин"}, {"name": "«простые движения | Яна Динамика»", "site": null, "source": "https://i-m-i.ru/sources/telegram/prostye-dvizheniya", "contacts": [{"type": "tg", "value": "https://t.me/prostomuzyka", "url": "https://t.me/prostomuzyka"}], "notes": "«простые движения | Яна Динамика» Telegram Можно ли прислать релиз: да, в ботТребования к релизу: «Интересно рассказывать про артистов, которые делают что-то самобытное, с историей». Требования к питчу: «Обращаю внимание на сопроводительное сообщение — заинтересовало ли оно меня. Ну и на знакомые имена, конечно, реагирую больше, но для меня „знакомые имена” — не обязательно большие, так как благодаря работе я знаю много и начинающих артистов». Что раздражает: «1. Питчи в личку. Я нигде не оставляю свои личные контакты, и когда люди где-то их находят и начинают присылать свои релизы, для меня это жесткое вторжение в мое личное пространство. 2. Точно не буду взаимодействовать с человеком, который пишет так, как будто я ему обязана, и требует мгновенного ответа. 3. Отталкивают сообщения, состоящие из ничего не говорящей информации типа: „это трек о чувствах”, „мы долго искали идеальный звук”, „очень важный для артиста релиз” и прочие клише, которые можно приложить к примерно любому релизу. 4. Голосовые сообщения и ссылки на демки. 5. Не люблю, когда люди пытаются льстить, изображать, что мы друзья, или пишут про то, как они любят мой канал, хотя из сообщения очевидно, что это массовая рассылка. Понятно же, что вы пишете по рабочему вопросу — нам не обязательно дружить, чтобы рабочая коммуникация была приятно». Напоминать о себе можно, но не в рамках питча, а например, при приглашении на концерт. Присылать новые релизы, если о предыдущих в канале не писали, — можно.Можно ли купить рекламу релиза: нет, возможна только реклама концерта или коммерческих проектов для музыкантов. По вопросам рекламы писать менеджеруДелюкс-рекомендации: «Для меня телеграм-канал — это не основная работа. Иногда я в завале, и могу пару недель не разбирать входящие. Даже у тех, для кого это основная работа, бывают плохие дни и более важные дела. Давайте не забывать о том, что по ту сторону находится живой человек со своими эмоциями. Тот факт, что мы все решили в том или ином виде связать свою жизнь с музыкой и делиться любимым творчеством, поддерживать друг друга — уже круто. Я советую всем снизить важность происходящего и быть более благодарными. А еще многие артисты не думают о том, что авторы телеграм-каналов очень ценят ответную поддержку — например, репост поста про вас в ваш личный канал. На создание материалов уходит много времени и сил, и отблагодарить таким образом автора — не сложно, но поможет в поддержании отношений».", "accepts_pitches": true, "accepts_unknown_artists": true, "genre_fit_ru_indie": null, "editor_name": null}, {"name": "«Радио Мята»", "site": "https://radiomyata.ru", "source": "https://i-m-i.ru/sources/telegram/radio-myata", "contacts": [{"type": "tg", "value": "https://t.me/radiomyata", "url": "https://t.me/radiomyata"}, {"type": "tg", "value": "https://t.me/radiomyata_bot", "url": "https://t.me/radiomyata_bot"}], "notes": "«Радио Мята» сайт, Telegram Автор канала: Денис ШалдинМожно ли прислать релиз: да, в ботТребования к релизу: «Мне важна не цифра, а музыка». Начинающие артисты могут попасть в плейлист «Сверхновые».«„Мята” всегда больше тяготела к жанрам вроде инди, нео-соула, фанка, альтернативного попа и рока. Все, что звучит не заунывно. „Мята” — точно не то место, куда стоит присылать агрессивный рэп, гиперпоп и чилл».Требования к питчу: прикладывать ссылку на облако с фотографиями. «Каждую пятницу ночью я вручную ищу фото для обложек плейлистов — и очень часто их попросту нет. Сделайте несколько хороших снимков, где вас можно легко вырезать с фона и разместить на обложке. Особенно это касается плейлиста «Сверхновые» — туда подходят далеко не все фотографии, которые нам присылают».Что раздражает: «1. Если артист или его представитель прислал только ссылку без каких-либо подробностей2. Есть сейчас тенденция, связанная с кринжовыми нейросетевыми обложками, по которым ты сразу понимаешь, что тебя ждет какая-то лютая дичь. Вообще по обложке можно многое сказать о релизе, даже не слушая его3. Письма в выходные после пятничных апдейтов чаще всего теряются». Напомнить о себе накануне релиза «мягко и без давления» можно. Присылать новые релизы, если о предыдущих не написали в канале, можно. Можно ли купить рекламу релиза: нет «Это не значит, что я против поддержки, просто предлагаю артистам присылать музыку в бот — и если она классная, она найдет своего слушателя через наш эфир и плейлисты».Делюкс-рекомендации: «Я искренне уважаю артистов, которые двигаются сами, без поддержки лейблов. Мне важна атмосфера уважения — потому что артист помогает медиа, а медиа помогает артисту».", "accepts_pitches": true, "accepts_unknown_artists": true, "genre_fit_ru_indie": true, "editor_name": "Денис Шалдин"}, {"name": "«Слова с музыкой»", "site": null, "source": "https://i-m-i.ru/sources/telegram/slova-s-muzykoy", "contacts": [{"type": "tg", "value": "https://t.me/wordswithmusic", "url": "https://t.me/wordswithmusic"}, {"type": "tg", "value": "https://t.me/tribute", "url": "https://t.me/tribute"}], "notes": "«Слова с музыкой» Telegram Автор канала: Кристина СарханянцМожно ли прислать релиз: «У меня можно заказать небольшой отзыв через бота Tribute. Но решение, публиковать рецензию у себя или нет, принимаю я».", "accepts_pitches": false, "accepts_unknown_artists": null, "genre_fit_ru_indie": null, "editor_name": "Кристина Сарханянц"}, {"name": "«Слушай сюда»", "site": null, "source": "https://i-m-i.ru/sources/podcasts/listen-here", "contacts": [{"type": "tg", "value": "https://t.me/slooshaysyuda", "url": "https://t.me/slooshaysyuda"}], "notes": "«Слушай сюда» Telegram На вопросы отвечал один из авторов канала Максим Громкий Можно ли прислать релиз: даТребования к релизу: «Стоит присылать музыку, подобною той, о которой мы пишем: хип-хоп, электроника, какое-то инди, возможно, джаз. Наверное, точно не стоит, если артист работает в откровенном поп-жанре или условном тяжелом роке и его поджанрах — мы просто в этом ничего не понимаем и не сможем ничем помочь».Требования к питчу: «Если питч сопровожден простыней на 10 000 символов — просто нет ресурса это читать. Круто, когда четко, коротко и по делу .Клево, если релиз присылают со ссылкой на предпрослушивание, а не со ссылкой на пресейв и словами „завтра можно будет послушать”. Вот когда можно будет послушать — тогда и пишите!Не надо писать пять раз после питча — даже, если мы не ответили. Мы практически не зарабатываем с нашего блога, а работаем на корпоративных работах, поэтому чаще всего у нас просто нет времени ответить всем, кто пишет! Но это не значит, что мы не послушали или не обратили внимания на вашу музыку — если сообщение прочитано и осталось без ответа — скорее всего, мы просто ее не поняли и не смогли чем-то помочь».Можно ли купить рекламу релиза: нетДелюкс-рекомендации: «Всегда оставайтесь людьми, ведь мы один большой механизм, который старается делать очень клевое и большое дело. Мой совет и желание — никогда об этом не забывать!»", "accepts_pitches": true, "accepts_unknown_artists": null, "genre_fit_ru_indie": true, "editor_name": "Максим Громкий"}, {"name": "«Тима слухает»", "site": null, "source": "https://i-m-i.ru/sources/telegram/tima-listens", "contacts": [{"type": "tg", "value": "https://t.me/timasluxai", "url": "https://t.me/timasluxai"}], "notes": "«Тима слухает» Telegram Автор канала: Тима ФокинМожно ли прислать релиз: даТребования к релизу: «главное — интересная музыка»«У меня в целом мультижанровый канал, слушаю и пишу про все, за исключением метала и мега эстрадной поп-музыки из разряда нового сингла Зары и Жасмин. Не смогу адекватно написать про дарковый метал, саундклауд-рэп или эстрадную попсу, просто потому что: а) в них не разбираюсь, в) их не люблю. К сожалению, часто присылают именно такую музыку».Требования к питчу: «Формат — ссылка на облако в формате mp3 (это важно, чтобы не скачивать и долго не грузить) или сразу аудиофайл в mp3 в сообщении. Не люблю когда питч-трека занимает 3-4 средних сообщения, когда можно было всю инфу уместить в одно большое полотно с разделением абзацев». Важно соблюдать границы, не быть чрезмерно настойчивым: «По этому поводу была даже „забавная” история. Одна артистка засылала миллион пресс-релизов и сообщений в телегу. Когда я уже устал от ее настырности и перестал отвечать, она нашла мою страничку в VK и стала долбиться туда в субботу около нуля. За это я ее заблокировал в телеграме и VK, потому что достало, честно говоря. Без объяснения причин, нотаций и негатива.Через неделю мне переслали видеоразоблачение с названием „Как меня оклеветал музыкальный критик”. Суть его уже досконально не помню, но главная мысль такова — он должен был посмотреть, ответить и блокировать ни в коем случае не должен был. Я никому ничего не должен, также как и артисты мне ничего не должны.[Также] не очень понимаю, когда разные артисты обращаются ко мне „брат” и „чувак” в первой холодной рассылке. Я не против сообщения на „ты” абсолютно, но какое-то уважение должно быть сто процентов». Напоминать о себе можно: «Шанс пропустить hiddem gem всегда имеется». Присылать новые релизы, если о предыдущих не написали и не был получен отказ, — можно. Можно ли купить рекламу релиза: нетДелюкс-рекомендации: «Важно понимать жанровую специфику канала, „экспертность” журналиста или блогера в опеределенной сфере. Шанс того, что Даня Порнорэп напишет про нишевого инди-артиста с гитарой наперевес, ничтожно мал. Ну и зачем тогда этому артисту ему писать? Пусть лучше мне напишет».", "accepts_pitches": true, "accepts_unknown_artists": null, "genre_fit_ru_indie": true, "editor_name": "Тима Фокин"}, {"name": "«Унылый рок»", "site": "http://telegra.in", "source": "https://i-m-i.ru/sources/telegram/unylyy-rok", "contacts": [{"type": "tg", "value": "https://t.me/u_rock", "url": "https://t.me/u_rock"}, {"type": "tg", "value": "https://t.me/u_rock_lettersbot", "url": "https://t.me/u_rock_lettersbot"}], "notes": "«Унылый рок» Telegram Автор канала: Алексей НимандовМожно ли прислать релиз: да, в ботТребования к релизу: русскоязычная музыка. Предпочтение отдается неизвестным артистам. «УТП „Унылого рока” — великие ноунеймы, то есть музыканты, которые пишут нестыдные песни, но пока не обрели массового слушателя. В истории канала есть случаи, когда нишевый артист, о котором я писал одним из первых, позже выходил на большую аудиторию — из последних примеров вспоминается успех певицы Крыли, которая уже анонсировала первые сольники в Москве и Петербурге». Требования к питчу: краткость. Указать название коллектива и его город, дать небольшое описание и ссылку на «Яндекс музыку». Присылать одно и то же несколько раз не стоит: автор отсматривает все сообщения из бота. А вот новые релизы отправлять можно, даже если о предыдущих в канале ничего не писали. Бывали случаи, когда группа несколько лет присылала треки, которые не очень нравились автору, а потом выпускала удачную песню — и попадала в канал. Можно ли купить рекламу релиза: да (в виде, например, пост-анонса нового альбома, не рецензии), но она будет маркирована. Реклама продается через платформу Telega.in. Условия можно найти тут. Делюкс-рекомендации: «Не забывайте вести свои соцсети и обновлять их хотя бы в формате «один пост в неделю». И если вы до сих пор не снимаете рилсы, тиктоки, клипы и прочие короткие видео, пора начинать».", "accepts_pitches": true, "accepts_unknown_artists": true, "genre_fit_ru_indie": true, "editor_name": "Алексей Нимандов"}, {"name": "«Ушла в музычество»", "site": null, "source": "https://i-m-i.ru/sources/telegram/ushla-v-muzychestvo", "contacts": [{"type": "tg", "value": "https://t.me/musichestvo", "url": "https://t.me/musichestvo"}], "notes": "«Ушла в музычество» Telegram Автор канала: Саша Шнайдер Можно ли прислать релиз: да Требования к релизу: русскоязычная музыка (в том числе — музыка на местных языках). Жанры — инди, инди-фолк, инди-рок, шугейз, электроника. «Не выкладываю инструментальную музыку, довольно редко выкладываю хип-хоп и рэп, но бывают исключения.Если это сильно популярный исполнитель, я скорее выберу релиз кого-то другого — про известных музыкантов и так много кто расскажет. Но, конечно, если это, например, дебютный сингл, я вряд ли про него напишу. Сложно судить о творчестве, когда релизов слишком мало».Требования к питчу: Что раздражает: «Сообщение без приветствия и хотя бы небольшого описания. Когда сразу просто кидают трек. Скорее всего не открою, когда мне присылают старые релизы — просто потому что из того, что мне присылают, я обычно делюсь свежим (вышедшим за неделю). Когда пишут после 10 вечера: возможно, открою, но заведомо будет не очень приятно....»Напоминать о себе можно в день релиза. Присылать новую музыку, если о предыдущей не написали в канале, можно. Но если был получен отказ, то не стоит. Можно ли купить рекламу релиза: нет, возможна только реклама розыгрыша, концерта или другого музыкального события, а также телеграм-канала. Стоимость — от 600 рублей. Делюкс-рекомендации: «Хочу посоветовать не расстраиваться, когда у вашего релиза нет медийной и редакционной поддержки. Большую роль здесь играет человеческий фактор, так что просто продолжайте и не бойтесь просить честную обратную связь, когда это возможно».", "accepts_pitches": true, "accepts_unknown_artists": true, "genre_fit_ru_indie": true, "editor_name": "Саша Шнайдер"}, {"name": "Чебанов", "site": null, "source": "https://i-m-i.ru/sources/telegram/chebanov", "contacts": [{"type": "tg", "value": "https://t.me/neverfakehiphop", "url": "https://t.me/neverfakehiphop"}], "notes": "Чебанов Telegram Автор канала: Давид Чебанов Можно ли прислать релиз: «Сейчас я отслушиваю музон из лички только в рамках консультаций, где мы с артистом обсуждаем не только треки, но и их позиционирование, сильные и слабые стороны, целевую аудиторию — все, что помогает найти свой путь. Это платная история, и я отношусь к ней серьезно. Такой подход кажется мне честнее и глубже, и намного больше даст артисту, чем быстрая «оценка демки из уважения» или френдли репост».", "accepts_pitches": false, "accepts_unknown_artists": null, "genre_fit_ru_indie": null, "editor_name": "Давид Чебанов"}, {"name": "«Чифирнуть бы — ништяк»", "site": null, "source": "https://i-m-i.ru/sources/telegram/chifirnut-nishtyak", "contacts": [{"type": "tg", "value": "https://t.me/chifirvradost", "url": "https://t.me/chifirvradost"}], "notes": "«Чифирнуть бы — ништяк» Telegram Автор канала: Наташа ХомяковаМожно ли прислать релиз: да, «обязательно»Требования к релизу: жанры: шансон, шансон-рэп «Я вообще нежно люблю тотальных ноунеймов, среди них встречаются бриллиантики». Требования к питчу: «Если пресс-релиз написан жопой, через GPT или не несет в себе ничего, кроме воды, — это сразу до свидания. Шансон — про жизнь и душу, вот и описание трека должно быть живым и душевным. Голосовые сообщения вместо текста – полный отстой. И когда пишут по строчкам, отправляя каждое слово отдельным сообщением – всего хорошего. Чем больше фактуры будет в сообщении, тем круче. Что за артист, откуда взялся, почему выбрал этот жанр и такую тему песни. Прикольные факты из истории песни, биографии артиста с привязкой к релизу – ништяк. Просто прислать ссылку на „Яндекс Диск” — так себе заход. Если артист пишет сам и не знает, что сказать о себе, так и должно быть написано в сообщении: „У меня пока нет бабла на менеджера, лейблы меня не подписывают, друзья — кони, поэтому двигаюсь сам, вот мой трек, там вся суть, написал в 17 лет, когда первый раз блевал на трубах, послушай, пожалуйста”». Напоминать о себе стоит только в том случае, если автор пообещал сделать пост — и забыл. Присылать новые релизы, если о предыдущих не написали, — можно.Можно ли купить рекламу релиза: нет", "accepts_pitches": true, "accepts_unknown_artists": true, "genre_fit_ru_indie": false, "editor_name": "Наташа Хомякова"}, {"name": "«Что послушать»", "site": null, "source": "https://i-m-i.ru/sources/telegram/chto-poslushat", "contacts": [{"type": "tg", "value": "https://t.me/chto_music", "url": "https://t.me/chto_music"}, {"type": "tg", "value": "https://t.me/ChtoMusicBot", "url": "https://t.me/ChtoMusicBot"}], "notes": "«Что послушать» Telegram Главный редактор: Павел КоффМожно ли прислать релиз: да, в личные сообщения главному редактору или кураторам жанровых направлений, но лучше — в бот Требования к релизу: «О популярных и хайповых вряд ли напишем, так как ориентируемся в основном на малоизвестных исполнителей. Мы их ласково называем „сверхновыми”.У нас 6 жанровых каналов (поп, рок/альтернатива, инди, электроника, фолк, хип-хоп) и один мой — главредский о новой музыкальной реальности. Если попадаете хотя бы по одному жанру и, тем более, если выпустили альбом — пишите. Ну а для всего неформатного у нас есть подвал с опытным авангардистом времён Курёхина и Мамонова». Требования к питчу: изложены в первом сообщении бота Что раздражает: «1. Войсы — однозначно в скам2. Демки3. Ссылки на папки с кучей файлов. Если что, слушаем только официальные релизы.4. Гипербольшие портянки текста. 5. Неуверенность и куча вопросов „а можно?”»Напоминать о себе можно, но через несколько недель после первого сообщения: «Проблема с обратной связью есть, мы ее решаем и скоро запустим нового бота, с помощью которого можно будет отслеживать статус питчинга, как заказ в Вайлдберриз». Присылать новые релизы, если о предыдущих не написали в канале, можно. Можно ли купить рекламу релиза: возможен платный обзор на релиз, который стоит дороже обычных рекламных постов с анонсом мероприятий или услугами и товарами для музыкантов. По вопросам рекламы писать в личные сообщенияДелюкс-рекомендации: «Просьба не стесняться и смело заявлять о себе. А еще круто дружить и поддерживать друг друга. Любви хватит на всех».", "accepts_pitches": true, "accepts_unknown_artists": true, "genre_fit_ru_indie": true, "editor_name": "Павел Кофф"}, {"name": "Analitix", "site": null, "source": "https://i-m-i.ru/sources/telegram/analitix", "contacts": [{"type": "tg", "value": "https://t.me/AnalitixMusic", "url": "https://t.me/AnalitixMusic"}], "notes": "Analitix Telegram Можно ли прислать релиз: да Можно ли купить рекламу релиза: да, cтоимость — от 1000 до 5000 рублей, зависит от формата", "accepts_pitches": true, "accepts_unknown_artists": null, "genre_fit_ru_indie": null, "editor_name": null}, {"name": "Capybara Tapes", "site": null, "source": "https://i-m-i.ru/sources/telegram/capybara-tapes", "contacts": [{"type": "tg", "value": "https://t.me/capybaratapes", "url": "https://t.me/capybaratapes"}], "notes": "Capybara Tapes Telegram Автор канала: Борис Стародубцев Можно ли прислать релиз: да «Мне кажется, тем, у кого больше тысячи прослушиваний, я не особо нужен, им лучше Паша Борисов или Коля Редькин».Требования к питчу: «Обычно пишут сообщение с кратким описанием и ссылкой на „Яндекс Диск”. Иногда — буквально пара фраз, мол, „послушайте, если вам не трудно”. Иногда с чуть более подробным описанием. Иногда со ссылкой на красивый пресс-релиз».Напоминать о себе можно (“Прошу прощения у всех, кого не послушал. Смело дергайте меня, если для вас это прям важно”). Присылать новые релизы, если о предыдущих не написали, — тоже. Писать ночью можно. Можно ли купить рекламу релиза: да, но автору должен понравиться материал: «Так было с Ooes. Мне понравилась ипишка, и я подробно написал с удовольствием».", "accepts_pitches": true, "accepts_unknown_artists": true, "genre_fit_ru_indie": null, "editor_name": "Борис Стародубцев"}, {"name": "house of culture", "site": null, "source": "https://i-m-i.ru/sources/telegram/house-of-culture", "contacts": [{"type": "tg", "value": "https://t.me/houseoftexts", "url": "https://t.me/houseoftexts"}], "notes": "house of culture Telegram Автор канала: Иван Шульц Можно ли прислать релиз: даТребования к релизу: «необычная электроника в разных формах, хип-хоп на стыке с ней». Требования к питчу: ссылка на стриминги «Пишите пресс-релизы максимально лаконично и по делу: жанр, короткое описание особенностей релиза, обложка — этого достаточно». Напоминать о себе не стоит. Присылать новые релизы, если автор пропустил сообщения о предыдущих, — можно. Что раздражает: «когда просто присылают ссылку без элементарного приветствия». Можно ли купить рекламу релиза: нет", "accepts_pitches": true, "accepts_unknown_artists": null, "genre_fit_ru_indie": false, "editor_name": "Иван Шульц"}, {"name": "oliverdead channel", "site": null, "source": "https://i-m-i.ru/sources/telegram/oliverdead-channel", "contacts": [{"type": "tg", "value": "https://t.me/oliverdeadchannel", "url": "https://t.me/oliverdeadchannel"}, {"type": "vk", "value": "https://vk.com/oliverdead", "url": "https://vk.com/oliverdead"}], "notes": "oliverdead channel Telegram, VK Автор канала: ВалентинМожно ли прислать релиз: даТребования к релизу: «Лучше ознакомляться с форматом контента на присылаемый канал, потому что порой люди присылают контент со словами „он вам подойдет”, хотя тот объективно никак не связан с тематикой канала — будто бы они не заходили туда вовсе и просто сделали рассылку». Требования к питчу: ссылки на прослушиваниеЧто раздражает: «Когда человек пишет безграмотно, не здоровается, постоянно напоминает о себе и требует к себе внимания, когда ему не обещали никаких сроков». Напоминать о себе можно. Присылать новую музыку, если о предыдущей не написали в канале, — тоже. Можно ли купить рекламу релиза: нет", "accepts_pitches": true, "accepts_unknown_artists": null, "genre_fit_ru_indie": null, "editor_name": "Валентин"}, {"name": "Paprika Magazine", "site": "https://docs.google.com/forms/d/e/1FAIpQLSeZg-qTTuJZ-chKnA4MLd40INCaOEUGWmb4Dp0MSaNfp4FJwQ/viewform", "source": "https://i-m-i.ru/sources/telegram/paprika-magazine", "contacts": [{"type": "email", "value": "Magazinepaprika.magazine@mail.ru", "url": "mailto:Magazinepaprika.magazine@mail.ru"}, {"type": "tg", "value": "https://t.me/paprika_magazine", "url": "https://t.me/paprika_magazine"}, {"type": "tg", "value": "https://t.me/iccuwanng", "url": "https://t.me/iccuwanng"}], "notes": "Paprika Magazine Telegram Главный редактор: Денис Шмидт Можно ли прислать релиз: да, через гугл-форму инициативы #PaprikaSupports. Релизы могут попасть в рубрику Independent&Unknown, если музыка подходит под тематику какой-либо из подборок.Требования к релизу: «Заранее ознакомьтесь с нашим селекшеном музыки и не присылайте то, что явно не подойдет нашему изданию (например, коммерческую музыку, поп, очередной однотипный рэп-альбом, ИИ-музыку). Желательно, чтобы ваша музыка была доступна хотя бы на одной из следующих платформ: Nina Protocol, BandCamp, SoundCloud».Требования к питчу: указаны в гугл-форме («можно добавить в текстовые поля дополнительную информацию — что угодно, что хотите сказать»).Напоминать о себе не стоит: «Если мы не выложили ваш релиз, то либо ещё не пришла его очередь, либо мы его не выбрали». Можно ли купить рекламу релиза: нет. С другими коммерческими предложениями можно написать на почту или в личные сообщения главному редактору в Telegram. «Если мы сами захотим рассказать о релизе, то сможем предложить вам варианты форматов (пост, интервью, коллаборация)». Делюкс-рекомендации: «Мы довольно трепетно относимся к нашему контенту и никогда не рекомендуем читателям то, что нам самим не нравится, что не проходит через фильтр нашей редакции. Не расстраивайтесь, если мы не готовы рассказывать о вашем релизе. Просто у нас свои вкусы на музыку. Делайте музыку для себя, а не для аудитории или ради денег/славы. Руководствуйтесь своими вкусами, не падите жертвой общественно правильного или популярного. Выпускайте свои релизы на платформах, которые уважают музыкантов».", "accepts_pitches": true, "accepts_unknown_artists": true, "genre_fit_ru_indie": true, "editor_name": "Денис Шмидт"}, {"name": "Radar", "site": null, "source": null, "contacts": [{"type": "tg", "value": "https://t.me/rdrcast", "url": "https://t.me/rdrcast"}], "notes": "Radar Telegram Автор канала: Игорь КарцевМожно ли прислать релиз: да, «но не на публикацию, а для личной оценки от редакции»: «В таком случае послушать можем любой трек от любого артиста независимо от жанра и бэкграунда»«Для безвозмездной публикации у нас существует рубрика „Микс от подписчика”. Любой подписчик может прислать электронный микстейп на публикацию. Если музыка подходит по формату, то в порядке живой очереди публикуем все миксы 1-2 раза в неделю». Требования к релизу: жанр — «все, кроме хип-хопа и попсы»Требования к питчу: «Лучше писать текстом с конкретным запросом. Отвечаем в любое время, кроме ночи, потому что спим».Присылать новую музыку, если о предыдущей не написали в канале, можно, если она подходит по формату. Можно ли купить рекламу релиза: да, cтоимость — от 4000 рублейТелеграм-каналы и VK-паблики с аудиторией от 5000 подписчиков", "accepts_pitches": true, "accepts_unknown_artists": true, "genre_fit_ru_indie": true, "editor_name": "Игорь Карцев"}, {"name": "«Альбомы по пятницам»", "site": null, "source": "https://i-m-i.ru/sources/telegram/albums-on-friday", "contacts": [{"type": "email", "value": "frailty.nine@gmail.com", "url": "mailto:frailty.nine@gmail.com"}, {"type": "tg", "value": "https://t.me/albumsweekly", "url": "https://t.me/albumsweekly"}, {"type": "tg", "value": "@gmail", "url": "https://t.me/gmail"}], "notes": "«Альбомы по пятницам» Telegram Автор канала: Павел БорисовМожно ли прислать релиз: да, в личные сообщения или на почтуТребования к релизу: жанр — любой, но лучше ориентироваться на то, о чем пишет автор Требования к питчу: присылать альбом заранее (примерно за неделю до выхода) ссылкой на Google Drive или «Яндекс Диск», не файлом в телеграме. Приложить пресс-релиз, из которого будет понятна история группы/исполнителя или альбома. Не стоит писать ночью. Напомнить о себе незадолго до релиза можно. Присылать новые релизы, если о предыдущих не написали в канале, — тоже. «Только не надо спрашивать: „Ну чего?”. Я иногда сам не знаю, напишу или нет. Просто представьте, в какой форме сами хотели бы, чтобы вам незнакомый человек рассказал о новой музыке — и в такой форме и пишите». Можно ли купить рекламу релиза: нет Делюкс-рекомендации: «Просто людьми будьте — и все».", "accepts_pitches": true, "accepts_unknown_artists": null, "genre_fit_ru_indie": true, "editor_name": "Павел Борисов"}, {"name": "«А можно потанцевальней?»", "site": null, "source": "https://i-m-i.ru/sources/telegram/bestdjchannel", "contacts": [{"type": "tg", "value": "https://t.me/bestdjchannel", "url": "https://t.me/bestdjchannel"}], "notes": "«А можно потанцевальней?» Telegram Автор канала: Антон СавенкоМожно ли прислать релиз: да, но автор редко пишет посты по входящим заявкамТребования к релизу: жанр — «строго» из тех, о которых пишет автор Требования к питчу: видеосниппет на лучшую песню (файл не должен быть большим) и краткая информация о проекте с обязательными ссылками на соцсети и на музыку Напоминать о себе не стоит. После отказа также нет смысла присылать новые релизы.Можно ли купить рекламу релиза: нетДелюкс-рекомендации: предложение послушать музыку не должно звучать как требование. Также стоит учиться адекватно реагировать на отказ. «Недавно девушка написала мне, что „жалеет, что у меня нет вкуса” — я ей ответил, что жалею, что она не может нормально воспринимать, что ее музыка может проходить мимо людей».", "accepts_pitches": true, "accepts_unknown_artists": null, "genre_fit_ru_indie": false, "editor_name": "Антон Савенко"}, {"name": "Вася Конад", "site": null, "source": "https://i-m-i.ru/sources/telegram/vasya-konad", "contacts": [{"type": "tg", "value": "https://t.me/vasily_konad", "url": "https://t.me/vasily_konad"}], "notes": "Вася Конад Telegram Можно ли прислать релиз: да, с пометкой, что нужна консультация«Если артист хочет, чтобы я послушал его музыку и дал подробный фидбек — я могу это сделать в формате платной консультации. Если это какой-то уникум — его музыка сама найдет меня, даже без прямого запроса артиста».Требования к релизу: «свежая и актуальная музыка в любых жанрах. Исключение: супер-попса и кальян — не моя тема».Требования к питчу: Что раздражает: «1. Простыня больше трех абзацев2. Тейк „мы перевернули / перевернем игру”3. 30 треков сходу4. Безграмотность5. Неумение выражать свои мысли емко и четко». Напоминать о себе можно через день–два после первого сообщения. Присылать новые релизы, если о предыдущих не писали в канале, можно. «Иногда нужно просто попасть в настроение — есть кейсы, когда я находил людей себе в команду просто открыв непрочитанные от нечего делав и изучив их предложения. Так, например, я нашел режиссера своей мечты».Можно ли купить рекламу релиза: да, стоимость обсуждаема", "accepts_pitches": false, "accepts_unknown_artists": null, "genre_fit_ru_indie": true, "editor_name": null}, {"name": "«Всякая годная попса»", "site": null, "source": "https://i-m-i.ru/sources/telegram/modern-pop", "contacts": [{"type": "tg", "value": "https://t.me/popgodnota", "url": "https://t.me/popgodnota"}, {"type": "tg", "value": "https://t.me/pop_priemnik_bot", "url": "https://t.me/pop_priemnik_bot"}, {"type": "vk", "value": "https://vk.com/popgodnota", "url": "https://vk.com/popgodnota"}], "notes": "«Всякая годная попса» Telegram, VK Можно ли прислать релиз: да, в личные сообщения VK-группы или в ботТребования к релизу: предпочтение отдается альбомам, но синглы присылать тоже можно: они могут попасть в плейлисты новинок «Рекомендуем вам подумать, точно ли вашу музыку можно назвать попсой. Если вы сами ее не можете так назвать, вряд ли она нам подойдет».Требования к питчу: не напоминать о себе при отсутствии ответа: “Если ваш трек не появился в плейлисте, значит, скорее всего, он нам не понравился”.Можно ли купить рекламу релиза: нет", "accepts_pitches": true, "accepts_unknown_artists": null, "genre_fit_ru_indie": false, "editor_name": null}, {"name": "«Гараж»", "site": null, "source": "https://i-m-i.ru/sources/telegram/garazh", "contacts": [{"type": "tg", "value": "https://t.me/GarageRobot", "url": "https://t.me/GarageRobot"}], "notes": "«Гараж» Telegram На вопросы отвечал редактор Егор Лоскутов Можно ли прислать релиз: да, в комментариях, в рубрике, где люди делятся своей музыкой, а также в личные сообщения авторамТребования к релизу: жанр — преимущественно рэпМожно ли купить рекламу релиза: нет", "accepts_pitches": true, "accepts_unknown_artists": null, "genre_fit_ru_indie": false, "editor_name": "Егор Лоскутов"}, {"name": "«Край ми айривер т30»", "site": null, "source": "https://i-m-i.ru/sources/telegram/cry-me-iriver-t30", "contacts": [{"type": "tg", "value": "https://t.me/cry_me_iriver_t30", "url": "https://t.me/cry_me_iriver_t30"}], "notes": "«Край ми айривер т30» Telegram Автор канала: Леша Горбаш Можно ли прислать релиз: да Требования к релизу: жанр — один из тех, о которых пишет автор Требования к питчу: идеальное сообщение — три абзаца о проекте со ссылками на музыку.«Если незнакомый человек скидывает мне вавку на 150 мегабайтов, я никогда ее не включу. Если наш диалог начинается с войса, это отличная заявка на то, чтобы я не ответил. Если мне напишут в три часа ночи, это гэмбл. Еще я негативно воспринимаю громкие сравнения: „Я новый Иван Дорн/Скриптонит/Платина” — и далее по списку. Тут автоматически ожидания как от этих имен — и 9 раз из 10 начинающие музыканты им проигрывают (это нормально, но портит впечатление)». Напоминать о себе можно, присылать новые релизы, если о предыдущих не написали, — тоже. Можно ли купить рекламу релиза: да«Я не верю, что платные посты у совсем маленьких каналов могут увеличить охваты. Если я не писал о вас бесплатно, вряд ли пост за бабки приведет вам огромное количество аудитории. Но если кто-то все же считает, что это хорошая тема, — давайте пробовать.Я вполне осознанно завышаю ценник на такие публикации и чуть отпугиваю людей, потому что мне не близок формат. В последний раз, кажется, попросил то ли 15000, то ли 20000 рублей». Делюкс-рекомендации: не расстраиваться из-за отказов, не требовать ничего от автора, вежливо общаться. Если к питчу приложена общая ссылка на стриминги, нужно учитывать, что человек не пойдет дальше топа треков и последнего релиза (например, если фокус-трек другой, нужно это указать).", "accepts_pitches": true, "accepts_unknown_artists": null, "genre_fit_ru_indie": null, "editor_name": "Леша Горбаш"}, {"name": "«Новая звуковая волна»", "site": null, "source": "https://i-m-i.ru/sources/telegram/novaya-zvukovaya-volna", "contacts": [{"type": "tg", "value": "https://t.me/new_soundwave", "url": "https://t.me/new_soundwave"}], "notes": "«Новая звуковая волна» Telegram Автор канала: Кирилл Конторщиков Можно ли прислать релиз: даТребования к релизу: «Лучше всего присылать электронные релизы. Я точно не возьму в канал поп-музыку радио-формата и хип-хоп». Требования к питчу: нужна ссылка на стриминги (кроме Spotify) Что раздражает: «1. Голосовые сообщения2. Графомания в пресс-релизах3. Сообщения, начинающиеся с „Я выпустил крутой релиз.....”4. Питч поздно ночью 5. Релиз, который скидывают в виде zip-архива». Напоминать о себе не стоит. Присылать новые релизы, если о предыдущих не написали, можно только в том случае, если музыка изменилась. Можно ли купить рекламу релиза: нет«Часто бывает такое, что артисты в знак благодарности за публикацию кидают мне символический донат. А если говорить о чистой коммерции — то такого нет». Делюкс-рекомендации: «Я сам электронный артист и уже давно перестал питчить свою музыку по причине того, что мне уже не важно, сколько человек послушает мою музыку, для меня это прежде всего способ самовыражения.А артистам я хотел бы сказать очень простую вещь — будьте искренними с собой и создавайте музыку ту, которая в перспективе не прослушивания вам принесет, а внутреннее удовлетворение от проделанной работы. Тогда и питч у вас будет не сделанный под копирку. Музыка у вас тогда тоже будет уникальной, которую точно захотят хотя бы послушать, прежде чем что-то написать».", "accepts_pitches": true, "accepts_unknown_artists": null, "genre_fit_ru_indie": false, "editor_name": "Кирилл Конторщиков"}, {"name": "«новая музыка. максимально коротко»", "site": null, "source": null, "contacts": [{"type": "tg", "value": "https://t.me/musicinanutshell", "url": "https://t.me/musicinanutshell"}], "notes": "«новая музыка. максимально коротко» Telegram Автор канала: Александр Горбачев* (Горбачев Александр Витальевич внесен Минюстом РФ в список иноагентов)Можно ли прислать релиз: да Требования к релизу: жанры — любые, кроме очень тяжелых. Требования к питчу: присылать только альбомы (автор не пишет про песни и клипы), не отправлять голосовые сообщения, не присылать пресс-релизные тексты. Напоминать о себе не стоит: автор слушает все, что ему присылают. Присылать новые релизы, если автор пропустил сообщения о предыдущих (не отказывал), — можно. Можно ли купить рекламу релиза: нет", "accepts_pitches": true, "accepts_unknown_artists": null, "genre_fit_ru_indie": true, "editor_name": "Александр Горбачев"}, {"name": "«По фактам»", "site": null, "source": "https://i-m-i.ru/sources/telegram/pofactam", "contacts": [{"type": "tg", "value": "https://t.me/pofactam", "url": "https://t.me/pofactam"}], "notes": "«По фактам» Telegram Автор канала: Александр МучаевМожно ли прислать релиз: да Требования к релизу: «Лео обожает шугейз, я люблю олдскульный рэп и разновидности техно и транса. Опираемся на свои вкусы, поэтому если что-то не понравилось, мы всего лишь субъективные диванные эксперты. Рады всем жанрам и стилям». Требования к питчу: «Формат простой: представиться и выслать файл + ссылку на пресейв + сниппет + краткую историю создания. Такие авторы сразу попадают если не в рай, то точно в списки приятных собеседников и сильно экономят время. Никаких особенных риторических приемов не требуется».Напоминать о себе можно — например, через сутки после первого сообщения. Присылать новые релизы, если о предыдущих в канале не писали, можно. «Всегда рады настойчивым — ведь бывает, что отслушиваем не сразу. К сожалению, отвечать всем максимально оперативно не выходит. На то мы и независимые авторы». Можно ли купить рекламу релиза: нет Делюкс-рекомендации: «Самое главное — помнить, что авторы пишут субъективное мнение без цели огорчить артиста. Ведь пока о музыке спорят и дискутируют, музыкальных журналистов не заменят нейросетки».", "accepts_pitches": true, "accepts_unknown_artists": null, "genre_fit_ru_indie": true, "editor_name": "Александр Мучаев"}, {"name": "«Родной звук»", "site": null, "source": "https://i-m-i.ru/sources/telegram/rodzvuk", "contacts": [{"type": "tg", "value": "https://t.me/rodzvuk", "url": "https://t.me/rodzvuk"}, {"type": "tg", "value": "@rodzvuk", "url": "https://t.me/rodzvuk"}, {"type": "tg", "value": "https://t.me/rodpromo", "url": "https://t.me/rodpromo"}, {"type": "vk", "value": "https://vk.com/rodzvuk", "url": "https://vk.com/rodzvuk"}, {"type": "vk", "value": "https://vk.com/innashoo", "url": "https://vk.com/innashoo"}], "notes": "«Родной звук» Telegram, VK Главный редактор: Вадим ЧувашевМожно ли прислать релиз: да, либо в VK (инструкция), либо в Telegram-ботТребования к релизу: жанр — любой. «Релиз должен быть уже доступен к прослушиванию на стримингах. До выхода релизы мы не слушаем». Требования к питчу: пост должен быть предложен согласно правиламМожно ли купить рекламу релиза: можно, писать в личные сообщения Инне в VK или Иннокентию в Telegram", "accepts_pitches": true, "accepts_unknown_artists": null, "genre_fit_ru_indie": true, "editor_name": "Вадим Чувашев"}, {"name": "«Русская кибернетика»", "site": "https://contact.ruscyber.ru/", "source": "https://i-m-i.ru/sources/podcasts/russian-cybernetics", "contacts": [{"type": "email", "value": "contact@ruscyber.ru", "url": "mailto:contact@ruscyber.ru"}, {"type": "tg", "value": "https://t.me/ruscyber", "url": "https://t.me/ruscyber"}, {"type": "tg", "value": "@ruscyber", "url": "https://t.me/ruscyber"}, {"type": "vk", "value": "https://vk.com/ruscyber", "url": "https://vk.com/ruscyber"}], "notes": "«Русская кибернетика» Telegram, VK Автор проекта: Евгений СваловМожно ли прислать релиз: да, на почту или через форму Требования к релизу: Жанры: хаус, техно, брейкбит, электроника. «Не подойдёт жёсткое, наша аудитория — массовый слушатель электронной музыки. При рассмотрении заявок ориентируемся только на музыку, а не количество прослушиваний и подписчиков».Требования к питчу: «Открываем все питчи. Первым делом обращаем внимание на возможность сразу послушать аудио, в идеале — по ссылке на файл в облаке. Не рассматриваем репосты, направленные в личные сообщения без сопроводительного текста».Напоминать о себе можно через неделю. Присылать новую музыку, если о предыдущей не написали в канале, можно — если убедились, что в эфирах, подкастах и плейлистах звучит похожая музыка. Можно ли купить рекламу релиза: да, если релиз подходит по жанру. По вопросам рекламы писать на почту. Делюкс-рекомендации: «Ценим, когда менеджер/артист предварительно проверил наш репертуар и не шлёт наугад. Особенно ценим, когда премьера — не просто сыграть трек, а эксклюзив накануне релиза, прямая речь артиста или другой маленький спецпроект (всегда готовы подумать вместе с вами)».", "accepts_pitches": true, "accepts_unknown_artists": true, "genre_fit_ru_indie": false, "editor_name": "Евгений Свалов"}, {"name": "«Сломанные пляски»", "site": null, "source": "https://i-m-i.ru/sources/telegram/broken-dance", "contacts": [{"type": "tg", "value": "https://t.me/brokendance", "url": "https://t.me/brokendance"}], "notes": "«Сломанные пляски» Telegram Автор канала: Николай Редькин Можно ли прислать релиз: да, «но это не очень работающая схема»: «Я привык узнавать о музыке естественным путем». «В случае с авторами телеграм-каналов и микромедиа, да и больших медиа, питч — это крайне малоэффективная штука. Она не работает. Мне присылают новую музыку в больших количествах. Предложение превышает спрос: поток превышает мои возможности. В этом потоке попадается что-то классное, но обычно это крепкий хороший мидок». Требования к релизу: жанр — любой, но автор «не очень ориентирован на метал и техно» Требования к питчу: идеальный формат — одно предложение о группе вместо большого пресс-релиза («умение кратко излагать мысль — важное качество»), ссылка на BandLink, пара вертикальных видео с кусочками песен «Вертикалки — лучший способ моментально составить впечатление о музыке и посмотреть, как все это выглядит». «Раздражает, когда регулярно пингуют насчет ответа, но тут я сразу архивирую сообщения. И когда видосы весят больше 100 мб»Можно ли купить рекламу релиза: нет Делюкс-рекомендации: «Есть смысл стучаться всегда во все двери, но главное это делать ненавязчиво. Нужен идеальный баланс между напористостью и ненавязчивостью. У меня в жизни бывало много случаев, когда мне человек писал, писал, писал, предлагал музыку послушать. И в итоге я кликаю и понимаю, что это, очень круто. Что я по своей дурости не смотрел — ленился или не находил времени послушать. Приведу пример. Когда менеджер певца Yerkatt присылал мне его музыку, я все ленился жмякнуть по ссылке. И потом мой друг и коллега Антон Савенко публикует у себя в канале две вертикалки и короткий текст про альбом Yerkatt. Я кликаю на первый видос — и с ходу „бабах”, это очень круто, про это нужно рассказывать, это музыка сфер».", "accepts_pitches": true, "accepts_unknown_artists": null, "genre_fit_ru_indie": true, "editor_name": "Николай Редькин"}, {"name": "«Спасибо, послушаю»", "site": null, "source": "https://i-m-i.ru/sources/telegram/spasibo-poslushayu", "contacts": [{"type": "email", "value": "spaspos@avtormedia.ru", "url": "mailto:spaspos@avtormedia.ru"}, {"type": "tg", "value": "https://t.me/spaspos", "url": "https://t.me/spaspos"}, {"type": "tg", "value": "@avtormedia", "url": "https://t.me/avtormedia"}], "notes": "«Спасибо, послушаю» Telegram Автор: Андрей Васильев Можно ли прислать релиз: да, написать на почту«Я могу не ответить или ответить не сразу — и к этому надо быть готовым. От меня можно получить мое личное мнение, без промо, рекламы и детальных советов». Требования к релизу: «оформленный релиз, а не просто аудиофайл»«Стоит присылать музыку, которая соответствует формату канала. Металкор и брейкбит слушать я вряд ли буду, потому что это не мой профиль».Требования к питчу: ссылка на «Яндекс Музыку», Spotify или Bandcamp, чтобы «была возможность не просто аудиофайл прослушать, а посмотреть на оформление обложки, количество прослушиваний». «Не открою трек, когда это просто информационная массовая рассылка по блогерам и музканалам. Если из сообщения видно, что человек знает, кому он пишет, есть хотя бы персонализированное приветствие, пара вводных слов о том, почему пишут именно мне — это все располагает к ответу. А если это просто безликий пресс-релиз „Вашему вниманию предлагается сингл группы такой-то..”, то едва ли я буду его слушать. То же самое касается и фамильярных сообщений, типа „Я тут написал тречок, зацени, скажи че думаешь”. Напоминать о себе можно через две недели после первого сообщения. Присылать новые релизы после получения отказа не стоит. Можно ли купить рекламу релиза: нет Делюкс-рекомендации: «Мне важно, чтобы из сообщения было понятно, чего конкретно от меня хотят. Формулировка „Послушайте наш новый трек” как будто не предполагает никакого ответа».", "accepts_pitches": true, "accepts_unknown_artists": null, "genre_fit_ru_indie": null, "editor_name": "Андрей Васильев"}, {"name": "«Сторона»", "site": null, "source": "https://i-m-i.ru/sources/telegram/storona-zine", "contacts": [{"type": "vk", "value": "https://vk.com/muzstorona", "url": "https://vk.com/muzstorona"}], "notes": "«Сторона» VK На вопросы отвечал один из авторов паблика Михаил КонатусМожно ли прислать релиз: да, нужно предложить пост в VK-группеТребования к релизу: предпочтение отдается альбомамТребования к питчу: краткость. Не упоминать, где уже было внимание к релизам.Напоминать о себе можно, но не часто. Присылать новые релизы, если не был получен фидбек по предыдущим, можно. Можно ли купить рекламу релиза: нет", "accepts_pitches": true, "accepts_unknown_artists": null, "genre_fit_ru_indie": null, "editor_name": "Михаил Конатус"}, {"name": "«Тихое место»", "site": null, "source": "https://i-m-i.ru/sources/telegram/quiet-place", "contacts": [{"type": "tg", "value": "https://t.me/thequietplace", "url": "https://t.me/thequietplace"}, {"type": "tg", "value": "https://t.me/QuietEnotBot", "url": "https://t.me/QuietEnotBot"}], "notes": "«Тихое место» Telegram Автор канала: Александр Кулич Можно ли прислать релиз: да, в бот Требования к питчу: «Главное, чтобы было написано понятным языком, что это за исполнитель и в каком жанре играет, а в идеале еще и прикреплен mp3 файл (без ссылок на „Яндекс диск” и без 100-мегабайтных wav-файлов). Чтобы это могло зацепить внимание сразу после прочтения первых двух-трех предложений. У меня нет какой-то стандартизации, я живой человек и внимание цепляется за те же триггеры, что и у вас самих. Меньше ссылок, меньше абстрактных формулировок, меньше того, что говорит о вашей музыке ровно ничего. Идеальный питч: короткое описание понятным языком, которое я смогу зачитать своему папе — и он поймет о чем идет речь + обложка + аудиофайл». Напоминать о себе не стоит. А вот присылать новые релизы, если о предыдущих не написали, — можно. Можно ли купить рекламу релиза: нет", "accepts_pitches": true, "accepts_unknown_artists": null, "genre_fit_ru_indie": null, "editor_name": "Александр Кулич"}, {"name": "«Хрущевка»", "site": null, "source": "https://i-m-i.ru/sources/vk/hruschevka", "contacts": [{"type": "tg", "value": "https://t.me/hrushevkaorg", "url": "https://t.me/hrushevkaorg"}, {"type": "vk", "value": "https://vk.com/hrushevkaorg", "url": "https://vk.com/hrushevkaorg"}, {"type": "vk", "value": "https://vk.com/topic", "url": "https://vk.com/topic"}], "notes": "«Хрущевка» Telegram, VK Можно ли прислать релиз: да, нужно предложить пост в VK-группе, ознакомившись с требованиями Требования к релизу: «не стоит присылать музыку, рассчитанную на поп-сегмент»Требования к питчу: см. образецОбязательна ссылка на стриминг или предпрослушивание, а также пресс-релиз. Не стоит отправлять голосовые сообщения. Релизы могут рассматриваться от пяти дней до четырех месяцев, напоминать о себе не нужно. Присылать новую музыку, если о предыдущей не написали в канале, можно.Можно ли купить рекламу релиза: да. В VK-группе возможна реклама мероприятия, проходящего в Москве или Петербурге, в телеграме — платный разбор релиза (он может быть как положительным, так и отрицательным; стоит 1700 рублей), который автоматически попадает и в VK. Чтобы купить рекламу, нужно написать в сообщения VK-группы или в сообщения в телеграме", "accepts_pitches": true, "accepts_unknown_artists": null, "genre_fit_ru_indie": true, "editor_name": null}, {"name": "«Эпоха»", "site": null, "source": "https://i-m-i.ru/sources/vk/epoha", "contacts": [{"type": "tg", "value": "https://t.me/epochhiphop", "url": "https://t.me/epochhiphop"}, {"type": "vk", "value": "https://vk.com/epoch_official_page", "url": "https://vk.com/epoch_official_page"}, {"type": "vk", "value": "https://vk.com/topic", "url": "https://vk.com/topic"}], "notes": "«Эпоха» Telegram, VK Создатель паблика: Александр Москалев Можно ли прислать релиз: да, в сообщения VK-группы, ознакомившись с требованиями и оформив релиз по приведенному примеруТребования к релизу: «Основной упор на хип-хоп и его производные. Но также мы рассматриваем поп, R&B, электронику, рок и альтернативу». Требования к питчу: «Главное, чтобы он передавал настроение и описывал стилистические особенности работы». Присылать новые релизы, если о предыдущих не написали, можно.Можно ли купить рекламу релиза: да, писать в сообщения VK-группы или в личные сообщения Александру Москалеву. При этом «основным условием для рекламы должно быть достойное качество рекламируемого материала». Делюкс-рекомендации: «Относиться к договоренностям, совместным проектам и коллабам с максимальной ответственностью, соблюдать сроки, не пропадать со связи и выкладываться в работе всегда так, чтобы не было ощущения, что одна из сторон абсолютно не заинтересована в результате».", "accepts_pitches": true, "accepts_unknown_artists": null, "genre_fit_ru_indie": true, "editor_name": "Александр Москалев"}, {"name": "0107 music", "site": null, "source": "https://i-m-i.ru/sources/telegram/0107-music", "contacts": [{"type": "tg", "value": "https://t.me/music0107", "url": "https://t.me/music0107"}, {"type": "vk", "value": "https://vk.com/music0107", "url": "https://vk.com/music0107"}], "notes": "0107 music Telegram, VK Главный редактор: НикитаМожно ли прислать релиз: да, нужно предложить пост в VK-группе«До половины того, что нам присылают в предложку, появляется как минимум в дайджесте новинок».Требования к релизу: Жанры: инди, поп, рок, рэп, электроника, альтернатива. Релизы в экстремальных жанрах присылать не стоит. Требования к питчу: «Накипело, когда сразу не присылают музыку в первом же сообщении, потому что нужно же сначала послушать, решить подходит нам или нет, а уже потом вести разговор об условиях». Напоминать о себе не стоит. «Мы всегда отвечаем, если это личное сообщение. Если ваша музыка из предложки нигде не вышла (пост/дадйжест), то снова присылать ее же не стоит. Попробуйте через какое-то время с другим релизом».Можно ли купить рекламу релиза: да, писать в личные сообщения главному редакторуДелюкс-рекомендации: «Больше внимания обложкам (встречают по одежке) и пресс-релизам. Посмотрите хорошие телеграм-каналы и как там рассказывают о музыке, это поможет в описании вашей».", "accepts_pitches": true, "accepts_unknown_artists": null, "genre_fit_ru_indie": true, "editor_name": "Никита"}, {"name": "Daily Slime", "site": null, "source": "https://i-m-i.ru/sources/telegram/daily-slime", "contacts": [{"type": "tg", "value": "https://t.me/dailyslime", "url": "https://t.me/dailyslime"}], "notes": "Daily Slime Telegram Автор канала: ВиталяМожно ли прислать релиз: да Требования к релизу: музыка должна быть «свэговой» Требования к питчу: нужны обложка и mp3-файл — и больше ничегоНапоминать о себе не стоит. А вот присылать новые релизы, если о предыдущих не писали, — можно: «Канье отказывали раз 20, поэтому смысл [писать снова] есть». Можно ли купить рекламу релиза: нет", "accepts_pitches": true, "accepts_unknown_artists": null, "genre_fit_ru_indie": false, "editor_name": "Виталя"}, {"name": "E:\\music\\Russia", "site": null, "source": "https://i-m-i.ru/sources/vk/e-music-russia", "contacts": [{"type": "tg", "value": "@e_music_russia", "url": "https://t.me/e_music_russia"}, {"type": "vk", "value": "https://vk.com/e_music_russia", "url": "https://vk.com/e_music_russia"}], "notes": "E:\\music\\Russia VK Автор паблика: Михаил КонатусМожно ли прислать релиз: да, нужно предложить пост в VK-группе, ознакомившись с требованиями, после чего написать в личные сообщения Михаилу КонатусуТребования к релизу: «В релизах обязательна музыкальная сторона (содержание), эта музыкальная часть не является грубо „повтором”-заимствованием, а все-таки имеет глубину проработанности. И, разумеется, релиз украшает его техническая завершенность — по сведению, громкости и в целом.Если релиз чем-то не подходит — это сообщается и дается консультанция, что можно было бы сделать, при условии, что это необходимо артисту».Требования к питчу: краткость. Не упоминать, где уже было внимание к релизам.Напоминать о себе можно, но не часто. Присылать новые релизы, если не был получен фидбек по предыдущим, можно.Можно ли купить рекламу релиза: нет«Артисты покупают не рекламу, а время работы редактора. Если у них есть потребность во внимании, фидбеке — они могут поддержать труд финансово». Подробности можно найти тут.Делюкс-рекомендации: «Приветствуется, если артист знает, с кем устанавливает взаимоотношения, что он может получить, какой опыт и знания. Артисты могут быть на равных с продюсерами, музыкальными журналистами и редакторами при наличии у них соответствующих компетенций. Чем больше такого равенства, тем проще можно контактировать, находить общее понимание и, в конце концов, быть в одном коммьюнити, где нет апелляций к авторитету, а только факты и реализация потенциала.Даже большим артистам нужно указание на то, какие ошибки сделаны в релизе — чтобы росла общая планка со стороны музыкального содержания, возможности выхода из «провинциальности» в некоторых случаях».", "accepts_pitches": true, "accepts_unknown_artists": null, "genre_fit_ru_indie": null, "editor_name": "Михаил Конатус"}, {"name": "No Cap", "site": null, "source": "https://i-m-i.ru/sources/telegram/no-cap", "contacts": [{"type": "tg", "value": "https://t.me/nocap", "url": "https://t.me/nocap"}], "notes": "No Cap Telegram Автор канала: Евгений ЗлатовМожно ли прислать релиз: нет«Запросов „оценить музыку” стало слишком много, и это отнимает много времени. Чтобы никого не обижать, я вообще не слушаю треки. Когда музыку присылают в личку — это приносит меньше удовольствия, чем когда находишь молодых артистов сам, например, в рекомендациях YouTube».Можно ли купить рекламу релиза: нет Делюкс-рекомендации: «Когда пишете админам в личку с вопросом о стоимости рекламы, не пишите просто: „Привет! Сколько стоит реклама?” Пишите с контекстом, например: „Привет! Я такой-то, делаю то-то. Через неделю у меня выходит альбом. Хочу прорекламировать. Вот ссылка на закрытое прослушивание. Сколько будет стоить пост?” Сообщение с контекстом увеличивает шансы получить ответ.Если вы получили отказ, не стесняйтесь попросить админа посоветовать другие каналы, кто занимается рекламой музыки».", "accepts_pitches": false, "accepts_unknown_artists": true, "genre_fit_ru_indie": null, "editor_name": "Евгений Златов"}, {"name": "PRNRP", "site": null, "source": "https://i-m-i.ru/sources/telegram/prnrp", "contacts": [{"type": "tg", "value": "https://t.me/trap_critics", "url": "https://t.me/trap_critics"}], "notes": "PRNRP Telegram Автор канала: Даня Порнорэп Можно ли прислать релиз: да, но «перед этим нужно включить трек, который вам реально нравится (не свой) и подумать, а прокачается ли автор с вашего трека так же»Требования к релизу: «интересует только один жанр — крутая_современная_музыка»Требования к питчу: Что раздражает: «1. Пресс-релизы2. Шаблонные рассылки 3. Когда пишут „буду ждать фидбека”, сразу не хочется ничего. Я напишу фидбек, если будет порыв, а не если добавить эту фразу в конце сообщения». О том, стоит ли напоминать о себе и присылать новые релизы, если о предыдущих в канале не писали: «Настоящий мужчина должен пытаться, а настоящая женщина — сопротивляться. Надо испробовать все. Но, возможно, я вас заблокирую». Можно ли купить рекламу релиза: нетДелюкс-рекомендации: «Лучше заходить к человеку через его личность, как минимум назвать по имени, как максимум — невзначай процитировать его любимый трек. Это сразу подкупает».", "accepts_pitches": true, "accepts_unknown_artists": null, "genre_fit_ru_indie": false, "editor_name": "Даня Порнорэп"}, {"name": "Shuffle Chamber", "site": null, "source": "https://i-m-i.ru/sources/telegram/shuffle-chamber-9deb2971-d22c-48a0-ad99-cd07f8e98083", "contacts": [{"type": "tg", "value": "https://t.me/shufflechamber", "url": "https://t.me/shufflechamber"}], "notes": "Shuffle Chamber Telegram Автор канала: Георгий ВолодинМожно ли прислать релиз: даТребования к релизу: «единственный критерий — качество музыки»Требования к питчу: краткость, отсутствие большого количества прикрепленных файлов и непонятных ссылок.«Обычно прикрепляют пресс-релиз, питч, ссылки для прослушивания — на BandLink — или файлы на предпрослушивание».Что раздражает: «1. Войсы вместо вступительного и без предупреждения — моветон. 2. Формулировки в стиле “Доброго времени суток!”. Учитесь писать грамотно и просто.3. Перечисление непонятных регалий или достижений, которые мне ничего не говорят». «Грамотный фоллоу-ап через пару дней, без излишней настойчивости, всегда приветствуется». Присылать новые релизы, если о предыдущих не писали в канале, можно. Можно ли купить рекламу релиза: даДелюкс-рекомендации: «Не бойтесь питчить нестандартно. Питч — это не только рассказ о новом треке. Это может быть розыгрыш, коллаборация, какая-то необычная идея или формат. Все, что может заинтересовать и порадовать не только нас, но и нашу аудиторию. Ведь читателям всегда интереснее увидеть живую движуху: викторину, интересный сторителлинг, инфоповод, необычное видео или партнерку — а не просто “вышел трек, послушайте”.Думайте шире. Если у вас есть идея, как органично и интересно встроиться в контекст — предлагайте. Будьте честными, смелыми, неожиданными. И краткими. Это ценят».", "accepts_pitches": true, "accepts_unknown_artists": null, "genre_fit_ru_indie": null, "editor_name": "Георгий Володин"}, {"name": "Voice", "site": null, "source": "https://i-m-i.ru/sources/telegram/voice", "contacts": [{"type": "tg", "value": "https://t.me/voicemedia", "url": "https://t.me/voicemedia"}], "notes": "Voice Telegram На вопросы отвечал один из авторов канала Владимир Завьялов Можно ли прислать релиз: да«Канал не заточен под формат: “Смотрите, вышел такой-то релиз”. Мы уходим больше в сторону мини-эссе. Другое дело, что если меня что-то действительно трогает, я не могу об этом не написать. Но я рассказываю о том, что есть вот такой классный артист — и вот почему вам надо его послушать». Требования к релизу: жанры — рок, поп «Часто по обложке, по названию релиза и артиста, даже по стилю письма бывает понятно, стоит ли писать про этого артиста или нет. Действительно ли это что-то, что стоит послушать, или изначально это то, что не стоит моего внимания. Если я вижу, кринжовое название, кринжовую аишную или предельно безвкусную обложку, я сразу пойму, что это любительская самодеятельность, и даже открывать и слушать не буду.Если ты видишь имя, которое уже мелькало у коллег в телеграм-каналах, на афишах фестивалей, то ты хочешь-не хочешь, но присматриваешься к нему чуть пристальнее, чем к тем, кого ты нигде никогда не видел». Требования к питчу: лаконичность («концепция, расписанная на 666 абзацев, никому не интересна») «Четко и по делу: „Мы такие-то, играем то и то”. Если есть — референсы. Не стоит гнушаться референсов. Если группа вдохновляется Tame Impala и Rammstein одновременно, то это классно подчеркнуть, потому что читателю сразу же станет понятно, с чем он имеет дело». Не присылать голосовые сообщения, не писать ночью. Напоминать о себе можно. Присылать новые релизы, если о предыдущих не написали в канале, можно. «Часто бывает такое, что я просто либо не вижу это сообщение, либо оно просто куда-то улетает. Если артист или его команда напоминает мне о релизе, это говорит о том, что он как минимум настойчив. А настойчивость — не лишнее качество в том, чем мы все занимаемся». Можно ли купить рекламу релиза: нет, возможна только реклама некоторых мероприятий — например, фестивалейДелюкс-рекомендации: «Я бы дал артистам совет искать релевантные каналы и не отсылать [материал] всем подряд. Не бойтесь, не оверсинкайте, не обижайтесь и будьте настойчивыми. Но в меру. И все-таки тактичными. И пишите по делу. Не надо бояться отказов. Я понимаю, что отказы – это очень болезненная вещь. Артисты — как люди тонко чувствующие — остро реагируют, когда им не отвечают или отказывают. Они принимают это на свой счет, замыкаются, держат обиду и испытывают другие неклассные чувства. Нужно понимать, что если вам отказал один человек, то это не значит, что на вашей музыке стоит ставить крест. Нужно писать другому. Отказ может быть связан с целым рядом факторов. Может быть, у коллеги плохое настроение, и ему не залетело ваше творчество в рабочее эмоциональное окно. У меня бывало, что трек сначала не залетел, а потом понравился. Ну и каждым из нас в той или иной степени управляет такая вещь, как вкусовщина».", "accepts_pitches": true, "accepts_unknown_artists": false, "genre_fit_ru_indie": true, "editor_name": "Владимир Завьялов"}, {"name": "Warhol", "site": null, "source": "https://i-m-i.ru/sources/vk/normalnikus", "contacts": [{"type": "tg", "value": "https://t.me/warhol", "url": "https://t.me/warhol"}], "notes": "Warhol Telegram Автор канала: Игорь Митряков Можно ли прислать релиз: «лучше не надо» «Я думаю, что прошла эпоха присылания музыки. Последний, кто попал в Warhol, прислав музыку — Катя Милтей. Она начала скинула релиз и клип в ВК — я сказал: „Норм, но публиковать не буду”. Потом она записала кружок в комменты в телеграме в контекст и показала свой трек. То есть можно сделать вывод, что прислать живой кружок со своей музыкой в комменты, учитывая контекст поста — это рабочий метод. Так только Катя сделала. И Катя в этом плане отличается, потому что она смекалистая».Требования к релизу: «чем меньше прослушиваний тем лучше»Требования к питчу: «Мы все откроем. Но это будет тяжко».Напоминать о себе можно, «если вы считаете, что делаете мясо, а не херню. Если выделаете херню — вы запомнитесь как настырные делатели херни». Присылать новые релизы, если о предыдущих в канале не писали, можно.Можно ли купить рекламу релиза: нет Делюкс-рекомендации: «Лучше присылать кружок артиста, где он сам сам о себе рассказывает и сам ставит свои песни, все это за 30 секунд. Плюс по словам в кружке должно быть понятно, что кружок лично для канала, а не рассылка. Артисту нужно думать, как пробиться. Катя Милтей договорилась с создателями обычных плейлистов в VK и они засунули ее треки. Монеточка* (Гырдымова Елизавета Андреевна «Монеточка» внесена Минюстом РФ в список иноагентов) специально про аниме трек записала, чтобы ее в паблик аниме запостили. Потом еще когда я кружок Кати милтей из комментов опубликовал в ленту, то она про это тикток записала и в этот момент я понял, что ей по кайфу взаимодействовать в целом. Артист или менеджер должны найти самые дешевые и самые быстрые пути раскрутки. Кажется, что публикация в телеграме вообще ничего артисту не дает. Нужно снимать тик токи и ловить хайп».", "accepts_pitches": false, "accepts_unknown_artists": true, "genre_fit_ru_indie": null, "editor_name": "Игорь Митряков"}, {"name": "Code55", "site": null, "source": "https://i-m-i.ru/sources/telegram/code55", "contacts": [{"type": "tg", "value": "https://t.me/code55music", "url": "https://t.me/code55music"}], "notes": "Code55 Telegram Можно ли прислать релиз: даТребования к релизу: жанры: рэп, рок, электроника («все что подойдет целевой аудитории 16-24»)Требования к питчу: «Пока у нас нет жесткого потока артистов, пишите когда угодно и в каком формате удобно: с матами, с пресс-релизом размером с простыню или „жесть как круто вышло, зацени”. Пишите как другу, пишите ночью, записывайте войсы, мы всегда будем рады. Но мы за открытую коммуникацию: будьте готовы принять от нас наш отказ без „10 причин, по которым мы вам отказали”, так как мы знаем свою аудиторию и то, что ей может быть интересно». Напоминать о себе можно, если сообщение не прочитано. Присылать новые релизы, если о предыдущих не написали, можно. Можно ли купить рекламу релиза: да", "accepts_pitches": true, "accepts_unknown_artists": null, "genre_fit_ru_indie": true, "editor_name": null}, {"name": "«журнал пситеррор»", "site": null, "source": null, "contacts": [{"type": "tg", "value": "https://t.me/psyterrormagazine", "url": "https://t.me/psyterrormagazine"}], "notes": "«журнал пситеррор» Telegram Главный редактор: Толя ПситеррорМожно ли прислать релиз: да, но автор «почти ничего не слушает — только если цепляет обложка, ник, название или описание релиза — а это очень редко бывает»Требования к релизу: «русский рэп и тд-кор в приоритете»Требования к питчу: «Давайте как можно больше контекста. Музыки в инфополе очень много, поэтому решает контекст. Объясните, чем ваш альбом может быть интересен, дайте интересную аналогию, какие-нибудь смыслы». Что раздражает: «1. Когда сообщение начинается с „йо!”2. Нейросетевой пресс-релиз3. Не тд-кор». Напоминать о себе не стоит. А вот присылать новые релизы, если о предыдущих не написали, можно, но после «вменяемой паузы, не через неделю после прошлой попытки». Можно ли купить рекламу релиза: нет Делюкс-рекомендации: «Не устраивайте спам-атаку во все существующие каналы, а выберите 2-3, с которых кайфуете больше всего, и человеческим языком, ссылаясь на личный лор автора, напишите сообщение. Это очень привлекает, даже если музыка не заходит в итоге. Подумайте, стоит ли вообще альбом кому-то слушать. Звучит глупо, но на стримингах лежит много музыки, которую наверняка было весело записывать, но которую необязательно всем остальным слушать. Задумайтесь, существуют ли люди, у которых ваша песня может стать любимой. Если нет, то лучше пока отложить питч музыки и заняться собственно самой музыкой».", "accepts_pitches": true, "accepts_unknown_artists": null, "genre_fit_ru_indie": false, "editor_name": "Толя Пситеррор"}, {"name": "Toaster", "site": null, "source": "https://i-m-i.ru/sources/telegram/toaster", "contacts": [{"type": "tg", "value": "https://t.me/toastermag", "url": "https://t.me/toastermag"}], "notes": "Toaster Telegram Можно ли прислать релиз: да, до 15:00 четверга Требования к релизу: у артиста должно быть от 10000 прослушиваний. Подходящие жанры: хип-хоп, электронная музыка, альтернативная музыка, инди, рок. Неподходящие жанры: поп, кальян-рэп. Требования к питчу: ссылка на прослушивание, обложка, пресс-релизЧто раздражает: «1. Когда присылают ночью2. Когда пишут фамильярно3. Когда скидывают войсы вместо сообщений4. Когда бесконечно пишут с просьбами послушать».Напоминать о себе можно через 3–4 дня после первого сообщения. Присылать новые релизы, если о предыдущих не писали, можно. Можно ли купить рекламу релиза: да Делюкс-рекомендации: «Не стоит бесконечно „напоминать о себе”, спрашивать: „А почему нет? а вы же уже такое постили”. То, что ваш трек/трек вашего музыканта уже освещали, не значит, что теперь его будут выкладывать постоянно. Все зависит от самого материала. Главное — выстроить дружелюбные и понимающие отношения, которые уважают личное время каждого из участников диалога».", "accepts_pitches": true, "accepts_unknown_artists": false, "genre_fit_ru_indie": true, "editor_name": null}, {"name": "Fast Food Music", "site": null, "source": "https://i-m-i.ru/sources/vk/fastfoodmusic", "contacts": [{"type": "tg", "value": "https://t.me/fastfoodmusictg", "url": "https://t.me/fastfoodmusictg"}, {"type": "tg", "value": "@fastfoodmusic", "url": "https://t.me/fastfoodmusic"}, {"type": "vk", "value": "https://vk.com/fastfoodmusic", "url": "https://vk.com/fastfoodmusic"}], "notes": "Fast Food Music Telegram, VK На вопросы отвечал Jacques FrankoМожно ли прислать релиз: да, но «в рамках рекламы»«Мы сами всегда активно отсматриваем новых артистов. Если он искренне нравится редакции, то он и без питча окажется на ресурсе». Требования к питчу: «Нас устраивает лейбловый формат питча: краткая информация о релизе, обложка, ссылка на прослушивание. При этом сопроводительный текст и обложка должны быть адекватными. Очень классно, когда заранее присылают общую ссылку на стриминговые платформы». Напоминать о себе не стоит. А вот присылать новые релизы, если о предыдущих не писали, можно.Можно ли купить рекламу релиза: да, прайс-лист можно найти по ссылке * Гырдымова Елизавета Андреевна «Монеточка», Горбачев Александр Витальевич, Рамазанова Земфира Талгатовна внесены Минюстом РФ в список иноагентов", "accepts_pitches": false, "accepts_unknown_artists": true, "genre_fit_ru_indie": null, "editor_name": "Jacques Franko"}]};
+
+const TYPE_LABELS = { email: "Email", tg: "Telegram", vk: "VK", whatsapp: "WhatsApp" };
+const TYPE_ORDER = ["email", "tg", "vk", "whatsapp"];
+
+const BOOL_FILTERS = [
+  { key: "accepts_pitches", label: "Принимают питчи" },
+  { key: "accepts_unknown_artists", label: "Берут неизвестных" },
+  { key: "genre_fit_ru_indie", label: "Подходит жанр: инди/альт" },
+];
+
+const STORAGE_KEY = "imi-outreach-state-v1";
+
+const CELEBRATION_PHRASES = [
+  "Молодец!", "Так держать!", "Отличная работа!", "Ещё один шаг к успеху!",
+  "Гордимся тобой!", "Им обязательно понравится!", "Твоя музыка это заслуживает!",
+  "Продолжай в том же духе!", "Ты на верном пути!", "Супер!", "Красота!",
+  "Однажды кто-то скажет тебе спасибо за эту музыку!", "Вперёд, к успеху!",
+];
+const CELEBRATION_EMOJI = ["🎉", "✨", "🔥", "🚀", "⭐️", "👏", "💪", "🙌", "🎊"];
+
+const DEFAULT_TEMPLATE = "Привет, {{editor_name}}! Мы — [название проекта] из [город]. Выпустили новый сингл [название] (жанр: русское инди / альт-рок). Это песня о [1–2 конкретных предложения]. Ниже — предпрослушивание, пресс-фото и короткая инфа о проекте. Если формат {{outlet_name}} подходит — будем рады, если послушаете. Спасибо!";
+
+
+const CHECK_ICON = '<svg viewBox="0 0 16 16" fill="none" aria-hidden="true"><path d="M3.5 8.5l3 3 6-7" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"/></svg>';
+
+function escapeHtml(str) {
+  return String(str)
+    .replaceAll("&", "&amp;")
+    .replaceAll("<", "&lt;")
+    .replaceAll(">", "&gt;")
+    .replaceAll('"', "&quot;")
+    .replaceAll("'", "&#39;");
+}
+
+function domainOf(url) {
+  if (!url) return "";
+  try {
+    return new URL(url).hostname.replace(/^www\./, "");
+  } catch (e) {
+    return url;
+  }
+}
+
+function fillTemplate(tpl, outlet) {
+  const editorName = outlet.editor_name || ("редакция " + outlet.name);
+  return tpl.replaceAll("{{editor_name}}", editorName).replaceAll("{{outlet_name}}", outlet.name);
+}
+
+function defaultEditorState() {
+  return { selected: false, message: "", sent: false, sentAt: null, replied: false, repliedAt: null };
+}
+
+function loadState() {
+  let saved = null;
+  try { saved = JSON.parse(localStorage.getItem(STORAGE_KEY) || "null"); } catch (e) { saved = null; }
+  const editors = {};
+  DATA.outlets.forEach(o => {
+    const savedEditor = (saved && saved.editors && saved.editors[o.name]) || {};
+    editors[o.name] = Object.assign(defaultEditorState(), savedEditor);
+  });
+  return {
+    template: (saved && typeof saved.template === "string" && saved.template) ? saved.template : DEFAULT_TEMPLATE,
+    step: (saved && [1, 2, 3].includes(saved.step)) ? saved.step : 1,
+    promoRecsExpanded: (saved && typeof saved.promoRecsExpanded === "boolean") ? saved.promoRecsExpanded : false,
+    editors,
+  };
+}
+
+function saveState() {
+  // localStorage.setItem can throw (private browsing, sandboxed iframes,
+  // storage partitioning) - a save failure must never block rendering or
+  // step-switching, only persistence degrades for that session.
+  try {
+    localStorage.setItem(STORAGE_KEY, JSON.stringify({
+      template: state.template,
+      step: state.step,
+      promoRecsExpanded: state.promoRecsExpanded,
+      editors: state.editors,
+    }));
+  } catch (e) {
+    console.warn("Could not save state to localStorage:", e);
+  }
+}
+
+const state = loadState();
+state.type = "all";
+state.toggles = new Set();
+
+function dotsHtml(types) {
+  return TYPE_ORDER.filter(t => types.has(t))
+    .map(t => `<span class="dot" style="background:var(--type-${t})" title="${TYPE_LABELS[t]}"></span>`)
+    .join("");
+}
+
+function contactsHtml(o) {
+  return o.contacts.map(c => `
+      <a class="contact-pill" href="${escapeHtml(c.url)}" target="_blank" rel="noopener noreferrer">
+        <span class="dot" style="background:var(--type-${c.type})"></span>
+        <span class="ctype">${TYPE_LABELS[c.type]}</span>
+        <span class="cval">${escapeHtml(c.value)}</span>
+      </a>`).join("");
+}
+
+function makeChip(filterKey, label, count, pressed, dotType) {
+  const btn = document.createElement("button");
+  btn.className = "chip";
+  btn.type = "button";
+  btn.dataset.filter = filterKey;
+  btn.setAttribute("aria-pressed", pressed ? "true" : "false");
+  const dot = dotType ? `<span class="dot" style="background:var(--type-${dotType})"></span>` : "";
+  btn.innerHTML = `${dot}${label} <span class="mono">${count}</span>`;
+  return btn;
+}
+
+function buildFilters() {
+  const counts = {};
+  DATA.outlets.forEach(o => {
+    const types = new Set(o.contacts.map(c => c.type));
+    types.forEach(t => { counts[t] = (counts[t] || 0) + 1; });
+  });
+  const available = TYPE_ORDER.filter(t => counts[t]);
+
+  const wrap = document.getElementById("filters");
+  wrap.innerHTML = "";
+  wrap.appendChild(makeChip("all", "Все", DATA.outlets.length, true));
+  available.forEach(t => wrap.appendChild(makeChip(t, TYPE_LABELS[t], counts[t], false, t)));
+
+  wrap.addEventListener("click", (e) => {
+    const chip = e.target.closest(".chip");
+    if (!chip) return;
+    [...wrap.children].forEach(c => c.setAttribute("aria-pressed", "false"));
+    chip.setAttribute("aria-pressed", "true");
+    state.type = chip.dataset.filter;
+    renderStep1();
+  });
+}
+
+function buildToggles() {
+  const wrap = document.getElementById("toggles");
+  wrap.innerHTML = "";
+  BOOL_FILTERS.forEach(({ key, label }) => {
+    const btn = document.createElement("button");
+    btn.className = "toggle";
+    btn.type = "button";
+    btn.dataset.key = key;
+    btn.setAttribute("aria-pressed", "false");
+    btn.innerHTML = `<span class="toggle-box">${CHECK_ICON}</span>${label}`;
+    wrap.appendChild(btn);
+  });
+
+  wrap.addEventListener("click", (e) => {
+    const toggle = e.target.closest(".toggle");
+    if (!toggle) return;
+    const key = toggle.dataset.key;
+    if (state.toggles.has(key)) {
+      state.toggles.delete(key);
+      toggle.setAttribute("aria-pressed", "false");
+    } else {
+      state.toggles.add(key);
+      toggle.setAttribute("aria-pressed", "true");
+    }
+    renderStep1();
+  });
+}
+
+function step1RowHtml(o) {
+  const e = state.editors[o.name];
+  const types = new Set(o.contacts.map(c => c.type));
+  const esc = escapeHtml(o.name);
+  const siteHtml = o.site
+    ? `<a class="site-link" href="${escapeHtml(o.site)}" target="_blank" rel="noopener noreferrer">${escapeHtml(domainOf(o.site))} ↗</a>`
+    : "";
+  return `
+    <div class="row" data-open="false">
+      <div class="row-top">
+        <button type="button" class="toggle take-check" data-take="${esc}" aria-pressed="${e.selected}" aria-label="Брать в рассылку" title="Брать">
+          <span class="toggle-box">${CHECK_ICON}</span>
+        </button>
+        <button type="button" class="row-head" aria-expanded="false">
+          <span class="dots">${dotsHtml(types)}</span>
+          <span class="row-main">
+            <span class="row-name">${escapeHtml(o.name)}</span>
+            <span class="row-meta mono">${o.site ? escapeHtml(domainOf(o.site)) : TYPE_ORDER.filter(t => types.has(t)).map(t => TYPE_LABELS[t]).join(" · ")}</span>
+          </span>
+          <svg class="chevron" width="16" height="16" viewBox="0 0 16 16" fill="none" aria-hidden="true"><path d="M6 3l5 5-5 5" stroke="currentColor" stroke-width="1.6" stroke-linecap="round" stroke-linejoin="round"/></svg>
+        </button>
+      </div>
+      <div class="row-detail"><div class="row-detail-inner"><div class="detail-pad">
+        ${siteHtml}
+        <div class="contact-list">${contactsHtml(o)}</div>
+        <p class="notes">${escapeHtml(o.notes)}</p>
+      </div></div></div>
+    </div>`;
+}
+
+function updateSelectedCounter() {
+  const n = Object.values(state.editors).filter(e => e.selected).length;
+  document.getElementById("selectedCounter").innerHTML = `Выбрано: <strong>${n}</strong>`;
+}
+
+function updateHeaderCounter() {
+  const n = Object.values(state.editors).filter(e => e.sent).length;
+  document.getElementById("sentCounter").innerHTML = `Отправлено: <strong>${n}</strong>`;
+}
+
+function renderStep1() {
+  const list = document.getElementById("list");
+  const empty = document.getElementById("emptyState");
+  const visibleCount = document.getElementById("visibleCount");
+
+  let outlets = state.type === "all"
+    ? DATA.outlets
+    : DATA.outlets.filter(o => o.contacts.some(c => c.type === state.type));
+  state.toggles.forEach(key => { outlets = outlets.filter(o => o[key] === true); });
+
+  const filtered = state.type !== "all" || state.toggles.size > 0;
+  visibleCount.textContent = filtered ? ` · показано: ${outlets.length}` : "";
+  empty.hidden = outlets.length > 0;
+
+  list.innerHTML = outlets.map(step1RowHtml).join("");
+  updateSelectedCounter();
+}
+
+function step2RowHtml(o) {
+  const e = state.editors[o.name];
+  const esc = escapeHtml(o.name);
+  const siteHtml = o.site
+    ? `<a class="site-link" href="${escapeHtml(o.site)}" target="_blank" rel="noopener noreferrer">${escapeHtml(domainOf(o.site))} ↗</a>`
+    : "";
+  return `
+    <div class="editor-row">
+      <div class="editor-row-head">
+        <div class="editor-name">${escapeHtml(o.name)}</div>
+        <button type="button" class="notes-toggle" data-notes-toggle="${esc}" aria-expanded="false">
+          Требования редакции
+          <svg class="chevron" width="14" height="14" viewBox="0 0 16 16" fill="none" aria-hidden="true"><path d="M6 3l5 5-5 5" stroke="currentColor" stroke-width="1.6" stroke-linecap="round" stroke-linejoin="round"/></svg>
+        </button>
+      </div>
+      <div class="notes-block" data-open="false">
+        <div class="row-detail"><div class="row-detail-inner"><div class="detail-pad-sm">
+          ${siteHtml}
+          <p class="notes">${escapeHtml(o.notes)}</p>
+        </div></div></div>
+      </div>
+      <div class="contact-list">${contactsHtml(o)}</div>
+      <label class="field-label">Сообщение</label>
+      <textarea class="field field-msg" rows="10" data-msg-for="${esc}">${escapeHtml(e.message)}</textarea>
+      <div class="msg-row-footer">
+        <button type="button" class="msg-reset" data-reset-for="${esc}">↺ Сбросить к шаблону</button>
+        <span class="char-count mono" data-count-for="${esc}">${e.message.length} символов</span>
+      </div>
+    </div>`;
+}
+
+function updateCharCount(name, text) {
+  const el = document.querySelector(`#step2List [data-count-for="${CSS.escape(name)}"]`);
+  if (el) el.textContent = `${text.length} символов`;
+}
+
+function renderStep2() {
+  const selected = DATA.outlets.filter(o => state.editors[o.name].selected);
+  document.getElementById("step2Empty").hidden = selected.length > 0;
+  document.getElementById("step2List").innerHTML = selected.map(step2RowHtml).join("");
+}
+
+function step3RowHtml(o) {
+  const e = state.editors[o.name];
+  const esc = escapeHtml(o.name);
+  return `
+    <div class="editor-row">
+      <div class="editor-name">${escapeHtml(o.name)}</div>
+      <div class="contact-list">${contactsHtml(o)}</div>
+      <textarea class="field" rows="3" data-msg-for="${esc}">${escapeHtml(e.message)}</textarea>
+      <div class="send-row">
+        <button type="button" class="toggle" data-sent-for="${esc}" aria-pressed="${e.sent}"><span class="toggle-box">${CHECK_ICON}</span>Отослал</button>
+        <button type="button" class="toggle" data-replied-for="${esc}" aria-pressed="${e.replied}"><span class="toggle-box">${CHECK_ICON}</span>Получил ответ</button>
+      </div>
+    </div>`;
+}
+
+function updateStep3Stats() {
+  const selected = DATA.outlets.filter(o => state.editors[o.name].selected);
+  const sent = selected.filter(o => state.editors[o.name].sent).length;
+  const replied = selected.filter(o => state.editors[o.name].replied).length;
+  document.getElementById("step3Stats").innerHTML = selected.length
+    ? `<span class="stat">Отправлено<strong class="mono">${sent} / ${selected.length}</strong></span><span class="stat">Получено ответов<strong class="mono">${replied}</strong></span>`
+    : "";
+}
+
+function renderStep3() {
+  const selected = DATA.outlets.filter(o => state.editors[o.name].selected);
+  document.getElementById("step3Empty").hidden = selected.length > 0;
+  document.getElementById("step3List").innerHTML = selected.map(step3RowHtml).join("");
+  updateStep3Stats();
+}
+
+function onSentToggle(name, btn) {
+  const e = state.editors[name];
+  const wasSent = e.sent;
+  e.sent = !wasSent;
+  e.sentAt = e.sent ? new Date().toISOString() : null;
+  btn.setAttribute("aria-pressed", String(e.sent));
+  saveState();
+  updateHeaderCounter();
+  updateStep3Stats();
+  if (e.sent && !wasSent) celebrate();
+}
+
+function onRepliedToggle(name, btn) {
+  const e = state.editors[name];
+  e.replied = !e.replied;
+  e.repliedAt = e.replied ? new Date().toISOString() : null;
+  btn.setAttribute("aria-pressed", String(e.replied));
+  saveState();
+  updateStep3Stats();
+}
+
+let celebrateTimer = null;
+function celebrate() {
+  const el = document.getElementById("celebrate");
+  const phrase = CELEBRATION_PHRASES[Math.floor(Math.random() * CELEBRATION_PHRASES.length)];
+  const emoji = CELEBRATION_EMOJI[Math.floor(Math.random() * CELEBRATION_EMOJI.length)];
+  el.textContent = `${emoji} ${phrase} ${emoji}`;
+  el.classList.remove("show");
+  void el.offsetWidth;
+  el.classList.add("show");
+  spawnConfetti();
+  clearTimeout(celebrateTimer);
+  celebrateTimer = setTimeout(() => { el.classList.remove("show"); }, 2200);
+}
+
+function spawnConfetti() {
+  if (window.matchMedia("(prefers-reduced-motion: reduce)").matches) return;
+  const host = document.getElementById("confettiHost");
+  const colors = [
+    "var(--type-email)", "var(--type-tg)", "var(--type-vk)", "var(--accent)",
+    "#FF6B9D", "#FFC93C", "#4ECDC4",
+  ];
+  for (let i = 0; i < 26; i++) {
+    const dot = document.createElement("span");
+    dot.className = "confetti-dot";
+    const size = 6 + Math.round(Math.random() * 6);
+    dot.style.width = `${size}px`;
+    dot.style.height = `${size}px`;
+    dot.style.setProperty("--dx", `${(Math.random() * 2 - 1) * 170}px`);
+    dot.style.setProperty("--dy", `${Math.random() * -200 - 60}px`);
+    dot.style.setProperty("--rot", `${(Math.random() * 2 - 1) * 320}deg`);
+    dot.style.background = colors[i % colors.length];
+    dot.style.left = "50%";
+    dot.style.top = "30px";
+    dot.style.animationDuration = `${0.8 + Math.random() * 0.5}s`;
+    host.appendChild(dot);
+    dot.addEventListener("animationend", () => dot.remove());
+  }
+}
+
+function fillEmptyMessages() {
+  DATA.outlets.forEach(o => {
+    const e = state.editors[o.name];
+    if (e.selected && !e.message.trim()) {
+      e.message = fillTemplate(state.template, o);
+    }
+  });
+  saveState();
+  renderStep2();
+}
+
+function applyPromoExpanded() {
+  const body = document.getElementById("promoBody");
+  const toggle = document.getElementById("promoToggle");
+  const chevron = document.getElementById("promoChevron");
+  body.hidden = !state.promoRecsExpanded;
+  toggle.setAttribute("aria-expanded", String(state.promoRecsExpanded));
+  chevron.style.transform = state.promoRecsExpanded ? "rotate(180deg)" : "rotate(0deg)";
+}
+
+function showImportStatus(msg, isError) {
+  const el = document.getElementById("importStatus");
+  el.textContent = msg;
+  el.hidden = false;
+  el.classList.toggle("error", !!isError);
+}
+
+function doExport() {
+  const selected = DATA.outlets.filter(o => state.editors[o.name].selected);
+  const payload = {
+    exportedAt: new Date().toISOString(),
+    template: state.template,
+    editors: selected.map(o => {
+      const e = state.editors[o.name];
+      return {
+        outlet: o.name, site: o.site, contacts: o.contacts, editor_name: o.editor_name,
+        message: e.message, sent: e.sent, sentAt: e.sentAt, replied: e.replied, repliedAt: e.repliedAt,
+      };
+    }),
+    stats: {
+      totalSelected: selected.length,
+      totalSent: selected.filter(o => state.editors[o.name].sent).length,
+      totalReplied: selected.filter(o => state.editors[o.name].replied).length,
+    },
+  };
+  const blob = new Blob([JSON.stringify(payload, null, 2)], { type: "application/json" });
+  const url = URL.createObjectURL(blob);
+  const a = document.createElement("a");
+  const d = new Date();
+  const ymd = `${d.getFullYear()}-${String(d.getMonth() + 1).padStart(2, "0")}-${String(d.getDate()).padStart(2, "0")}`;
+  a.href = url;
+  a.download = `imi-outreach-${ymd}.json`;
+  document.body.appendChild(a);
+  a.click();
+  a.remove();
+  URL.revokeObjectURL(url);
+}
+
+function doImport(file) {
+  const reader = new FileReader();
+  reader.onload = () => {
+    let parsed;
+    try { parsed = JSON.parse(reader.result); } catch (e) { showImportStatus("Не удалось прочитать файл — это не JSON.", true); return; }
+    if (!parsed || !Array.isArray(parsed.editors)) { showImportStatus("В файле нет списка editors.", true); return; }
+
+    let applyTemplate = false;
+    if (typeof parsed.template === "string" && parsed.template !== state.template) {
+      applyTemplate = confirm("Импортированный файл содержит другой шаблон сообщения. Заменить текущий шаблон?");
+    }
+    if (applyTemplate) {
+      state.template = parsed.template;
+      document.getElementById("templateField").value = parsed.template;
+    }
+
+    let matched = 0;
+    parsed.editors.forEach(imp => {
+      const outlet = DATA.outlets.find(o => o.name === imp.outlet);
+      if (!outlet) return;
+      matched++;
+      const e = state.editors[outlet.name];
+      e.selected = true;
+      if (typeof imp.message === "string") e.message = imp.message;
+      e.sent = !!imp.sent;
+      e.sentAt = imp.sentAt || null;
+      e.replied = !!imp.replied;
+      e.repliedAt = imp.repliedAt || null;
+    });
+
+    showImportStatus(matched ? `Импортировано редакторов: ${matched}` : "Ни один редактор не совпал по имени.", !matched);
+    saveState();
+    updateSelectedCounter();
+    updateHeaderCounter();
+    if (state.step === 1) renderStep1();
+    else if (state.step === 2) renderStep2();
+    else renderStep3();
+  };
+  reader.readAsText(file);
+}
+
+function buildTabs() {
+  const wrap = document.getElementById("tabs");
+  const labels = { 1: "1. Выбери", 2: "2. Заполни", 3: "3. Рассылай" };
+  wrap.innerHTML = [1, 2, 3].map(n =>
+    `<button type="button" class="tab" data-step="${n}" role="tab" aria-selected="${state.step === n}">${labels[n]}</button>`
+  ).join("");
+  wrap.addEventListener("click", (e) => {
+    const tab = e.target.closest(".tab");
+    if (!tab) return;
+    switchStep(Number(tab.dataset.step));
+  });
+}
+
+function switchStep(n) {
+  state.step = n;
+  saveState();
+  [1, 2, 3].forEach(i => { document.getElementById("step" + i).hidden = i !== n; });
+  document.querySelectorAll(".tab").forEach(t => t.setAttribute("aria-selected", String(Number(t.dataset.step) === n)));
+  if (n === 1) renderStep1();
+  else if (n === 2) renderStep2();
+  else renderStep3();
+}
+
+function initStatic() {
+  const tf = document.getElementById("templateField");
+  tf.value = state.template;
+  tf.addEventListener("input", () => { state.template = tf.value; saveState(); });
+
+  document.getElementById("fillEmptyBtn").addEventListener("click", fillEmptyMessages);
+
+  applyPromoExpanded();
+  document.getElementById("promoToggle").addEventListener("click", () => {
+    state.promoRecsExpanded = !state.promoRecsExpanded;
+    saveState();
+    applyPromoExpanded();
+  });
+
+  document.getElementById("exportBtn").addEventListener("click", doExport);
+  document.getElementById("importBtn").addEventListener("click", () => document.getElementById("importFile").click());
+  document.getElementById("importFile").addEventListener("change", (e) => {
+    const file = e.target.files[0];
+    if (file) doImport(file);
+    e.target.value = "";
+  });
+
+  document.getElementById("list").addEventListener("click", (e) => {
+    const take = e.target.closest("[data-take]");
+    if (take) {
+      const name = take.dataset.take;
+      const ed = state.editors[name];
+      ed.selected = !ed.selected;
+      take.setAttribute("aria-pressed", String(ed.selected));
+      saveState();
+      updateSelectedCounter();
+      return;
+    }
+    const head = e.target.closest(".row-head");
+    if (head) {
+      const row = head.closest(".row");
+      const isOpen = row.dataset.open === "true";
+      row.dataset.open = isOpen ? "false" : "true";
+      head.setAttribute("aria-expanded", isOpen ? "false" : "true");
+    }
+  });
+
+  document.getElementById("step2List").addEventListener("input", (e) => {
+    const ta = e.target.closest("textarea[data-msg-for]");
+    if (!ta) return;
+    state.editors[ta.dataset.msgFor].message = ta.value;
+    saveState();
+    updateCharCount(ta.dataset.msgFor, ta.value);
+  });
+  document.getElementById("step2List").addEventListener("click", (e) => {
+    const toggle = e.target.closest("[data-notes-toggle]");
+    if (toggle) {
+      const block = toggle.closest(".editor-row").querySelector(".notes-block");
+      const isOpen = block.dataset.open === "true";
+      block.dataset.open = isOpen ? "false" : "true";
+      toggle.setAttribute("aria-expanded", isOpen ? "false" : "true");
+      return;
+    }
+    const btn = e.target.closest("[data-reset-for]");
+    if (!btn) return;
+    const name = btn.dataset.resetFor;
+    const outlet = DATA.outlets.find(o => o.name === name);
+    if (!outlet) return;
+    const filled = fillTemplate(state.template, outlet);
+    state.editors[name].message = filled;
+    saveState();
+    const ta = document.querySelector(`#step2List textarea[data-msg-for="${CSS.escape(name)}"]`);
+    if (ta) ta.value = filled;
+    updateCharCount(name, filled);
+  });
+
+  document.getElementById("step3List").addEventListener("input", (e) => {
+    const ta = e.target.closest("textarea[data-msg-for]");
+    if (!ta) return;
+    state.editors[ta.dataset.msgFor].message = ta.value;
+    saveState();
+  });
+  document.getElementById("step3List").addEventListener("click", (e) => {
+    const sentBtn = e.target.closest("[data-sent-for]");
+    if (sentBtn) { onSentToggle(sentBtn.dataset.sentFor, sentBtn); return; }
+    const repliedBtn = e.target.closest("[data-replied-for]");
+    if (repliedBtn) { onRepliedToggle(repliedBtn.dataset.repliedFor, repliedBtn); return; }
+  });
+}
+
+if (!window.__imiOutreachInit) {
+  window.__imiOutreachInit = true;
+  buildTabs();
+  buildFilters();
+  buildToggles();
+  initStatic();
+  switchStep(state.step);
+  updateHeaderCounter();
+}
+</script>
+</body>
+</html>

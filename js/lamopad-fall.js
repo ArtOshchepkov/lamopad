@@ -7,15 +7,9 @@
     s.id = 'lamopad-fall-style';
     s.textContent = [
       '.lamopad-canvas{position:fixed;inset:0;pointer-events:none;z-index:0;overflow:hidden;}',
-      '.lama{position:absolute;top:-80px;line-height:1;user-select:none;will-change:transform,opacity;',
-        'animation:lama-fall linear forwards;pointer-events:auto;cursor:grab;touch-action:none;}',
+      '.lama{position:absolute;top:0;left:0;line-height:1;user-select:none;opacity:0;',
+        'will-change:transform,opacity;pointer-events:auto;cursor:grab;touch-action:none;}',
       '.lama.dragging{cursor:grabbing;}',
-      '@keyframes lama-fall{',
-        '0%{opacity:0;transform:translateY(0) rotate(var(--rot-start));}',
-        '8%{opacity:var(--opacity);}',
-        '88%{opacity:var(--opacity);}',
-        '100%{opacity:0;transform:translateY(var(--fall-dist)) rotate(var(--rot-end));}',
-      '}',
     ].join('');
     document.head.appendChild(s);
   }
@@ -27,6 +21,15 @@
 
   /* ── helpers ── */
   function rand(a, b) { return a + Math.random() * (b - a); }
+  function clamp01(v) { return v < 0 ? 0 : v > 1 ? 1 : v; }
+
+  const D2R = Math.PI / 180;
+  const SPAWN_MARGIN = 140;  // px outside the viewport where items appear
+  const KILL_MARGIN  = 220;  // px outside the viewport where they are recycled
+  const FADE         = 110;  // px of edge proximity over which they fade in/out
+  const GRAV_TAU     = 0.25; // s — smoothing of the sensor reading
+  const TURN_TAU     = 0.45; // s — how fast a falling item swings onto a new direction
+  const MAX_ITEMS    = 120;
 
   const BAG_FILTER = 'sepia(1) saturate(4) hue-rotate(300deg) brightness(0.85)';
 
@@ -66,89 +69,235 @@
   };
   const preset = PRESETS[window.lamopadFallConfig] || PRESETS.full;
 
-  /* ── spawn ── */
+  /* ── viewport ── */
+  let W = 0, H = 0, screenAngle = 0;
+  function readViewport() {
+    W = window.innerWidth;
+    H = window.innerHeight;
+    const so = screen.orientation;
+    screenAngle = so && typeof so.angle === 'number'
+      ? so.angle
+      : (typeof window.orientation === 'number' ? (window.orientation + 360) % 360 : 0);
+  }
+  readViewport();
+  window.addEventListener('resize', readViewport);
+  window.addEventListener('orientationchange', readViewport);
+
+  /* ── gravity ────────────────────────────────────────────────────────────────
+     Unit vector in screen space (x right, y down). Without a sensor it stays
+     (0,1) and everything falls straight down, exactly like before.            */
+  const grav       = { x: 0, y: 1 };
+  const gravTarget = { x: 0, y: 1 };
+  let sensorSeen = false;
+
+  // Gravity in device coords from the deviceorientation Euler angles. With
+  // R = Rz(alpha)Rx(beta)Ry(gamma) mapping device -> earth, earth-down (0,0,-1)
+  // becomes (sin g cos b, -sin b, -cos g cos b) in the device frame (x right,
+  // y up, z out of the screen). Alpha drops out: gravity is invariant under
+  // rotation about the vertical. Screen y points down, hence the flipped sign.
+  function fromOrientation(beta, gamma) {
+    const b = beta * D2R, g = gamma * D2R;
+    return { x: Math.sin(g) * Math.cos(b), y: Math.sin(b) };
+  }
+
+  // The device frame is fixed to the hardware; the layout rotates with the UI.
+  function applyScreenAngle(v) {
+    const a = screenAngle * D2R, c = Math.cos(a), s = Math.sin(a);
+    return { x: v.x * c + v.y * s, y: -v.x * s + v.y * c };
+  }
+
+  function pushGravity(v) {
+    const m = Math.hypot(v.x, v.y);
+    if (m < 0.12) return;  // device is flat: the in-plane direction is just noise, hold the last one
+    sensorSeen = true;
+    gravTarget.x = v.x / m;
+    gravTarget.y = v.y / m;
+  }
+
+  function onDeviceOrientation(e) {
+    if (e.beta == null || e.gamma == null) return;
+    pushGravity(applyScreenAngle(fromOrientation(e.beta, e.gamma)));
+  }
+
+  // Fallback for devices that expose no fused orientation. Per the W3C
+  // convention accelerationIncludingGravity reports the reaction to gravity
+  // (+z when lying face up), so the gravity vector is its negation; device y
+  // points up, screen y down, so that sign flips back.
+  const motionLP = { x: 0, y: 0 };
+  let motionInit = false;
+  function onDeviceMotion(e) {
+    const a = e.accelerationIncludingGravity;
+    if (!a || a.x == null || a.y == null) return;
+    const rx = -a.x, ry = a.y;
+    if (motionInit) {
+      motionLP.x += (rx - motionLP.x) * 0.08;  // raw accelerometer: heavy low-pass
+      motionLP.y += (ry - motionLP.y) * 0.08;
+    } else {
+      motionLP.x = rx; motionLP.y = ry; motionInit = true;
+    }
+    pushGravity(applyScreenAngle({ x: motionLP.x / 9.81, y: motionLP.y / 9.81 }));
+  }
+
+  let sensorsOn = false;
+  function enableSensors() {
+    if (sensorsOn) return;
+    sensorsOn = true;
+    window.addEventListener('deviceorientation', onDeviceOrientation);
+    setTimeout(function () {
+      if (!sensorSeen) window.addEventListener('devicemotion', onDeviceMotion);
+    }, 2000);
+  }
+
+  const DOE = window.DeviceOrientationEvent;
+  if (DOE && typeof DOE.requestPermission === 'function') {
+    // iOS 13+: the prompt is only allowed from a user gesture.
+    const gestures = ['pointerdown', 'touchend', 'click'];
+    const onGesture = function () {
+      gestures.forEach(function (t) { document.removeEventListener(t, onGesture); });
+      DOE.requestPermission()
+        .then(function (r) { if (r === 'granted') enableSensors(); })
+        .catch(function () {});
+    };
+    gestures.forEach(function (t) { document.addEventListener(t, onGesture, { passive: true }); });
+  } else if (DOE) {
+    enableSensors();
+  }
+
+  /* ── items ── */
+  const parts = [];
+
+  function place(p, vis) {
+    p.el.style.transform =
+      'translate3d(' + p.x.toFixed(1) + 'px,' + p.y.toFixed(1) + 'px,0)' +
+      ' rotate(' + p.rot.toFixed(1) + 'deg) translate(-50%,-50%)';
+    p.el.style.opacity = (p.opacity * vis).toFixed(3);
+  }
+
   function spawnItem(cfg) {
     const el = document.createElement('span');
     el.className = 'lama';
     el.textContent = cfg.emoji;
+    el.style.fontSize = rand(cfg.minSize, cfg.maxSize) + 'px';
+    if (cfg.filter) el.style.filter = cfg.filter;
 
-    const size      = rand(cfg.minSize, cfg.maxSize);
-    const dur       = rand(cfg.minDur, cfg.maxDur);
-    const totalDist = window.innerHeight + 160;
-    const opacity   = rand(cfg.minOpacity, cfg.maxOpacity);
+    // Enter from the upwind side of the current gravity, spread across it,
+    // and cross the viewport in `dur` seconds whatever the tilt.
+    const gx = grav.x, gy = grav.y;
+    const px = -gy, py = gx;
+    const span  = Math.abs(gx) * W + Math.abs(gy) * H;  // viewport extent along gravity
+    const spanP = Math.abs(px) * W + Math.abs(py) * H;  // ...and across it
+    const off   = rand(-0.53, 0.53) * spanP;
+    const speed = (span + 2 * SPAWN_MARGIN) / rand(cfg.minDur, cfg.maxDur);
 
-    el.style.cssText = [
-      'left:' + rand(-2, 100) + 'vw;',
-      'font-size:' + size + 'px;',
-      'animation-duration:' + dur + 's;',
-      '--fall-dist:' + totalDist + 'px;',
-      '--rot-start:' + rand(-25, 25) + 'deg;',
-      '--rot-end:' + rand(-180, 180) + 'deg;',
-      '--opacity:' + opacity + ';',
-      cfg.filter ? 'filter:' + cfg.filter + ';' : '',
-    ].join('');
-
+    const p = {
+      el: el,
+      x: W / 2 - gx * (span / 2 + SPAWN_MARGIN) + px * off,
+      y: H / 2 - gy * (span / 2 + SPAWN_MARGIN) + py * off,
+      vx: gx * speed,
+      vy: gy * speed,
+      speed: speed,
+      rot: rand(-25, 25),
+      spin: rand(-30, 30),
+      opacity: rand(cfg.minOpacity, cfg.maxOpacity),
+      drag: null,
+    };
+    parts.push(p);
     canvas.appendChild(el);
-    el.addEventListener('animationend', () => el.remove());
+    attachDrag(p);
+    place(p, 0);
+  }
 
-    /* drag */
-    const pxPerMs = totalDist / (dur * 1000);
-    let startMX, startMY, startEL, startET, fallAnim = null, dragging = false;
-
-    function beginDrag(cx, cy) {
-      const r = el.getBoundingClientRect();
-      el.style.animation = 'none';
-      el.style.opacity   = opacity;
-      el.style.transform = 'none';
-      el.style.top  = r.top  + 'px';
-      el.style.left = r.left + 'px';
-      if (fallAnim) { fallAnim.cancel(); fallAnim = null; }
-      startMX = cx; startMY = cy; startEL = r.left; startET = r.top;
-      el.classList.add('dragging');
-      document.body.style.userSelect = 'none';
-    }
-
-    function moveDrag(cx, cy) {
-      el.style.left = (startEL + cx - startMX) + 'px';
-      el.style.top  = (startET + cy - startMY) + 'px';
-    }
-
-    function endDrag() {
-      el.classList.remove('dragging');
-      document.body.style.userSelect = '';
-      const curTop    = parseFloat(el.style.top);
-      const remaining = window.innerHeight + 160 - curTop;
-      if (remaining <= 0) { el.remove(); return; }
-      fallAnim = el.animate(
-        [
-          { transform: 'translateY(0) rotate(0deg)', opacity: opacity },
-          { transform: 'translateY(' + remaining + 'px) rotate(' + rand(-200, 200) + 'deg)', opacity: 0 },
-        ],
-        { duration: remaining / pxPerMs, easing: 'linear', fill: 'forwards' }
-      );
-      fallAnim.addEventListener('finish', () => el.remove());
-    }
+  /* ── drag ── */
+  function attachDrag(p) {
+    const el = p.el;
+    let pid = null, lx = 0, ly = 0, lt = 0, fx = 0, fy = 0;
 
     el.addEventListener('pointerdown', function (e) {
       e.preventDefault();
       el.setPointerCapture(e.pointerId);
-      dragging = true;
-      beginDrag(e.clientX, e.clientY);
+      pid = e.pointerId;
+      p.drag = { dx: p.x - e.clientX, dy: p.y - e.clientY };
+      lx = e.clientX; ly = e.clientY; lt = e.timeStamp; fx = fy = 0;
+      el.classList.add('dragging');
+      document.body.style.userSelect = 'none';
     });
+
     el.addEventListener('pointermove', function (e) {
-      if (!dragging) return;
+      if (!p.drag || e.pointerId !== pid) return;
       e.preventDefault();
-      moveDrag(e.clientX, e.clientY);
+      p.x = e.clientX + p.drag.dx;
+      p.y = e.clientY + p.drag.dy;
+      const dt = (e.timeStamp - lt) / 1000;
+      if (dt > 0.004) {
+        fx = (e.clientX - lx) / dt; fy = (e.clientY - ly) / dt;
+        lx = e.clientX; ly = e.clientY; lt = e.timeStamp;
+      }
     });
-    el.addEventListener('pointerup',     function () { if (!dragging) return; dragging = false; endDrag(); });
-    el.addEventListener('pointercancel', function () { if (!dragging) return; dragging = false; endDrag(); });
+
+    function release() {
+      if (!p.drag) return;
+      p.drag = null;
+      pid = null;
+      el.classList.remove('dragging');
+      document.body.style.userSelect = '';
+      // keep the throw, capped; gravity reels it back in over TURN_TAU
+      const m = Math.hypot(fx, fy), cap = p.speed * 12;
+      const k = m > cap ? cap / m : 1;
+      p.vx = fx * k; p.vy = fy * k;
+    }
+    el.addEventListener('pointerup', release);
+    el.addEventListener('pointercancel', release);
   }
 
   /* ── schedule ── */
-  preset.items.forEach(function (cfg) {
-    for (let i = 0; i < cfg.initCount; i++) {
-      setTimeout(function () { spawnItem(cfg); }, rand(cfg.initMin, cfg.initMax));
-    }
-    setInterval(function () { spawnItem(cfg); }, cfg.interval);
+  const spawners = preset.items.map(function (cfg) {
+    const queue = [];
+    for (let i = 0; i < cfg.initCount; i++) queue.push(rand(cfg.initMin, cfg.initMax) / 1000);
+    queue.sort(function (a, b) { return a - b; });
+    return { cfg: cfg, queue: queue, t: 0, next: cfg.interval / 1000 };
   });
+
+  /* ── loop ── */
+  let last = 0;
+  function frame(now) {
+    requestAnimationFrame(frame);
+    const dt = Math.min((now - last) / 1000, 0.05);  // also swallows background-tab gaps
+    last = now;
+    if (dt <= 0) return;
+
+    const kg = 1 - Math.exp(-dt / GRAV_TAU);
+    grav.x += (gravTarget.x - grav.x) * kg;
+    grav.y += (gravTarget.y - grav.y) * kg;
+    const gm = Math.hypot(grav.x, grav.y) || 1;
+    grav.x /= gm; grav.y /= gm;
+
+    for (const s of spawners) {
+      s.t += dt;
+      while (s.queue.length && s.queue[0] <= s.t) { s.queue.shift(); if (parts.length < MAX_ITEMS) spawnItem(s.cfg); }
+      if (s.t >= s.next) { s.next += s.cfg.interval / 1000; if (parts.length < MAX_ITEMS) spawnItem(s.cfg); }
+    }
+
+    const kv = 1 - Math.exp(-dt / TURN_TAU);
+    for (let i = parts.length - 1; i >= 0; i--) {
+      const p = parts[i];
+      if (!p.drag) {
+        p.vx += (grav.x * p.speed - p.vx) * kv;
+        p.vy += (grav.y * p.speed - p.vy) * kv;
+        p.x += p.vx * dt;
+        p.y += p.vy * dt;
+        p.rot += p.spin * dt;
+      }
+      const edge = Math.min(p.x, W - p.x, p.y, H - p.y);
+      if (!p.drag && edge < -KILL_MARGIN) { p.el.remove(); parts.splice(i, 1); continue; }
+      place(p, clamp01((edge + FADE) / FADE));
+    }
+  }
+  requestAnimationFrame(function (t) { last = t; requestAnimationFrame(frame); });
+
+  /* debug / desktop testing: lamopadFall.setGravity(1, 0) tips everything right */
+  window.lamopadFall = {
+    gravity: grav,
+    setGravity: function (x, y) { pushGravity({ x: x, y: y }); },
+    fromOrientation: fromOrientation,
+  };
 })();

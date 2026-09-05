@@ -89,6 +89,7 @@
   const grav       = { x: 0, y: 1 };
   const gravTarget = { x: 0, y: 1 };
   let sensorSeen = false;
+  let sensorEvents = 0, lastReading = '-', permission = 'n/a';
 
   // Gravity in device coords from the deviceorientation Euler angles. With
   // R = Rz(alpha)Rx(beta)Ry(gamma) mapping device -> earth, earth-down (0,0,-1)
@@ -116,6 +117,8 @@
 
   function onDeviceOrientation(e) {
     if (e.beta == null || e.gamma == null) return;
+    sensorEvents++;
+    lastReading = 'orient b=' + e.beta.toFixed(0) + ' g=' + e.gamma.toFixed(0);
     pushGravity(applyScreenAngle(fromOrientation(e.beta, e.gamma)));
   }
 
@@ -128,6 +131,8 @@
   function onDeviceMotion(e) {
     const a = e.accelerationIncludingGravity;
     if (!a || a.x == null || a.y == null) return;
+    sensorEvents++;
+    lastReading = 'motion x=' + a.x.toFixed(1) + ' y=' + a.y.toFixed(1);
     const rx = -a.x, ry = a.y;
     if (motionInit) {
       motionLP.x += (rx - motionLP.x) * 0.08;  // raw accelerometer: heavy low-pass
@@ -149,16 +154,36 @@
   }
 
   const DOE = window.DeviceOrientationEvent;
-  if (DOE && typeof DOE.requestPermission === 'function') {
-    // iOS 13+: the prompt is only allowed from a user gesture.
-    const gestures = ['pointerdown', 'touchend', 'click'];
-    const onGesture = function () {
-      gestures.forEach(function (t) { document.removeEventListener(t, onGesture); });
-      DOE.requestPermission()
-        .then(function (r) { if (r === 'granted') enableSensors(); })
-        .catch(function () {});
-    };
-    gestures.forEach(function (t) { document.addEventListener(t, onGesture, { passive: true }); });
+  const needsPermission = !!DOE && typeof DOE.requestPermission === 'function';
+  permission = !DOE ? 'no orientation api' : needsPermission ? 'waiting for a tap' : 'not required';
+
+  // iOS 13+ only shows the prompt from inside a user gesture, and it is picky
+  // about which one — a pointerdown is rejected outright. So ask on every
+  // gesture until one is accepted, and only give up once iOS actually answers.
+  const GESTURES = ['touchend', 'click', 'pointerup'];
+  let asking = false;
+  function stopAsking() {
+    GESTURES.forEach(function (t) { document.removeEventListener(t, askPermission, true); });
+  }
+  function askPermission() {
+    if (asking || sensorsOn) return;
+    asking = true;
+    permission = 'asking';
+    let p;
+    try { p = DOE.requestPermission(); } catch (e) { asking = false; permission = 'threw: ' + e.name; return; }
+    p.then(function (r) {
+      asking = false;
+      permission = r;
+      if (r === 'granted') { stopAsking(); enableSensors(); }
+      else stopAsking();          // a denial sticks for the rest of the page load
+    }, function (e) {
+      asking = false;             // gesture not accepted — the next one may be
+      permission = 'rejected: ' + (e && e.name || e);
+    });
+  }
+
+  if (needsPermission) {
+    GESTURES.forEach(function (t) { document.addEventListener(t, askPermission, true); });
   } else if (DOE) {
     enableSensors();
   }
@@ -205,6 +230,36 @@
     canvas.appendChild(el);
     attachDrag(p);
     place(p, 0);
+  }
+
+  /* ── on-device diagnostics ──────────────────────────────────────────────────
+     Add ?falldebug (or #falldebug) to any URL to see what the phone reports.
+     Tapping the panel re-requests motion access.                             */
+  const debugOn = /falldebug/.test(location.search + location.hash);
+  let debugBox = null;
+  if (debugOn) {
+    debugBox = document.createElement('div');
+    debugBox.style.cssText = 'position:fixed;left:8px;bottom:8px;z-index:99999;' +
+      'font:11px/1.45 ui-monospace,Menlo,Consolas,monospace;white-space:pre;' +
+      'background:rgba(0,0,0,.82);color:#fff;padding:8px 10px;border-radius:8px;' +
+      'pointer-events:auto;max-width:calc(100vw - 16px);';
+    debugBox.addEventListener('click', function () { if (needsPermission) askPermission(); });
+    document.body.appendChild(debugBox);
+    updateDebug();
+  }
+  function updateDebug() {
+    debugBox.textContent = [
+      'secure context : ' + window.isSecureContext,
+      'orientation api: ' + (DOE ? (needsPermission ? 'yes, needs permission' : 'yes') : 'MISSING'),
+      'permission     : ' + permission,
+      'listening      : ' + sensorsOn,
+      'sensor events  : ' + sensorEvents,
+      'last reading   : ' + lastReading,
+      'screen angle   : ' + screenAngle,
+      'gravity        : ' + grav.x.toFixed(2) + ', ' + grav.y.toFixed(2),
+      'items on screen: ' + parts.length,
+      needsPermission && !sensorsOn ? '\n>> tap here to allow motion access' : '',
+    ].join('\n');
   }
 
   /* ── drag ── */
@@ -258,7 +313,7 @@
   });
 
   /* ── loop ── */
-  let last = 0;
+  let last = 0, frames = 0;
   function frame(now) {
     requestAnimationFrame(frame);
     const dt = Math.min((now - last) / 1000, 0.05);  // also swallows background-tab gaps
@@ -276,6 +331,8 @@
       while (s.queue.length && s.queue[0] <= s.t) { s.queue.shift(); if (parts.length < MAX_ITEMS) spawnItem(s.cfg); }
       if (s.t >= s.next) { s.next += s.cfg.interval / 1000; if (parts.length < MAX_ITEMS) spawnItem(s.cfg); }
     }
+
+    if (debugBox && (frames++ % 6 === 0)) updateDebug();
 
     const kv = 1 - Math.exp(-dt / TURN_TAU);
     for (let i = parts.length - 1; i >= 0; i--) {

@@ -1,14 +1,14 @@
-// ─── Игрок: ходит влево-вправо, у ведра упирается и толкает ──────────────────
+// ─── Игрок: ходит влево-вправо, у квадрата упирается и толкает ──────────────
 import { CONF, DEPTH } from '../config.js';
 import { Person } from './person.js';
 import { HERO } from './textures.js';
 import { Sfx } from '../sfx.js';
 
 export class Player {
-  constructor(scene, groundY, bucketLeft) {
+  constructor(scene, groundY, squareLeft) {
     this.scene = scene;
-    this.bucketLeft = bucketLeft;
-    this.pushX = bucketLeft - 2;                  // ближе уже не подойти
+    this.squareLeft = squareLeft;
+    this.pushX = squareLeft - 2;                  // ближе уже не подойти
     this.person = new Person(scene, CONF.player.startX, groundY, {
       variant: HERO, scale: CONF.px.person,
     });
@@ -19,11 +19,11 @@ export class Player {
 
   get x() { return this.person.x; }
 
-  /** dir: -1 | 0 | 1. Возвращает true, если в этом кадре толкаем ведро. */
+  /** dir: -1 | 0 | 1. Возвращает true, если в этом кадре толкаем квадрат. */
   update(dt, dir) {
     const p = this.person;
-    const atBucket = p.x >= this.pushX;
-    this.pushing = atBucket && dir > 0;
+    const atSquare = p.x >= this.pushX;
+    this.pushing = atSquare && dir > 0;
 
     if (this.pushing) {
       p.x = this.pushX;

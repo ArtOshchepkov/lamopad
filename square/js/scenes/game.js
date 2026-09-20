@@ -1,10 +1,10 @@
-// ─── Основная сцена: плита, пропасть, ведро и растущая толпа ────────────────
+// ─── Основная сцена: плита, пропасть, квадрат и растущая толпа ────────────────
 import { CONF, DEPTH, PAL } from '../config.js';
 import { Beat } from '../beat.js';
 import { Debug } from '../debug.js';
 import { Sfx } from '../sfx.js';
 import { Disco, tripLevel } from '../objects/disco.js';
-import { Bucket } from '../objects/bucket.js';
+import { Square } from '../objects/square.js';
 import { Crowd } from '../objects/crowd.js';
 import { Player } from '../objects/player.js';
 
@@ -20,13 +20,13 @@ export class GameScene extends Phaser.Scene {
 
     this._buildWorld(W, H);
 
-    this.bucket = new Bucket(this, this.groundY);
-    this.player = new Player(this, this.groundY, this.bucket.footLeft);
-    this.crowd = new Crowd(this, this.groundY, this.bucket.footLeft);
+    this.square = new Square(this, this.groundY);
+    this.player = new Player(this, this.groundY, this.square.footLeft);
+    this.crowd = new Crowd(this, this.groundY, this.square.footLeft);
     // На узком экране рядов меньше, чем нужно под полную цель: тогда снижаем
     // её, иначе забег станет непроходимым. Запас — на бегущих в этот момент
     this.needed = Math.min(CONF.crowd.needed, Math.floor(this.crowd.capacity / 1.15));
-    this.bucket.needed = this.needed;
+    this.square.needed = this.needed;
 
     // состояние забега
     this.state = 'play';                            // play | win
@@ -72,7 +72,7 @@ export class GameScene extends Phaser.Scene {
   _disco(dt, time) {
     if (!this.disco) return;
     Beat.update(time, dt);
-    const target = tripLevel(this.bucket.progress);
+    const target = tripLevel(this.square.progress);
     this.trip += (target - this.trip) * Math.min(1, dt * 1.5);
     this.disco.update(dt, this.trip);
     // Цвет не крутим по кругу, а РАСКАЧИВАЕМ: размах маятника растёт вместе
@@ -88,8 +88,8 @@ export class GameScene extends Phaser.Scene {
       this.tripFx.hue = this.hue;
     }
     this.cameras.main.setZoom(Disco.pulse(this.trip, CONF.disco.camPulse));
-    if (this.bucket.state === 'stand') {
-      this.bucket.sprite.setScale(CONF.px.bucket * Disco.pulse(this.trip, CONF.disco.bucketPulse));
+    if (this.square.state === 'stand') {
+      this.square.sprite.setScale(CONF.px.square * Disco.pulse(this.trip, CONF.disco.squarePulse));
     }
     const heave = Beat.beat * CONF.disco.crowdHeave * this.trip;
     this.crowd.heave(heave);
@@ -175,14 +175,14 @@ export class GameScene extends Phaser.Scene {
       if (!m) return;
       this.buf = (this.buf + m[1].toLowerCase()).slice(-8);
       if (this.buf.endsWith('lama')) { this.crowd.add(true); this.buf = ''; }
-      else if (this.buf.endsWith('vedro')) { for (let i = 0; i < 40; i++) this.crowd.add(); this.buf = ''; }
+      else if (this.buf.endsWith('square')) { for (let i = 0; i < 40; i++) this.crowd.add(); this.buf = ''; }
       else if (this.buf.endsWith('padai')) { this._win(); this.buf = ''; }
       else if (this.buf.endsWith('dead')) { this._ascend(); this.buf = ''; }
     });
   }
 
   _dir() {
-    if (!window.__vedroReady || this.state !== 'play') return 0;
+    if (!window.__squareReady || this.state !== 'play') return 0;
     const k = this.keys;
     if (k.left.isDown || k.a.isDown) return -1;
     if (k.right.isDown || k.d.isDown) return 1;
@@ -200,12 +200,12 @@ export class GameScene extends Phaser.Scene {
     this._disco(dt, time);
 
     if (this.state === 'win') {
-      // пока идёт пауза на толпу, ведро продолжает трястись от натуги,
+      // пока идёт пауза на толпу, квадрат продолжает трястись от натуги,
       // а не расслабляется на глазах
-      this.bucket.update(dt, this.bucket.state === 'stand' ? this.lastForce : 0);
+      this.square.update(dt, this.square.state === 'stand' ? this.lastForce : 0);
       this.crowd.party(dt);
       if (this.glow) this._shine(dt);
-      if (this.bucket.gone && !this.reported) {
+      if (this.square.gone && !this.reported) {
         this.reported = true;                       // дать полюбоваться финалом
         this.time.delayedCall(this.ending === 'ascend' ? 4200 : 2200, () => this._report());
       }
@@ -226,14 +226,14 @@ export class GameScene extends Phaser.Scene {
     this.lastForce = force;
     this.peak = Math.max(this.peak, this.crowd.size + 1);
 
-    this.bucket.update(dt, force);
+    this.square.update(dt, force);
 
-    // крошка из-под точки опоры, пока ведро ворочается
-    if (this.bucket.progress > 0.15) {
+    // крошка из-под точки опоры, пока квадрат ворочается
+    if (this.square.progress > 0.15) {
       this.dustT += dt;
-      if (this.dustT > (0.22 - this.bucket.progress * 0.16) * (this.touch ? 2 : 1)) {
+      if (this.dustT > (0.22 - this.square.progress * 0.16) * (this.touch ? 2 : 1)) {
         this.dustT = 0;
-        this.bucket.dust();
+        this.square.dust();
       }
     }
 
@@ -243,8 +243,8 @@ export class GameScene extends Phaser.Scene {
     Debug.set('состояние', this.state);
     Debug.set('толпа', this.crowd.size);
     Debug.set('сила', force);
-    Debug.set('наклон', this.bucket.tilt.toFixed(1));
-    Debug.set('напряжение', (this.bucket.progress * 100).toFixed(0) + '%');
+    Debug.set('наклон', this.square.tilt.toFixed(1));
+    Debug.set('напряжение', (this.square.progress * 100).toFixed(0) + '%');
     Debug.set('цель', this.needed + ' из ' + this.crowd.capacity);
     Debug.set('время', this.elapsed.toFixed(1));
     Debug.set('осталось', this.left.toFixed(1));
@@ -258,19 +258,19 @@ export class GameScene extends Phaser.Scene {
     else if (this.crowd.size >= 30) this.hint = C.horde;
     else if (pushing && this.crowd.size > 0) this.hint = C.keep;
     else if (pushing) { this.hint = C.solo; this.soloSeen = true; }
-    else if (this.player.x >= this.bucket.footLeft - 80) this.hint = C.push;
+    else if (this.player.x >= this.square.footLeft - 80) this.hint = C.push;
     else this.hint = this.soloSeen ? C.keep : C.move;
   }
 
   /** Финал первый: навалились и уронили. */
   _win() { this._finish('topple'); }
 
-  /** Финал второй: ведро устало стоять и вознеслось. */
+  /** Финал второй: квадрат устало стоять и вознеслось. */
   _ascend() { this._finish('ascend'); }
 
   /**
    * Общий сценарий финала: сперва пауза на замерший от натуги народ —
-   * ради него всё и затевалось, — и только потом ведро делает своё дело.
+   * ради него всё и затевалось, — и только потом квадрат делает своё дело.
    */
   _finish(ending) {
     if (this.state === 'win') return;
@@ -281,10 +281,10 @@ export class GameScene extends Phaser.Scene {
     this.player.person.setFrame('stand');
     this.time.delayedCall(CONF.holdBeat, () => {
       if (ending === 'ascend') {
-        this.bucket.ascend();
+        this.square.ascend();
         this._lightUp();
       } else {
-        this.bucket.topple();
+        this.square.topple();
       }
       this.time.delayedCall(450, () => { this.crowd.celebrate(); Sfx.cheer(); });
     });
@@ -292,14 +292,14 @@ export class GameScene extends Phaser.Scene {
 
   /** Свет великой мудрости: ядро, лучи и притихшее небо. Толпа — на свету. */
   _lightUp() {
-    const b = this.bucket.sprite;
+    const b = this.square.sprite;
     // затемняем только фон: человечков (глубина 10+) свет не должен съесть
     this.dim = this.add.rectangle(0, 0, this.scale.width, this.scale.height, 0x0a0820)
       .setOrigin(0, 0).setDepth(DEPTH.dim).setAlpha(0);
     this.tweens.add({ targets: this.dim, alpha: 0.5, duration: 1400 });
 
     this.credo = this.add.text(this.scale.width * 0.32, this.groundY - 300,
-      'МЫ ПОЛЮБИЛИ ВЕДРО', {
+      'МЫ ПОЛЮБИЛИ КВАДРАТ', {
         fontFamily: '"Courier New", ui-monospace, monospace',
         fontSize: '38px', fontStyle: 'bold', color: '#fff6dc', align: 'center',
         wordWrap: { width: this.scale.width * 0.62 },
@@ -311,7 +311,7 @@ export class GameScene extends Phaser.Scene {
       targets: this.credo, alpha: 1, scale: 1, duration: 900, delay: 900, ease: 'Back.easeOut',
     });
 
-    const cx = b.x - this.bucket.width * 0.45;
+    const cx = b.x - this.square.width * 0.45;
     this.rays = this.add.image(cx, b.y - b.displayHeight * 0.45, 'rays')
       .setDepth(DEPTH.rays).setBlendMode(Phaser.BlendModes.ADD).setScale(0.2).setAlpha(0);
     this.glow = this.add.image(cx, b.y - b.displayHeight * 0.45, 'glow')
@@ -320,10 +320,10 @@ export class GameScene extends Phaser.Scene {
     this.tweens.add({ targets: this.glow, scale: 4.5, alpha: 0.95, duration: 1200, ease: 'Quad.easeOut' });
   }
 
-  /** Сияние живёт своей жизнью: лучи крутятся, ядро дышит, всё едет за ведром. */
+  /** Сияние живёт своей жизнью: лучи крутятся, ядро дышит, всё едет за квадратм. */
   _shine(dt) {
-    const b = this.bucket.sprite;
-    const cx = b.x - this.bucket.width * 0.45;
+    const b = this.square.sprite;
+    const cx = b.x - this.square.width * 0.45;
     const cy = b.y - b.displayHeight * 0.45;
     this.rays.setPosition(cx, cy);
     this.glow.setPosition(cx, cy);
@@ -332,7 +332,7 @@ export class GameScene extends Phaser.Scene {
   }
 
   _report() {
-    this.game.events.emit('vedro-win', {
+    this.game.events.emit('square-win', {
       ending: this.ending,
       count: this.peak,
       seconds: Math.max(1, Math.round(this.elapsed)),

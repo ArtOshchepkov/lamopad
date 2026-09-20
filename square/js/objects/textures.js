@@ -1,5 +1,5 @@
 // ─── Процедурные денди-текстуры: рисуем пикселями, без бинарных ассетов ──────
-// Всё рисуется в «пиксельных» координатах (8×12 человечек, 90×100 ведро),
+// Всё рисуется в «пиксельных» координатах (8×12 человечек, 90×90 квадрат),
 // а на сцене увеличивается целым числом — отсюда честный NES-вид.
 import { CONF, FOLK, PAL } from '../config.js';
 
@@ -65,7 +65,7 @@ const PERSON_FRAMES = {
     p.r(5, 2, 1, 1, PAL.ink);
     p.r(2, 4, 4, 2, f.shirt);
     p.r(3, 6, 2, 2, f.shirt);
-    p.r(6, 4, 2, 1, f.skin);                     // обе руки в ведро
+    p.r(6, 4, 2, 1, f.skin);                     // обе руки в квадрат
     p.r(2, 8, 3, 2, PAL.pants);
     p.r(0, 10, 2, 1, PAL.pants);                   // задняя нога в упоре
     p.r(4, 10, 1, 1, PAL.pants);
@@ -82,7 +82,7 @@ const HERO_FRAMES = {
     p.r(4, 2, 1, 1, PAL.ink);
     p.r(1, 4, 6, 4, PAL.shoe);                     // пончо
     p.r(1, 6, 6, 1, PAL.pack);
-    p.r(1, 5, 6, 1, PAL.rustHi);
+    p.r(1, 5, 6, 1, PAL.ponchoHi);
     p.r(2, 8, 3, 2, PAL.pants);
     p.r(2, 10, 1, 1, PAL.pants); p.r(4, 10, 1, 1, PAL.pants);
     p.r(2, 11, 1, 1, PAL.shoe);  p.r(4, 11, 1, 1, PAL.shoe);
@@ -94,7 +94,7 @@ const HERO_FRAMES = {
     p.r(4, 2, 1, 1, PAL.ink);
     p.r(1, 4, 6, 4, PAL.shoe);
     p.r(1, 6, 6, 1, PAL.pack);
-    p.r(1, 5, 6, 1, PAL.rustHi);
+    p.r(1, 5, 6, 1, PAL.ponchoHi);
     p.r(2, 8, 3, 2, PAL.pants);
     p.r(1, 10, 1, 1, PAL.pants); p.r(5, 10, 1, 1, PAL.pants);
     p.r(1, 11, 2, 1, PAL.shoe);  p.r(4, 11, 2, 1, PAL.shoe);
@@ -106,8 +106,8 @@ const HERO_FRAMES = {
     p.r(5, 2, 1, 1, PAL.ink);
     p.r(2, 4, 5, 4, PAL.shoe);
     p.r(2, 6, 5, 1, PAL.pack);
-    p.r(2, 5, 5, 1, PAL.rustHi);
-    p.r(6, 4, 2, 1, PAL.skin);                     // руки в ведро
+    p.r(2, 5, 5, 1, PAL.ponchoHi);
+    p.r(6, 4, 2, 1, PAL.skin);                     // руки в квадрат
     p.r(2, 8, 3, 2, PAL.pants);
     p.r(0, 10, 2, 1, PAL.pants); p.r(4, 10, 1, 1, PAL.pants);
     p.r(0, 11, 2, 1, PAL.shoe);  p.r(4, 11, 2, 1, PAL.shoe);
@@ -140,64 +140,39 @@ function makePeople(scene) {
   p.done();
 }
 
-// ─── Ведро: 90×100, ручка сверху, ржавчина, дырки ───────────────────────────
-function makeBucket(scene) {
-  const { texW: W, texH: H } = CONF.bucket;
-  const p = canvas(scene, 'bucket', W, H);
+// ─── Квадрат: 90×90, чернота и кракелюр ─────────────────────────────────────
+// Никакой фактуры сверх необходимого: это плоская чёрная плоскость, которую
+// выдаёт только сеть трещин по краске — иначе на экране читается дыра.
+function makeSquare(scene) {
+  const { texW: W, texH: H } = CONF.square;
+  const p = canvas(scene, 'square', W, H);
   if (!p) return;
-  const TOP = 15;                                   // ниже — само ведро
-  const halfAt = (y) => 45 - ((y - TOP) / (H - TOP)) * CONF.bucket.botInset;
+  p.r(0, 0, W, H, PAL.ink0);
 
-  // ручка: дуга из гнутого прутка
-  for (let x = 8; x <= 81; x++) {
-    const t = (x - 45) / 37;
-    const y = TOP - 1 - Math.round(Math.sqrt(Math.max(0, 1 - t * t)) * 13);
-    p.r(x, y, 1, 2, PAL.metal);
-    p.r(x, y + 2, 1, 1, PAL.rustDark);
-  }
-
-  // корпус построчно — трапеция, сужающаяся книзу
-  for (let y = TOP; y < H; y++) {
-    const hw = halfAt(y);
-    const x0 = Math.round(45 - hw), w = Math.round(hw * 2);
-    p.r(x0, y, w, 1, PAL.rust);
-    p.r(x0, y, 4, 1, PAL.rustLite);                 // свет слева
-    p.r(x0 + w - 6, y, 6, 1, PAL.rustDark);         // тень справа
-  }
-
-  // обод и два обруча
-  p.r(0, TOP, W, 2, PAL.rustHi);
-  for (let y = TOP + 2; y < TOP + 8; y++) {
-    const hw = halfAt(y), x0 = Math.round(45 - hw);
-    p.r(x0, y, Math.round(hw * 2), 1, PAL.rustLite);
-  }
-  for (const by of [46, 76]) {
-    for (let y = by; y < by + 5; y++) {
-      const hw = halfAt(y), x0 = Math.round(45 - hw);
-      p.r(x0, y, Math.round(hw * 2), 1, PAL.rustDark);
-      p.r(x0, y, 3, 1, PAL.rust);
+  const rand = rnd(20260920);
+  // трещины: ломаные, ползущие от случайной точки в случайную сторону
+  for (let i = 0; i < 26; i++) {
+    let x = Math.floor(rand() * W), y = Math.floor(rand() * H);
+    let dx = rand() < 0.5 ? 1 : -1, dy = rand() < 0.5 ? 1 : -1;
+    const len = 6 + Math.floor(rand() * 20);
+    for (let k = 0; k < len; k++) {
+      if (x < 1 || y < 1 || x > W - 2 || y > H - 2) break;
+      p.r(x, y, 1, 1, rand() < 0.4 ? PAL.crack : PAL.ink2);
+      if (rand() < 0.35) { dx = -dx; }
+      if (rand() < 0.35) { dy = -dy; }
+      if (rand() < 0.6) x += dx; else y += dy;
     }
   }
-
-  // ржавые проплешины и сквозные дыры — ведро своё отслужило
-  const rand = rnd(20260920);
-  for (let i = 0; i < 90; i++) {
-    const y = TOP + 3 + Math.floor(rand() * (H - TOP - 8));
-    const hw = halfAt(y) - 3;
-    const x = Math.round(45 + (rand() * 2 - 1) * hw);
-    const s = 1 + Math.floor(rand() * 3);
-    p.r(x, y, s, s, rand() < 0.55 ? PAL.rustDeep : PAL.rustDark);
+  // едва заметные пятна выработки, чтобы плоскость не была мёртвой
+  for (let i = 0; i < 40; i++) {
+    const x = Math.floor(rand() * (W - 3)), y = Math.floor(rand() * (H - 3));
+    p.r(x, y, 1 + Math.floor(rand() * 3), 1 + Math.floor(rand() * 2), PAL.ink1);
   }
-  for (const [hx, hy, hs] of [[26, 62, 5], [58, 34, 4], [40, 86, 3]]) {
-    p.r(hx, hy, hs, hs, PAL.abyss);
-    p.r(hx - 1, hy - 1, hs + 2, 1, PAL.rustDeep);
-  }
-
-  // дно
-  for (let y = H - 4; y < H; y++) {
-    const hw = halfAt(y), x0 = Math.round(45 - hw);
-    p.r(x0, y, Math.round(hw * 2), 1, PAL.rustDeep);
-  }
+  // грани: левая чуть светлее, правая и низ тонут
+  for (let y = 0; y < H; y++) p.r(0, y, 1, 1, PAL.ink2);
+  for (let x = 0; x < W; x++) p.r(x, 0, 1, 1, PAL.ink2);
+  for (let y = 0; y < H; y++) p.r(W - 1, y, 1, 1, '#050506');
+  for (let x = 0; x < W; x++) p.r(x, H - 1, 1, 1, '#050506');
   p.done();
 }
 
@@ -305,7 +280,7 @@ function makeGlow(scene) {
 export function buildTextures(scene) {
   makeGlow(scene);
   makePeople(scene);
-  makeBucket(scene);
+  makeSquare(scene);
   makeLlama(scene);
   makeGround(scene);
   makeCloud(scene);

@@ -1,4 +1,4 @@
-// ─── Ведро: очень большое, очень ржавое, очень упрямое ──────────────────────
+// ─── Квадрат: очень большой, очень чёрный, очень упрямый ──────────────────
 // Крутится вокруг нижнего правого угла — это точка опоры на самом краю.
 // Наклон тянется к цели, которую задаёт суммарная сила толкающих: одному
 // хватает только на дрожание, толпе — на опрокидывание.
@@ -7,22 +7,20 @@ import { Sfx } from '../sfx.js';
 
 const CREAK_MS = 420;
 
-export class Bucket {
+export class Square {
   constructor(scene, groundY) {
     this.scene = scene;
     this.groundY = groundY;
-    // Низ ведра уже верха, поэтому точка опоры — не угол текстуры, а угол
-    // самой трапеции: иначе при наклоне ведро «отрывается» от края обрыва.
-    const originX = (CONF.bucket.texW - CONF.bucket.botInset) / CONF.bucket.texW;
-    this.sprite = scene.add.image(CONF.cliffX, groundY + 2, 'bucket')
+    // Точка опоры — нижний правый угол: им квадрат и стоит на самой кромке.
+    const originX = (CONF.square.texW - CONF.square.botInset) / CONF.square.texW;
+    this.sprite = scene.add.image(CONF.cliffX, groundY + 2, 'square')
       .setOrigin(originX, 1)
-      .setScale(CONF.px.bucket)
-      .setDepth(DEPTH.bucket);
-    this.width = CONF.bucket.texW * CONF.px.bucket;
+      .setScale(CONF.px.square)
+      .setDepth(DEPTH.square);
+    this.width = CONF.square.texW * CONF.px.square;
     this.left = CONF.cliffX - originX * this.width;
-    // Упираются в низ ведра: он на botInset правее верхней кромки, и именно
-    // туда достают руки человечка ростом в одну десятую ведра.
-    this.footLeft = this.left + CONF.bucket.botInset * CONF.px.bucket;
+    // У квадрата отвесные бока, так что упираются прямо в левую грань.
+    this.footLeft = this.left + CONF.square.botInset * CONF.px.square;
     this.needed = CONF.crowd.needed;                // сцена уточнит под экран
     this.tilt = 0;                                  // градусы
     this.progress = 0;                              // 0..1 — сколько набрали
@@ -34,16 +32,16 @@ export class Bucket {
     this.spin = 0;
     this.ascendV = 0;
     this.hovering = false;
-    // Возносясь, ведро уменьшается — уходит ввысь, а не просто едет вверх.
+    // Возносясь, квадрат уменьшается — уходит ввысь, а не просто едет вверх.
     // Зависнуть должно над толпой, но целиком в кадре: отсюда обе границы
-    this.ascendScale = CONF.px.bucket * 0.6;
-    const finalH = CONF.bucket.texH * this.ascendScale;
+    this.ascendScale = CONF.px.square * 0.6;
+    const finalH = CONF.square.texH * this.ascendScale;
     this.hoverY = Math.max(30 + finalH, groundY - 320);
   }
 
   /** force — сколько человечков реально упирается прямо сейчас. */
   update(dt, force) {
-    const B = CONF.bucket;
+    const B = CONF.square;
 
     if (this.state === 'ascend') {
       this.tilt += (0 - this.tilt) * Math.min(1, 3 * dt);
@@ -52,7 +50,7 @@ export class Bucket {
         this.ascendV = Math.min(260, this.ascendV + 110 * dt);
         this.sprite.y = Math.max(target, this.sprite.y - this.ascendV * dt);
         const k = Math.min(1, (this.startY - this.sprite.y) / (this.startY - this.hoverY));
-        this.sprite.setScale(CONF.px.bucket + (this.ascendScale - CONF.px.bucket) * k);
+        this.sprite.setScale(CONF.px.square + (this.ascendScale - CONF.px.square) * k);
         if (this.sprite.y <= target + 1) this.hovering = true;
       } else {
         this.sprite.y += (target - this.sprite.y) * Math.min(1, 2.5 * dt);
@@ -72,7 +70,7 @@ export class Bucket {
     if (this.state === 'topple') {
       this.tilt += (5 + this.tilt * 0.95) * dt;     // точка невозврата пройдена
       this.sprite.setAngle(this.tilt);
-      if (this.tilt > CONF.bucket.fallAt) {
+      if (this.tilt > CONF.square.fallAt) {
         this.state = 'fall';
         this.fallVX = 90;
         this.fallVY = 40;
@@ -89,7 +87,7 @@ export class Bucket {
     const ease = force > 0 ? B.ease : B.releaseEase;
     this.tilt += (target - this.tilt) * Math.min(1, ease * dt);
 
-    // вся драма — в дрожи: чем больше навалилось, тем сильнее ходит ведро
+    // вся драма — в дрожи: чем больше навалилось, тем сильнее ходит квадрат
     this.wobbleT += dt * (7 + prog * 26);
     const amp = prog > 0 ? 0.3 + prog * 1.9 : 0;
     const wob = Math.sin(this.wobbleT * 3.1) * amp;
@@ -105,7 +103,7 @@ export class Bucket {
     }
   }
 
-  /** Время вышло: ведро устало стоять на краю и пошло вверх. */
+  /** Время вышло: квадрат устал стоять на краю и пошёл вверх. */
   ascend() {
     if (this.state !== 'stand') return;
     this.state = 'ascend';
@@ -120,7 +118,7 @@ export class Bucket {
     this.scene.cameras.main.shake(700, 0.012);
   }
 
-  /** Ведра больше нет в кадре: упало в пропасть или ушло в небо. */
+  /** Квадрата больше нет в кадре: упал в пропасть или ушёл в небо. */
   get gone() {
     if (this.state === 'fall') {
       return this.sprite.y - this.sprite.displayHeight > this.scene.scale.height + 400;
@@ -128,7 +126,7 @@ export class Bucket {
     return this.state === 'ascend' && this.hovering;
   }
 
-  /** Пыль из-под опоры: ведро ворочается и крошит кромку. */
+  /** Пыль из-под опоры: квадрат ворочается и крошит кромку. */
   dust() {
     const g = this.scene.add.rectangle(
       CONF.cliffX - 10 - Math.random() * 40,

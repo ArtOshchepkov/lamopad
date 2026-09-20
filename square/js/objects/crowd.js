@@ -1,16 +1,16 @@
 // ─── Толпа: человечки сбегаются на помощь, пока ты толкаешь ─────────────────
 // Слоты заранее разложены рядами «в глубину»: ближние ряды крупнее и ниже.
-// Уходят тоже по одному — стоит бросить ведро, и помощники теряют интерес.
+// Уходят тоже по одному — стоит бросить квадрат, и помощники теряют интерес.
 import { CONF, DEPTH, FOLK } from '../config.js';
 import { Person, personScale } from './person.js';
 import { Sfx } from '../sfx.js';
 
 export class Crowd {
-  constructor(scene, groundY, bucketLeft) {
+  constructor(scene, groundY, squareLeft) {
     this.scene = scene;
     this.groundY = groundY;
     this.members = [];
-    this.slots = this._makeSlots(bucketLeft);
+    this.slots = this._makeSlots(squareLeft);
     this.capacity = this.slots.length;
     this.spawnAcc = 0;      // накопленные доли человека — приход дробный
     this.leaveT = 0;
@@ -22,13 +22,13 @@ export class Crowd {
 
   /**
    * Толпа — курган: передние ряды длинные, дальние короче, так что силуэт
-   * заваливается от ведра влево-вниз. Сетку нарочно портим разбросом по обеим
+   * заваливается от квадрата влево-вниз. Сетку нарочно портим разбросом по обеим
    * осям — иначе ровные ряды читаются ковром, а не людьми.
    */
-  _makeSlots(bucketLeft) {
+  _makeSlots(squareLeft) {
     const { rows, rowTaper, slotGap, rowLift } = CONF.crowd;
     // сколько человечков влезает в ряд — вопрос к ширине экрана, не к конфигу
-    const perRow = Math.max(12, Math.floor((bucketLeft - 16) / slotGap));
+    const perRow = Math.max(12, Math.floor((squareLeft - 16) / slotGap));
     const out = [];
     let y = this.groundY;
     for (let r = 0; r < rows; r++) {
@@ -37,7 +37,7 @@ export class Crowd {
       for (let i = 0; i < cols; i++) {
         const j = (r * 7 + i * 3) % 7;
         out.push({
-          x: bucketLeft - 2 - i * slotGap + (j - 3) * 2,
+          x: squareLeft - 2 - i * slotGap + (j - 3) * 2,
           y: y + ((j * 5) % 7) - 3,
           scale,
           // Внутри ряда левые рисуются поверх правых: сосед слева закрывает
@@ -91,9 +91,9 @@ export class Crowd {
     return m;
   }
 
-  /** playerPushing — игрок упёрся в ведро. */
+  /** playerPushing — игрок упёрся в квадрат. */
   update(dt, playerPushing) {
-    if (this.partying) return;                      // ведро упало, всем не до того
+    if (this.partying) return;                      // квадрат упало, всем не до того
     const C = CONF.crowd;
 
     if (playerPushing) {

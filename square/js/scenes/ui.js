@@ -17,7 +17,7 @@ export class UIScene extends Phaser.Scene {
     this.shown = { count: -1, seg: -1, hint: '', left: -1 };
 
     const style = { fontFamily: FONT, fontSize: '26px', color: PAL.paper, fontStyle: 'bold' };
-    this.countText = this.add.text(18, 14, 'НАС: 1', style)
+    this.countText = this.add.text(18, 14, '□►▪: 1', style)
       .setShadow(3, 3, '#000', 0, true, true).setDepth(100);
 
     // шкала напряжения — сегментами, как полоска здоровья на денди.
@@ -75,12 +75,12 @@ export class UIScene extends Phaser.Scene {
     this.lastAt = time;
 
     const gs = this.scene.get('game');
-    if (!gs || !gs.bucket) return;
+    if (!gs || !gs.square) return;
 
     const count = gs.crowd.size + 1;
     if (count !== this.shown.count) {
       this.shown.count = count;
-      this.countText.setText('НАС: ' + (count * CONF.crowd.countMul).toLocaleString('ru-RU'));
+      this.countText.setText('□►▪: ' + (count * CONF.crowd.countMul).toLocaleString('ru-RU'));
     }
 
     // на финале таймер убираем: он своё отсчитал
@@ -91,10 +91,10 @@ export class UIScene extends Phaser.Scene {
       this.timeText.setColor(left <= 8 ? '#ff5a3c' : PAL.paper);
     }
 
-    const seg = Math.round(gs.bucket.progress * SEGS);
+    const seg = Math.round(gs.square.progress * SEGS);
     if (seg !== this.shown.seg) {
       this.shown.seg = seg;
-      this._drawMeter(gs.bucket.progress);
+      this._drawMeter(gs.square.progress);
     }
 
     const hint = gs.state === 'play' ? gs.hint : '';

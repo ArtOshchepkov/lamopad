@@ -6,7 +6,7 @@ export class BootScene extends Phaser.Scene {
 
   create() {
     buildTextures(this);
-    this.game.events.emit('vedro-booted');
+    this.game.events.emit('square-booted');
     this.scene.start('game');
     this.scene.launch('ui');
   }

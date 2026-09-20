@@ -1,12 +1,12 @@
-/* ── ВЕДРО: денди-палитра, пиксельные кнопки, никаких скруглений ── */
+/* ── КВАДРАТ: денди-палитра, пиксельные кнопки, никаких скруглений ── */
 *, *::before, *::after { margin: 0; padding: 0; box-sizing: border-box; }
 
 :root {
   --sky-top: #2a4a9c;
   --sky-mid: #5b8fe0;
   --sand:    #8a5220;
-  --rust:    #dc9048;
-  --rust-hi: #f0bc78;
+  --rust:    #6f7a90;
+  --rust-hi: #cfd6e4;
   --paper:   #fff2dc;
   --red:     #d02c1c;
   --ink:     #1a1410;
@@ -102,9 +102,9 @@ html, body {
   overflow-wrap: anywhere;
 }
 
-.load-bucket, .start-bucket {
+.load-fig, .start-fig {
   width: clamp(54px, 16vmin, 110px);
-  aspect-ratio: 18 / 21;
+  aspect-ratio: 1 / 1;
   flex: 0 0 auto;
   display: block;
   filter: drop-shadow(0 8px 0 rgba(26, 20, 16, 0.35));
@@ -152,8 +152,8 @@ html, body {
 .start-inner { display: flex; flex-direction: column; align-items: center; gap: 2.2vmin; max-width: 520px; }
 .start-title { cursor: default; transition: transform 0.15s, color 0.15s; }
 .start-title:hover { color: var(--rust-hi); transform: rotate(-2deg) scale(1.02); }
-.start-bucket { transition: transform 0.2s; }
-.start-bucket:hover { animation-play-state: paused; transform: rotate(34deg); }
+.start-fig { transition: transform 0.2s; }
+.start-fig:hover { animation-play-state: paused; transform: rotate(34deg); }
 
 .start-toggles { display: flex; flex-wrap: wrap; justify-content: center; gap: 8px; margin-top: 0.6vmin; }
 .tgl {
@@ -292,7 +292,7 @@ html, body {
 }
 
 @media (max-height: 520px) {
-  .load-bucket, .start-bucket { width: 44px; }
+  .load-fig, .start-fig { width: 44px; }
   .start-inner { gap: 1.2vmin; }
   .win-quote { display: none; }
   .start-links { gap: 2px; }

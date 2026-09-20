@@ -24,7 +24,7 @@ const aspect = vw / vh;
 if (aspect < CONF.portraitCut) {
   CONF.baseW = 640;
   CONF.abyssW = 150;
-  CONF.px.bucket = 3;
+  CONF.px.square = 3;
 }
 if (aspect >= CONF.baseW / CONF.baseH) {
   CONF.height = CONF.baseH;
@@ -54,12 +54,12 @@ const startOverlay = $('start');
 const winOverlay = $('win');
 const audio = $('track');
 audio.volume = 0.5;
-const GAME_URL = 'https://lamopad.ru/games/vedro/';
-const SHARE_PITCH = 'Помоги уронить ВЕДРО. Одному не под силу 🪣';
+const GAME_URL = 'https://lamopad.ru/square/';
+const SHARE_PITCH = '◇▫◄▓▓▫ ◄█▓○▫◄▒ ▼▪▒▲▓ ◄ ▓○░□►◆ ○▪ ○◇► ▲░○▪';
 const nice = (n) => n.toLocaleString('ru-RU');
 $('win-version').textContent = CONF.version;
 
-game.events.once('vedro-booted', () => loading.classList.add('hidden'));
+game.events.once('square-booted', () => loading.classList.add('hidden'));
 
 // ─── Звук: музыка (<audio>) и SFX (синтез) мутятся независимо ───────────────
 const load = (key) => { try { return localStorage.getItem(key) === '1'; } catch (e) { return false; } };
@@ -141,11 +141,11 @@ $('start-btn').addEventListener('click', () => {
   if (requestFs && !fsMuted) {
     try { requestFs.call(docEl).catch(() => {}); } catch (e) { /* не судьба */ }
   }
-  // ведро на старте кренится и утаскивает экран за собой
+  // квадрат на старте кренится и утаскивает экран за собой
   startOverlay.classList.add('tipping');
   setTimeout(() => {
     startOverlay.classList.add('hidden');
-    window.__vedroReady = true;
+    window.__squareReady = true;
   }, 800);
   if (!musicMuted) audio.play().catch(() => {});
 });
@@ -157,24 +157,24 @@ document.addEventListener('visibilitychange', () => {
   if (!musicMuted && audio.currentTime > 0) audio.play().catch(() => {});
 });
 
-// ─── Финал: ведро упало ──────────────────────────────────────────────────────
+// ─── Финал ──────────────────────────────────────────────────────────────────
 const bestKey = CONF.storage.best;
 const readBest = () => { try { return parseInt(localStorage.getItem(bestKey) || '0', 10) || 0; } catch (e) { return 0; } };
 
 const ENDINGS = {
   topple: {
-    head: 'ВЕДРО УПАЛО',
-    quote: 'Смысла не было.<br>Зато как славно навалились.',
+    head: '▼▪▒▲▓ ◄○◇◄●',
+    quote: '◄◇○○◇◄ ○▪ ▒█●●.<br>◇●▓□ ■◄□ □○▲▪□○ ■▓◄◆▫██◇◄●.',
   },
   ascend: {
-    head: 'МЫ ПОЛЮБИЛИ ВЕДРО',
-    quote: 'Толкали-толкали, а оно взяло и вознеслось.<br>Так тоже бывает.',
+    head: '◆□ ◆▓░◄▫■◄► ░■□■◄',
+    quote: '○▫◄►░█▒-█◆○►►◄□, ▓ ▫▓░ ▓○►□○ ▪ ►▼□●▼●◆□◆■.<br>○●█ ◇▓░● ◆▓░►●█.',
   },
 };
 
 let lastRun = { count: 0, seconds: 0, ending: 'topple' };
 
-game.events.on('vedro-win', ({ ending, count, seconds }) => {
+game.events.on('square-win', ({ ending, count, seconds }) => {
   const people = count * CONF.crowd.countMul;
   lastRun = { count: people, seconds, ending };
   const best = readBest();
@@ -184,8 +184,8 @@ game.events.on('vedro-win', ({ ending, count, seconds }) => {
   $('win-head').textContent = e.head;
   $('win-quote').innerHTML = e.quote;
   $('win-big').textContent = nice(people);
-  $('win-sub').textContent = 'за ' + seconds + ' сек';
-  $('win-best').textContent = 'рекорд · ' + nice(isNew ? people : best);
+  $('win-sub').textContent = '▒● ' + seconds + ' ▼◄█';
+  $('win-best').textContent = '●◄█□▲▼ · ' + nice(isNew ? people : best);
   $('win-new').classList.toggle('hidden', !isNew);
   winOverlay.classList.remove('hidden');
 });
@@ -202,13 +202,13 @@ function bindShare(btn, makeText) {
   btn.addEventListener('click', async () => {
     const text = makeText();
     if (navigator.share) {
-      try { await navigator.share({ title: 'ВЕДРО', text, url: GAME_URL }); }
+      try { await navigator.share({ title: '▼▪▒▲▓', text, url: GAME_URL }); }
       catch (e) { /* передумал — бывает */ }
       return;
     }
     try {
       await navigator.clipboard.writeText(`${text}\n${GAME_URL}`);
-      btn.textContent = '✅ скопировано!';
+      btn.textContent = '✅ ▼■◆█▓▼◆◇▫▲■';
       setTimeout(() => { btn.textContent = label; }, 1800);
     } catch (e) { /* буфера нет — молчим */ }
   });
@@ -217,23 +217,7 @@ function bindShare(btn, makeText) {
 // со старта делимся просто игрой, с финала — тем, чем кончилось
 bindShare($('start-share'), () => SHARE_PITCH);
 bindShare($('win-share'), () => (lastRun.ending === 'ascend'
-  ? `Нас было ${nice(lastRun.count)}, и ВЕДРО вознеслось 🪣✨`
-  : `Нас было ${nice(lastRun.count)}, и мы уронили ВЕДРО 🪣`));
+  ? `◆●▪ ○□█▓ ${nice(lastRun.count)} ◄ ►▼□●▼●◆□◆■`
+  : `◆●▪ ○□█▓ ${nice(lastRun.count)} ◄ ◄█▓○▫◄◇▫`));
 
-// ─── «Хочу игру под свой трек» — общий модуль на весь сайт ──────────────────
-const orderBtn = $('order-open');
-orderBtn.textContent = window.LAMOPAD_ORDER.btnLabel;
-orderBtn.addEventListener('click', () => LamopadOrder.open({
-  bg: 'linear-gradient(180deg, #2a4a9c 0%, #5b8fe0 55%, #8a5220 100%)',
-  ink: '#fff2dc',
-  accent: '#f0bc78',
-  mailColor: '#dc9048',
-  tgColor: '#a8cdf0',
-  titleFont: '"Courier New", ui-monospace, monospace',
-  bodyFont: "'Nunito', sans-serif",
-  emoji: '🎮',
-  radius: '4px',
-  gamesUrl: '../',
-}));
-
-window.__vedro = game;
+window.__square = game;

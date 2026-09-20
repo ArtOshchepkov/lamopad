@@ -1,7 +1,9 @@
 // ─── Основная сцена: плита, пропасть, ведро и растущая толпа ────────────────
 import { CONF, DEPTH, PAL } from '../config.js';
+import { Beat } from '../beat.js';
 import { Debug } from '../debug.js';
 import { Sfx } from '../sfx.js';
+import { Disco, tripLevel } from '../objects/disco.js';
 import { Bucket } from '../objects/bucket.js';
 import { Crowd } from '../objects/crowd.js';
 import { Player } from '../objects/player.js';
@@ -42,7 +44,56 @@ export class GameScene extends Phaser.Scene {
     this.reported = false;
     this.glow = this.rays = this.dim = this.credo = null;
 
+    // ─── дискотека ───
+    this.trip = 0;
+    this.huePhase = 0;
+    this.hue = 0;
+    this.disco = this.registry.get('disco') ? new Disco(this, this.groundY) : null;
+    this._mountTrip();
+
     this._bindInput();
+  }
+
+  /**
+   * Кислотный пост-эффект вешаем на камеру ЭТОЙ сцены: HUD рисует сцена ui,
+   * её камера остаётся трезвой, и цифры на экране читаются.
+   */
+  _mountTrip() {
+    this.tripFx = null;
+    const cam = this.cameras.main;
+    cam.resetPostPipeline();                        // после restart() старый остаётся
+    cam.setZoom(1);
+    if (!this.disco || this.game.renderer.type !== Phaser.WEBGL) return;
+    cam.setPostPipeline('Trip');
+    this.tripFx = cam.getPostPipeline('Trip') || null;
+  }
+
+  /** Раз в кадр: слушаем трек и раздуваем мир в такт. */
+  _disco(dt, time) {
+    if (!this.disco) return;
+    Beat.update(time, dt);
+    const target = tripLevel(this.bucket.progress);
+    this.trip += (target - this.trip) * Math.min(1, dt * 1.5);
+    this.disco.update(dt, this.trip);
+    // Цвет не крутим по кругу, а РАСКАЧИВАЕМ: размах маятника растёт вместе
+    // с толпой. Вначале мир лишь слегка отливает в сторону и возвращается,
+    // под конец уходит на полный круг. Если крутить — даже слабый приход
+    // за пару секунд утащит всю палитру, и нарастания не почувствуешь
+    this.huePhase += dt * (0.35 + Beat.energy * 0.5 + this.trip * 0.9);
+    this.hue = Math.sin(this.huePhase) * Math.PI * this.trip;
+    if (this.tripFx) {
+      this.tripFx.trip = this.trip;
+      this.tripFx.beat = Beat.beat;
+      this.tripFx.energy = Beat.energy;
+      this.tripFx.hue = this.hue;
+    }
+    this.cameras.main.setZoom(Disco.pulse(this.trip, CONF.disco.camPulse));
+    if (this.bucket.state === 'stand') {
+      this.bucket.sprite.setScale(CONF.px.bucket * Disco.pulse(this.trip, CONF.disco.bucketPulse));
+    }
+    const heave = Beat.beat * CONF.disco.crowdHeave * this.trip;
+    this.crowd.heave(heave);
+    this.player.person.sprite.y = this.groundY - Math.round(heave);
   }
 
   // ── мир: небо полосами, солнце, облака, плита и чернота за краем ──────────
@@ -146,6 +197,8 @@ export class GameScene extends Phaser.Scene {
       if (c.img.x < -60) c.img.x = this.scale.width + 60;
     }
 
+    this._disco(dt, time);
+
     if (this.state === 'win') {
       // пока идёт пауза на толпу, ведро продолжает трястись от натуги,
       // а не расслабляется на глазах
@@ -195,6 +248,8 @@ export class GameScene extends Phaser.Scene {
     Debug.set('цель', this.needed + ' из ' + this.crowd.capacity);
     Debug.set('время', this.elapsed.toFixed(1));
     Debug.set('осталось', this.left.toFixed(1));
+    Debug.set('приход', this.trip.toFixed(2) + ' / бит ' + Beat.beat.toFixed(2)
+      + ' / энергия ' + Beat.energy.toFixed(2));
   }
 
   _hint(pushing, force) {

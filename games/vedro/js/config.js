@@ -69,6 +69,14 @@ export const CONF = {
     partyAmp: 14,     // высота прыжка от радости
   },
 
+  // Дискотека: сила эффекта растёт вместе с толпой, от minTrip до единицы
+  disco: {
+    minTrip: 0.16,    // с чего начинается приход, когда толпы ещё нет
+    crowdHeave: 5,    // на сколько пикселей толпа приседает на долю
+    bucketPulse: 0.05,// насколько раздувается ведро
+    camPulse: 0.012,  // и насколько наезжает камера
+  },
+
   // Через столько секунд ведро устаёт стоять и возносится
   timeLimit: 40,
   // Пауза между «всё, добились» и тем, что делает ведро: дать посмотреть на народ
@@ -83,6 +91,7 @@ export const CONF = {
     muted: 'lamopad_vedro_muted',
     sfxMuted: 'lamopad_vedro_sfx_muted',
     fsDisabled: 'lamopad_vedro_fs_disabled',
+    discoOff: 'lamopad_vedro_disco_off',
     best: 'lamopad_vedro_best_people',
   },
 

@@ -17,6 +17,7 @@ export class Crowd {
     this.pushT = 0;
     this.partyT = 0;
     this.partying = false;
+    this._heave = 0;
   }
 
   /**
@@ -166,6 +167,19 @@ export class Crowd {
     for (const m of this.members) {
       m.state = 'cheer';
       if (m.person) m.person.setFrame('walk');
+    }
+  }
+
+  /**
+   * Присесть в такт: одно общее смещение на всех. Округляем до пикселя, и
+   * тогда перебор спрайтов случается только когда картинка правда меняется.
+   */
+  heave(px) {
+    const v = Math.round(px);
+    if (v === this._heave) return;
+    this._heave = v;
+    for (const m of this.members) {
+      if (m.state !== 'cheer') m.sprite.y = m.slot.y - v;
     }
   }
 

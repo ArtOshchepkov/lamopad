@@ -1,7 +1,9 @@
 // ─── Точка входа: Phaser + DOM-оверлеи + звук ────────────────────────────────
+import { Beat } from './beat.js';
 import { CONF } from './config.js';
 import { Debug } from './debug.js';
 import { Sfx } from './sfx.js';
+import { TripPipeline } from './trip-pipeline.js';
 import { BootScene } from './scenes/boot.js';
 import { GameScene } from './scenes/game.js';
 import { UIScene } from './scenes/ui.js';
@@ -42,6 +44,7 @@ const game = new Phaser.Game({
   scene: [BootScene, GameScene, UIScene],
   scale: { mode: Phaser.Scale.FIT, autoCenter: Phaser.Scale.CENTER_BOTH },
   render: { pixelArt: true, roundPixels: true, antialias: false },
+  pipeline: { Trip: TripPipeline },
 });
 
 // ─── DOM ─────────────────────────────────────────────────────────────────────
@@ -65,6 +68,9 @@ const save = (key, v) => { try { localStorage.setItem(key, v ? '1' : '0'); } cat
 let musicMuted = load(CONF.storage.muted);
 let sfxMuted = load(CONF.storage.sfxMuted);
 let fsMuted = load(CONF.storage.fsDisabled);
+let discoOff = load(CONF.storage.discoOff);
+// сцена читает флаг в create(), а она стартует ещё под стартовым экраном
+game.registry.set('disco', !discoOff);
 
 const muteMusicBtn = $('mute-music');
 const muteSfxBtn = $('mute-sfx');
@@ -76,6 +82,7 @@ function renderMute() {
   muteSfxBtn.setAttribute('aria-label', sfxMuted ? 'Включить звуки' : 'Выключить звуки');
   audio.muted = musicMuted;
   Sfx.setMuted(sfxMuted);
+  Beat.setMusicOn(!musicMuted);                     // нет музыки — отбиваем такт сами
 }
 renderMute();
 
@@ -95,10 +102,13 @@ muteSfxBtn.addEventListener('click', () => {
 const optMusic = $('opt-music');
 const optSfx = $('opt-sfx');
 const optFs = $('opt-fs');
+const optDisco = $('opt-disco');
 optMusic.classList.toggle('off', musicMuted);
 optSfx.classList.toggle('off', sfxMuted);
 optFs.classList.toggle('off', fsMuted);
-[optMusic, optSfx, optFs].forEach((b) => b.addEventListener('click', () => b.classList.toggle('off')));
+optDisco.classList.toggle('off', discoOff);
+[optMusic, optSfx, optFs, optDisco].forEach((b) =>
+  b.addEventListener('click', () => b.classList.toggle('off')));
 
 const docEl = document.documentElement;
 const requestFs = docEl.requestFullscreen || docEl.webkitRequestFullscreen;
@@ -114,11 +124,20 @@ $('start-btn').addEventListener('click', () => {
   musicMuted = optMusic.classList.contains('off');
   sfxMuted = optSfx.classList.contains('off');
   fsMuted = optFs.classList.contains('off');
+  const discoWas = discoOff;
+  discoOff = optDisco.classList.contains('off');
   save(CONF.storage.muted, musicMuted);
   save(CONF.storage.sfxMuted, sfxMuted);
   save(CONF.storage.fsDisabled, fsMuted);
+  save(CONF.storage.discoOff, discoOff);
   Sfx.init(game);
+  // анализатор трека заводим ровно здесь: это жест пользователя, контекст жив
+  Beat.attach(game, audio);
   renderMute();
+  if (discoWas !== discoOff) {
+    game.registry.set('disco', !discoOff);
+    game.scene.getScene('game').scene.restart();    // сцена собирает эффекты в create()
+  }
   if (requestFs && !fsMuted) {
     try { requestFs.call(docEl).catch(() => {}); } catch (e) { /* не судьба */ }
   }
@@ -132,8 +151,10 @@ $('start-btn').addEventListener('click', () => {
 });
 
 document.addEventListener('visibilitychange', () => {
-  if (document.hidden) audio.pause();
-  else if (!musicMuted && audio.currentTime > 0) audio.play().catch(() => {});
+  if (document.hidden) { audio.pause(); return; }
+  // музыка теперь идёт через WebAudio: уснувший контекст = тишина
+  if (Beat.ctx && Beat.ctx.state === 'suspended') Beat.ctx.resume().catch(() => {});
+  if (!musicMuted && audio.currentTime > 0) audio.play().catch(() => {});
 });
 
 // ─── Финал: ведро упало ──────────────────────────────────────────────────────

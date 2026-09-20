@@ -1,7 +1,7 @@
 // ─── Толпа: человечки сбегаются на помощь, пока ты толкаешь ─────────────────
 // Слоты заранее разложены рядами «в глубину»: ближние ряды крупнее и ниже.
 // Уходят тоже по одному — стоит бросить ведро, и помощники теряют интерес.
-import { CONF, DEPTH, SHIRTS } from '../config.js';
+import { CONF, DEPTH, FOLK } from '../config.js';
 import { Person, personScale } from './person.js';
 import { Sfx } from '../sfx.js';
 
@@ -26,14 +26,16 @@ export class Crowd {
   _makeSlots(bucketLeft) {
     const { rows, perRow, rowTaper, slotGap, rowLift } = CONF.crowd;
     const out = [];
+    let y = this.groundY;
     for (let r = 0; r < rows; r++) {
+      const scale = personScale(r);
       const cols = Math.max(6, perRow - Math.floor(r * rowTaper));
       for (let i = 0; i < cols; i++) {
         const j = (r * 7 + i * 3) % 7;
         out.push({
           x: bucketLeft - 2 - i * slotGap + (j - 3) * 2,
-          y: this.groundY - r * rowLift + ((j * 5) % 7) - 3,
-          scale: personScale(r),
+          y: y + ((j * 5) % 7) - 3,
+          scale,
           // Внутри ряда левые рисуются поверх правых: сосед слева закрывает
           // спину с красным рюкзаком, и от каждого остаётся видна правая
           // половина — лицо, плечо, рука. Иначе толпа читается красным ковром
@@ -43,6 +45,7 @@ export class Crowd {
           busy: false,
         });
       }
+      y -= rowLift * (personScale(r + 1) / CONF.px.person);
     }
     return out.sort((a, b) => a.order - b.order);
   }
@@ -73,7 +76,7 @@ export class Crowd {
       m.sprite.setDepth(slot.depth);
     } else {
       m.person = new Person(this.scene, -40 - Math.random() * 140, slot.y, {
-        variant: Math.floor(Math.random() * SHIRTS.length),
+        variant: Math.floor(Math.random() * FOLK.length),
         scale: slot.scale,
       });
       m.person.sprite.setDepth(slot.depth);

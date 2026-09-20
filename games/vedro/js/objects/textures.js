@@ -1,7 +1,7 @@
 // ─── Процедурные денди-текстуры: рисуем пикселями, без бинарных ассетов ──────
 // Всё рисуется в «пиксельных» координатах (8×12 человечек, 90×100 ведро),
 // а на сцене увеличивается целым числом — отсюда честный NES-вид.
-import { CONF, HAIRS, PAL, SHIRTS } from '../config.js';
+import { CONF, FOLK, PAL } from '../config.js';
 
 /** Детерминированный шум: ржавчина должна быть одинаковой между запусками. */
 function rnd(seed) {
@@ -34,45 +34,44 @@ function canvas(scene, key, w, h) {
 
 // ─── Человечек: 8×12, лицом вправо. Три кадра: стоит / шагает / толкает ─────
 const PERSON_FRAMES = {
-  stand: (p, shirt, hair) => {
-    p.r(0, 4, 2, 3, PAL.pack);                     // красный рюкзак за спиной
-    p.r(2, 0, 3, 2, hair);
-    p.r(2, 2, 3, 2, PAL.skin);
+  stand: (p, f) => {
+    if (f.pack) p.r(0, 4, 2, 3, f.pack);
+    p.r(2, 0, 3, 2, f.hair);
+    p.r(2, 2, 3, 2, f.skin);
     p.r(4, 2, 1, 1, PAL.ink);                      // глаз
-    p.r(1, 4, 5, 2, shirt);
-    p.r(2, 6, 3, 2, shirt);
-    p.r(5, 5, 1, 2, PAL.skin);                     // рука
+    p.r(1, 4, 5, 2, f.shirt);
+    p.r(2, 6, 3, 2, f.shirt);
+    p.r(5, 5, 1, 2, f.skin);                       // рука
     p.r(2, 8, 3, 2, PAL.pants);
     p.r(2, 10, 1, 1, PAL.pants); p.r(4, 10, 1, 1, PAL.pants);
-    p.r(2, 11, 1, 1, PAL.shoe);  p.r(4, 11, 1, 1, PAL.shoe);
+    p.r(2, 11, 1, 1, f.shoe);    p.r(4, 11, 1, 1, f.shoe);
   },
-  walk: (p, shirt, hair) => {
-    p.r(0, 4, 2, 3, PAL.pack);
-    p.r(2, 0, 3, 2, hair);
-    p.r(2, 2, 3, 2, PAL.skin);
+  walk: (p, f) => {
+    if (f.pack) p.r(0, 4, 2, 3, f.pack);
+    p.r(2, 0, 3, 2, f.hair);
+    p.r(2, 2, 3, 2, f.skin);
     p.r(4, 2, 1, 1, PAL.ink);
-    p.r(1, 4, 5, 2, shirt);
-    p.r(2, 6, 3, 2, shirt);
-    p.r(6, 4, 1, 2, PAL.skin);                     // рука вперёд на ходу
+    p.r(1, 4, 5, 2, f.shirt);
+    p.r(2, 6, 3, 2, f.shirt);
+    p.r(6, 4, 1, 2, f.skin);                     // рука вперёд на ходу
     p.r(2, 8, 3, 2, PAL.pants);
     p.r(1, 10, 1, 1, PAL.pants); p.r(5, 10, 1, 1, PAL.pants);
-    p.r(1, 11, 2, 1, PAL.shoe);  p.r(4, 11, 2, 1, PAL.shoe);
+    p.r(1, 11, 2, 1, f.shoe);    p.r(4, 11, 2, 1, f.shoe);
   },
-  push: (p, shirt, hair) => {
-    p.r(1, 4, 2, 3, PAL.pack);
-    p.r(3, 0, 3, 2, hair);
-    p.r(3, 2, 3, 2, PAL.skin);
+  push: (p, f) => {
+    if (f.pack) p.r(1, 4, 2, 3, f.pack);
+    p.r(3, 0, 3, 2, f.hair);
+    p.r(3, 2, 3, 2, f.skin);
     p.r(5, 2, 1, 1, PAL.ink);
-    p.r(2, 4, 4, 2, shirt);
-    p.r(3, 6, 2, 2, shirt);
-    p.r(6, 4, 2, 1, PAL.skin);                     // обе руки в ведро
+    p.r(2, 4, 4, 2, f.shirt);
+    p.r(3, 6, 2, 2, f.shirt);
+    p.r(6, 4, 2, 1, f.skin);                     // обе руки в ведро
     p.r(2, 8, 3, 2, PAL.pants);
     p.r(0, 10, 2, 1, PAL.pants);                   // задняя нога в упоре
     p.r(4, 10, 1, 1, PAL.pants);
-    p.r(0, 11, 2, 1, PAL.shoe);  p.r(4, 11, 2, 1, PAL.shoe);
+    p.r(0, 11, 2, 1, f.shoe);    p.r(4, 11, 2, 1, f.shoe);
   },
 };
-
 
 // ─── Герой: дреды, пончо, красный рюкзак — его видно даже в давке ───────────
 const HERO_FRAMES = {
@@ -123,17 +122,17 @@ export function personKey(variant, frame) { return `${variant}_${frame}`; }
 
 function makePeople(scene) {
   const frames = Object.keys(PERSON_FRAMES);
-  const rows = [[HERO, null], ...SHIRTS.map((shirt, i) => [i, shirt])];
+  const rows = [[HERO, null], ...FOLK.map((f, i) => [i, f])];
   const PAD = 1;                                    // кадры не должны «течь» друг в друга
   const cw = PW + PAD * 2, ch = PH + PAD * 2;
   const p = canvas(scene, PEOPLE_TEX, frames.length * cw, rows.length * ch);
   if (!p) return;
-  rows.forEach(([variant, shirt], row) => {
+  rows.forEach(([variant, folk], row) => {
     frames.forEach((frame, col) => {
       p.ox = col * cw + PAD;
       p.oy = row * ch + PAD;
-      if (shirt === null) HERO_FRAMES[frame](p);
-      else PERSON_FRAMES[frame](p, shirt, HAIRS[variant % HAIRS.length]);
+      if (folk === null) HERO_FRAMES[frame](p);
+      else PERSON_FRAMES[frame](p, folk);
       p.tex.add(personKey(variant, frame), 0, p.ox, p.oy, PW, PH);
     });
   });

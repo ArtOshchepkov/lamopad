@@ -17,6 +17,10 @@ export class Square {
       .setOrigin(originX, 1)
       .setScale(CONF.px.square)
       .setDepth(DEPTH.square);
+    // края уплывают: у этой штуки нет чёткой границы, сколько ни смотри
+    if (scene.game.renderer.type === Phaser.WEBGL) {
+      this.sprite.postFX.addBlur(1, 2, 2, 0.9);
+    }
     this.width = CONF.square.texW * CONF.px.square;
     this.left = CONF.cliffX - originX * this.width;
     // У квадрата отвесные бока, так что упираются прямо в левую грань.

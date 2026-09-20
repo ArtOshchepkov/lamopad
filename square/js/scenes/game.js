@@ -182,6 +182,7 @@ export class GameScene extends Phaser.Scene {
   }
 
   _dir() {
+    // клавиатура на доске общая: та же стрелка одновременно уходит соседям
     if (!window.__squareReady || this.state !== 'play') return 0;
     const k = this.keys;
     if (k.left.isDown || k.a.isDown) return -1;
@@ -299,7 +300,7 @@ export class GameScene extends Phaser.Scene {
     this.tweens.add({ targets: this.dim, alpha: 0.5, duration: 1400 });
 
     this.credo = this.add.text(this.scale.width * 0.32, this.groundY - 300,
-      'МЫ ПОЛЮБИЛИ КВАДРАТ', {
+      'МЫ ПОЛЮБИЛИ ███████', {
         fontFamily: '"Courier New", ui-monospace, monospace',
         fontSize: '38px', fontStyle: 'bold', color: '#fff6dc', align: 'center',
         wordWrap: { width: this.scale.width * 0.62 },

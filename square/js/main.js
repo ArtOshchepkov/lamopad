@@ -1,5 +1,9 @@
-// ─── Точка входа: Phaser + DOM-оверлеи + звук ────────────────────────────────
+// ─── Точка входа: доска панелей + Phaser + DOM-оверлеи + звук ────────────────
+// Страница — четыре мини-игры сразу; расклад и общий ввод живут в board.js,
+// здесь только большая панель на Phaser, общий стартовый экран и звук.
+import { startAccessRoulette } from './access.js';
 import { Beat } from './beat.js';
+import { mountBoard } from './board.js';
 import { CONF } from './config.js';
 import { Debug } from './debug.js';
 import { Sfx } from './sfx.js';
@@ -9,13 +13,15 @@ import { GameScene } from './scenes/game.js';
 import { UIScene } from './scenes/ui.js';
 
 Debug.init();
+mountBoard();
 
 // Поле подгоняем под вьюпорт на момент загрузки: тянем ту сторону, которой
 // у экрана в избытке, — тогда FIT не оставит чёрных полей ни в портрете, ни
 // в ландшафте. На широком растёт ширина: плита и толпа становятся длиннее,
 // пропасть остаётся прежней. На высоком растёт высота — это просто небо.
-// Меряем окно, а не screen: панели браузера на телефоне не прячутся.
-const vw = window.innerWidth, vh = window.innerHeight;
+// Меряем свою панель доски, а не окно: сцена живёт в четверти экрана.
+const pane = document.getElementById('pane-square');
+const vw = pane.clientWidth, vh = pane.clientHeight;
 const aspect = vw / vh;
 // В портрете мир 960 шириной растягивается по высоте до двух тысяч пикселей,
 // и телефон честно рисует эту прорву пустого неба — кадры падают вдвое.
@@ -51,13 +57,10 @@ const game = new Phaser.Game({
 const $ = (id) => document.getElementById(id);
 const loading = $('loading');
 const startOverlay = $('start');
-const winOverlay = $('win');
 const audio = $('track');
 audio.volume = 0.5;
 const GAME_URL = 'https://lamopad.ru/square/';
 const SHARE_PITCH = '◇▫◄◆◆▫ ◄█◆○▫◄◇ ▼▪◇▲◆ ◄ ◆○▫□►◆ ○▪ ○◇► ▲▫○▪';
-const nice = (n) => n.toLocaleString('ru-RU');
-$('win-version').textContent = CONF.version;
 
 game.events.once('square-booted', () => loading.classList.add('hidden'));
 
@@ -86,13 +89,31 @@ function renderMute() {
 }
 renderMute();
 
-muteMusicBtn.addEventListener('click', () => {
+// Пробел - игровая клавиша доски, а сфокусированная кнопка превращает его в
+// клик и щёлкала бы музыкой. preventDefault звать нельзя (см. board.js), поэтому
+// клик от пробела режем сами, а после мышиного клика ещё и снимаем фокус.
+// Клик приходит синхронно сразу за keyup, так что флаг живёт до конца задачи.
+let spaceClick = false;
+window.addEventListener('keyup', (e) => {
+  if (e.code !== 'Space') return;
+  spaceClick = true;
+  setTimeout(() => { spaceClick = false; });
+}, true);
+function onToggle(btn, fn) {
+  btn.addEventListener('click', (e) => {
+    if (spaceClick) return;
+    fn();
+    if (e.detail > 0) btn.blur();
+  });
+}
+
+onToggle(muteMusicBtn, () => {
   musicMuted = !musicMuted;
   save(CONF.storage.muted, musicMuted);
   renderMute();
   if (!musicMuted && audio.paused) audio.play().catch(() => {});
 });
-muteSfxBtn.addEventListener('click', () => {
+onToggle(muteSfxBtn, () => {
   sfxMuted = !sfxMuted;
   save(CONF.storage.sfxMuted, sfxMuted);
   renderMute();
@@ -108,17 +129,11 @@ optSfx.classList.toggle('off', sfxMuted);
 optFs.classList.toggle('off', fsMuted);
 optDisco.classList.toggle('off', discoOff);
 [optMusic, optSfx, optFs, optDisco].forEach((b) =>
-  b.addEventListener('click', () => b.classList.toggle('off')));
+  onToggle(b, () => b.classList.toggle('off')));
 
 const docEl = document.documentElement;
 const requestFs = docEl.requestFullscreen || docEl.webkitRequestFullscreen;
 if (!requestFs) optFs.classList.add('hidden');
-
-// игра широкая: в портрете подсказываем повернуть телефон
-const orientHint = $('orient-hint');
-const updateOrient = () => orientHint.classList.toggle('hidden', window.innerWidth >= window.innerHeight);
-updateOrient();
-window.addEventListener('resize', updateOrient);
 
 $('start-btn').addEventListener('click', () => {
   musicMuted = optMusic.classList.contains('off');
@@ -146,6 +161,7 @@ $('start-btn').addEventListener('click', () => {
   setTimeout(() => {
     startOverlay.classList.add('hidden');
     window.__squareReady = true;
+    startAccessRoulette();                          // игра началась: браузер начинает спрашивать
   }, 800);
   if (!musicMuted) audio.play().catch(() => {});
 });
@@ -157,43 +173,13 @@ document.addEventListener('visibilitychange', () => {
   if (!musicMuted && audio.currentTime > 0) audio.play().catch(() => {});
 });
 
-// ─── Финал ──────────────────────────────────────────────────────────────────
-const bestKey = CONF.storage.best;
-const readBest = () => { try { return parseInt(localStorage.getItem(bestKey) || '0', 10) || 0; } catch (e) { return 0; } };
-
-const ENDINGS = {
-  topple: {
-    head: '▼▪◇▲◆ ◄○◇◄●',
-    quote: '◄◇○○◇◄ ○▪ ◇█●●.<br>◇●◆□ ■◄□ □○▲▪□○ ■◆◄◆▫██◇◄●.',
-  },
-  ascend: {
-    head: '◆□ ◆◆▫◄▫■◄► ▫■□■◄',
-    quote: '○▫◄►▫█◇-█◆○►►◄□, ◆ ▫◆▫ ◆○►□○ ▪ ►▼□●▼●◆□◆■.<br>○●█ ◇◆▫● ◆◆▫►●█.',
-  },
-};
-
-let lastRun = { count: 0, seconds: 0, ending: 'topple' };
-
-game.events.on('square-win', ({ ending, count, seconds }) => {
-  const people = count * CONF.crowd.countMul;
-  lastRun = { count: people, seconds, ending };
-  const best = readBest();
-  const isNew = people > best;
-  if (isNew) { try { localStorage.setItem(bestKey, String(people)); } catch (e) { /* ок */ } }
-  const e = ENDINGS[ending] || ENDINGS.topple;
-  $('win-head').textContent = e.head;
-  $('win-quote').innerHTML = e.quote;
-  $('win-big').textContent = nice(people);
-  $('win-sub').textContent = '◇● ' + seconds + ' ▼◄█';
-  $('win-best').textContent = '●◄█□▲▼ · ' + nice(isNew ? people : best);
-  $('win-new').classList.toggle('hidden', !isNew);
-  winOverlay.classList.remove('hidden');
-});
-
-$('restart').addEventListener('click', () => {
-  winOverlay.classList.add('hidden');
-  game.scene.getScene('game').scene.restart();
-  game.scene.getScene('ui').scene.restart();
+// ─── Конец забега: панель просто начинает всё сначала ───────────────────────
+// Отдельного экрана нет — доска не останавливается ни на секунду.
+game.events.on('square-win', () => {
+  setTimeout(() => {
+    game.scene.getScene('game').scene.restart();
+    game.scene.getScene('ui').scene.restart();
+  }, 1200);
 });
 
 // ─── Поделиться: нативно, а без него — в буфер ──────────────────────────────
@@ -214,10 +200,6 @@ function bindShare(btn, makeText) {
   });
 }
 
-// со старта делимся просто игрой, с финала — тем, чем кончилось
 bindShare($('start-share'), () => SHARE_PITCH);
-bindShare($('win-share'), () => (lastRun.ending === 'ascend'
-  ? `◆●▪ ○□█◆ ${nice(lastRun.count)} ◄ ►▼□●▼●◆□◆■`
-  : `◆●▪ ○□█◆ ${nice(lastRun.count)} ◄ ◄█◆○▫◄◇▫`));
 
 window.__square = game;

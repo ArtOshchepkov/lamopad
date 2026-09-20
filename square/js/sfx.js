@@ -70,6 +70,61 @@ export const Sfx = {
   join()  { this.tone(520, 0.07, { vol: 0.16 }); this.tone(780, 0.07, { vol: 0.14, delay: 0.06 }); },
   grunt() { this.noise(0.13, { vol: 0.16, freq: 380, q: 4, sweepTo: 180 }); },
 
+  /**
+   * Голос тревоги: два пилообразных тона на тритоне (самый неуютный интервал),
+   * которые съезжают вниз и рвутся быстрой дрожью, как сирена в соседней комнате.
+   */
+  _dread(f, dur, vol, delay = 0) {
+    if (!this._ready()) return;
+    const t0 = this.ctx.currentTime + delay;
+    const g = this.ctx.createGain();
+    const lfo = this.ctx.createOscillator();
+    const lfoG = this.ctx.createGain();
+    const filt = this.ctx.createBiquadFilter();
+    filt.type = 'bandpass'; filt.frequency.value = 1100; filt.Q.value = 0.9;
+    lfo.type = 'square'; lfo.frequency.value = 15;
+    lfoG.gain.value = vol * 0.6;
+    lfo.connect(lfoG).connect(g.gain);
+    g.gain.setValueAtTime(0.0001, t0);
+    g.gain.exponentialRampToValueAtTime(vol, t0 + 0.03);
+    g.gain.exponentialRampToValueAtTime(0.0001, t0 + dur);
+    for (const k of [1, 1.4142]) {
+      const osc = this.ctx.createOscillator();
+      osc.type = 'sawtooth';
+      osc.frequency.setValueAtTime(f * k, t0);
+      osc.frequency.exponentialRampToValueAtTime(f * k * 0.62, t0 + dur);
+      osc.connect(filt);
+      osc.start(t0); osc.stop(t0 + dur + 0.02);
+    }
+    filt.connect(g).connect(this.master);
+    lfo.start(t0); lfo.stop(t0 + dur + 0.02);
+  },
+
+  /** Сердцебиение: глухой удар, который чувствуешь скорее животом, чем ушами. */
+  _thump(delay = 0, vol = 0.4) {
+    this.tone(62, 0.28, { type: 'sine', vol, to: 34, delay });
+  },
+
+  /**
+   * Тревожное уведомление. Первый раз: двойной удар, нарастающий шум и долгая
+   * съезжающая сирена. Повтор: удар и короткая злая нота — чтобы не привыкать.
+   */
+  notify(first = true) {
+    if (!first) {
+      this._thump(0, 0.35);
+      this._dread(466, 0.45, 0.14);
+      return;
+    }
+    this._thump(0, 0.42);
+    this._thump(0.3, 0.36);
+    this.noise(0.8, { vol: 0.16, freq: 400, q: 0.8, sweepTo: 3600 });
+    this._dread(523, 1.0, 0.16, 0.05);
+    this._dread(392, 0.6, 0.13, 0.6);
+  },
+
+  /** Уведомление прихлопнули. */
+  dismiss() { this.tone(520, 0.06, { type: 'triangle', vol: 0.16, to: 240 }); },
+
   /** Скрип ржавого металла — чем сильнее наклон, тем выше и надсаднее. */
   creak(strength) {
     if (!this._ready()) return;

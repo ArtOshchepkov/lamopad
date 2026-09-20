@@ -26,9 +26,15 @@
 //               После десятой буквы её иногда перебивает красное зацензуренное
 //               уведомление: пищит, пока не закроешь (правила — games/notes.js).
 //
+// СВЕТ. Поверх всех панелей лежит общий дискотечный слой (disco-overlay.js):
+// он один на доску, светит в такт треку и трясёт доску на басах. Такт считает сама доска — Beat.update
+// зовётся здесь раз в кадр и только здесь, остальные его лишь читают.
+//
 // КУДА РАСТИ. Новая панель = файл в js/games с наследником Panel + строка в
 // PANES + ячейка в сетке. Все панели переиспользуемы поодиночке: им нужен
 // только контейнер и tick() в чьём-нибудь rAF.
+import { Beat } from './beat.js';
+import { DiscoOverlay } from './disco-overlay.js';
 import { Focus } from './focus.js';
 import { Sisyphus } from './games/sisyphus.js';
 import { Swing } from './games/swing.js';
@@ -44,6 +50,8 @@ const PANES = [
 
 export function mountBoard() {
   const panes = [];
+  // свет лежит поверх страницы, а трясётся в такт сама доска под ним
+  const disco = new DiscoOverlay(document.body, document.getElementById('board'));
 
   for (const def of PANES) {
     const el = document.getElementById(def.id);
@@ -102,12 +110,15 @@ export function mountBoard() {
   const frame = (now) => {
     const dt = Math.min(0.05, (now - prev) / 1000);
     prev = now;
+    Beat.update(now, dt);                 // единственный на странице тик такта
     for (const p of panes) if (p.panel) p.panel.tick(dt);
+    disco.tick(dt);                       // свет рисуем последним, поверх всех
     requestAnimationFrame(frame);
   };
   requestAnimationFrame(frame);
 
   window.__focus = Focus;                 // отладка: что доска думает о внимании
+  window.__disco = disco;                 // отладка: свет можно зажечь руками
   window.__panes = panes;                 // отладка: достучаться до панели из консоли
-  return panes;
+  return { panes, disco };
 }

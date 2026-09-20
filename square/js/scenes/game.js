@@ -68,10 +68,11 @@ export class GameScene extends Phaser.Scene {
     this.tripFx = cam.getPostPipeline('Trip') || null;
   }
 
-  /** Раз в кадр: слушаем трек и раздуваем мир в такт. */
-  _disco(dt, time) {
+  /** Раз в кадр: читаем такт и раздуваем мир под него. */
+  _disco(dt) {
     if (!this.disco) return;
-    Beat.update(time, dt);
+    // Beat.update зовёт доска (js/board.js) — один раз за кадр на всю
+    // страницу, иначе вспышка доли затухала бы вдвое быстрее
     const target = tripLevel(this.square.progress);
     this.trip += (target - this.trip) * Math.min(1, dt * 1.5);
     this.disco.update(dt, this.trip);
@@ -198,7 +199,7 @@ export class GameScene extends Phaser.Scene {
       if (c.img.x < -60) c.img.x = this.scale.width + 60;
     }
 
-    this._disco(dt, time);
+    this._disco(dt);
 
     if (this.state === 'win') {
       // пока идёт пауза на толпу, квадрат продолжает трястись от натуги,

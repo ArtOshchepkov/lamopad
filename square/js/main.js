@@ -13,7 +13,7 @@ import { GameScene } from './scenes/game.js';
 import { UIScene } from './scenes/ui.js';
 
 Debug.init();
-mountBoard();
+const board = mountBoard();
 
 // Поле подгоняем под вьюпорт на момент загрузки: тянем ту сторону, которой
 // у экрана в избытке, — тогда FIT не оставит чёрных полей ни в портрете, ни
@@ -149,6 +149,7 @@ $('start-btn').addEventListener('click', () => {
   // анализатор трека заводим ровно здесь: это жест пользователя, контекст жив
   Beat.attach(game, audio);
   renderMute();
+  board.disco.setEnabled(!discoOff);                // общий свет над всей доской
   if (discoWas !== discoOff) {
     game.registry.set('disco', !discoOff);
     game.scene.getScene('game').scene.restart();    // сцена собирает эффекты в create()

@@ -50,8 +50,11 @@ const PANES = [
 
 export function mountBoard() {
   const panes = [];
-  // свет лежит поверх страницы, а трясётся в такт сама доска под ним
+  // свет лежит поверх страницы, а трясётся в такт сама доска под ним.
+  // Горит сразу: под стартовым экраном его всё равно не видно, зато доска
+  // светится с первого кадра, даже если main.js до своего тумблера не дошёл
   const disco = new DiscoOverlay(document.body, document.getElementById('board'));
+  disco.setEnabled(true);
 
   for (const def of PANES) {
     const el = document.getElementById(def.id);

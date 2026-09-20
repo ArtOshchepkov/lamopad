@@ -91,7 +91,9 @@ export const CONF = {
     muted: 'lamopad_square_muted',
     sfxMuted: 'lamopad_square_sfx_muted',
     fsDisabled: 'lamopad_square_fs_disabled',
-    discoOff: 'lamopad_square_disco_off',
+    // ключ с суффиксом: тумблер теперь гасит весь свет над доской, а не
+    // только кислоту в панели плиты, поэтому старое «выключено» не в счёт
+    discoOff: 'lamopad_square_disco_off_v2',
     best: 'lamopad_square_best_people',
   },
 

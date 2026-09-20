@@ -30,11 +30,11 @@
 import { Beat } from './beat.js';
 
 const BEAMS = 5;
-const SPARKS = 16;
+const SPARKS = 22;
 const HUE_SPIN = 7;                 // градусов в секунду в покое
-const SHAKE_PX = 7;                 // максимальный сдвиг доски на удар, px
+const SHAKE_PX = 11;                // максимальный сдвиг доски на удар, px
 const SHAKE_HZ = 58;                // частота самой дрожи
-const PUNCH = 0.009;                // наезд камеры на доле, доля от размера
+const PUNCH = 0.013;                // наезд камеры на доле, доля от размера
 
 export class DiscoOverlay {
   /**
@@ -132,7 +132,9 @@ export class DiscoOverlay {
   _pop() {
     const x = Math.random() * this.w;
     const y = Math.random() * this.h;
+    // два кольца из одной точки, вдогонку друг другу: удар читается лучше
     this.rings.push({ x, y, r: this.diag * 0.02, v: this.diag * 0.5, life: 1, hue: this.hue });
+    this.rings.push({ x, y, r: 0, v: this.diag * 0.32, life: 0.8, hue: (this.hue + 40) % 360 });
     for (let i = 0; i < SPARKS; i++) {
       const a = Math.random() * Math.PI * 2;
       const v = 70 + Math.random() * 300;
@@ -159,7 +161,7 @@ export class DiscoOverlay {
   }
 
   _wash(ctx, w, h) {
-    const amp = 0.04 + Beat.bass * 0.1;
+    const amp = 0.06 + Beat.bass * 0.17;
     const spots = [
       [w * 0.12, h * 0.1, this.hue],
       [w * 0.88, h * 0.9, (this.hue + 170) % 360],
@@ -176,7 +178,7 @@ export class DiscoOverlay {
   _beams(ctx, w, h) {
     const pivot = { x: w * 0.5, y: h * 1.14 };
     const len = this.diag * 1.4;
-    const k = 0.04 + Beat.beat * 0.13 + Beat.energy * 0.04;
+    const k = 0.06 + Beat.beat * 0.2 + Beat.energy * 0.06;
     for (let i = 0; i < BEAMS; i++) {
       const spin = (i % 2 ? 1 : -1) * (0.13 + i * 0.05);
       const ang = -Math.PI / 2 + Math.sin(this.t * spin + i * 1.7) * 0.9;
@@ -200,7 +202,7 @@ export class DiscoOverlay {
 
   /** Рампа по краям кадра: то, что на сцене светит из-за кулис. */
   _edges(ctx, w, h) {
-    const k = Beat.beat * 0.22 + Beat.energy * 0.04;
+    const k = Beat.beat * 0.3 + Beat.energy * 0.05;
     if (k < 0.01) return;
     const band = Math.max(10, Math.min(w, h) * 0.07);
     const sides = [
@@ -220,7 +222,7 @@ export class DiscoOverlay {
 
   _ringsDraw(ctx) {
     for (const r of this.rings) {
-      ctx.strokeStyle = `hsla(${r.hue}, 95%, 64%, ${r.life * 0.32})`;
+      ctx.strokeStyle = `hsla(${r.hue}, 95%, 64%, ${r.life * 0.4})`;
       ctx.lineWidth = 2 + r.life * 7;
       ctx.beginPath();
       ctx.arc(r.x, r.y, r.r, 0, Math.PI * 2);
@@ -236,7 +238,7 @@ export class DiscoOverlay {
   }
 
   _flash(ctx, w, h) {
-    const k = Beat.beat * 0.05 + Beat.energy * 0.015;
+    const k = Beat.beat * 0.07 + Beat.energy * 0.02;
     if (k < 0.005) return;
     ctx.fillStyle = `hsla(${this.hue}, 90%, 60%, ${k})`;
     ctx.fillRect(0, 0, w, h);

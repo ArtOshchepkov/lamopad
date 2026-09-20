@@ -1,0 +1,122 @@
+<!DOCTYPE html>
+<html lang="ru">
+<head>
+  <meta charset="utf-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1, user-scalable=no, viewport-fit=cover">
+  <title>ВЕДРО: мини-игра Ламопад</title>
+  <meta name="description" content="Очень большое ржавое ведро на краю пропасти и очень маленький человечек. Одному не под силу — зови остальных. Простая денди-игра Ламопада под трек «Шмурдики».">
+  <meta name="keywords" content="Ламопад, ведро, мини-игра, браузерная игра, денди, пиксель-арт, инди-музыка, абсурд">
+  <meta property="og:title" content="ВЕДРО | Ламопад">
+  <meta property="og:description" content="Одному не под силу. Зови остальных.">
+  <meta property="og:type" content="website">
+  <meta property="og:image" content="https://lamopad.ru/img/slon_1024px.jpg">
+  <meta property="og:url" content="https://lamopad.ru/games/vedro/">
+  <meta property="og:locale" content="ru_RU">
+  <meta property="og:site_name" content="Ламопад">
+  <link rel="canonical" href="https://lamopad.ru/games/vedro/">
+  <link rel="icon" href="/img/slon_96px.png" type="image/png" sizes="96x96">
+
+  <link rel="preconnect" href="https://fonts.googleapis.com">
+  <link href="https://fonts.googleapis.com/css2?family=Nunito:wght@400;700&display=swap" rel="stylesheet">
+  <link rel="stylesheet" href="css/style.css">
+  <script data-goatcounter="https://lamopad.goatcounter.com/count"
+          async src="//gc.zgo.at/count.js"></script>
+</head>
+<body>
+
+<div id="game"></div>
+
+<audio id="track" src="../../tracks/shmurdiki.mp3" loop preload="none"></audio>
+
+<div id="audio-controls">
+  <button id="mute-music" class="mute-btn" type="button" aria-label="Выключить музыку">🎵</button>
+  <button id="mute-sfx" class="mute-btn" type="button" aria-label="Выключить звуки">🔊</button>
+</div>
+
+<!-- загрузка -->
+<div id="loading">
+  <div class="load-title">ВЕДРО</div>
+  <svg class="load-bucket" viewBox="0 0 18 21" shape-rendering="crispEdges" aria-hidden="true">
+    <path d="M3 4.5 Q9 -0.5 15 4.5" fill="none" stroke="#8c8c98" stroke-width="1.1"/>
+    <polygon points="1,4 17,4 15,20 3,20" fill="#b0642c"/>
+    <polygon points="1,4 3,4 3,20 2.6,20" fill="#dc9048"/>
+    <polygon points="15,4 17,4 15,20 13.8,20" fill="#733c14"/>
+    <rect x="1" y="4" width="16" height="2" fill="#f0bc78"/>
+    <polygon points="2,9 16,9 15.8,10 2.2,10" fill="#733c14"/>
+    <polygon points="2.6,14 15.4,14 15.2,15 2.8,15" fill="#733c14"/>
+    <rect x="6" y="11" width="1" height="1" fill="#0b0a12"/>
+    <rect x="11" y="7" width="1" height="1" fill="#0b0a12"/>
+    <rect x="9" y="17" width="1" height="1" fill="#0b0a12"/>
+    <polygon points="3,19 15,19 15,20 3,20" fill="#48230c"/>
+  </svg>
+  <div class="load-dots"><span>■</span><span>■</span><span>■</span></div>
+  <a class="load-studio" href="../../">ламопад</a>
+  <div class="load-copy">© кое-какие права защищены</div>
+</div>
+
+<!-- старт -->
+<div id="start">
+  <div class="s-cloud c1"></div>
+  <div class="s-cloud c2"></div>
+  <div class="s-cloud c3"></div>
+  <a class="load-studio" href="../../">ламопад</a>
+  <div class="load-copy">© кое-какие права защищены</div>
+  <div class="start-inner">
+    <div class="start-title">ВЕДРО</div>
+    <svg class="start-bucket" viewBox="0 0 18 21" shape-rendering="crispEdges" aria-hidden="true">
+    <path d="M3 4.5 Q9 -0.5 15 4.5" fill="none" stroke="#8c8c98" stroke-width="1.1"/>
+    <polygon points="1,4 17,4 15,20 3,20" fill="#b0642c"/>
+    <polygon points="1,4 3,4 3,20 2.6,20" fill="#dc9048"/>
+    <polygon points="15,4 17,4 15,20 13.8,20" fill="#733c14"/>
+    <rect x="1" y="4" width="16" height="2" fill="#f0bc78"/>
+    <polygon points="2,9 16,9 15.8,10 2.2,10" fill="#733c14"/>
+    <polygon points="2.6,14 15.4,14 15.2,15 2.8,15" fill="#733c14"/>
+    <rect x="6" y="11" width="1" height="1" fill="#0b0a12"/>
+    <rect x="11" y="7" width="1" height="1" fill="#0b0a12"/>
+    <rect x="9" y="17" width="1" height="1" fill="#0b0a12"/>
+    <polygon points="3,19 15,19 15,20 3,20" fill="#48230c"/>
+  </svg>
+    <div class="start-toggles">
+      <button id="opt-music" class="tgl" type="button">🎵 музыка</button>
+      <button id="opt-sfx" class="tgl" type="button">🔔 звуки</button>
+      <button id="opt-fs" class="tgl" type="button">весь экран</button>
+    </div>
+    <p class="start-warn">в игре есть музыка и звуки</p>
+    <p id="orient-hint" class="start-orient hidden">📱 лучше горизонтально</p>
+    <button id="start-btn" type="button" class="start-go">Пошли толкать</button>
+    <div class="start-links">
+      <button id="start-share" type="button" class="start-more">🔗 поделиться</button>
+      <a class="start-more" href="../">🎮 другие игры</a>
+    </div>
+  </div>
+</div>
+
+<!-- финал: ведро упало -->
+<div id="win" class="hidden">
+  <div class="win-inner">
+    <p id="win-quote" class="win-quote"></p>
+    <p id="win-head" class="win-head"></p>
+    <div class="win-stats">
+      <div class="win-count">нас было</div>
+      <div id="win-big" class="win-time">0</div>
+      <div id="win-sub" class="win-best"></div>
+      <div id="win-best" class="win-best">рекорд · 0</div>
+      <div id="win-new" class="win-new hidden">★ НОВЫЙ РЕКОРД! ★</div>
+    </div>
+    <button id="restart" type="button" class="win-go">Найти новое ведро</button>
+    <a id="win-save" class="win-save" href="../../shmurdiki/text/">🎧 послушать «Шмурдиков»</a>
+    <div class="win-links">
+      <button id="win-share" type="button" class="win-more">🔗 поделиться</button>
+      <button id="order-open" type="button" class="win-more win-order"></button>
+      <a class="win-more" href="../">другие игры</a>
+    </div>
+  </div>
+  <div id="win-version" class="win-version"></div>
+</div>
+
+<script src="../../lib/phaser.min.js"></script>
+<script src="../../lib/order-widget.js"></script>
+<script type="module" src="js/main.js"></script>
+
+</body>
+</html>

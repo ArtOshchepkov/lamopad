@@ -63,7 +63,7 @@ export class UIScene extends Phaser.Scene {
       this.meter.fillRect(x, this.meterY, 12, 16);
       if (i < filled) {
         const near = i >= SEGS - 3;
-        this.meter.fillStyle(hex(near ? PAL.shoe : PAL.rustLite), 1);
+        this.meter.fillStyle(hex(near ? PAL.shoe : PAL.paper), 1);
         this.meter.fillRect(x + 2, this.meterY + 2, 8, 12);
       }
     }

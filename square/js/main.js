@@ -55,7 +55,7 @@ const winOverlay = $('win');
 const audio = $('track');
 audio.volume = 0.5;
 const GAME_URL = 'https://lamopad.ru/square/';
-const SHARE_PITCH = '◇▫◄▓▓▫ ◄█▓○▫◄▒ ▼▪▒▲▓ ◄ ▓○░□►◆ ○▪ ○◇► ▲░○▪';
+const SHARE_PITCH = '◇▫◄◆◆▫ ◄█◆○▫◄◇ ▼▪◇▲◆ ◄ ◆○▫□►◆ ○▪ ○◇► ▲▫○▪';
 const nice = (n) => n.toLocaleString('ru-RU');
 $('win-version').textContent = CONF.version;
 
@@ -163,12 +163,12 @@ const readBest = () => { try { return parseInt(localStorage.getItem(bestKey) || 
 
 const ENDINGS = {
   topple: {
-    head: '▼▪▒▲▓ ◄○◇◄●',
-    quote: '◄◇○○◇◄ ○▪ ▒█●●.<br>◇●▓□ ■◄□ □○▲▪□○ ■▓◄◆▫██◇◄●.',
+    head: '▼▪◇▲◆ ◄○◇◄●',
+    quote: '◄◇○○◇◄ ○▪ ◇█●●.<br>◇●◆□ ■◄□ □○▲▪□○ ■◆◄◆▫██◇◄●.',
   },
   ascend: {
-    head: '◆□ ◆▓░◄▫■◄► ░■□■◄',
-    quote: '○▫◄►░█▒-█◆○►►◄□, ▓ ▫▓░ ▓○►□○ ▪ ►▼□●▼●◆□◆■.<br>○●█ ◇▓░● ◆▓░►●█.',
+    head: '◆□ ◆◆▫◄▫■◄► ▫■□■◄',
+    quote: '○▫◄►▫█◇-█◆○►►◄□, ◆ ▫◆▫ ◆○►□○ ▪ ►▼□●▼●◆□◆■.<br>○●█ ◇◆▫● ◆◆▫►●█.',
   },
 };
 
@@ -184,7 +184,7 @@ game.events.on('square-win', ({ ending, count, seconds }) => {
   $('win-head').textContent = e.head;
   $('win-quote').innerHTML = e.quote;
   $('win-big').textContent = nice(people);
-  $('win-sub').textContent = '▒● ' + seconds + ' ▼◄█';
+  $('win-sub').textContent = '◇● ' + seconds + ' ▼◄█';
   $('win-best').textContent = '●◄█□▲▼ · ' + nice(isNew ? people : best);
   $('win-new').classList.toggle('hidden', !isNew);
   winOverlay.classList.remove('hidden');
@@ -202,13 +202,13 @@ function bindShare(btn, makeText) {
   btn.addEventListener('click', async () => {
     const text = makeText();
     if (navigator.share) {
-      try { await navigator.share({ title: '▼▪▒▲▓', text, url: GAME_URL }); }
+      try { await navigator.share({ title: '▼▪◇▲◆', text, url: GAME_URL }); }
       catch (e) { /* передумал — бывает */ }
       return;
     }
     try {
       await navigator.clipboard.writeText(`${text}\n${GAME_URL}`);
-      btn.textContent = '✅ ▼■◆█▓▼◆◇▫▲■';
+      btn.textContent = '✅ ▼■◆█◆▼◆◇▫▲■';
       setTimeout(() => { btn.textContent = label; }, 1800);
     } catch (e) { /* буфера нет — молчим */ }
   });
@@ -217,7 +217,7 @@ function bindShare(btn, makeText) {
 // со старта делимся просто игрой, с финала — тем, чем кончилось
 bindShare($('start-share'), () => SHARE_PITCH);
 bindShare($('win-share'), () => (lastRun.ending === 'ascend'
-  ? `◆●▪ ○□█▓ ${nice(lastRun.count)} ◄ ►▼□●▼●◆□◆■`
-  : `◆●▪ ○□█▓ ${nice(lastRun.count)} ◄ ◄█▓○▫◄◇▫`));
+  ? `◆●▪ ○□█◆ ${nice(lastRun.count)} ◄ ►▼□●▼●◆□◆■`
+  : `◆●▪ ○□█◆ ${nice(lastRun.count)} ◄ ◄█◆○▫◄◇▫`));
 
 window.__square = game;

@@ -133,6 +133,32 @@
       text-decoration-color: var(--red);
     }
 
+    /* Закрашенный анонс: ритм слов остался, слов нет. Полоски рисуются
+       шириной в --n условных знаков, так что строка ведёт себя как текст */
+    .bar {
+      display: inline-block;
+      width: calc(var(--n, 5) * 0.58em);
+      height: 0.82em;
+      vertical-align: -0.1em;
+      margin-right: 0.34em;
+      border-radius: 2px;
+      background: var(--ink);
+    }
+
+    .news-title .bar { height: 0.86em; }
+
+    /* закрашенное слово-ссылка: читать нечего, нажать есть на что */
+    .news-body a .bar {
+      background: var(--ink);
+      border-bottom: 2px solid rgba(200, 40, 30, 0.55);
+      border-radius: 2px 2px 0 0;
+      transition: background 0.15s, border-color 0.15s;
+    }
+    .news-body a:hover .bar {
+      background: var(--red);
+      border-bottom-color: var(--red);
+    }
+
     /* ── tracks link ── */
     .tracks-wrap { margin-top: 48px; }
 
@@ -184,11 +210,11 @@
 
       <li id="2026-09-20">
         <time class="news-date" datetime="2026-09-20">20 сентября 2026</time>
-        <div class="news-title">◄◆◄▫◇ ▲▫◇◇◆ ▼▪◇▲◆</div>
+        <div class="news-title"><span class="bar" style="--n: 7"></span><span class="bar" style="--n: 4"></span><span class="bar" style="--n: 9"></span></div>
         <div class="news-body">
-          <p>▫●□◆◇▲◄ ◄◆◄▫ ○◇▪◄▫◇ ◇▫ ◆●▪◇ ◄►◇◄■◆, ◄ ○▫◄ ▫◇◄◆◇ ◄●▪ ◆◇▫◆◆◄. ◇█◆○▫◄◇ <a href="/square/">▫◆◄█◇▪◆</a> ◄ ◆○▫□►◆ ○▪ ○◇► ▲▫○▪.</p>
-          <p>◄▫▲◄►◆ ●□◄◆◇ ◇▫▪◆◄, ◆►● ▫●□▫▫ ▫◆◇■▫▲▫▫◆◇ ◄█○▲◇.</p>
-          <p><a href="/square/">◇▫◄►◆▫◇ →</a></p>
+          <p><span class="bar" style="--n: 5"></span><span class="bar" style="--n: 8"></span><span class="bar" style="--n: 4"></span><span class="bar" style="--n: 6"></span><span class="bar" style="--n: 9"></span><span class="bar" style="--n: 3"></span><span class="bar" style="--n: 7"></span><span class="bar" style="--n: 5"></span><a href="/square/"><span class="bar" style="--n: 6"></span></a><span class="bar" style="--n: 4"></span><span class="bar" style="--n: 8"></span><span class="bar" style="--n: 3"></span><span class="bar" style="--n: 7"></span><span class="bar" style="--n: 5"></span><span class="bar" style="--n: 9"></span><span class="bar" style="--n: 4"></span></p>
+          <p><span class="bar" style="--n: 6"></span><span class="bar" style="--n: 4"></span><span class="bar" style="--n: 9"></span><span class="bar" style="--n: 5"></span><span class="bar" style="--n: 3"></span><span class="bar" style="--n: 8"></span><span class="bar" style="--n: 7"></span><span class="bar" style="--n: 4"></span><span class="bar" style="--n: 6"></span><span class="bar" style="--n: 5"></span></p>
+          <p><a href="/square/"><span class="bar" style="--n: 7"></span>→</a></p>
         </div>
       </li>
 

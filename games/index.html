@@ -140,6 +140,21 @@
       text-shadow: 0 0 10px rgba(255, 240, 170, 1), 0 0 28px rgba(255, 200, 80, 0.7), 0 0 48px rgba(255, 170, 60, 0.35);
     }
 
+    /* Закрашенный анонс: ритм слов остался, слов нет. Полоски рисуются
+       шириной в --n условных знаков, так что строка ведёт себя как текст */
+    .bar {
+      display: inline-block;
+      width: calc(var(--n, 5) * 0.58em);
+      height: 0.86em;
+      vertical-align: -0.1em;
+      margin-right: 0.34em;
+      border-radius: 2px;
+      background: var(--ink);
+    }
+
+    .game-desc .bar { height: 0.8em; opacity: 0.86; transition: opacity 0.15s; }
+    .game-link:hover .game-desc .bar { opacity: 1; }
+
     .game-desc {
       font-size: clamp(13px, 2.5vw, 15px);
       color: var(--faded);
@@ -227,6 +242,13 @@
         <a class="game-link" href="/tracks/sun-coming-glasses/game/">
           <div class="game-title sun"><span class="g">Солнце</span>наступательные очки<span class="game-arrow">→</span></div>
           <div class="game-desc">Прыгай очками по облакам от офисной рутины к солнцу. Дудл-джампер с ламами, рюкзаками и крокодилами.</div>
+        </a>
+      </li>
+
+      <li>
+        <a class="game-link" href="/square/" aria-label="███████ ████ ████████">
+          <div class="game-title"><span class="bar" style="--n: 7"></span><span class="bar" style="--n: 4"></span><span class="bar" style="--n: 9"></span><span class="game-arrow">→</span></div>
+          <div class="game-desc"><span class="bar" style="--n: 5"></span><span class="bar" style="--n: 7"></span><span class="bar" style="--n: 4"></span><span class="bar" style="--n: 9"></span><span class="bar" style="--n: 3"></span><span class="bar" style="--n: 6"></span><span class="bar" style="--n: 8"></span><span class="bar" style="--n: 4"></span><span class="bar" style="--n: 7"></span><span class="bar" style="--n: 5"></span><span class="bar" style="--n: 6"></span><span class="bar" style="--n: 3"></span><span class="bar" style="--n: 8"></span><span class="bar" style="--n: 4"></span></div>
         </a>
       </li>
 

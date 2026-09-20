@@ -23,6 +23,7 @@ export class Bucket {
     // Упираются в низ ведра: он на botInset правее верхней кромки, и именно
     // туда достают руки человечка ростом в одну десятую ведра.
     this.footLeft = this.left + CONF.bucket.botInset * CONF.px.bucket;
+    this.needed = CONF.crowd.needed;                // сцена уточнит под экран
     this.tilt = 0;                                  // градусы
     this.progress = 0;                              // 0..1 — сколько набрали
     this.state = 'stand';                           // stand | topple | fall | ascend
@@ -80,7 +81,7 @@ export class Bucket {
       return;
     }
 
-    const prog = force > 0 ? Math.min(1, force / CONF.crowd.needed) : 0;
+    const prog = force > 0 ? Math.min(1, force / this.needed) : 0;
     this.progress = prog;
     const target = force > 0
       ? B.soloWobble + (B.maxLean - B.soloWobble) * Math.pow(prog, 1.15)

@@ -21,6 +21,10 @@ export class GameScene extends Phaser.Scene {
     this.bucket = new Bucket(this, this.groundY);
     this.player = new Player(this, this.groundY, this.bucket.footLeft);
     this.crowd = new Crowd(this, this.groundY, this.bucket.footLeft);
+    // На узком экране рядов меньше, чем нужно под полную цель: тогда снижаем
+    // её, иначе забег станет непроходимым. Запас — на бегущих в этот момент
+    this.needed = Math.min(CONF.crowd.needed, Math.floor(this.crowd.capacity / 1.15));
+    this.bucket.needed = this.needed;
 
     // состояние забега
     this.state = 'play';                            // play | win
@@ -180,7 +184,7 @@ export class GameScene extends Phaser.Scene {
       }
     }
 
-    if (force >= CONF.crowd.needed) this._win();
+    if (force >= this.needed) this._win();
 
     this._hint(pushing, force);
     Debug.set('состояние', this.state);
@@ -188,6 +192,7 @@ export class GameScene extends Phaser.Scene {
     Debug.set('сила', force);
     Debug.set('наклон', this.bucket.tilt.toFixed(1));
     Debug.set('напряжение', (this.bucket.progress * 100).toFixed(0) + '%');
+    Debug.set('цель', this.needed + ' из ' + this.crowd.capacity);
     Debug.set('время', this.elapsed.toFixed(1));
     Debug.set('осталось', this.left.toFixed(1));
   }

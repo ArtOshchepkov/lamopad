@@ -8,13 +8,30 @@ import { UIScene } from './scenes/ui.js';
 
 Debug.init();
 
-// Высоту поля подгоняем под вьюпорт на момент загрузки: ширина мира
-// фиксирована (от неё зависит вся геометрия плиты), а высота — это небо,
-// которого не жалко. Берём точное соотношение сторон, чтобы FIT не оставил
-// чёрных полей: в портрете экран просто заполняется небом над обрывом.
+// Поле подгоняем под вьюпорт на момент загрузки: тянем ту сторону, которой
+// у экрана в избытке, — тогда FIT не оставит чёрных полей ни в портрете, ни
+// в ландшафте. На широком растёт ширина: плита и толпа становятся длиннее,
+// пропасть остаётся прежней. На высоком растёт высота — это просто небо.
 // Меряем окно, а не screen: панели браузера на телефоне не прячутся.
 const vw = window.innerWidth, vh = window.innerHeight;
-CONF.height = Phaser.Math.Clamp(Math.round(CONF.width * vh / vw), 540, 2400);
+const aspect = vw / vh;
+// В портрете мир 960 шириной растягивается по высоте до двух тысяч пикселей,
+// и телефон честно рисует эту прорву пустого неба — кадры падают вдвое.
+// Поэтому для узких экранов мир компактнее: и пикселей втрое меньше, и всё
+// на экране крупнее, потому что тот же телефон делит уже не 960, а 640
+if (aspect < CONF.portraitCut) {
+  CONF.baseW = 640;
+  CONF.abyssW = 150;
+  CONF.px.bucket = 3;
+}
+if (aspect >= CONF.baseW / CONF.baseH) {
+  CONF.height = CONF.baseH;
+  CONF.width = Phaser.Math.Clamp(Math.round(CONF.baseH * aspect), CONF.baseW, 1560);
+} else {
+  CONF.width = CONF.baseW;
+  CONF.height = Phaser.Math.Clamp(Math.round(CONF.baseW / aspect), CONF.baseH, 2400);
+}
+CONF.cliffX = CONF.width - CONF.abyssW;
 
 const game = new Phaser.Game({
   type: Phaser.AUTO,

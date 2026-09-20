@@ -11,6 +11,7 @@ export class Crowd {
     this.groundY = groundY;
     this.members = [];
     this.slots = this._makeSlots(bucketLeft);
+    this.capacity = this.slots.length;
     this.spawnAcc = 0;      // накопленные доли человека — приход дробный
     this.leaveT = 0;
     this.pushT = 0;
@@ -24,7 +25,9 @@ export class Crowd {
    * осям — иначе ровные ряды читаются ковром, а не людьми.
    */
   _makeSlots(bucketLeft) {
-    const { rows, perRow, rowTaper, slotGap, rowLift } = CONF.crowd;
+    const { rows, rowTaper, slotGap, rowLift } = CONF.crowd;
+    // сколько человечков влезает в ряд — вопрос к ширине экрана, не к конфигу
+    const perRow = Math.max(12, Math.floor((bucketLeft - 16) / slotGap));
     const out = [];
     let y = this.groundY;
     for (let r = 0; r < rows; r++) {

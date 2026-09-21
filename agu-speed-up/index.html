@@ -291,6 +291,17 @@
       100% { transform: translate(var(--dx), -140px) scale(1.2) rotate(var(--rot)); opacity: 0; }
     }
 
+    /* ── БАС-БУСТ: пока играет голосовое, интерфейс пляшет под ритм (transform ставит JS) ── */
+    .fx-overlay {
+      position: fixed; inset: 0; z-index: 45; pointer-events: none; opacity: 0;
+      background: radial-gradient(circle at 50% 55%, hsl(var(--fx-h, 300) 95% 60%) 0, transparent 65%);
+      box-shadow: inset 0 0 180px 30px hsl(var(--fx-h, 300) 95% 55%);
+    }
+    body.fx-on .play { transition: background .12s; }
+    body.fx-on .mention { display: inline-block; }
+    body.fx-on .clip-title, body.fx-on .ch-name { transform-origin: left center; }
+    .chip[aria-pressed="false"] { opacity: .55; text-decoration: line-through; }
+
     /* ── ССЫЛКИ (unfurl) ── */
     .unfurls { display: flex; flex-direction: column; gap: 8px; margin-top: 8px; max-width: 520px; }
     .unfurl {
@@ -453,6 +464,7 @@
                 <div class="clip-meta">
                   <span id="timeLabel">0:00 / 1:28</span>
                   <span class="spacer"></span>
+                  <button class="chip" id="fxBtn" type="button" aria-pressed="true" title="Бас-буст: интерфейс пляшет под ритм" aria-label="Бас-буст">бас</button>
                   <button class="chip" id="speedBtn" type="button" aria-label="Скорость воспроизведения">1×</button>
                   <a class="icon-btn" href="/tracks/agu-speed-up.mp3" download title="Скачать MP3" aria-label="Скачать MP3">
                     <svg viewBox="0 0 16 16" aria-hidden="true"><path d="M8 1.5a.75.75 0 0 1 .75.75v6.19l1.97-1.97a.75.75 0 1 1 1.06 1.06l-3.25 3.25a.75.75 0 0 1-1.06 0L4.22 7.53a.75.75 0 1 1 1.06-1.06l1.97 1.97V2.25A.75.75 0 0 1 8 1.5zM2.5 11.25a.75.75 0 0 1 1.5 0v1.5c0 .14.11.25.25.25h7.5c.14 0 .25-.11.25-.25v-1.5a.75.75 0 0 1 1.5 0v1.5c0 .97-.78 1.75-1.75 1.75h-7.5A1.75 1.75 0 0 1 2.5 12.75v-1.5z"/></svg>
@@ -685,7 +697,13 @@
 </footer>
 
 <div class="floaters" id="floaters" aria-hidden="true"></div>
+<div class="fx-overlay" id="fxOverlay" aria-hidden="true"></div>
 
+<script>
+/* ритм трека, посчитанный заранее из mp3: 40 кадров/с, по 3 байта на кадр (бас, середина, верх), base64.
+   Бас 35-140 Гц, середина 250-2500 Гц, верх 4-12 кГц; байт = всплеск громкости полосы над её скользящим средним (0.5 с) */
+const FX_DATA = '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';
+</script>
 <script>
 (function () {
   const reduceMotion = matchMedia('(prefers-reduced-motion: reduce)').matches;
@@ -772,20 +790,23 @@
 
   /* ── реакции: свой клик плюс-минус один, лама и соска летят вверх ── */
   const floaters = document.getElementById('floaters');
-  function burst(btn, emoji) {
+  function burstAt(x, y, emoji, n) {
     if (reduceMotion) return;
-    const r = btn.getBoundingClientRect();
-    for (let i = 0; i < 6; i++) {
+    for (let i = 0; i < n; i++) {
       const f = document.createElement('span');
       f.className = 'floater';
       f.textContent = emoji;
-      f.style.left = (r.left + r.width / 2) + 'px';
-      f.style.top = (r.top + r.height / 2) + 'px';
+      f.style.left = x + 'px';
+      f.style.top = y + 'px';
       f.style.setProperty('--dx', ((Math.random() - 0.5) * 120).toFixed(0) + 'px');
       f.style.setProperty('--rot', ((Math.random() - 0.5) * 60).toFixed(0) + 'deg');
       floaters.appendChild(f);
       f.addEventListener('animationend', () => f.remove());
     }
+  }
+  function burst(btn, emoji) {
+    const r = btn.getBoundingClientRect();
+    burstAt(r.left + r.width / 2, r.top + r.height / 2, emoji, 6);
   }
   document.getElementById('reactions').addEventListener('click', (e) => {
     const btn = e.target.closest('.rx');
@@ -794,6 +815,161 @@
     btn.setAttribute('aria-pressed', on);
     btn.querySelector('.n').textContent = Number(btn.dataset.count) + (on ? 1 : 0);
     if (on) burst(btn, btn.querySelector('.e').textContent);
+  });
+
+  /* ── БАС-БУСТ ──
+     Ритм читается из FX_DATA по audio.currentTime, а не через Web Audio: граф глушил бы звук на iOS
+     при беззвучном режиме, а так работает и на любой скорости воспроизведения. */
+  const FX_FPS = 40;
+  const FX_LAG = 0.03;
+  const fxData = Uint8Array.from(atob(FX_DATA), (c) => c.charCodeAt(0));
+  const fxFrames = fxData.length / 3;
+  const fxBtn = document.getElementById('fxBtn');
+  const fxOverlay = document.getElementById('fxOverlay');
+  const wrap = document.querySelector('.wrap');
+  const camEls = [document.querySelector('.crumbs'), document.querySelector('.site-footer')];
+  const env = [0, 0, 0];                   /* сглаженные бас / середина / верх, 0..1 */
+  const DECAY = [0.86, 0.82, 0.78];        /* бас затухает медленнее: удар "ощущается" */
+  const BAND = { bass: 0, mid: 1, high: 2 };
+  const FX_KEY = 'agu-speed-up-fx';
+
+  /* [селектор, полоса, масштаб, поворот в градусах, сдвиг x, сдвиг y в px] - у каждой группы свои
+     коэффициенты, а внутри группы у каждого элемента ещё свой множитель и своя сторона наклона */
+  const DANCERS = [
+    ['.msg > .av',                                'bass', 0.14,  6, 0,  0],
+    ['.play',                                     'bass', 0.30,  0, 0,  0],
+    ['.clip',                                     'bass', 0.012, 0, 0,  0],
+    ['.clip-title',                               'mid',  0.03,  0, 0,  0],
+    ['.clip .chip',                               'high', 0.22,  8, 0,  0],
+    ['.clip .icon-btn',                           'high', 0.30, 14, 0,  0],
+    ['.rx',                                       'bass', 0.10,  0, 0, -4],
+    ['.rx .e',                                    'mid',  0.45, 16, 0,  0],
+    ['.msg-head .st',                             'bass', 0.50, 24, 0,  0],
+    ['.mention',                                  'mid',  0.10,  0, 0,  0],
+    ['.unfurl',                                   'bass', 0.012, 0, 3,  0],
+    ['.u-thumb',                                  'bass', 0.12,  5, 0,  0],
+    ['.u-site img, .u-site .kion',                'high', 0.35, 18, 0,  0],
+    ['.thread-toggle .stack img',                 'mid',  0.20, 10, 0,  0],
+    ['.sb-ws span',                               'bass', 0.08,  0, 0,  0],
+    ['.sb-item i, .sb-item .ava, .sb-item .dot',  'mid',  0.25, 12, 0,  0],
+    ['.ch-name',                                  'bass', 0.07,  0, 0,  0],
+    ['.ch-members',                               'high', 0.14, -5, 0,  0],
+    ['.divider span',                             'mid',  0.10,  0, 0,  0],
+    ['.composer .send',                           'bass', 0.18,  0, 0,  0],
+    ['.site-footer a',                            'mid',  0.06,  0, 0, -3]
+  ];
+  const dancers = [];
+  DANCERS.forEach(([sel, band, sc, rot, x, y], gi) => {
+    document.querySelectorAll(sel).forEach((el, i) => {
+      dancers.push({ el, band: BAND[band], sc, rot, x, y, k: 0.55 + ((gi * 31 + i * 17) % 11) * 0.09, sign: i % 2 ? -1 : 1 });
+    });
+  });
+
+  let fxOn = !reduceMotion;
+  try { const v = localStorage.getItem(FX_KEY); if (v !== null) fxOn = v === '1'; } catch (e) { /* без хранилища живём */ }
+  fxBtn.setAttribute('aria-pressed', fxOn);
+
+  let fxRaf = 0, fxLast = 0, fxDir = 1, fxArmed = true, fxBurstAt = 0, lastCT = -1, lastPerf = 0, originY = -1;
+
+  /* currentTime обновляется рывками, между ними дорисовываем по часам кадра */
+  function songTime(now) {
+    const ct = audio.currentTime;
+    if (ct !== lastCT) { lastCT = ct; lastPerf = now; }
+    return ct + (audio.paused ? 0 : Math.min(0.08, (now - lastPerf) / 1000) * audio.playbackRate) - FX_LAG;
+  }
+  function sampleFx(t, ch) {
+    const f = Math.min(Math.max(t, 0) * FX_FPS, fxFrames - 1.001);
+    const i = Math.floor(f), k = f - i;
+    return (fxData[i * 3 + ch] * (1 - k) + fxData[(i + 1) * 3 + ch] * k) / 255;
+  }
+
+  function fxClear() {
+    dancers.forEach((d) => { d.el.style.transform = ''; });
+    bars.forEach((b) => { b.style.transform = ''; });
+    [wrap, ...camEls].forEach((e) => { e.style.transform = ''; });
+    wrap.style.willChange = '';
+    fxOverlay.style.opacity = 0;
+  }
+  function fxStop() {
+    cancelAnimationFrame(fxRaf);
+    fxRaf = 0;
+    document.body.classList.remove('fx-on');
+    fxClear();
+  }
+
+  function fxFrame(now) {
+    const dt = Math.min(0.05, (now - fxLast) / 1000 || 0.016);
+    fxLast = now;
+    const playing = !audio.paused && fxOn;
+    const amp = Math.pow(audio.playbackRate, -0.7);   /* на 2× и 4× слабее: удары чаще, глаза те же */
+    const t = songTime(now);
+    for (let c = 0; c < 3; c++) {
+      env[c] = Math.max(playing ? sampleFx(t, c) * amp : 0, env[c] * Math.pow(DECAY[c], dt * 60));
+    }
+    const bass = env[0];
+
+    /* каждый сильный удар меняет сторону наклона, поэтому элементы качаются влево-вправо */
+    if (bass > 0.6 && fxArmed) {
+      fxArmed = false;
+      fxDir = -fxDir;
+      if (bass > 0.85 && now - fxBurstAt > 900) {
+        fxBurstAt = now;
+        const r = playBtn.getBoundingClientRect();
+        burstAt(r.left + r.width / 2, r.top, ['🦙', '🍼', '🔊', '🙏'][Math.floor(Math.random() * 4)], 2);
+      }
+    } else if (bass < 0.3) fxArmed = true;
+
+    for (const d of dancers) {
+      const p = env[d.band] * d.k;
+      const side = d.sign * fxDir;
+      d.el.style.transform = 'translate(' + (d.x * p * side) + 'px,' + (d.y * p) + 'px) rotate(' + (d.rot * p * side) + 'deg) scale(' + (1 + d.sc * p) + ')';
+    }
+
+    /* волна превращается в эквалайзер: слева бас, в центре середина, справа верх */
+    for (let i = 0; i < bars.length; i++) {
+      const pos = i / (bars.length - 1);
+      const v = env[0] * Math.max(0, 1 - pos * 2) + env[1] * (1 - Math.abs(pos * 2 - 1)) + env[2] * Math.max(0, pos * 2 - 1);
+      const wobble = 0.7 + 0.3 * Math.sin(t * 11 + i * 0.9);
+      bars[i].style.transform = 'scaleY(' + (0.75 + 0.75 * v * wobble) + ')';
+    }
+
+    /* камера: дребезжание и наезд. Пока открыто мобильное меню (position: fixed внутри .slack), transform и
+       will-change на предке нельзя: оба делают его containing block и меню съезжает */
+    if (slack.classList.contains('sb-open')) {
+      [wrap, ...camEls].forEach((e) => { e.style.transform = ''; });
+      wrap.style.willChange = '';
+    } else {
+      wrap.style.willChange = 'transform';
+      const sh = Math.pow(bass, 1.5);
+      const a = 3.2 * amp * sh;
+      const jx = (Math.random() * 2 - 1) * a, jy = (Math.random() * 2 - 1) * a;
+      const jr = (Math.random() * 2 - 1) * 0.1 * sh * amp;
+      const oy = Math.round(scrollY + innerHeight / 2 - wrap.offsetTop);   /* масштаб вокруг центра экрана, а не всей страницы */
+      if (oy !== originY) { originY = oy; wrap.style.transformOrigin = '50% ' + oy + 'px'; }
+      wrap.style.transform = 'translate(' + jx + 'px,' + jy + 'px) rotate(' + jr + 'deg) scale(' + (1 + 0.012 * bass * amp) + ')';
+      camEls.forEach((e) => { e.style.transform = 'translate(' + jx + 'px,' + jy + 'px)'; });
+    }
+
+    /* оверлей: мягкая цветная вспышка, оттенок плывёт по кругу */
+    fxOverlay.style.setProperty('--fx-h', Math.round((t * 50) % 360));
+    fxOverlay.style.opacity = Math.min(1, bass * 0.9 + env[1] * 0.2) * 0.16 * amp;
+
+    if (playing || env.some((v) => v > 0.01)) fxRaf = requestAnimationFrame(fxFrame);
+    else fxStop();
+  }
+
+  function fxStart() {
+    if (fxRaf || !fxOn || audio.paused) return;
+    document.body.classList.add('fx-on');
+    fxLast = performance.now();
+    fxRaf = requestAnimationFrame(fxFrame);
+  }
+  audio.addEventListener('play', fxStart);
+  fxBtn.addEventListener('click', () => {
+    fxOn = !fxOn;
+    fxBtn.setAttribute('aria-pressed', fxOn);
+    try { localStorage.setItem(FX_KEY, fxOn ? '1' : '0'); } catch (e) { /* не страшно */ }
+    if (fxOn) fxStart(); else { env.fill(0); fxStop(); }
   });
 
   /* ── ЛС и текущий канал переключаются без перезагрузки, адрес хранит выбор (#kesha) ── */

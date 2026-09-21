@@ -10,7 +10,7 @@
   <link rel="icon" href="/tracks/agu-speed-up-icon.jpg">
 
   <meta property="og:title" content="Атгул: поскорей бы! (Speed Up) | Ламопад">
-  <meta property="og:description" content="Тут задачка на минутку: послушай голосовое, плиз. Всего 1:28 - раньше было 2:56, но мы всё ускорили.">
+  <meta property="og:description" content="Тут задачка на минутку: послушай голосовое, плиз. Оптимизировали трек-процессы, поспевай.">
   <meta property="og:type" content="music.song">
   <meta property="og:url" content="https://lamopad.ru/agu-speed-up/">
   <meta property="og:image" content="https://lamopad.ru/tracks/agu-speed-up-cover.jpg">
@@ -339,6 +339,19 @@
       border: 1px solid var(--line); border-radius: 10px; overflow: hidden; background: #000;
     }
     .reel video { display: block; width: 100%; height: auto; aspect-ratio: 9 / 16; }
+
+    /* анонимное сообщение: всё закрашено, как спойлер в слаке, читать нечего, нажать есть на что */
+    .sr-only { position: absolute; width: 1px; height: 1px; overflow: hidden; clip: rect(0 0 0 0); white-space: nowrap; }
+    .av.lt { display: flex; font-size: 16px; background: #8e4ec6; }
+    .lt.anon { background: #616061; }
+    .censored p { line-height: 1.75; }
+    .censored .bar {
+      display: inline-block; width: calc(var(--n, 5) * 0.58em); height: 0.82em;
+      vertical-align: -0.1em; margin-right: 0.34em; border-radius: 3px; background: #2d2c2e;
+    }
+    .censored a { text-decoration: none; }
+    .censored a .bar { border-bottom: 2px solid var(--link); border-radius: 3px 3px 0 0; transition: background .15s; }
+    .censored a:hover .bar { background: var(--link); }
 
     .credit { margin-top: 16px; font-size: 12px; color: #b9a5bb; }
     .site-footer .credit a { color: inherit; font-size: inherit; font-weight: inherit; text-decoration: underline; }
@@ -713,6 +726,38 @@
                 <div class="msg-body">
                   <div class="msg-head"><b>Алиса</b><time datetime="2026-09-21T08:47">08:47</time></div>
                   <p>Всё страньше и страньше! Всё чудесатее и чудесатее! Всё любопытственнее и любопытственнее! Всё страннее и страннее! Всё чудесится и чудесится!</p>
+                </div>
+              </div>
+            </div>
+          </section>
+
+          <article class="msg" id="msg-anon">
+            <span class="av lt anon" role="img" aria-label="Аноним">?</span>
+            <div class="msg-body">
+              <div class="msg-head"><b>Анонимное</b><span class="st" title="Анонимно">🤐</span><time datetime="2026-09-21T09:03">09:03</time></div>
+              <div class="censored">
+                <span class="sr-only">Сообщение зацензурено.</span>
+                <p><span class="bar" style="--n: 5" aria-hidden="true"></span><span class="bar" style="--n: 8" aria-hidden="true"></span><span class="bar" style="--n: 4" aria-hidden="true"></span><span class="bar" style="--n: 6" aria-hidden="true"></span><span class="bar" style="--n: 9" aria-hidden="true"></span><span class="bar" style="--n: 3" aria-hidden="true"></span><span class="bar" style="--n: 7" aria-hidden="true"></span><span class="bar" style="--n: 5" aria-hidden="true"></span><a href="/square/" aria-label="Перейти на /square" title="/square"><span class="bar" style="--n: 6" aria-hidden="true"></span></a><span class="bar" style="--n: 4" aria-hidden="true"></span><span class="bar" style="--n: 8" aria-hidden="true"></span><span class="bar" style="--n: 3" aria-hidden="true"></span><span class="bar" style="--n: 7" aria-hidden="true"></span><span class="bar" style="--n: 5" aria-hidden="true"></span><span class="bar" style="--n: 9" aria-hidden="true"></span><span class="bar" style="--n: 4" aria-hidden="true"></span></p>
+                <p><span class="bar" style="--n: 6" aria-hidden="true"></span><span class="bar" style="--n: 4" aria-hidden="true"></span><span class="bar" style="--n: 9" aria-hidden="true"></span><span class="bar" style="--n: 5" aria-hidden="true"></span><span class="bar" style="--n: 3" aria-hidden="true"></span><span class="bar" style="--n: 8" aria-hidden="true"></span><span class="bar" style="--n: 7" aria-hidden="true"></span><span class="bar" style="--n: 4" aria-hidden="true"></span><span class="bar" style="--n: 6" aria-hidden="true"></span><span class="bar" style="--n: 5" aria-hidden="true"></span></p>
+                <p><a href="/square/" aria-label="Перейти на /square"><span class="bar" style="--n: 7" aria-hidden="true"></span>→</a></p>
+              </div>
+            </div>
+          </article>
+
+          <section class="thread" aria-label="Ветка">
+            <button class="thread-toggle" type="button" aria-expanded="true" aria-controls="threadBodyAnon">
+              <span class="stack" aria-hidden="true">
+                <img src="/agu-speed-up/img/alice.jpg" alt="" width="24" height="24">
+              </span>
+              <b>1 ответ</b><span class="last">Последний ответ 21 сен</span>
+              <span class="arr" aria-hidden="true">›</span>
+            </button>
+            <div class="thread-body" id="threadBodyAnon">
+              <div class="msg">
+                <img class="av" src="/agu-speed-up/img/alice.jpg" alt="Алиса (иллюстрация Джона Тенниела)" width="32" height="32" loading="lazy">
+                <div class="msg-body">
+                  <div class="msg-head"><b>Алиса</b><time datetime="2026-09-21T09:05">09:05</time></div>
+                  <p>Я видала такую чепуху, по сравнению с которой эта чепуха - толковый словарь.</p>
                 </div>
               </div>
             </div>

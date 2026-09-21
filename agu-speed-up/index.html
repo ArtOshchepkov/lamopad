@@ -334,6 +334,12 @@
     .trk-bar i { display: block; width: 0; height: 100%; background: var(--link); }
     .trk-time { flex: none; font-size: 12px; color: var(--dim); font-variant-numeric: tabular-nums; }
 
+    .reel {
+      width: 260px; max-width: 100%; margin-top: 8px;
+      border: 1px solid var(--line); border-radius: 10px; overflow: hidden; background: #000;
+    }
+    .reel video { display: block; width: 100%; height: auto; aspect-ratio: 9 / 16; }
+
     .credit { margin-top: 16px; font-size: 12px; color: #b9a5bb; }
     .site-footer .credit a { color: inherit; font-size: inherit; font-weight: inherit; text-decoration: underline; }
 
@@ -462,7 +468,7 @@
       <div class="sb-h">Каналы</div>
       <ul>
         <li><button class="sb-item active" type="button" data-view="speedup" aria-current="true"><i>#</i>атгул-speed-up</button></li>
-        <li><span class="sb-item"><i>#</i>общее</span></li>
+        <li><button class="sb-item unread" type="button" data-view="plak"><i>#</i>плак-плак</button></li>
         <li><button class="sb-item unread" type="button" data-view="otpusk"><i>#</i>ждём-отпуск</button></li>
         <li><a class="sb-item" href="/agu/"><i>#</i>атгул</a></li>
         <li><a class="sb-item" href="/agu/text/"><i>#</i>атгул-текст</a></li>
@@ -670,6 +676,50 @@
       </div>
       </section>
 
+      <section class="view" id="view-plak" data-ph="Написать в # плак-плак" hidden>
+        <header class="ch-head">
+          <button class="menu-btn" type="button" aria-label="Каналы и личные сообщения" aria-expanded="false" aria-controls="sb">☰</button>
+          <span class="ch-name"># плак-плак</span>
+          <span class="ch-topic">Поплакать вместе. Начальникам не читать.</span>
+          <span class="ch-members" aria-label="Участников: 14">👥 14</span>
+        </header>
+        <div class="feed">
+          <div class="divider"><span>21 сен 2026</span></div>
+
+          <article class="msg">
+            <img class="av" src="/agu-speed-up/img/gregor.jpg" alt="Грегор Замза (таракан)" width="36" height="36" loading="lazy">
+            <div class="msg-body">
+              <div class="msg-head"><b>Грегор Замза</b><time datetime="2026-09-21T08:45">08:45</time></div>
+              <p>Проснувшись однажды утром после беспокойного сна, увидел такой рилс, жиза, да?</p>
+              <div class="reel">
+                <video id="reel" controls playsinline preload="metadata" poster="/agu-speed-up/img/reels-poster.jpg" width="270" height="480" title="Рилс про Атгул">
+                  <source src="/agu-speed-up/reels.mp4" type="video/mp4">
+                </video>
+              </div>
+            </div>
+          </article>
+
+          <section class="thread" aria-label="Ветка">
+            <button class="thread-toggle" type="button" aria-expanded="true" aria-controls="threadBodyReel">
+              <span class="stack" aria-hidden="true">
+                <img src="/agu-speed-up/img/alice.jpg" alt="" width="24" height="24">
+              </span>
+              <b>1 ответ</b><span class="last">Последний ответ 21 сен</span>
+              <span class="arr" aria-hidden="true">›</span>
+            </button>
+            <div class="thread-body" id="threadBodyReel">
+              <div class="msg">
+                <img class="av" src="/agu-speed-up/img/alice.jpg" alt="Алиса (иллюстрация Джона Тенниела)" width="32" height="32" loading="lazy">
+                <div class="msg-body">
+                  <div class="msg-head"><b>Алиса</b><time datetime="2026-09-21T08:47">08:47</time></div>
+                  <p>Всё страньше и страньше! Всё чудесатее и чудесатее! Всё любопытственнее и любопытственнее! Всё страннее и страннее! Всё чудесится и чудесится!</p>
+                </div>
+              </div>
+            </div>
+          </section>
+        </div>
+      </section>
+
       <section class="view" id="view-otpusk" data-ph="Написать в # ждём-отпуск" hidden>
         <header class="ch-head">
           <button class="menu-btn" type="button" aria-label="Каналы и личные сообщения" aria-expanded="false" aria-controls="sb">☰</button>
@@ -852,7 +902,7 @@
     <a href="/agu/game/">Игра</a>
     <a href="/">lamopad.ru</a>
   </nav>
-  <p class="credit">Фото Шарика: <a href="https://commons.wikimedia.org/wiki/File:Statuo_de_%C5%9Carik_el_Prostokva%C5%9Dino_en_ripozejo_%C4%89e_lago_Smolino_(%C4%88elabinsko).jpg" target="_blank" rel="noopener">RG72</a>, Wikimedia Commons, <a href="https://creativecommons.org/licenses/by-sa/4.0/" target="_blank" rel="noopener">CC BY-SA 4.0</a> (кадрировано)</p>
+  <p class="credit">Аватары с Wikimedia Commons, кадрированы: Шарик - <a href="https://commons.wikimedia.org/wiki/File:Statuo_de_%C5%9Carik_el_Prostokva%C5%9Dino_en_ripozejo_%C4%89e_lago_Smolino_(%C4%88elabinsko).jpg" target="_blank" rel="noopener">RG72</a>, Грегор - <a href="https://commons.wikimedia.org/wiki/File:Blatta_orientalis_Trento_03.jpg" target="_blank" rel="noopener">Syrio</a>, обе фотографии <a href="https://creativecommons.org/licenses/by-sa/4.0/" target="_blank" rel="noopener">CC BY-SA 4.0</a>; Алиса - <a href="https://commons.wikimedia.org/wiki/File:Alice_par_John_Tenniel_30.png" target="_blank" rel="noopener">иллюстрация Джона Тенниела</a>, общественное достояние.</p>
   <p class="copyright">© Ламопад - все права защищены</p>
 </footer>
 
@@ -1140,9 +1190,12 @@ const FX_DATA = 'AAAAAAAABwAEjQAA/wAA7AAA6TAAOoYAHTA1ADEQ/3QO4koaAAARADo1DEEeSqs
   const navItems = [...sb.querySelectorAll('.sb-item[data-view]')];
   const composerPh = document.getElementById('composerPh');
 
+  const reel = document.getElementById('reel');
+
   function showView(name) {
     const target = document.getElementById('view-' + name) || views[0];
     const key = target.id.replace('view-', '');
+    if (!target.contains(reel)) reel.pause();   /* со скрытым видео звук не нужен, а голосовое играет и в фоне */
     views.forEach((v) => { v.hidden = v !== target; });
     navItems.forEach((b) => {
       const on = b.dataset.view === key;
@@ -1215,6 +1268,11 @@ const FX_DATA = 'AAAAAAAABwAEjQAA/wAA7AAA6TAAOoYAHTA1ADEQ/3QO4koaAAARADo1DEEeSqs
     miniCard.querySelector('.trk-time').textContent = fmt(mini.currentTime);
   });
   audio.addEventListener('play', () => mini.pause());
+
+  /* видео, голосовое и треки-вложения не играют вместе */
+  reel.addEventListener('play', () => { audio.pause(); mini.pause(); });
+  audio.addEventListener('play', () => reel.pause());
+  mini.addEventListener('play', () => reel.pause());
 })();
 </script>
 </body>

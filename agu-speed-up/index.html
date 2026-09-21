@@ -291,6 +291,52 @@
       100% { transform: translate(var(--dx), -140px) scale(1.2) rotate(var(--rot)); opacity: 0; }
     }
 
+    /* ── CTA на голосовом: красная стрелка слева от play, пока трек ни разу не включали ── */
+    .clip-row { position: relative; }
+    .cta {
+      position: absolute; right: 100%; top: 50%; z-index: 2;
+      width: 64px; height: 44px; margin: -22px 6px 0 0; pointer-events: none;
+      filter: drop-shadow(0 2px 4px #ff1f3d66);
+    }
+    .cta svg { display: block; width: 100%; height: 100%; animation: nudge .75s ease-in-out infinite; }
+    .clip.played .cta { display: none; }
+    .clip:not(.played) .play { animation: ring 1.5s ease-out infinite; }
+    @keyframes nudge { 0%, 100% { transform: translateX(-5px); } 50% { transform: translateX(4px); } }
+    @keyframes ring {
+      0%   { box-shadow: 0 0 0 0 #ff1f3d99; }
+      70%  { box-shadow: 0 0 0 12px #ff1f3d00; }
+      100% { box-shadow: 0 0 0 0 #ff1f3d00; }
+    }
+
+    /* ── закреп и прикреплённые треки ── */
+    .msg.pinned { background: #fffbea; }
+    .msg.pinned:hover { background: #fff6d2; }
+    .pin { font-size: 12px; color: #8a6d00; font-weight: 700; margin-bottom: 2px; }
+    .trk {
+      display: flex; align-items: center; gap: 10px;
+      max-width: 420px; margin-top: 8px; padding: 8px 12px 8px 8px;
+      border: 1px solid var(--line); border-radius: 10px; background: #fff;
+    }
+    .trk-play {
+      flex: none; width: 32px; height: 32px; border-radius: 50%;
+      background: var(--link); color: #fff;
+      display: flex; align-items: center; justify-content: center;
+    }
+    .trk-play:hover { background: #0b4f8a; }
+    .trk-play svg { width: 12px; height: 12px; fill: currentColor; }
+    .trk-play .i-pause, .trk.playing .trk-play .i-play { display: none; }
+    .trk.playing .trk-play .i-pause { display: block; }
+    .trk-cover { flex: none; width: 44px; height: 44px; border-radius: 6px; object-fit: cover; }
+    .trk-info { flex: 1; min-width: 0; display: flex; flex-direction: column; }
+    .trk-title { font-weight: 900; overflow-wrap: anywhere; }
+    .trk-sub { font-size: 12px; color: var(--dim); }
+    .trk-bar { display: block; height: 3px; margin-top: 5px; border-radius: 2px; background: #e3e3e3; overflow: hidden; }
+    .trk-bar i { display: block; width: 0; height: 100%; background: var(--link); }
+    .trk-time { flex: none; font-size: 12px; color: var(--dim); font-variant-numeric: tabular-nums; }
+
+    .credit { margin-top: 16px; font-size: 12px; color: #b9a5bb; }
+    .site-footer .credit a { color: inherit; font-size: inherit; font-weight: inherit; text-decoration: underline; }
+
     /* ── БАС-БУСТ: пока играет голосовое, интерфейс пляшет под ритм (transform ставит JS) ── */
     .fx-overlay {
       position: fixed; inset: 0; z-index: 45; pointer-events: none; opacity: 0;
@@ -379,6 +425,7 @@
     }
 
     @media (max-width: 520px) {
+      .cta { width: 52px; height: 36px; margin-top: -18px; }
       .wrap { padding: 8px 0 0; }
       .slack { border-radius: 0; }
       .msg { padding: 8px 12px; gap: 8px; }
@@ -394,6 +441,7 @@
     @media (prefers-reduced-motion: reduce) {
       html { scroll-behavior: auto; }
       .typing .dots span { animation: none; opacity: .6; }
+      .cta svg, .clip:not(.played) .play { animation: none; }
       .floater { animation-duration: .01s; }
       .sb, .slack.sb-open .sb { transition: none; }
     }
@@ -413,12 +461,12 @@
       <div class="sb-ws"><span>Ламопад</span><small>▾</small></div>
       <div class="sb-h">Каналы</div>
       <ul>
+        <li><button class="sb-item active" type="button" data-view="speedup" aria-current="true"><i>#</i>атгул-speed-up</button></li>
         <li><span class="sb-item"><i>#</i>общее</span></li>
-        <li><span class="sb-item"><i>#</i>ждём-отпуск</span></li>
+        <li><button class="sb-item unread" type="button" data-view="otpusk"><i>#</i>ждём-отпуск</button></li>
         <li><a class="sb-item" href="/agu/"><i>#</i>атгул</a></li>
         <li><a class="sb-item" href="/agu/text/"><i>#</i>атгул-текст</a></li>
         <li><a class="sb-item" href="/agu/game/"><i>#</i>атгул-игра</a></li>
-        <li><button class="sb-item active" type="button" data-view="speedup" aria-current="true"><i>#</i>атгул-speed-up</button></li>
       </ul>
       <div class="sb-h">Личные сообщения</div>
       <ul>
@@ -456,6 +504,9 @@
               <h1 class="clip-title">Атгул: поскорей бы! (Speed Up)</h1>
               <div class="clip-sub">Голосовое сообщение · Ламопад</div>
               <div class="clip-row">
+                <span class="cta" aria-hidden="true">
+                  <svg viewBox="0 0 64 44"><path d="M2 14h36V3l24 19-24 19V30H2z" fill="#ff1f3d" stroke="#fff" stroke-width="2" stroke-linejoin="round"/><text x="7" y="27" font-size="12" font-weight="900" fill="#fff" font-family="-apple-system,'Segoe UI',Roboto,Arial,sans-serif">ЖМИ</text></svg>
+                </span>
                 <button class="play" id="playBtn" type="button" aria-label="Слушать: Атгул, поскорей бы (Speed Up)">
                   <svg class="i-play" viewBox="0 0 16 16" aria-hidden="true"><path d="M3.5 1.8v12.4a.6.6 0 0 0 .9.5l10-6.2a.6.6 0 0 0 0-1L4.4 1.3a.6.6 0 0 0-.9.5z"/></svg>
                   <svg class="i-pause" viewBox="0 0 16 16" aria-hidden="true"><rect x="3" y="2" width="3.6" height="12" rx="1"/><rect x="9.4" y="2" width="3.6" height="12" rx="1"/></svg>
@@ -619,6 +670,114 @@
       </div>
       </section>
 
+      <section class="view" id="view-otpusk" data-ph="Написать в # ждём-отпуск" hidden>
+        <header class="ch-head">
+          <button class="menu-btn" type="button" aria-label="Каналы и личные сообщения" aria-expanded="false" aria-controls="sb">☰</button>
+          <span class="ch-name"># ждём-отпуск</span>
+          <span class="ch-topic">Считаем дни. Показываем, как отдыхали.</span>
+          <span class="ch-members" aria-label="Участников: 9">👥 9</span>
+        </header>
+        <div class="feed">
+          <div class="divider"><span>21 сен 2026</span></div>
+
+          <article class="msg">
+            <img class="av" src="/agu/ava/kesha.jpg" alt="Попугай Кеша" width="36" height="36" loading="lazy">
+            <div class="msg-body">
+              <div class="msg-head"><b>Попугай Кеша</b><time datetime="2026-09-21T12:03">12:03</time></div>
+              <p>ПОГЛЯДИТЕ КАК Я НА ТРАКТОРЕ ТЕМ ЛЕТОМ <a href="/samosval/game/">lamopad.ru/samosval/game/</a></p>
+                <div class="unfurls">
+                  <a class="unfurl" style="--pc:#7c4dff" href="/samosval/game/">
+                    <span class="u-site"><img src="/agu-speed-up/img/site.png" alt="" width="16" height="16">lamopad.ru</span>
+                    <span class="u-title">Самосвал: мини-игра</span>
+                    <span class="u-desc">Управляй ламой-самосвалом: уворачивайся от ящиков и собирай пилюли</span>
+                    <img class="u-thumb" src="/agu-speed-up/img/samosval.jpg" alt="Обложка игры «Самосвал»" width="84" height="84" loading="lazy">
+                  </a>
+                </div>
+            </div>
+          </article>
+
+          <article class="msg">
+            <img class="av" src="/agu/ava/novoseltsev.jpg" alt="Новосельцев" width="36" height="36" loading="lazy">
+            <div class="msg-body">
+              <div class="msg-head"><b>Новосельцев</b><time datetime="2026-09-21T12:10">12:10</time></div>
+              <p>Кто потерял очки? <a href="/tracks/sun-coming-glasses/game/">lamopad.ru/tracks/sun-coming-glasses/game/</a></p>
+                <div class="unfurls">
+                  <a class="unfurl" style="--pc:#f2994a" href="/tracks/sun-coming-glasses/game/">
+                    <span class="u-site"><img src="/agu-speed-up/img/site.png" alt="" width="16" height="16">lamopad.ru</span>
+                    <span class="u-title">Солнценаступательные очки: игра по треку Ламопад</span>
+                    <span class="u-desc">Прыгай очками по облакам от офисной рутины к солнцу. Дудл-джампер с ламами, рюкзаками и крокодилами</span>
+                    <img class="u-thumb" src="/agu-speed-up/img/sun-coming-glasses.jpg" alt="Обложка трека «Солнценаступательные очки»" width="84" height="84" loading="lazy">
+                  </a>
+                </div>
+            </div>
+          </article>
+
+          <section class="thread" aria-label="Ветка">
+            <button class="thread-toggle" type="button" aria-expanded="true" aria-controls="threadBodyGlasses">
+              <span class="stack" aria-hidden="true">
+                <img src="/agu/ava/munchausen.jpg" alt="" width="24" height="24">
+              </span>
+              <b>1 ответ</b><span class="last">Последний ответ 21 сен</span>
+              <span class="arr" aria-hidden="true">›</span>
+            </button>
+            <div class="thread-body" id="threadBodyGlasses">
+              <div class="msg">
+                <img class="av" src="/agu/ava/munchausen.jpg" alt="Барон Мюнхаузен" width="32" height="32" loading="lazy">
+                <div class="msg-body">
+                  <div class="msg-head"><b>Барон Мюнхаузен</b><time datetime="2026-09-21T12:12">12:12</time></div>
+                  <p>с ядролёта и не такое уронишь! Зацени мой прошлый отпуск <a href="https://www.youtube.com/watch?v=A0mOHyGgVPA" target="_blank" rel="noopener">youtube.com/watch?v=A0mOHyGgVPA</a></p>
+                <div class="unfurls">
+                  <a class="unfurl" style="--pc:#ff0000" href="https://www.youtube.com/watch?v=A0mOHyGgVPA" target="_blank" rel="noopener">
+                    <span class="u-site"><img src="https://cdn.simpleicons.org/youtube/ff0000" alt="" width="16" height="16">YouTube</span>
+                    <span class="u-title">Ламопад - Солнценаступательные очки / текст / lyrics</span>
+                    <span class="u-desc">Ламопад</span>
+                    <img class="u-thumb" src="/agu-speed-up/img/sun-coming-glasses.jpg" alt="Кадр клипа «Солнценаступательные очки»" width="84" height="84" loading="lazy">
+                  </a>
+                </div>
+                </div>
+              </div>
+            </div>
+          </section>
+
+          <article class="msg pinned">
+            <img class="av" src="/agu/ava/pisatel.jpg" alt="Писатель" width="36" height="36" loading="lazy">
+            <div class="msg-body">
+              <div class="pin">📌 Закреплено</div>
+              <div class="msg-head"><b>Писатель</b><time datetime="2026-09-21T14:20">14:20</time></div>
+              <p>вот и лето прошло.. а я так и не отдохнул..</p>
+                <div class="trk" data-src="/tracks/osen-9.mp3">
+                  <button class="trk-play" type="button" aria-label="Слушать: Осень, девять"><svg class="i-play" viewBox="0 0 16 16" aria-hidden="true"><path d="M3.5 1.8v12.4a.6.6 0 0 0 .9.5l10-6.2a.6.6 0 0 0 0-1L4.4 1.3a.6.6 0 0 0-.9.5z"/></svg><svg class="i-pause" viewBox="0 0 16 16" aria-hidden="true"><rect x="3" y="2" width="3.6" height="12" rx="1"/><rect x="9.4" y="2" width="3.6" height="12" rx="1"/></svg></button>
+                  <img class="trk-cover" src="/agu-speed-up/img/osen-9.jpg" alt="Обложка трека «Осень, девять»" width="44" height="44" loading="lazy">
+                  <div class="trk-info">
+                    <a class="trk-title" href="/osen-9/text/">Осень, девять</a>
+                    <span class="trk-sub">Ламопад · трек</span>
+                    <span class="trk-bar"><i></i></span>
+                  </div>
+                  <span class="trk-time">0:00</span>
+                </div>
+            </div>
+          </article>
+
+          <article class="msg">
+            <img class="av" src="/agu-speed-up/img/sharik.jpg" alt="Пёс Шарик (скульптура из Простоквашино)" width="36" height="36" loading="lazy">
+            <div class="msg-body">
+              <div class="msg-head"><b>Пёс Шарик</b><time datetime="2026-09-21T15:45">15:45</time></div>
+              <p>Свои в такую погоду дома сидят</p>
+                <div class="trk" data-src="/tracks/nikuda-ne-poidem.mp3">
+                  <button class="trk-play" type="button" aria-label="Слушать: Никуда не пойдём"><svg class="i-play" viewBox="0 0 16 16" aria-hidden="true"><path d="M3.5 1.8v12.4a.6.6 0 0 0 .9.5l10-6.2a.6.6 0 0 0 0-1L4.4 1.3a.6.6 0 0 0-.9.5z"/></svg><svg class="i-pause" viewBox="0 0 16 16" aria-hidden="true"><rect x="3" y="2" width="3.6" height="12" rx="1"/><rect x="9.4" y="2" width="3.6" height="12" rx="1"/></svg></button>
+                  <img class="trk-cover" src="/agu-speed-up/img/slon.jpg" alt="Обложка трека «Никуда не пойдём»" width="44" height="44" loading="lazy">
+                  <div class="trk-info">
+                    <a class="trk-title" href="/tracks/">Никуда не пойдём</a>
+                    <span class="trk-sub">Ламопад · трек</span>
+                    <span class="trk-bar"><i></i></span>
+                  </div>
+                  <span class="trk-time">0:00</span>
+                </div>
+            </div>
+          </article>
+        </div>
+      </section>
+
       <section class="view" id="view-kesha" data-ph="Сообщение для Кеши" hidden>
         <header class="ch-head">
           <button class="menu-btn" type="button" aria-label="Каналы и личные сообщения" aria-expanded="false" aria-controls="sb">☰</button>
@@ -693,6 +852,7 @@
     <a href="/agu/game/">Игра</a>
     <a href="/">lamopad.ru</a>
   </nav>
+  <p class="credit">Фото Шарика: <a href="https://commons.wikimedia.org/wiki/File:Statuo_de_%C5%9Carik_el_Prostokva%C5%9Dino_en_ripozejo_%C4%89e_lago_Smolino_(%C4%88elabinsko).jpg" target="_blank" rel="noopener">RG72</a>, Wikimedia Commons, <a href="https://creativecommons.org/licenses/by-sa/4.0/" target="_blank" rel="noopener">CC BY-SA 4.0</a> (кадрировано)</p>
   <p class="copyright">© Ламопад - все права защищены</p>
 </footer>
 
@@ -739,6 +899,7 @@ const FX_DATA = 'AAAAAAAABwAEjQAA/wAA7AAA6TAAOoYAHTA1ADEQ/3QO4koaAAARADo1DEEeSqs
 
   function setPlaying(on) {
     clip.classList.toggle('playing', on);
+    if (on) clip.classList.add('played');
     playBtn.setAttribute('aria-label', (on ? 'Пауза: ' : 'Слушать: ') + 'Атгул, поскорей бы (Speed Up)');
   }
 
@@ -1016,13 +1177,44 @@ const FX_DATA = 'AAAAAAAABwAEjQAA/wAA7AAA6TAAOoYAHTA1ADEQ/3QO4koaAAARADo1DEEeSqs
   showView(location.hash.slice(1));
 
   /* ── ветка сворачивается ── */
-  const tt = document.getElementById('threadToggle');
-  const tb = document.getElementById('threadBody');
-  tt.addEventListener('click', () => {
-    const open = tt.getAttribute('aria-expanded') !== 'true';
-    tt.setAttribute('aria-expanded', open);
-    tb.hidden = !open;
+  document.querySelectorAll('.thread-toggle').forEach((tt) => {
+    const tb = document.getElementById(tt.getAttribute('aria-controls'));
+    tt.addEventListener('click', () => {
+      const open = tt.getAttribute('aria-expanded') !== 'true';
+      tt.setAttribute('aria-expanded', open);
+      tb.hidden = !open;
+    });
   });
+
+  /* ── прикреплённые треки: один общий плеер, с голосовым не играют одновременно ── */
+  const mini = new Audio();
+  mini.preload = 'none';
+  let miniCard = null;
+  const cards = [...document.querySelectorAll('.trk')];
+  const paint = (card, on) => {
+    card.classList.toggle('playing', on);
+    card.querySelector('.trk-play').setAttribute('aria-label', (on ? 'Пауза: ' : 'Слушать: ') + card.querySelector('.trk-title').textContent);
+  };
+  cards.forEach((card) => card.querySelector('.trk-play').addEventListener('click', () => {
+    if (miniCard === card && !mini.paused) { mini.pause(); return; }
+    if (miniCard !== card) {
+      if (miniCard) { paint(miniCard, false); miniCard.querySelector('.trk-bar i').style.width = '0'; }
+      miniCard = card;
+      mini.src = card.dataset.src;
+    }
+    audio.pause();
+    mini.play().catch(() => paint(card, false));
+  }));
+  mini.addEventListener('play', () => miniCard && paint(miniCard, true));
+  mini.addEventListener('pause', () => miniCard && paint(miniCard, false));
+  mini.addEventListener('ended', () => { mini.currentTime = 0; });
+  mini.addEventListener('timeupdate', () => {
+    if (!miniCard) return;
+    const d = mini.duration || 1;
+    miniCard.querySelector('.trk-bar i').style.width = (mini.currentTime / d * 100) + '%';
+    miniCard.querySelector('.trk-time').textContent = fmt(mini.currentTime);
+  });
+  audio.addEventListener('play', () => mini.pause());
 })();
 </script>
 </body>

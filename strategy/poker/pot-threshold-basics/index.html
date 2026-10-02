@@ -1,0 +1,1311 @@
+<!DOCTYPE html>
+<html lang="ru">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>Покер: сколько можно ставить? Порог ставки | Ламопад</title>
+  <meta name="description" content="Сколько можно поставить в покере, если известны банк и шанс победы. Порог ставки = p / (1 − p) банка: калькулятор, графики, таблица шансов дро и мини-квиз.">
+  <meta name="keywords" content="покер, pot odds, шансы банка, эквити, порог ставки, сколько ставить в покере, матожидание колла, ауты, флеш-дро, стрит-дро, калькулятор покера">
+  <meta name="author" content="Артём Ощепков">
+  <meta name="robots" content="index, follow">
+  <link rel="canonical" href="https://lamopad.ru/strategy/poker/pot-threshold-basics/">
+  <link rel="icon" href="/img/slon_96px.png" type="image/png" sizes="96x96">
+
+  <meta property="og:type" content="article">
+  <meta property="og:title" content="Покер: сколько можно ставить?">
+  <meta property="og:description" content="Сколько можно поставить в покере, если известны банк и шанс победы. Порог ставки = p / (1 − p) банка: калькулятор, графики, таблица шансов дро и мини-квиз.">
+  <meta property="og:url" content="https://lamopad.ru/strategy/poker/pot-threshold-basics/">
+  <meta property="og:image" content="https://lamopad.ru/img/slon_1024px.jpg">
+  <meta property="og:image:width" content="1024">
+  <meta property="og:image:height" content="1024">
+  <meta property="og:locale" content="ru_RU">
+  <meta property="og:site_name" content="Ламопад">
+  <meta name="twitter:card" content="summary">
+  <meta name="twitter:title" content="Покер: сколько можно ставить?">
+  <meta name="twitter:description" content="Сколько можно поставить в покере, если известны банк и шанс победы. Порог ставки = p / (1 − p) банка: калькулятор, графики, таблица шансов дро и мини-квиз.">
+  <meta name="twitter:image" content="https://lamopad.ru/img/slon_1024px.jpg">
+  <meta property="article:published_time" content="2026-10-02">
+  <meta property="article:author" content="https://github.com/ArtOshchepkov">
+  <meta property="article:section" content="Покер">
+  <meta property="article:tag" content="pot odds">
+  <meta property="article:tag" content="эквити">
+
+  <script type="application/ld+json">
+  {
+    "@context": "https://schema.org",
+    "@type": "Article",
+    "headline": "Покер: сколько можно ставить?",
+    "description": "Сколько можно поставить в покере, если известны банк и шанс победы. Порог ставки = p / (1 − p) банка: калькулятор, графики, таблица шансов дро и мини-квиз.",
+    "inLanguage": "ru",
+    "datePublished": "2026-10-02",
+    "dateModified": "2026-10-02",
+    "author": { "@type": "Person", "name": "Артём Ощепков", "url": "https://github.com/ArtOshchepkov" },
+    "publisher": { "@type": "Organization", "name": "Ламопад", "url": "https://lamopad.ru/", "logo": { "@type": "ImageObject", "url": "https://lamopad.ru/img/slon_1024px.jpg" } },
+    "image": "https://lamopad.ru/img/slon_1024px.jpg",
+    "mainEntityOfPage": "https://lamopad.ru/strategy/poker/pot-threshold-basics/",
+    "about": ["Покер", "Pot odds", "Эквити", "Математическое ожидание"],
+    "keywords": "покер, pot odds, эквити, порог ставки, шансы банка, ауты"
+  }
+  </script>
+
+  <link rel="preconnect" href="https://fonts.googleapis.com">
+  <link href="https://fonts.googleapis.com/css2?family=Nunito:ital,wght@0,400;0,600;0,700;1,400&family=STIX+Two+Text:ital@0;1&family=Unbounded:wght@900&display=swap" rel="stylesheet">
+
+  <style>
+    *, *::before, *::after { margin: 0; padding: 0; box-sizing: border-box; }
+    [hidden] { display: none !important; }
+
+    :root {
+      --bg:    #f8f4ed;
+      --ink:   #1e1810;
+      --faded: #7a6e62;
+      --red:   #c8281e;
+      --green: #2f7d3a;
+    }
+
+    body {
+      background: var(--bg);
+      color: var(--ink);
+      font-family: 'Nunito', sans-serif;
+      font-size: clamp(16px, 3.2vw, 19px);
+      line-height: 1.7;
+      min-height: 100vh;
+      cursor: url('/img/lamopad_cursor_48px.png') 0 0, auto;
+    }
+
+    .page {
+      position: relative;
+      z-index: 1;
+      max-width: 780px;
+      margin: 0 auto;
+      padding: clamp(48px, 10vw, 96px) 24px clamp(64px, 12vw, 120px);
+    }
+
+    h1 {
+      font-family: 'Unbounded', sans-serif;
+      font-size: clamp(30px, 9vw, 54px);
+      font-weight: 900;
+      line-height: 1.05;
+      color: var(--red);
+      letter-spacing: .01em;
+    }
+
+    .byline {
+      margin-top: 10px;
+      font-size: 14px;
+      color: var(--faded);
+    }
+
+    .byline a {
+      color: var(--ink);
+      text-decoration: underline;
+      text-decoration-color: rgba(200, 40, 30, 0.35);
+      text-underline-offset: 3px;
+    }
+    .byline a:hover { color: var(--red); text-decoration-color: var(--red); }
+
+    .tagline {
+      margin-top: 12px;
+      font-size: clamp(11px, 2vw, 13px);
+      letter-spacing: .28em;
+      text-transform: uppercase;
+      color: var(--faded);
+      font-weight: 700;
+    }
+
+    h2 {
+      font-family: 'Unbounded', sans-serif;
+      font-size: clamp(17px, 4.2vw, 22px);
+      font-weight: 900;
+      line-height: 1.25;
+      margin: 56px 0 16px;
+    }
+
+    p { margin-bottom: 1em; }
+
+    .muted { color: var(--faded); font-size: .9em; }
+
+    /* ── calculator card ── */
+    .calc {
+      background: #fff;
+      border: 1px solid rgba(0,0,0,0.08);
+      border-radius: 6px;
+      box-shadow: 3px 3px 0 rgba(0,0,0,0.07);
+      padding: 22px 20px;
+      margin: 24px 0;
+    }
+
+    .field + .field { margin-top: 18px; }
+
+    .field-head {
+      display: flex;
+      justify-content: space-between;
+      align-items: baseline;
+      gap: 12px;
+    }
+
+    .field label { font-weight: 700; }
+    .field .hint { display: block; font-weight: 400; font-size: 13px; color: var(--faded); line-height: 1.35; }
+
+    .num {
+      display: flex;
+      align-items: baseline;
+      gap: 4px;
+      flex-shrink: 0;
+    }
+
+    .num input {
+      width: calc(4ch + 14px);
+      font: inherit;
+      -moz-appearance: textfield;
+      font-weight: 700;
+      text-align: right;
+      color: var(--ink);
+      background: var(--bg);
+      border: 1px solid rgba(0,0,0,0.12);
+      border-radius: 4px;
+      padding: 0 6px;
+    }
+
+    .num input::-webkit-inner-spin-button { -webkit-appearance: none; }
+
+    .num span { color: var(--faded); font-size: .85em; }
+
+    input[type=range] {
+      width: 100%;
+      margin-top: 8px;
+      accent-color: var(--red);
+    }
+
+    /* ── chance bar: моя вероятность против точки безубыточности ── */
+    .bar {
+      position: relative;
+      height: 10px;
+      margin: 26px 0 6px;
+      background: rgba(0,0,0,0.07);
+      border-radius: 5px;
+    }
+
+    .bar-fill {
+      position: absolute;
+      inset: 0 auto 0 0;
+      border-radius: 5px;
+      background: var(--red);
+      transition: width .15s, background .15s;
+    }
+
+    .bar-mark {
+      position: absolute;
+      top: -6px;
+      bottom: -6px;
+      width: 2px;
+      background: var(--ink);
+      transform: translateX(-1px);
+      transition: left .15s;
+    }
+
+    .bar-legend {
+      display: flex;
+      justify-content: space-between;
+      gap: 12px;
+      font-size: 13px;
+      color: var(--faded);
+      line-height: 1.35;
+    }
+
+    /* ── piles of coins: кучки квадратиков ── */
+    .eq {
+      --sq: 9px;
+      --gap: 2px;
+      margin-top: 26px;
+      padding-top: 18px;
+      border-top: 1px dashed rgba(0,0,0,0.12);
+    }
+
+    .eq-title {
+      font-size: 14px;
+      font-weight: 700;
+      color: var(--faded);
+      text-align: center;
+      line-height: 1.35;
+    }
+
+    .eq-row {
+      display: flex;
+      justify-content: center;
+      align-items: flex-end;
+      gap: 6px;
+      margin: 12px 0 22px;
+    }
+
+    .pile-box {
+      display: flex;
+      flex-direction: column;
+      align-items: center;
+      gap: 6px;
+      min-width: 0;
+    }
+
+    /* wrap-reverse: кучка растёт снизу вверх, закрашенная часть лежит внизу */
+    .pile {
+      display: flex;
+      flex-wrap: wrap-reverse;
+      gap: var(--gap);
+    }
+
+    .pile:empty {
+      width: var(--sq);
+      height: var(--sq);
+      outline: 1px dashed rgba(0,0,0,0.25);
+      border-radius: 2px;
+    }
+
+    .sq {
+      height: var(--sq);
+      border-radius: 2px;
+      transition: background .15s;
+    }
+
+    .pile-cap {
+      font-size: 12px;
+      line-height: 1.3;
+      color: var(--faded);
+      text-align: center;
+      white-space: nowrap;
+      font-variant-numeric: tabular-nums;
+    }
+
+    .pile-cap b { display: block; font-size: 14px; color: var(--ink); }
+    .pile-cap b.pos { color: var(--green); }
+    .pile-cap b.neg { color: var(--red); }
+
+    .eq-op {
+      align-self: center;
+      font-family: 'Unbounded', sans-serif;
+      font-weight: 900;
+      font-size: 20px;
+      line-height: 1;
+      color: var(--faded);
+      text-align: center;
+    }
+
+    .eq-to { padding: 0 8px; }
+
+    .eq-op small {
+      display: block;
+      font-family: 'Nunito', sans-serif;
+      font-size: 12px;
+      font-weight: 700;
+      margin-bottom: 2px;
+    }
+
+    /* Срезы кучек: банк режется на высоте p, ставка на высоте 1 − p.
+       Подпись висит снаружи кучки на уровне линии, под неё оставлено поле */
+    .cut-right { margin-right: 76px; }
+    .cut-left  { margin-left: 76px; }
+    .pile-wrap { position: relative; }
+
+    .cut {
+      position: absolute;
+      left: -5px;
+      right: -5px;
+      border-top: 2px solid var(--ink);
+      transition: bottom .15s;
+    }
+
+    .cut-hint {
+      position: absolute;
+      top: 0;
+      transform: translateY(-50%);
+      width: 72px;
+      font-size: 12px;
+      font-weight: 700;
+      line-height: 1.3;
+      white-space: pre;
+    }
+
+    .cut-right .cut-hint { left: calc(100% + 6px); color: var(--green); }
+    .cut-left  .cut-hint { right: calc(100% + 6px); text-align: right; color: var(--red); }
+
+    .cmp {
+      margin: -8px 0 22px;
+      font-size: 14px;
+      font-weight: 700;
+      text-align: center;
+      font-variant-numeric: tabular-nums;
+    }
+
+    /* Кнопка (?) раскрывает пояснение */
+    .q {
+      display: inline-grid;
+      place-items: center;
+      width: 17px;
+      height: 17px;
+      margin-left: 2px;
+      vertical-align: 1px;
+      border: 1px solid currentColor;
+      border-radius: 50%;
+      background: none;
+      color: inherit;
+      font: 700 11px/1 'Nunito', sans-serif;
+      cursor: pointer;
+    }
+
+    .q[aria-expanded="true"] { background: var(--ink); border-color: var(--ink); color: var(--bg); }
+
+    .why { margin: 0 0 18px; }
+
+    .eq-legend {
+      font-size: 13px;
+      color: var(--faded);
+      line-height: 1.35;
+    }
+
+    .eq-legend i {
+      display: inline-block;
+      width: 11px;
+      height: 11px;
+      border-radius: 2px;
+      vertical-align: -1px;
+    }
+
+    @media (min-width: 480px) {
+      .eq { --sq: 12px; --gap: 3px; }
+      .eq-row { gap: 12px; }
+      .cut-right { margin-right: 100px; }
+      .cut-left  { margin-left: 100px; }
+      .cut-hint { width: 96px; font-size: 13px; }
+    }
+
+    /* ── results ── */
+    .results {
+      display: grid;
+      grid-template-columns: 1fr 1fr;
+      gap: 10px;
+      margin-top: 22px;
+    }
+
+    .stat {
+      border: 1px solid rgba(0,0,0,0.08);
+      border-radius: 6px;
+      padding: 12px 14px;
+    }
+
+    .stat-label { font-size: 13px; color: var(--faded); line-height: 1.3; }
+
+    .stat-value {
+      font-family: 'Unbounded', sans-serif;
+      font-weight: 900;
+      font-size: clamp(18px, 4.5vw, 24px);
+      line-height: 1.3;
+      font-variant-numeric: tabular-nums;
+    }
+
+    .pos { color: var(--green); }
+    .neg { color: var(--red); }
+
+    .verdict {
+      grid-column: 1 / -1;
+      text-align: center;
+      padding: 16px 14px;
+      border-radius: 6px;
+      color: #fff;
+      background: var(--faded);
+      transition: background .15s;
+    }
+
+    .verdict.yes { background: var(--green); }
+    .verdict.no  { background: var(--red); }
+
+    .verdict-word {
+      font-family: 'Unbounded', sans-serif;
+      font-weight: 900;
+      font-size: clamp(28px, 8vw, 40px);
+      line-height: 1.1;
+    }
+
+    .verdict-why { font-size: 14px; opacity: .9; margin-top: 4px; }
+
+    .formula {
+      font-family: ui-monospace, monospace;
+      font-size: .9em;
+      line-height: 1.4;
+      background: #fff;
+      border-left: 3px solid var(--red);
+      padding: 12px 14px;
+      margin: 0 0 1em;
+    }
+
+    /* Подсказка-облачко над частью формулы, хвостик указывает на (1 − p) */
+    .callout {
+      background: var(--ink);
+      color: var(--bg);
+      font-size: 14px;
+      line-height: 1.45;
+      border-radius: 6px;
+      padding: 10px 14px;
+      margin: 0 0 12px;
+    }
+
+    .hinted {
+      position: relative;
+      color: var(--red);
+      font-weight: 700;
+      border-bottom: 2px dotted var(--red);
+    }
+
+    .callout[hidden] + .formula .hinted::before { display: none; }
+
+    .hinted::before {
+      content: '';
+      position: absolute;
+      left: 50%;
+      bottom: 100%;
+      margin-bottom: 12px;
+      transform: translateX(-50%);
+      border: 8px solid transparent;
+      border-top-color: var(--ink);
+    }
+
+    /* ── rule of thumb ── */
+    h3 {
+      font-family: 'Unbounded', sans-serif;
+      font-size: clamp(15px, 3.6vw, 18px);
+      font-weight: 900;
+      line-height: 1.3;
+      margin: 36px 0 12px;
+    }
+
+    .note {
+      padding: 12px 16px;
+      border-left: 3px solid var(--faded);
+      background: rgba(0,0,0,0.03);
+      font-size: .95em;
+    }
+
+    .nerd { margin: 4px 0 1em; }
+    .nerd summary { cursor: pointer; font-weight: 700; color: var(--red); margin-bottom: 12px; }
+    .nerd-list { padding-left: 1.3em; margin-bottom: 1em; }
+    .err-table { width: auto; margin: 0 0 1.2em; }
+    .ceil-table.err-table td { font-weight: 400; color: inherit; font-size: 14px; padding-right: 14px; }
+    .ceil-table.err-table td:first-child { font-family: 'STIX Two Text', serif; font-style: italic; font-size: 16px; }
+
+    .seg {
+      display: flex;
+      flex-wrap: wrap;
+      gap: 6px;
+      margin-top: 16px;
+    }
+
+    .seg label {
+      font-family: 'STIX Two Text', serif;
+      font-style: italic;
+      font-size: 16px;
+      padding: 4px 12px;
+      border: 1px solid rgba(0,0,0,0.15);
+      border-radius: 999px;
+      cursor: pointer;
+    }
+
+    .seg input { position: absolute; opacity: 0; pointer-events: none; }
+    .seg label:has(input:checked) { background: var(--ink); border-color: var(--ink); color: #FFFF00; }
+    .seg label:has(input:focus-visible) { outline: 2px solid var(--red); outline-offset: 2px; }
+
+    .badge {
+      display: inline-block;
+      margin: 16px 0 0;
+      padding: 4px 12px;
+      border-radius: 999px;
+      background: var(--green);
+      color: #fff;
+      font-size: 14px;
+      font-weight: 700;
+      line-height: 1.4;
+    }
+
+    .say { margin: 12px 0 4px; line-height: 1.5; }
+    .say b { color: var(--green); }
+
+    .manim {
+      display: block;
+      width: 100%;
+      margin-top: 20px;
+      border-radius: 6px;
+      background: #1C1C1C;
+    }
+
+    .readout {
+      display: flex;
+      flex-wrap: wrap;
+      gap: 6px 18px;
+      margin: 12px 0 6px;
+      font-variant-numeric: tabular-nums;
+    }
+
+    .readout dt { font-size: 12px; color: var(--faded); line-height: 1.2; }
+    .readout dd { font-weight: 700; }
+
+    .ceil { margin-top: 14px; }
+
+    .ceil summary {
+      cursor: pointer;
+      font-weight: 700;
+      color: var(--red);
+    }
+
+    .ceil-table {
+      width: 100%;
+      margin: 10px 0;
+      border-collapse: collapse;
+      font-size: 14px;
+      line-height: 1.35;
+      font-variant-numeric: tabular-nums;
+    }
+
+    .ceil-table th {
+      text-align: left;
+      font-size: 12px;
+      color: var(--faded);
+      font-weight: 700;
+      padding: 0 8px 6px 0;
+    }
+
+    .ceil-table td {
+      padding: 5px 8px 5px 0;
+      border-top: 1px solid rgba(0,0,0,0.07);
+      vertical-align: top;
+    }
+
+    .ceil-table td:nth-child(-n+3) { white-space: nowrap; }
+    .ceil-table td:nth-child(3) { font-weight: 700; }
+    .ceil-table td:nth-child(4) { color: var(--faded); font-size: 13px; }
+
+    .rules { padding-left: 1.3em; margin-bottom: 1.6em; }
+    .rules li + li { margin-top: .7em; }
+    .nw { white-space: nowrap; }
+
+    .odds { margin: 6px 0 2px; border-collapse: collapse; font-variant-numeric: tabular-nums; }
+    .odds td { padding: 1px 18px 1px 0; }
+    .odds td:first-child { font-weight: 700; }
+    .odds td:nth-child(2) { color: var(--faded); }
+
+    /* ── quiz ── */
+    .quiz-step {
+      font-size: 13px;
+      font-weight: 700;
+      letter-spacing: .08em;
+      text-transform: uppercase;
+      color: var(--faded);
+    }
+
+    .quiz-q { margin: 6px 0 14px; }
+
+    .quiz-form {
+      display: flex;
+      flex-wrap: wrap;
+      align-items: baseline;
+      gap: 8px;
+    }
+
+    .quiz-form input {
+      width: 8ch;
+      font: inherit;
+      font-weight: 700;
+      color: var(--ink);
+      background: var(--bg);
+      border: 1px solid rgba(0,0,0,0.15);
+      border-radius: 4px;
+      padding: 2px 8px;
+    }
+
+    .quiz-unit { color: var(--faded); }
+
+    .btn {
+      font: 700 15px/1 'Nunito', sans-serif;
+      color: #fff;
+      background: var(--red);
+      border: none;
+      border-radius: 6px;
+      padding: 9px 16px;
+      cursor: pointer;
+      box-shadow: 2px 2px 0 rgba(0,0,0,0.12);
+    }
+
+    .btn:hover { box-shadow: 3px 3px 0 rgba(200,40,30,0.25); }
+    .btn-ghost { color: var(--ink); background: none; border: 1px solid rgba(0,0,0,0.15); box-shadow: none; }
+
+    .quiz-feedback { margin: 14px 0 0; line-height: 1.5; }
+    .quiz-feedback b { display: block; }
+    .quiz-mistake {
+      display: block;
+      margin: 8px 0;
+      padding: 10px 14px;
+      border-radius: 6px;
+      background: var(--ink);
+      color: var(--bg);
+      font-size: 14px;
+      line-height: 1.45;
+    }
+
+    .quiz-feedback small { color: var(--faded); font-size: 14px; }
+    #quiz-next { margin-top: 14px; }
+
+    .thanks {
+      display: flex;
+      align-items: center;
+      gap: 24px;
+      margin-top: 64px;
+    }
+
+    .thanks img {
+      width: 300px;
+      height: auto;
+      flex-shrink: 0;
+      border-radius: 6px;
+      box-shadow: 3px 3px 0 rgba(0,0,0,0.07);
+    }
+
+    .thanks h2 { margin-top: 0; }
+    .thanks p { margin: 0; }
+
+    .thanks a {
+      color: var(--ink);
+      text-decoration: underline;
+      text-decoration-color: rgba(200, 40, 30, 0.35);
+      text-underline-offset: 3px;
+    }
+    .thanks a:hover { color: var(--red); text-decoration-color: var(--red); }
+
+    @media (max-width: 560px) {
+      .thanks { flex-direction: column; align-items: flex-start; }
+      .thanks img { width: 100%; max-width: 540px; }
+    }
+
+    .links { list-style: none; }
+    .links li + li { margin-top: .4em; }
+    .links a {
+      color: var(--ink);
+      text-decoration: underline;
+      text-decoration-color: rgba(200, 40, 30, 0.35);
+      text-underline-offset: 3px;
+    }
+    .links a:hover { color: var(--red); text-decoration-color: var(--red); }
+
+    footer {
+      margin-top: 72px;
+      padding-top: 20px;
+      border-top: 1px solid rgba(0,0,0,0.10);
+      font-size: 11px;
+      letter-spacing: .10em;
+      color: rgba(0,0,0,0.2);
+    }
+
+    .back {
+      display: inline-block;
+      margin-bottom: 32px;
+      color: var(--faded);
+      text-decoration: none;
+      font-weight: 600;
+    }
+    .back:hover { color: var(--red); }
+
+    @media (max-width: 400px) {
+      .page { padding: 40px 16px 60px; }
+      .calc { padding: 18px 14px; }
+      .results { grid-template-columns: 1fr; }
+    }
+  </style>
+  <script data-goatcounter="https://lamopad.goatcounter.com/count"
+          async src="//gc.zgo.at/count.js"></script>
+</head>
+<body>
+
+<main class="page">
+  <a class="back" href="/">&larr; Ламопад</a>
+
+  <header>
+    <h1>Покер: сколько можно ставить?</h1>
+    <p class="tagline">pot odds &nbsp;·&nbsp; эквити &nbsp;·&nbsp; порог ставки</p>
+    <p class="byline">Автор: <a href="https://github.com/ArtOshchepkov" target="_blank" rel="noopener">Артём Ощепков</a> · <time datetime="2026-10-02">2 октября 2026</time></p>
+  </header>
+
+  <section>
+    <h2>1. Стоит ли делать ставку в покере?</h2>
+
+    <p>Соперник поставил, в банке лежат деньги, вам нужно доплатить. Платить или сбросить карты? Двигайте ползунки.</p>
+
+    <div class="calc" id="calc">
+      <div class="field">
+        <div class="field-head">
+          <label for="pot-range">Банк<span class="hint">всё, что уже лежит на столе, вместе со ставкой соперника</span></label>
+          <span class="num"><input id="pot" type="number" min="0" max="1000" step="1" value="100" inputmode="numeric" aria-label="Банк, монет"><span>мон.</span></span>
+        </div>
+        <input id="pot-range" type="range" min="0" max="1000" step="1" value="100">
+      </div>
+
+      <div class="field">
+        <div class="field-head">
+          <label for="call-range">Моя ставка<span class="hint">сколько нужно доплатить, чтобы остаться в игре</span></label>
+          <span class="num"><input id="call" type="number" min="0" max="1000" step="1" value="50" inputmode="numeric" aria-label="Моя ставка, монет"><span>мон.</span></span>
+        </div>
+        <input id="call-range" type="range" min="0" max="1000" step="1" value="50">
+      </div>
+
+      <div class="field">
+        <div class="field-head">
+          <label for="chance-range">Вероятность победы<span class="hint">ваше эквити: доля раскладов, где банк ваш</span></label>
+          <span class="num"><input id="chance" type="number" min="0" max="100" step="1" value="20" inputmode="numeric" aria-label="Вероятность победы, процентов"><span>%</span></span>
+        </div>
+        <input id="chance-range" type="range" min="0" max="100" step="1" value="20">
+      </div>
+
+      <div class="bar" aria-hidden="true">
+        <div class="bar-fill" id="bar-fill"></div>
+        <div class="bar-mark" id="bar-mark"></div>
+      </div>
+      <div class="bar-legend">
+        <span>заливка - ваш шанс</span>
+        <span id="even-label"></span>
+      </div>
+
+      <div class="eq" aria-label="Кучки монет: ставка, банк и ожидание">
+        <div class="eq-title">Ставлю такую кучку, чтобы забрать такую</div>
+        <div class="eq-row">
+          <div class="pile-box cut-left">
+            <div class="pile-wrap">
+              <div class="pile" id="pile-bet"></div>
+              <div class="cut" id="cut-bet"><span class="cut-hint"><span id="cut-bet-share"></span> <button class="q" type="button" aria-controls="why-loss" aria-expanded="false" aria-label="Почему 1 − p">?</button></span></div>
+            </div>
+            <div class="pile-cap">моя ставка<b id="cap-bet"></b></div>
+          </div>
+          <div class="eq-op eq-to">→</div>
+          <div class="pile-box cut-right">
+            <div class="pile-wrap">
+              <div class="pile" id="pile-prize"></div>
+              <div class="cut" id="cut-prize"><span class="cut-hint"><span id="cut-prize-share"></span> <button class="q" type="button" aria-controls="why-win" aria-expanded="false" aria-label="Почему p">?</button></span></div>
+            </div>
+            <div class="pile-cap">банк<b id="cap-prize"></b></div>
+          </div>
+        </div>
+        <p class="cmp" id="cmp"></p>
+        <p class="callout why" id="why-win" hidden>Шанс победы - это кусок банка, который в среднем ваш за раздачу: <b class="win-avg"></b> В одной раздаче вы забираете весь банк или ничего, но на длинной дистанции выходит именно столько.</p>
+        <p class="callout why why-loss" id="why-loss" hidden>При победе вы забираете банк <b>и возвращаете свою ставку</b>, поэтому теряете её только когда проигрываете. То есть в среднем вы платите <b class="loss-avg"></b></p>
+
+        <div class="eq-title">Что это даёт в среднем за игру</div>
+        <div class="eq-row">
+          <div class="pile-box">
+            <div class="pile" id="pile-win"></div>
+            <div class="pile-cap" id="cap-win-k"></div>
+            <div class="pile-cap"><b id="cap-win" class="pos"></b></div>
+          </div>
+          <div class="eq-op">−</div>
+          <div class="pile-box">
+            <div class="pile" id="pile-loss"></div>
+            <div class="pile-cap" id="cap-loss-k"></div>
+            <div class="pile-cap"><b id="cap-loss" class="neg"></b></div>
+          </div>
+          <div class="eq-op">=</div>
+          <div class="pile-box">
+            <div class="pile" id="pile-ev"></div>
+            <div class="pile-cap">прибыль</div>
+            <div class="pile-cap"><b id="cap-ev"></b></div>
+          </div>
+        </div>
+
+        <p class="eq-legend"><i id="unit-sq"></i> = <span id="unit"></span> мон. Яркие квадратики - то, что в среднем забираете (зелёные) или теряете (красные). Бледные - остаток банка или ставки.</p>
+      </div>
+
+      <div class="results" aria-live="polite">
+        <div class="stat">
+          <div class="stat-label">Матожидание прибыли</div>
+          <div class="stat-value" id="ev"></div>
+        </div>
+        <div class="stat">
+          <div class="stat-label">На каждую поставленную монету</div>
+          <div class="stat-value" id="ratio"></div>
+        </div>
+        <div class="verdict" id="verdict">
+          <div class="verdict-word" id="verdict-word"></div>
+          <div class="verdict-why" id="verdict-why"></div>
+        </div>
+      </div>
+    </div>
+
+    <p>Как считается:</p>
+    <p class="callout why-loss" id="why-formula" hidden></p>
+    <p class="formula">EV = p · банк − <span class="hinted">(1 − p)</span><button class="q" type="button" aria-controls="why-formula" aria-expanded="false" aria-label="Почему 1 − p">?</button> · ставка</p>
+    <p>Отсюда точка безубыточности:</p>
+    <p class="formula">p &gt; ставка / (банк + ставка)</p>
+    <p class="muted">Упрощение: это последняя ставка, дальше никто не доплачивает. В живой игре на результат ещё влияют будущие ставки на следующих улицах (implied odds) и шанс, что соперник сбросит карты.</p>
+  </section>
+
+  <section>
+    <h2>2. Rule of thumb: потолок ставки</h2>
+    <p>Банк и шанс победы известны, нужно понять, больше какой ставки платить не стоит. Ожидание прибыли зависит от ставки <i>x</i> по прямой:</p>
+    <p class="formula">EV(x) = p · банк − (1 − p) · x</p>
+    <p>Вместе с осями она отсекает треугольник. Всё, что внутри него, - выгодные ставки. Там, где прямая пересекает ноль, ставка становится убыточной.</p>
+
+    <div class="calc">
+      <div class="field">
+        <div class="field-head">
+          <label for="t-pot-range">Банк</label>
+          <span class="num"><input id="t-pot" type="number" min="10" max="1000" step="10" value="100" inputmode="numeric" aria-label="Банк, монет"><span>мон.</span></span>
+        </div>
+        <input id="t-pot-range" type="range" min="10" max="1000" step="10" value="100">
+      </div>
+      <div class="field">
+        <div class="field-head">
+          <label for="t-chance-range">Шанс победы</label>
+          <span class="num"><input id="t-chance" type="number" min="0.1" max="90" step="0.1" value="20" inputmode="decimal" aria-label="Шанс победы, процентов"><span>%</span></span>
+        </div>
+        <input id="t-chance-range" type="range" min="0.1" max="90" step="0.1" value="20">
+      </div>
+
+      <canvas class="manim" id="thumb-plot" role="img" aria-label="График ожидания прибыли в зависимости от ставки"></canvas>
+
+      <dl class="readout">
+        <div><dt>наклон</dt><dd id="t-slope"></dd></div>
+        <div><dt>шансы против</dt><dd id="t-odds"></dd></div>
+        <div><dt>потолок</dt><dd id="t-cap"></dd></div>
+      </dl>
+      <p class="muted">Подвигайте банк: треугольник не меняется, меняются только подписи осей. Форму задаёт один шанс победы.</p>
+    </div>
+
+    <ol class="rules">
+      <li><b>Наклон = шанс проигрыша.</b> Каждая монета ставки отнимает <span class="nw">1 − p</span> монеты ожидания: это жёлтая ступенька. Серый пунктир - наклон 45°, то есть −1. При малом шансе прямая почти лежит на пунктире, при 50% она вдвое положе, при 75% вчетверо.</li>
+      <li><b>Потолок = банк ÷ шансы против.</b> Шансы против - во сколько раз проигрыш вероятнее победы.
+        <table class="odds">
+          <tr><td>20%</td><td>4 : 1</td><td>банк / 4</td></tr>
+          <tr><td>25%</td><td>3 : 1</td><td>банк / 3</td></tr>
+          <tr><td>33%</td><td>2 : 1</td><td>банк / 2</td></tr>
+          <tr><td>50%</td><td>1 : 1</td><td>весь банк</td></tr>
+        </table>
+      </li>
+      <li><b>Пунктир - это ловушка.</b> Он пересекает ноль в p · банк: так выглядит ответ «ставка меньше моего куска банка». Настоящая прямая положе и уходит дальше, в <span class="nw">1 / (1 − p)</span> раз. При 20% это +25%, при 50% уже вдвое.</li>
+    </ol>
+
+    <p>Раз банк только масштаб, его можно сократить. Потолок ставки в долях банка зависит от одного шанса победы:</p>
+    <p class="formula">порог / банк = p / (1 − p)</p>
+
+    <div class="calc">
+      <div class="field">
+        <div class="field-head">
+          <label for="r-chance-range">Шанс победы<span class="hint">тот же, что у треугольника выше</span></label>
+          <span class="num"><input id="r-chance" type="number" min="0.1" max="90" step="0.1" value="20" inputmode="decimal" aria-label="Шанс победы, процентов"><span>%</span></span>
+        </div>
+        <input id="r-chance-range" type="range" min="0.1" max="90" step="0.1" value="20">
+      </div>
+
+      <p class="badge" id="r-badge" hidden>Шанс выше 50%: выгодно ставить больше банка</p>
+      <canvas class="manim" id="ratio-plot" role="img" aria-label="Потолок ставки в долях банка в зависимости от шанса победы"></canvas>
+      <p class="say"><span id="r-say"></span> <button class="q" type="button" aria-controls="why-ceil" aria-expanded="false" aria-label="Почему больше нельзя">?</button></p>
+      <p class="callout why" id="why-ceil" hidden>Меньше можно: любая ставка ниже порога в плюс, просто прибыль скромнее. Больше нет: выше порога колл в среднем теряет, и чем дальше, тем больше. Исключение - fold equity и блеф: если ваша ставка может заставить соперника сбросить карты, вы иногда забираете банк без вскрытия, и порог выше. Здесь этого нет: считаем, что вы платите и идёте до вскрытия.</p>
+      <p class="muted">Жёлтая точка - текущий шанс. Под синей кривой ставки в плюс, над ней в минус. Пунктир - ловушка «ставка = p · банк»: при любом шансе он ниже кривой.</p>
+
+      <details class="ceil">
+        <summary>Таблица потолков</summary>
+        <table class="ceil-table">
+          <thead><tr><th>Шанс</th><th>Против</th><th>Потолок</th><th>Когда бывает</th></tr></thead>
+          <tbody id="ceil-body"></tbody>
+        </table>
+        <p class="muted">Потолок - в процентах от банка. Дро на одну карту посчитаны по 46 неизвестным картам (тёрн → ривер), на две - с флопа до ривера. «Монетка» и пара против пары - округлённые шансы до флопа.</p>
+      </details>
+    </div>
+
+    <h3>Выводы</h3>
+    <p>Делите вероятность победы на вероятность поражения: <b>p / (1 − p)</b>. Ставьте меньшую долю банка, чем получился коэффициент.</p>
+    <p>Шанс 20%: 0,2 / 0,8 = 0,25, значит, ставка меньше четверти банка в плюс. Шанс 50%: 0,5 / 0,5 = 1, в плюс всё, что меньше банка. Ровно на пороге - в ноль, выше - в минус.</p>
+    <p class="note">Это упрощённая базовая модель для новичков: вы платите последнюю ставку и идёте до вскрытия, дальше никто не ставит и никто не сбрасывает карты. В настоящей игре соперник может сбросить карты под вашей ставкой, и это добавляет ей ценности. Для более глубокой игры изучите <b>fold equity</b>.</p>
+    <p class="note">И ещё одно упрощение: модель считает, что вы последний, кто ходит в этом круге ставок. Если после вас ещё кто-то ходит, соперники могут заколлировать и увеличить банк, тогда ваша ставка выгоднее, чем по формуле. А могут зарейзить: вырастут и банк, и ваши затраты, потому что придётся доплачивать. Как это учитывать, здесь пока не разбираем. Для более глубокого погружения изучите <b>implied odds</b>: сколько вы доберёте на следующих улицах, если соберёте руку. И их обратную сторону, <b>reverse implied odds</b>: сколько потеряете, если соберёте сильную, но не самую сильную руку.</p>
+
+    <h3>Мини-квиз</h3>
+    <p>Проверьте себя без ползунков. Ответ - число, можно дробное. Если ответ не круглый, засчитывается всё, что отличается от точного меньше чем на 0,1.</p>
+
+    <div class="calc quiz" aria-live="polite">
+      <div class="quiz-step" id="quiz-step"></div>
+      <p class="quiz-q" id="quiz-q"></p>
+      <form class="quiz-form" id="quiz-form">
+        <input id="quiz-input" type="text" inputmode="decimal" autocomplete="off" aria-label="Ваш ответ">
+        <span class="quiz-unit" id="quiz-unit"></span>
+        <button class="btn" type="submit">Проверить</button>
+      </form>
+      <p class="quiz-feedback" id="quiz-feedback" hidden></p>
+      <button class="btn btn-ghost" type="button" id="quiz-next" hidden></button>
+    </div>
+
+    <details class="nerd">
+      <summary>Для нёрдов-математиков</summary>
+
+      <p><b>Сразу вывод: ряд Тейлора не нужен, хотя прикольно.</b> Он неплохо аппроксимирует порог примерно до 20% шанса победы, а дальше проще разделить p на 1 − p.</p>
+      <p>Если всё же хочется без деления: <b>потолок ≈ (p + p²) × банк</b>. При шансе 20%: 0,2 + 0,04 = 0,24 банка вместо точных 0,25. Приближение всегда чуть меньше настоящего порога, так что лишнего вы не поставите.</p>
+
+      <p>Потолок в долях банка раскладывается в ряд Тейлора в нуле. Это обычная геометрическая прогрессия, она сходится при любом p &lt; 1:</p>
+      <p class="formula">p / (1 − p) = p + p² + p³ + p⁴ + …</p>
+      <p>Если оборвать ряд после n членов, получится ровно <span class="nw">точное значение × (1 − pⁿ)</span>. Отсюда два вывода:</p>
+      <ul class="nerd-list">
+        <li>ошибка всегда вниз: приближение никогда не советует ставку выше порога;</li>
+        <li>относительная ошибка ровно <b>pⁿ</b>.</li>
+      </ul>
+
+      <table class="ceil-table err-table">
+        <thead><tr><th>Ошибка</th><th>10%</th><th>20%</th><th>30%</th><th>50%</th></tr></thead>
+        <tbody>
+          <tr><td>p</td><td>10%</td><td>20%</td><td>30%</td><td>50%</td></tr>
+          <tr><td>p + p²</td><td>1%</td><td>4%</td><td>9%</td><td>25%</td></tr>
+          <tr><td>p + p² + p³</td><td>0,1%</td><td>0,8%</td><td>2,7%</td><td>12,5%</td></tr>
+        </tbody>
+      </table>
+
+      <p><b>Есть ли смысл считать дальше?</b> Сравните с тем, насколько точно вы знаете сам шанс. Если ошиблись в нём всего на 2 процентных пункта, потолок «поплывёт» на <span class="nw">0,02 / (p · (1 − p))</span>: при 20% это 12,5%, при 30% около 9,5%.</p>
+      <p>При 20% ошибка p + p² (4%) втрое меньше неточности самого шанса (12,5%), так что точнее считать бессмысленно. При 30% они уже сравнялись (9% и 9,5%), а после 50% ряд сходится медленно. Член p³ спасает немного, а больше p³ смысла нет совсем: проще честно поделить p на 1 − p.</p>
+
+      <div class="calc">
+        <div class="field">
+          <div class="field-head">
+            <label for="n-chance-range">Шанс победы<span class="hint">тот же, что у графиков выше</span></label>
+            <span class="num"><input id="n-chance" type="number" min="0.1" max="90" step="0.1" value="20" inputmode="decimal" aria-label="Шанс победы, процентов"><span>%</span></span>
+          </div>
+          <input id="n-chance-range" type="range" min="0.1" max="90" step="0.1" value="20">
+        </div>
+
+        <div class="seg" role="radiogroup" aria-label="Сколько членов ряда">
+          <label><input type="radio" name="terms" value="1"> p</label>
+          <label><input type="radio" name="terms" value="2" checked> p + p²</label>
+          <label><input type="radio" name="terms" value="3"> p + p² + p³</label>
+        </div>
+
+        <canvas class="manim" id="taylor-plot" role="img" aria-label="Ряд Тейлора для потолка ставки на фоне точной кривой"></canvas>
+        <p class="say" id="n-say"></p>
+        <p class="muted">Голубая кривая - точный потолок, жёлтая - приближение, жёлтая полоса между ними - ошибка.</p>
+      </div>
+    </details>
+
+  </section>
+
+  <section>
+    <h2>Доп. материалы</h2>
+    <ul class="links">
+      <li><a href="https://pekarstas.com/veroyatnosti-v-pokere/" target="_blank" rel="noopener">Вероятность в покере</a> <span class="muted">· pekarstas.com</span></li>
+    </ul>
+  </section>
+
+  <section class="thanks">
+    <div>
+      <h2>Спасибо, что прочли!</h2>
+      <p>Если нашли ошибку или хотите оставить комментарий, пишите мне в телеграм: <a href="https://t.me/art_oshk" target="_blank" rel="noopener">t.me/art_oshk</a>.</p>
+    </div>
+    <img src="./img/author-poker.jpg" width="720" height="765" alt="Артём Ощепков за покерным столом с фишками в руках" loading="lazy">
+  </section>
+
+  <footer>&copy; Ламопад &mdash; все права защищены</footer>
+</main>
+
+<script type="module">
+  import { assessCall, evLine, ceilingSeries } from './js/bet-math.js';
+  import { createTaylorPlot } from './js/taylor-plot.js';
+  import { createThumbPlot } from './js/thumb-plot.js';
+  import { createRatioPlot, isFar } from './js/ratio-plot.js';
+  import { fmt, sig } from './js/manim.js';
+  import { pickUnit, cells, pileCols, cutHeight } from './js/coin-grid.js';
+  import { makeQuiz, parseAnswer, judge, diagnose, naiveAnswer } from './js/quiz.js';
+
+  const $ = (id) => document.getElementById(id);
+  const fields = ['pot', 'call', 'chance'];
+
+  const coins = (x) => x.toLocaleString('ru-RU', { maximumFractionDigits: 1 });
+  const signed = (x, fmt) => (x > 0 ? '+' : x < 0 ? '−' : '') + fmt(Math.abs(x));
+  const tone = (el, x) => {
+    el.classList.toggle('pos', x > 0);
+    el.classList.toggle('neg', x < 0);
+  };
+
+  const COLORS = {
+    green: ['#2f7d3a', 'rgba(47,125,58,0.18)'],
+    red:   ['#c8281e', 'rgba(200,40,30,0.18)'],
+  };
+
+  // Последний квадрат уже, если сумма не кратна номиналу: площадь = монеты
+  // cut - высота горизонтального среза в рядах: тогда закраска идёт снизу до среза,
+  // иначе закрашены первые filled монет по порядку укладки
+  function drawPile(el, amount, filled, unit, color, cut = null) {
+    const [bright, pale] = COLORS[color];
+    const squares = cells(amount, filled, unit);
+    const cols = pileCols(squares.length);
+    el.style.width = squares.length ? `calc(${cols} * (var(--sq) + var(--gap)) - var(--gap))` : '';
+    el.replaceChildren(...squares.map(({ part, fill }, i) => {
+      const sq = document.createElement('span');
+      const [dir, edge] = cut === null
+        ? ['to right', (fill / part) * 100]
+        : ['to top', Math.min(1, Math.max(0, cut - Math.floor(i / cols))) * 100];
+      sq.className = 'sq';
+      sq.style.width = `calc(var(--sq) * ${part})`;
+      sq.style.background = `linear-gradient(${dir}, ${bright} ${edge}%, ${pale} ${edge}%)`;
+      return sq;
+    }));
+  }
+
+  // Линия на высоте cut рядов; ровно на границе рядов - посередине зазора
+  function placeCut(line, cut) {
+    const row = Math.floor(cut), frac = cut - row;
+    line.style.bottom = frac === 0 && row > 0
+      ? `calc(${row} * (var(--sq) + var(--gap)) - var(--gap) / 2)`
+      : `calc(${row} * (var(--sq) + var(--gap)) + ${frac} * var(--sq))`;
+  }
+
+  // Кучка с горизонтальным срезом: под линией ровно area монет
+  function drawCutPile(name, amount, area, unit, color) {
+    const parts = cells(amount, 0, unit).map((c) => c.part);
+    const cut = cutHeight(parts, pileCols(parts.length), area / unit);
+    drawPile($('pile-' + name), amount, area, unit, color, cut);
+    placeCut($('cut-' + name), cut);
+  }
+
+  function render() {
+    const [pot, call, chance] = fields.map((f) => Number($(f).value));
+    const r = assessCall({ pot, call, winChance: chance / 100 });
+
+    $('ev').textContent = signed(r.ev, coins) + ' мон.';
+    tone($('ev'), r.ev);
+
+    if (r.evPerCoin === null) {
+      $('ratio').textContent = 'без затрат';
+      $('ratio').classList.remove('pos', 'neg');
+    } else {
+      $('ratio').textContent = signed(r.evPerCoin * 100, (x) => x.toFixed(0)) + '%';
+      tone($('ratio'), r.evPerCoin);
+    }
+
+    const p = chance / 100;
+    const win = p * pot, loss = (1 - p) * call;
+    const unit = pickUnit(Math.max(pot, call));
+    drawCutPile('bet', call, loss, unit, 'red');
+    drawCutPile('prize', pot, win, unit, 'green');
+    $('cut-bet-share').textContent = `${100 - chance}% ставки\n= ${coins(loss)} мон.`;
+    $('cut-prize-share').textContent = `шанс ${chance}%\n= ${coins(win)} мон.`;
+    const fillAll = (cls, text) => document.querySelectorAll(cls).forEach((el) => { el.textContent = text; });
+    fillAll('.win-avg', `${chance}% × ${coins(pot)} = ${coins(win)} мон.`);
+    fillAll('.loss-avg', `${100 - chance}% × ${coins(call)} = ${coins(loss)} мон.`);
+    const sign = r.verdict === 'yes' ? '>' : r.verdict === 'no' ? '<' : '=';
+    $('cmp').textContent = `${coins(win)} ${sign} ${coins(loss)}: ${r.verdict === 'yes' ? 'в плюс' : r.verdict === 'no' ? 'в минус' : 'в ноль'}`;
+    $('cmp').className = 'cmp ' + { yes: 'pos', no: 'neg', even: '' }[r.verdict];
+    drawPile($('pile-win'), pot, win, unit, 'green');
+    drawPile($('pile-loss'), call, loss, unit, 'red');
+    drawPile($('pile-ev'), Math.abs(r.ev), Math.abs(r.ev), unit, r.ev >= 0 ? 'green' : 'red');
+    $('cap-bet').textContent = coins(call);
+    $('cap-prize').textContent = coins(pot);
+    $('cap-win-k').textContent = `${chance}% банка`;
+    $('cap-win').textContent = '+' + coins(win);
+    $('cap-loss-k').textContent = `${100 - chance}% ставки`;
+    $('cap-loss').textContent = signed(-loss, coins);
+    $('cap-ev').textContent = signed(r.ev, coins);
+    tone($('cap-ev'), r.ev);
+    $('unit').textContent = unit;
+    $('unit-sq').style.background = COLORS.green[0];
+
+    const evenPct = r.breakEvenChance * 100;
+    $('bar-fill').style.width = chance + '%';
+    $('bar-fill').style.background = chance > evenPct ? 'var(--green)' : 'var(--red)';
+    $('bar-mark').style.left = evenPct + '%';
+    $('even-label').textContent = '| нужно больше ' + evenPct.toFixed(1) + '%';
+
+    const limit = r.maxCall === Infinity ? 'любая ставка' : 'ставка до ' + coins(r.maxCall) + ' мон.';
+    const verdicts = {
+      yes:  ['Да, платить', 'в долгую это плюс. При таком шансе выгодна ' + limit],
+      no:   ['Нет, сбросить', 'в долгую это минус. При таком шансе выгодна ' + limit],
+      even: ['В ноль', 'ни плюса, ни минуса: дальше решает вкус к риску'],
+    };
+    const [word, why] = verdicts[r.verdict];
+    $('verdict').className = 'verdict ' + r.verdict;
+    $('verdict-word').textContent = word;
+    $('verdict-why').textContent = why;
+  }
+
+  // Одно пояснение про 1 − p на две кнопки (?): у кучки ставки и в формуле
+  $('why-formula').innerHTML = $('why-loss').innerHTML;
+  for (const q of document.querySelectorAll('.q')) {
+    q.addEventListener('click', () => {
+      const open = q.getAttribute('aria-expanded') !== 'true';
+      q.setAttribute('aria-expanded', open);
+      $(q.getAttribute('aria-controls')).hidden = !open;
+    });
+  }
+
+  // Ползунок и числовое поле - два входа для одного значения
+  function bindField(f, onChange) {
+    const num = $(f), range = $(f + '-range');
+    range.addEventListener('input', () => { num.value = range.value; onChange(); });
+    num.addEventListener('input', () => {
+      if (num.value === '') return;  // даём стереть и набрать заново
+      const v = Math.min(Number(num.max), Math.max(Number(num.min), Number(num.value) || 0));
+      if (Number(num.value) !== v) num.value = v;
+      range.value = v;
+      onChange();
+    });
+    num.addEventListener('change', () => { num.value = range.value; });
+  }
+  fields.forEach((f) => bindField(f, render));
+
+  render();
+
+  // ── квиз ──
+  let quiz, step, score;
+
+  const QUESTIONS = {
+    maxCall: (q) => [`В банке ${q.pot} мон., вероятность забрать его ${q.chance}%. Какая максимальная ставка имеет смысл?`, 'мон.'],
+    minChance: (q) => [`Вы хотите поставить ровно ${q.call} мон. при банке ${q.pot} мон. С какой минимальной вероятностью победы это имеет смысл?`, '%'],
+  };
+  const exactNum = (x) => x.toLocaleString('ru-RU', { maximumFractionDigits: 2 });
+  const answerText = (q) => exactNum(q.answer) + (q.kind === 'maxCall' ? ' мон.' : '%');
+  const WHY = {
+    maxCall: (q) => `Ставка в ноль: ${q.chance}% × ${q.pot} / ${100 - q.chance}% = ${answerText(q)} Всё, что меньше, - в плюс.`,
+    minChance: (q) => `Порог: ${q.call} / (${q.pot} + ${q.call}) = ${answerText(q)}. Всё, что выше, - в плюс.`,
+  };
+
+  // Разбор типичной ошибки: ставку сравнили со всем куском банка, забыв, что при победе она возвращается
+  const MISTAKE = {
+    maxCall: (q) => `Похоже, вы сравнили ставку с куском банка: ${q.chance}% × ${q.pot} = ${exactNum(naiveAnswer(q))}. `
+      + `Но ставку вы теряете только в ${100 - q.chance}% раздач: при победе она возвращается вместе с банком. `
+      + `В среднем она обходится дешевле, поэтому ставить можно больше: ${exactNum(naiveAnswer(q))} / ${100 - q.chance}% = ${answerText(q)}`,
+    minChance: (q) => `Похоже, вы посчитали ставка / банк = ${q.call} / ${q.pot} = ${exactNum(naiveAnswer(q))}%. `
+      + `Но при победе вы забираете банк и возвращаете свою ставку, так что на кону ${q.pot + q.call}, а не ${q.pot}: `
+      + `${q.call} / ${q.pot + q.call} = ${answerText(q)}.`,
+  };
+
+  function startQuiz() {
+    quiz = makeQuiz();
+    step = 0;
+    score = 0;
+    showQuestion();
+  }
+
+  function showQuestion() {
+    const q = quiz[step];
+    const [text, unit] = QUESTIONS[q.kind](q);
+    $('quiz-step').textContent = `Вопрос ${step + 1} из ${quiz.length}`;
+    $('quiz-q').textContent = text;
+    $('quiz-unit').textContent = unit;
+    $('quiz-form').hidden = false;
+    $('quiz-feedback').hidden = true;
+    $('quiz-next').hidden = true;
+    $('quiz-input').value = '';
+  }
+
+  function feedback(html, cls) {
+    $('quiz-feedback').innerHTML = html;
+    $('quiz-feedback').className = 'quiz-feedback ' + cls;
+    $('quiz-feedback').hidden = false;
+  }
+
+  $('quiz-form').addEventListener('submit', (e) => {
+    e.preventDefault();
+    const q = quiz[step];
+    const answer = parseAnswer($('quiz-input').value);
+    if (Number.isNaN(answer)) return feedback('Введите число.', '');
+
+    const { ok, exact } = judge(answer, q.answer);
+    if (ok) score++;
+    const head = ok
+      ? (exact ? `✓ Верно: ${answerText(q)}` : `✓ Засчитано. Точно: ${answerText(q)}`)
+      : `✗ Нет, ответ: ${answerText(q)}`;
+    const mistake = diagnose(q, answer) ? `<span class="quiz-mistake">${MISTAKE[q.kind](q)}</span>` : '';
+    feedback(`<b>${head}</b>${mistake}<small>${WHY[q.kind](q)}</small>`, ok ? 'pos' : 'neg');
+    $('quiz-form').hidden = true;
+    $('quiz-next').textContent = step + 1 < quiz.length ? 'Дальше' : 'Итог';
+    $('quiz-next').hidden = false;
+    $('quiz-next').focus();
+  });
+
+  $('quiz-next').addEventListener('click', () => {
+    if (step === null) return startQuiz();
+    if (++step < quiz.length) return showQuestion();
+    $('quiz-step').textContent = 'Итог';
+    $('quiz-q').textContent = `Правильно ${score} из ${quiz.length}.` + (score === quiz.length ? ' Можно садиться за стол.' : '');
+    $('quiz-form').hidden = true;
+    $('quiz-feedback').hidden = true;
+    $('quiz-next').textContent = 'Ещё раз';
+    step = null;
+  });
+
+  startQuiz();
+
+  // ── rule of thumb: треугольник EV(ставка) и потолок в долях банка ──
+  const plot = createThumbPlot($('thumb-plot'));
+  const ratioPlot = createRatioPlot($('ratio-plot'));
+
+  // Шансы дро: на одну карту из 46 неизвестных, на две - с флопа (47, потом 46)
+  const oneCard = (outs) => outs / 46;
+  const twoCards = (outs) => 1 - ((47 - outs) / 47) * ((46 - outs) / 46);
+  const CEIL_ROWS = [
+    [0.05],
+    [oneCard(4), 'гатшот (4 аута) на ривер'],
+    [0.10],
+    [0.15],
+    [twoCards(4), 'гатшот с флопа до ривера'],
+    [oneCard(8), 'двусторонний стрит-дро (8 аутов) на ривер'],
+    [oneCard(9), 'флеш-дро (9 аутов) на ривер'],
+    [0.25],
+    [0.30],
+    [twoCards(8), 'двусторонний стрит-дро с флопа до ривера'],
+    [1 / 3],
+    [twoCards(9), 'флеш-дро с флопа до ривера'],
+    [0.40],
+    [0.45],
+    [0.50, '«монетка»: пара против двух старших карт'],
+    [0.60],
+    [2 / 3],
+    [0.75],
+    [0.80, 'старшая пара против младшей до флопа'],
+    [0.90],
+  ];
+  $('ceil-body').replaceChildren(...CEIL_ROWS.map(([p, note = '']) => {
+    const l = evLine(1, p), cap = l.zero * 100;
+    const tr = document.createElement('tr');
+    for (const text of [fmt(p * 100) + '%', fmt(l.oddsAgainst, 2) + ' : 1', fmt(cap, cap < 10 ? 1 : 0) + '%', note]) {
+      tr.appendChild(document.createElement('td')).textContent = text;
+    }
+    return tr;
+  }));
+  const odds = (x) => x.toLocaleString('ru-RU', { maximumFractionDigits: 2 });
+
+  // Два ползунка шанса (у треугольника и у кривой) держат одно значение
+  const CHANCE_PAIRS = ['t-chance', 'r-chance', 'n-chance'];
+  function syncChance(from) {
+    const v = $(from + '-range').value;
+    for (const f of CHANCE_PAIRS) if (f !== from) { $(f).value = v; $(f + '-range').value = v; }
+    renderThumb();
+  }
+
+  function renderThumb() {
+    const pot = Number($('t-pot').value), chance = Number($('t-chance').value);
+    const l = evLine(pot, chance / 100);
+    plot.set({ pot, p: chance / 100 });
+    ratioPlot.set({ p: chance / 100 });
+    $('r-badge').hidden = !isFar(chance / 100);
+    renderTaylor();
+    $('r-say').innerHTML = `При шансе <b>${fmt(chance)}%</b> максимально осмысленная ставка = <b>${sig(l.zero / pot)} × банк</b>. Меньше можно, больше нет.`;
+    $('t-slope').textContent = signed(l.slope, odds);
+    $('t-odds').textContent = `${odds(l.oddsAgainst)} : 1`;
+    $('t-cap').textContent = `${coins(pot)} ÷ ${odds(l.oddsAgainst)} = ${sig(l.zero)} мон.`;
+  }
+  // ── ряд Тейлора для ленивых ──
+  const taylorPlot = createTaylorPlot($('taylor-plot'));
+  const TERM_NAMES = ['p', 'p²', 'p³'];
+
+  function renderTaylor() {
+    const p = Number($('t-chance').value) / 100;
+    const n = Number(document.querySelector('input[name=terms]:checked').value);
+    const exact = evLine(1, p).zero, approx = ceilingSeries(p, n);
+    taylorPlot.set({ p, n });
+    $('n-say').innerHTML = `При ${fmt(p * 100)}%: приближение <b>${sig(approx)} банка</b>, точно ${sig(exact)}. `
+      + `Ошибка ${sig(p ** n * 100)}% = ${TERM_NAMES[n - 1]}.`;
+  }
+  document.querySelectorAll('input[name=terms]').forEach((r) => r.addEventListener('change', renderTaylor));
+
+  bindField('t-pot', renderThumb);
+  CHANCE_PAIRS.forEach((f) => bindField(f, () => syncChance(f)));
+  renderThumb();
+</script>
+
+<script src="/js/lamopad-fall.js"></script>
+</body>
+</html>

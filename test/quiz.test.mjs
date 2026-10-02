@@ -1,6 +1,6 @@
 import test from 'node:test';
 import assert from 'node:assert/strict';
-import { parseAnswer, judge, makeQuiz, diagnose, MAX_CALL_POOL, MIN_CHANCE_POOL } from '../risk/js/quiz.js';
+import { parseAnswer, judge, makeQuiz, diagnose, MAX_CALL_POOL, MIN_CHANCE_POOL } from '../strategy/poker/pot-threshold-basics/js/quiz.js';
 
 test('parseAnswer accepts free-form numbers', () => {
   assert.equal(parseAnswer('25'), 25);

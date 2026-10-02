@@ -1,6 +1,6 @@
 import test from 'node:test';
 import assert from 'node:assert/strict';
-import { pickUnit, cells, pileCols, cutHeight } from '../risk/js/coin-grid.js';
+import { pickUnit, cells, pileCols, cutHeight } from '../strategy/poker/pot-threshold-basics/js/coin-grid.js';
 
 test('pickUnit chooses the smallest round coin value that keeps the grid short', () => {
   assert.equal(pickUnit(0), 1);

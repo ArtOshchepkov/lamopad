@@ -1,6 +1,6 @@
 import test from 'node:test';
 import assert from 'node:assert/strict';
-import { assessCall, evLine, ceilingSeries } from '../risk/js/bet-math.js';
+import { assessCall, evLine, ceilingSeries } from '../strategy/poker/pot-threshold-basics/js/bet-math.js';
 
 const near = (got, want, tol = 1e-9) =>
   assert.ok(Math.abs(got - want) <= tol, `expected ~${want}, got ${got}`);

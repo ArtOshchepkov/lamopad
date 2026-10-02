@@ -1,0 +1,913 @@
+<!DOCTYPE html>
+<html lang="ru">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>Как перестать бояться теоремы Байеса: пособие для самоваров | Ламопад</title>
+  <meta name="description" content="Начальник пишет «зайди ко мне в кабинет, надо срочно поговорить». Уволят? Теорема Байеса в три шага: правдоподобие, обратный случай и априорная вероятность. С калькулятором.">
+  <meta name="keywords" content="теорема Байеса, формула Байеса, байесовское мышление, априорная вероятность, правдоподобие, условная вероятность, тревожность, ошибка базовой частоты, калькулятор Байеса">
+  <meta name="author" content="Артём Ощепков">
+  <meta name="robots" content="index, follow">
+  <link rel="canonical" href="https://lamopad.ru/strategy/bayess-rule-basic/">
+  <link rel="icon" href="/img/slon_96px.png" type="image/png" sizes="96x96">
+
+  <meta property="og:type" content="article">
+  <meta property="og:title" content="Ключ к спокойствию и адекватности, или Как перестать бояться теоремы Байеса">
+  <meta property="og:description" content="Начальник пишет «зайди ко мне в кабинет, надо срочно поговорить». Уволят? Теорема Байеса в три шага: правдоподобие, обратный случай и априорная вероятность. С калькулятором.">
+  <meta property="og:url" content="https://lamopad.ru/strategy/bayess-rule-basic/">
+  <meta property="og:image" content="https://lamopad.ru/strategy/bayess-rule-basic/img/babushka-bayes.jpg">
+  <meta property="og:image:width" content="620">
+  <meta property="og:image:height" content="476">
+  <meta property="og:image:alt" content="Бабушка в красном платке показывает «козу»: пособие для самоваров">
+  <meta property="og:locale" content="ru_RU">
+  <meta property="og:site_name" content="Ламопад">
+  <meta name="twitter:card" content="summary_large_image">
+  <meta name="twitter:title" content="Ключ к спокойствию и адекватности, или Как перестать бояться теоремы Байеса">
+  <meta name="twitter:description" content="Начальник пишет «зайди ко мне в кабинет, надо срочно поговорить». Уволят? Теорема Байеса в три шага: правдоподобие, обратный случай и априорная вероятность. С калькулятором.">
+  <meta name="twitter:image" content="https://lamopad.ru/strategy/bayess-rule-basic/img/babushka-bayes.jpg">
+  <meta property="article:published_time" content="2026-10-02">
+  <meta property="article:author" content="https://github.com/ArtOshchepkov">
+  <meta property="article:section" content="Вероятность">
+  <meta property="article:tag" content="теорема Байеса">
+  <meta property="article:tag" content="априорная вероятность">
+
+  <script type="application/ld+json">
+  {
+    "@context": "https://schema.org",
+    "@type": "Article",
+    "headline": "Ключ к спокойствию и адекватности, или Как перестать бояться теоремы Байеса",
+    "description": "Начальник пишет «зайди ко мне в кабинет, надо срочно поговорить». Уволят? Теорема Байеса в три шага: правдоподобие, обратный случай и априорная вероятность. С калькулятором.",
+    "inLanguage": "ru",
+    "datePublished": "2026-10-02",
+    "dateModified": "2026-10-02",
+    "author": { "@type": "Person", "name": "Артём Ощепков", "url": "https://github.com/ArtOshchepkov" },
+    "publisher": { "@type": "Organization", "name": "Ламопад", "url": "https://lamopad.ru/", "logo": { "@type": "ImageObject", "url": "https://lamopad.ru/img/slon_1024px.jpg" } },
+    "image": "https://lamopad.ru/strategy/bayess-rule-basic/img/babushka-bayes.jpg",
+    "mainEntityOfPage": "https://lamopad.ru/strategy/bayess-rule-basic/",
+    "about": ["Теорема Байеса", "Условная вероятность", "Априорная вероятность", "Ошибка базовой частоты"],
+    "keywords": "теорема Байеса, формула Байеса, априорная вероятность, правдоподобие, условная вероятность"
+  }
+  </script>
+
+  <link rel="preconnect" href="https://fonts.googleapis.com">
+  <link href="https://fonts.googleapis.com/css2?family=Nunito:ital,wght@0,400;0,600;0,700;1,400&family=STIX+Two+Text:ital@0;1&family=Unbounded:wght@900&display=swap" rel="stylesheet">
+
+  <style>
+    *, *::before, *::after { margin: 0; padding: 0; box-sizing: border-box; }
+    [hidden] { display: none !important; }
+
+    :root {
+      --bg:    #f8f4ed;
+      --ink:   #1e1810;
+      --faded: #7a6e62;
+      --red:   #c8281e;
+      --green: #2f7d3a;
+      --blue:  #2a62b8;
+      --red-pale:   rgba(200,40,30,0.16);
+      --green-pale: rgba(47,125,58,0.16);
+    }
+
+    body {
+      background: var(--bg);
+      color: var(--ink);
+      font-family: 'Nunito', sans-serif;
+      font-size: clamp(16px, 3.2vw, 19px);
+      line-height: 1.7;
+      min-height: 100vh;
+      cursor: url('/img/lamopad_cursor_48px.png') 0 0, auto;
+    }
+
+    .page {
+      position: relative;
+      z-index: 1;
+      max-width: 780px;
+      margin: 0 auto;
+      padding: clamp(48px, 10vw, 96px) 24px clamp(64px, 12vw, 120px);
+    }
+
+    h1 {
+      font-family: 'Unbounded', sans-serif;
+      font-size: clamp(26px, 7vw, 44px);
+      font-weight: 900;
+      line-height: 1.05;
+      color: var(--red);
+      letter-spacing: .01em;
+    }
+
+    .h1-sub {
+      display: block;
+      margin-top: 12px;
+      font-size: .5em;
+      color: var(--ink);
+    }
+
+    .hero {
+      display: block;
+      width: 100%;
+      height: auto;
+      margin-top: 28px;
+      border-radius: 6px;
+      box-shadow: 3px 3px 0 rgba(0,0,0,0.07);
+    }
+
+    .byline {
+      margin-top: 10px;
+      font-size: 14px;
+      color: var(--faded);
+    }
+
+    .byline a, .links a, .thanks a {
+      color: var(--ink);
+      text-decoration: underline;
+      text-decoration-color: rgba(200, 40, 30, 0.35);
+      text-underline-offset: 3px;
+    }
+    .byline a:hover, .links a:hover, .thanks a:hover { color: var(--red); text-decoration-color: var(--red); }
+
+    .tagline {
+      margin-top: 12px;
+      font-size: clamp(11px, 2vw, 13px);
+      letter-spacing: .28em;
+      text-transform: uppercase;
+      color: var(--faded);
+      font-weight: 700;
+    }
+
+    h2 {
+      font-family: 'Unbounded', sans-serif;
+      font-size: clamp(17px, 4.2vw, 22px);
+      font-weight: 900;
+      line-height: 1.25;
+      margin: 56px 0 16px;
+    }
+
+    h3 {
+      font-family: 'Unbounded', sans-serif;
+      font-size: clamp(15px, 3.6vw, 18px);
+      font-weight: 900;
+      line-height: 1.3;
+      margin: 36px 0 12px;
+    }
+
+    p { margin-bottom: 1em; }
+
+    .muted { color: var(--faded); font-size: .9em; }
+    .nw { white-space: nowrap; }
+
+    /* Реплика начальника: как сообщение в мессенджере */
+    .msg {
+      display: inline-block;
+      max-width: 100%;
+      margin: 4px 0 20px;
+      padding: 10px 16px;
+      border-radius: 14px 14px 14px 4px;
+      background: #fff;
+      box-shadow: 3px 3px 0 rgba(0,0,0,0.07);
+      border: 1px solid rgba(0,0,0,0.08);
+      line-height: 1.45;
+    }
+
+    .msg small { display: block; font-size: 12px; font-weight: 700; color: var(--faded); }
+
+    .thought {
+      font-family: 'Unbounded', sans-serif;
+      font-weight: 900;
+      font-size: clamp(20px, 5vw, 26px);
+      color: var(--red);
+      line-height: 1.25;
+    }
+
+    .why-big {
+      font-family: 'Unbounded', sans-serif;
+      font-weight: 900;
+      font-size: clamp(17px, 4.2vw, 22px);
+      margin: 28px 0 0;
+    }
+
+    .formula {
+      font-family: ui-monospace, monospace;
+      font-size: .9em;
+      line-height: 1.5;
+      background: #fff;
+      border-left: 3px solid var(--red);
+      padding: 12px 14px;
+      margin: 0 0 1em;
+      font-variant-numeric: tabular-nums;
+    }
+
+    .formula b { font-family: 'Unbounded', sans-serif; font-weight: 900; color: var(--red); }
+
+    .callout {
+      background: var(--ink);
+      color: var(--bg);
+      font-size: 14px;
+      line-height: 1.45;
+      border-radius: 6px;
+      padding: 10px 14px;
+      margin: 0 0 1em;
+    }
+
+    .callout p + p { margin-top: .6em; }
+    .callout p { margin: 0; }
+    .callout a { color: inherit; text-decoration: underline; text-underline-offset: 3px; }
+    .callout a:hover { color: #FFFF00; }
+
+    /* Кнопка (?) раскрывает пояснение */
+    .q {
+      display: inline-grid;
+      place-items: center;
+      width: 17px;
+      height: 17px;
+      margin-left: 2px;
+      vertical-align: 1px;
+      border: 1px solid currentColor;
+      border-radius: 50%;
+      background: none;
+      color: inherit;
+      font: 700 11px/1 'Nunito', sans-serif;
+      cursor: pointer;
+    }
+
+    .q[aria-expanded="true"] { background: var(--ink); border-color: var(--ink); color: var(--bg); }
+
+    .note {
+      padding: 12px 16px;
+      border-left: 3px solid var(--faded);
+      background: rgba(0,0,0,0.03);
+      font-size: .95em;
+    }
+
+    /* ── calculator card ── */
+    .calc {
+      background: #fff;
+      border: 1px solid rgba(0,0,0,0.08);
+      border-radius: 6px;
+      box-shadow: 3px 3px 0 rgba(0,0,0,0.07);
+      margin: 24px 0;
+      overflow: hidden;
+    }
+
+    /* Секция калькулятора: цветная подпись слева, ввод «X из Y» справа */
+    .step {
+      --c: var(--red);
+      --c-pale: rgba(200,40,30,0.06);
+      display: grid;
+      grid-template-columns: 56px 1fr;
+      border-bottom: 1px solid rgba(0,0,0,0.08);
+    }
+
+    .step.calm-blue  { --c: var(--blue);  --c-pale: rgba(42,98,184,0.06); }
+    .step.calm-green { --c: var(--green); --c-pale: rgba(47,125,58,0.06); }
+
+    .step-tag {
+      display: flex;
+      flex-direction: column;
+      align-items: center;
+      gap: 10px;
+      padding: 18px 0;
+      background: var(--c);
+      color: #fff;
+      font-family: 'Unbounded', sans-serif;
+      font-weight: 900;
+    }
+
+    .step-tag b { font-size: 24px; line-height: 1; }
+
+    .step-tag span {
+      writing-mode: vertical-rl;
+      transform: rotate(180deg);
+      font-size: 13px;
+      letter-spacing: .18em;
+      text-transform: uppercase;
+    }
+
+    .step-body { padding: 18px 20px; background: var(--c-pale); min-width: 0; }
+
+    .step-shout {
+      font-family: 'Unbounded', sans-serif;
+      font-weight: 900;
+      font-size: clamp(17px, 4.4vw, 23px);
+      line-height: 1.2;
+      color: var(--c);
+      text-transform: uppercase;
+      margin-bottom: 6px;
+    }
+
+    .step-say {
+      font-size: clamp(17px, 3.8vw, 20px);
+      font-weight: 700;
+      line-height: 1.35;
+      margin-bottom: 12px;
+    }
+
+    .step-line { margin: 0; line-height: 2; }
+
+    .cnt {
+      width: calc(5ch + 12px);
+      font: inherit;
+      font-weight: 700;
+      text-align: center;
+      -moz-appearance: textfield;
+      color: var(--ink);
+      background: #fff;
+      border: 1px solid rgba(0,0,0,0.15);
+      border-bottom: 2px solid var(--c);
+      border-radius: 4px;
+      padding: 0 4px;
+    }
+
+    .cnt::-webkit-inner-spin-button { -webkit-appearance: none; }
+
+    input[type=range] {
+      width: 100%;
+      margin-top: 6px;
+      accent-color: var(--c);
+    }
+
+    .step-result {
+      margin: 6px 0 0;
+      font-variant-numeric: tabular-nums;
+      line-height: 1.4;
+    }
+
+    .step-result .f { font-family: ui-monospace, monospace; font-size: .85em; color: var(--faded); }
+    .step-result b { font-family: 'Unbounded', sans-serif; font-weight: 900; font-size: 1.15em; color: var(--c); white-space: nowrap; }
+
+    /* Паника: текст дрожит */
+    .step.panic .step-shout { display: inline-block; animation: panic .18s infinite alternate; }
+    @keyframes panic {
+      from { transform: translate(-1px, 0) rotate(-.6deg); }
+      to   { transform: translate(1px, 1px) rotate(.6deg); }
+    }
+    @media (prefers-reduced-motion: reduce) { .step.panic .step-shout { animation: none; } }
+
+    .calc-sum { padding: 4px 20px 22px; }
+
+    .step .callout { margin: 10px 0 0; }
+
+    .panic-line {
+      margin: 4px 0 0;
+      font-family: 'Unbounded', sans-serif;
+      font-weight: 900;
+      font-size: clamp(20px, 5vw, 28px);
+      line-height: 1.3;
+      text-transform: uppercase;
+      color: var(--red);
+    }
+
+    .panic-line .cnt { width: calc(3ch + 20px); padding: 0 6px; }
+
+    .step-explain { margin: 10px 0 0; line-height: 1.5; }
+
+    .how { color: var(--faded); font-weight: 600; white-space: nowrap; }
+
+    .tip {
+      margin: 14px 0 0;
+      padding: 10px 14px;
+      border-left: 3px solid var(--c);
+      background: #fff;
+      font-size: 14px;
+      line-height: 1.5;
+    }
+
+    .tip p + p { margin-top: .5em; }
+    .tip p { margin: 0; }
+
+    .tip-title {
+      font-size: 12px;
+      font-weight: 700;
+      letter-spacing: .14em;
+      text-transform: uppercase;
+      color: var(--c);
+    }
+
+    .step-note {
+      margin: 8px 0 0;
+      font-size: 13px;
+      line-height: 1.4;
+      font-style: italic;
+      color: var(--c);
+    }
+
+    /* ── мозаика: ширина столбца = как часто бывает исход, закраска = как часто так зовут ── */
+    .mosaic-title {
+      margin-top: 22px;
+      font-size: 14px;
+      font-weight: 700;
+      color: var(--faded);
+      text-align: center;
+      line-height: 1.35;
+    }
+
+    /* Квадрат 100 вызовов: части лежат абсолютно, подпись внутри или выносной плашкой */
+    .mosaic {
+      position: relative;
+      height: 240px;
+      /* поля под выносные подписи крошечных частей у краёв квадрата */
+      margin: 34px 0 34px;
+    }
+
+    .part {
+      position: absolute;
+      border: 1px solid #fff;
+      transition: left .35s, width .35s, bottom .35s, height .35s;
+    }
+
+    .part.firedCalled { background: var(--red); }
+    .part.firedQuiet  { background: var(--red-pale); }
+    .part.calmCalled  { background: var(--green); }
+    .part.calmQuiet   { background: var(--green-pale); }
+
+    .part-label {
+      position: absolute;
+      z-index: 2;
+      top: 4px;
+      right: 2px;
+      padding: 3px 6px;
+      border-radius: 4px;
+      font-size: 12px;
+      font-weight: 700;
+      line-height: 1.25;
+      white-space: pre;
+      text-align: right;
+      font-variant-numeric: tabular-nums;
+    }
+
+    .part-label b { display: block; font-family: 'Unbounded', sans-serif; font-weight: 900; font-size: 15px; }
+    .part.l .part-label { right: auto; left: 2px; text-align: left; }
+    .part.firedCalled .part-label, .part.calmCalled .part-label { color: #fff; }
+
+    /* Яркая часть подписана снизу, бледная сверху: выноска соседа на их общей границе их не закроет */
+    .part:where(.firedCalled, .calmCalled) .part-label { top: auto; bottom: 4px; }
+
+    /* Выносная подпись: тёмная плашка с хвостиком к своей части */
+    .part-label.out { background: var(--ink); color: var(--bg) !important; }
+    .part-label.out::before {
+      content: '';
+      position: absolute;
+      border: 6px solid transparent;
+    }
+
+    .part-label.right { bottom: auto; top: 50%; left: calc(100% + 10px) !important; right: auto; transform: translateY(-50%); text-align: left; }
+    .part-label.right::before { right: 100%; top: 50%; margin-top: -6px; border-right-color: var(--ink); }
+    .part-label.left { bottom: auto; top: 50%; right: calc(100% + 10px) !important; left: auto !important; transform: translateY(-50%); }
+    .part-label.left::before { left: 100%; top: 50%; margin-top: -6px; border-left-color: var(--ink); }
+    .part-label.up { top: auto; bottom: calc(100% + 8px); }
+    .part-label.up::before { top: 100%; right: 14px; border-top-color: var(--ink); }
+    .part-label.down { bottom: auto; top: calc(100% + 8px); }
+    .part-label.down::before { bottom: 100%; right: 14px; border-bottom-color: var(--ink); }
+    .part.l .part-label.up::before, .part.l .part-label.down::before { right: auto; left: 14px; }
+    .part-label.none { display: none; }
+
+    .glued {
+      display: flex;
+      height: 26px;
+      margin: 10px 0 6px;
+      border-radius: 4px;
+      overflow: hidden;
+      background: var(--green);
+    }
+
+    .glued-fired {
+      background: var(--red);
+      transition: width .35s;
+    }
+
+    .bar-legend {
+      display: flex;
+      justify-content: space-between;
+      gap: 12px;
+      font-size: 13px;
+      line-height: 1.35;
+      font-weight: 700;
+      font-variant-numeric: tabular-nums;
+    }
+
+    .bar-legend .f { color: var(--red); }
+    .bar-legend .c { color: var(--green); text-align: right; }
+
+    /* Разделитель с подписью: линия - текст - линия */
+    .divider {
+      display: flex;
+      align-items: center;
+      gap: 12px;
+      margin: 30px 0 0;
+      font-size: 12px;
+      font-weight: 700;
+      letter-spacing: .14em;
+      text-transform: uppercase;
+      color: var(--faded);
+    }
+
+    .divider::before, .divider::after {
+      content: '';
+      flex: 1;
+      border-top: 1px dashed rgba(0,0,0,0.18);
+    }
+
+    .verdict {
+      margin-top: 22px;
+      text-align: center;
+      padding: 16px 14px;
+      border-radius: 6px;
+      color: #fff;
+      background: var(--faded);
+      transition: background .2s;
+    }
+
+    .verdict.high { background: var(--red); }
+    .verdict.low  { background: var(--green); }
+
+    .verdict-label { font-size: 14px; opacity: .9; }
+
+    .verdict-word {
+      font-family: 'Unbounded', sans-serif;
+      font-weight: 900;
+      font-size: clamp(30px, 9vw, 44px);
+      line-height: 1.15;
+      font-variant-numeric: tabular-nums;
+    }
+
+    .verdict-scale { font-weight: 700; font-size: 16px; }
+    .verdict-scale:empty { display: none; }
+
+    .verdict-why { font-size: 14px; opacity: .9; margin-top: 4px; }
+
+    .rules { padding-left: 1.3em; margin-bottom: 1.6em; }
+    .rules li + li { margin-top: .7em; }
+
+    .math {
+      font-family: 'STIX Two Text', serif;
+      font-size: 1.1em;
+      white-space: nowrap;
+    }
+
+    /* Длинная формула не переносится, на узком экране прокручивается внутри плашки */
+    .formula.wide { white-space: nowrap; overflow-x: auto; }
+
+    .thanks { margin-top: 64px; }
+    .thanks h2 { margin-top: 0; }
+
+    .links { list-style: none; }
+    .links li + li { margin-top: .4em; }
+
+    footer {
+      margin-top: 72px;
+      padding-top: 20px;
+      border-top: 1px solid rgba(0,0,0,0.10);
+      font-size: 11px;
+      letter-spacing: .10em;
+      color: rgba(0,0,0,0.2);
+    }
+
+    .back {
+      display: inline-block;
+      margin-bottom: 32px;
+      color: var(--faded);
+      text-decoration: none;
+      font-weight: 600;
+    }
+    .back:hover { color: var(--red); }
+
+    @media (max-width: 400px) {
+      .page { padding: 40px 16px 60px; }
+      .step { grid-template-columns: 40px 1fr; }
+      .step-body { padding: 16px 14px; }
+      .calc-sum { padding: 4px 14px 18px; }
+      .mosaic { height: 150px; }
+    }
+  </style>
+  <script data-goatcounter="https://lamopad.goatcounter.com/count"
+          async src="//gc.zgo.at/count.js"></script>
+</head>
+<body>
+
+<main class="page">
+  <a class="back" href="/">&larr; Ламопад</a>
+
+  <header>
+    <h1>Ключ к спокойствию и адекватности, или Как перестать бояться теоремы Байеса <span class="h1-sub">Пособие для самоваров</span></h1>
+    <p class="tagline">правдоподобие &nbsp;·&nbsp; обратный случай &nbsp;·&nbsp; априорная вероятность</p>
+    <p class="byline">Автор: <a href="https://github.com/ArtOshchepkov" target="_blank" rel="noopener">Артём Ощепков</a> · <time datetime="2026-10-02">2 октября 2026</time></p>
+    <img class="hero" src="./img/babushka-bayes.jpg" width="620" height="476" alt="Бабушка в красном платке и очках показывает «козу» на кухне">
+  </header>
+
+  <section>
+    <h2>1. «Зайди ко мне в кабинет, надо срочно поговорить»</h2>
+
+    <p>Обычный вторник. Приходит сообщение от начальника:</p>
+    <p class="msg"><small>Начальник</small>Зайди ко мне в кабинет, надо срочно поговорить</p>
+    <p>Без подробностей. Мгновенная мысль:</p>
+    <p class="thought">Меня уволят.</p>
+
+    <p>И в ней есть логика. Увольняют обычно именно так: зовут в кабинет, закрывают дверь, «надо поговорить». А на прошлой работе со мной было ровно это: позвали в кабинет и уволили.</p>
+    <p>Так оно обычно и происходит, и у меня уже было точно так же. Поэтому даже успокаивая себя, внутри ожидаешь увольнения с вероятностью 80%. А эмоционально - все 99%.</p>
+
+    <p class="why-big">Почему это неправильно?</p>
+
+    <h3>Шаг 1. Если увольняют, то обычно так</h3>
+    <p>Что мы на самом деле знаем? Если человека увольняют, то обычно его вот так и зовут. Пусть в 8 случаях из 10, то есть в 80%.</p>
+    <p>А посчитали мы другое: <b>если зовут, то увольняют</b>. Это перевёрнутая фраза, и она не равна исходной. Почти каждое увольнение начинается с вызова в кабинет, но отсюда ничего не следует о том, чем обычно кончаются вызовы в кабинет.</p>
+    <p class="formula">шанс увольнения = «если увольняют, то так» = <b>80%</b></p>
+
+    <h3>Шаг 2. А бывало наоборот?</h3>
+    <p>Было ли такое, что вас звали так же, а не уволили? Попросили подписать справку, согласовать отпуск, спросили про отчёт.</p>
+    <p>На этой работе вас звали в кабинет раз двадцать. Примерно половина вызовов звучала так же тревожно: «зайди, надо срочно поговорить». Ни разу не уволили. <button class="q" type="button" aria-controls="why-zero" aria-expanded="false" aria-label="А как учесть «ни разу»?">?</button></p>
+    <div class="callout" id="why-zero" hidden>
+      <p><b>А как учесть «ни разу»? Не будет деления на ноль?</b></p>
+      <p>Не будет. Отсюда мы считаем другую долю: сколько безобидных вызовов звучали тревожно. Это 10 из 20, делим на 20 безобидных вызовов, а не на увольнения.</p>
+      <p>Ноль в знаменателе получился бы, если по этой работе считать «если увольняют, то как зовут»: увольнений тут не было, вышло бы 0 / 0. Поэтому эту долю, 80% из шага 1, мы берём из прошлого опыта и того, как увольняют вообще.</p>
+    </div>
+    <p>Значит, если не увольняют, так зовут в 50% случаев. Ставим два наблюдения рядом и смотрим, какую долю от всех «тревожных» вызовов занимает первое:</p>
+    <p class="formula">шанс увольнения = 80 / (80 + 50) = <b>61,5%</b></p>
+    <p>Тревога уже немного спала, и посчитала это ваша же интуиция: такой вызов почти так же часто бывает и без увольнения. Чем ближе два числа, тем меньше сам вызов о чём-то говорит. Если бы так звали всегда, при любом поводе, вызов не значил бы ничего: 80 / (80 + 80) = 50 на 50.</p>
+
+    <h3>Шаг 3. Как часто увольняют вообще?</h3>
+    <p>Но и здесь кое-чего не хватает. Формула шага 2 молча считает, что уволят или нет - 50 на 50. Как будто половина вызовов в кабинет кончается увольнением.</p>
+    <p>А каждый день в этот кабинет заходят десятки людей, и почти все возвращаются за свой стол. Допустим, увольнением кончается 1 вызов из 100 (в реальности намного реже).</p>
+    <p>Теперь каждое наблюдение взвешиваем тем, как часто бывает его исход: 80% - у одного вызова из 100, 50% - у остальных 99:</p>
+    <p class="formula">шанс увольнения = 80 × 1 / (80 × 1 + 50 × 99) = <b>1,6%</b></p>
+    <p>Было 99% эмоционально и 80% «рационально». Стало меньше двух процентов. Ничего не выдумали: это те же ваши ощущения и наблюдения, просто сложенные честно.</p>
+    <p class="note">Точные числа знать не обязательно. Суть в поправке ожиданий: каждый из трёх вопросов сдвигает оценку, и третий обычно сдвигает сильнее всех.</p>
+  </section>
+
+  <section>
+    <h2>2. Калькулятор спокойствия</h2>
+    <p>Три вопроса сверху вниз. Под каждым - шанс увольнения с учётом всего, что выше.</p>
+
+    <div class="calc" id="calc">
+      <div class="step panic">
+        <div class="step-tag"><b>1</b><span>Паника</span></div>
+        <div class="step-body">
+          <p class="step-shout">Аааа! Увольняют всегда так!</p>
+          <p class="step-say">«Так оно обычно и происходит»</p>
+          <p class="panic-line">Меня <input class="cnt" id="hit" type="number" min="1" max="100" value="95" inputmode="numeric" aria-label="С какой вероятностью меня уволят, процентов">&nbsp;% уволят!!!</p>
+          <input id="hit-range" type="range" min="1" max="100" step="1" value="95" aria-label="С какой вероятностью меня уволят, процентов">
+          <p class="step-explain" id="explain-1"></p>
+        </div>
+      </div>
+
+      <div class="step calm-blue">
+        <div class="step-tag"><b>2</b><span>Опыт</span></div>
+        <div class="step-body">
+          <p class="step-shout">А было ли наоборот?</p>
+          <p class="step-say">«А я возвращался из кабинета целым-невредимым»</p>
+          <p class="step-line">Меня звали <input class="cnt" id="falseAlarm-of" type="number" min="0" max="10000" value="20" inputmode="numeric" aria-label="Сколько раз звали без увольнения"> раз и не уволили,</p>
+          <p class="step-line">при этом я тревожился <input class="cnt" id="falseAlarm" type="number" min="0" max="20" value="10" inputmode="numeric" aria-label="Сколько раз из них я тревожился"> раз <span class="how" id="how-often"></span></p>
+          <input id="falseAlarm-range" type="range" min="0" max="20" step="1" value="10" aria-label="Сколько раз из них я тревожился">
+          <p class="step-result"><span id="res-2"></span> <button class="q" type="button" id="q-2" aria-controls="why-2" aria-expanded="false" aria-label="Откуда плюс один" hidden>?</button></p>
+          <div class="callout" id="why-2" hidden></div>
+          <p class="step-note">* Тревожка молча считает: уволят или нет - 50 на 50.</p>
+          <div class="tip" id="tip-first" hidden>
+            <p class="tip-title">Если зовут в первый раз</p>
+            <p>Короче, даже если всё в первый раз, можно считать неизвестность 50 на 50, как выйдет. Даже это снижает градус напряжения: <span id="tip-first-drop"></span>.</p>
+          </div>
+          <div class="tip" id="tip-anxious" hidden>
+            <p class="tip-title">Подсказка тревожным</p>
+            <p>Вы тревожились чаще, чем через раз, и всё равно возвращались за стол. Это не повод тревожиться сильнее: наоборот, это <b>уменьшает</b> шанс увольнения. Чем чаще тревога бывает зря, тем меньше она говорит о беде.</p>
+            <p>Токсичное «ой, да ты вечно переживаешь» в переводе на рациональный язык значит: в прошлом с той же тревогой вы приходили к другим результатам. Поэтому объективно стоит снизить градус напряжения.</p>
+          </div>
+        </div>
+      </div>
+
+      <div class="step calm-green">
+        <div class="step-tag"><b>3</b><span>Другие</span></div>
+        <div class="step-body">
+          <p class="step-shout">А у других и вообще обычно как?</p>
+          <p class="step-say">«Другие норм заходят»</p>
+          <p class="step-line">Из 100 зашедших в кабинет нормально выходят <input class="cnt" id="calm" type="number" min="0" max="100" value="99" inputmode="numeric" aria-label="Сколько из 100 выходят нормально"></p>
+          <input id="calm-range" type="range" min="0" max="100" step="1" value="99" aria-label="Сколько из 100 выходят нормально">
+          <p class="step-result"><span id="res-3"></span> <button class="q" type="button" id="q-3" aria-controls="why-3" aria-expanded="false" aria-label="Откуда плюс один" hidden>?</button></p>
+          <div class="callout" id="why-3" hidden></div>
+        </div>
+      </div>
+
+      <div class="calc-sum">
+        <div class="verdict" id="verdict" aria-live="polite">
+          <div class="verdict-label">Шанс, что уволят после такого вызова</div>
+          <div class="verdict-word" id="verdict-word"></div>
+          <div class="verdict-scale" id="verdict-scale"></div>
+          <div class="verdict-why" id="verdict-why"></div>
+        </div>
+
+        <p class="divider">Визуализация вычислений</p>
+        <p class="mosaic-title">Квадрат - 100 вызовов в кабинет. Слева уволенные, справа все остальные. Ярко - кого звали тревожно</p>
+        <div class="mosaic" id="mosaic" aria-hidden="true"></div>
+
+        <p class="mosaic-title">Вас позвали тревожно, значит, вы в одной из ярких частей. Склеим их:</p>
+        <div class="glued" aria-hidden="true"><div class="glued-fired" id="glued-fired"></div></div>
+        <div class="bar-legend"><span class="f" id="glued-f"></span><span class="c" id="glued-c"></span></div>
+
+      </div>
+    </div>
+  </section>
+
+  <section>
+    <h2>3. Это и есть теорема Байеса</h2>
+    <p>Три шага выше - это три числа, из которых она собирается:</p>
+    <ol class="rules">
+      <li><b>«Если увольняют, то так»</b> - <span class="math"><i>P</i>(позвали | уволят)</span>. Шаг 1, по-научному правдоподобие.</li>
+      <li><b>«А бывало наоборот?»</b> - <span class="math"><i>P</i>(позвали | не уволят)</span>. Шаг 2: как часто то же самое бывает без беды.</li>
+      <li><b>«Как часто вообще?»</b> - <span class="math"><i>P</i>(уволят)</span>. Шаг 3, априорная вероятность: что вы знали до сообщения.</li>
+    </ol>
+    <p>Шанс увольнения - это доля «увольнительных» вызовов среди всех, которые звучат так же:</p>
+    <p class="formula wide">P(уволят | позвали) =<br>
+      &nbsp;&nbsp;P(позвали | уволят) · P(уволят)<br>
+      &nbsp;&nbsp;/ ( P(позвали | уволят) · P(уволят)<br>
+      &nbsp;&nbsp;&nbsp;&nbsp;+ P(позвали | не уволят) · P(не уволят) )</p>
+    <p>Знаменатель - все способы, которыми вас могли так позвать. Обычно его коротко пишут как <span class="math"><i>P</i>(позвали)</span>, и получается каноничная запись:</p>
+    <p class="formula">P(A | B) = P(B | A) · P(A) / P(B)</p>
+
+    <h3>Выводы</h3>
+    <p>Когда что-то пугает, задайте три вопроса:</p>
+    <ol class="rules">
+      <li><b>Не перевернул ли я фразу?</b> «Если увольняют, то зовут» не значит «если зовут, то увольняют».</li>
+      <li><b>А бывает так же без беды?</b> Если да и почти так же часто, сам знак почти ничего не значит.</li>
+      <li><b>Как часто беда случается вообще?</b> Редкое событие остаётся редким даже после тревожного знака. Именно этот вопрос тревожка забывает чаще всего.</li>
+    </ol>
+    <p>Работает не только с начальником: страшный анализ, шорох ночью в палатке, «нам надо поговорить» от близкого человека.</p>
+  </section>
+
+  <section>
+    <h2>Доп. материалы</h2>
+    <ul class="links">
+      <li><a href="/strategy/poker/pot-threshold-basics/">Покер: сколько можно ставить?</a> <span class="muted">· ещё один интерактивный разбор</span></li>
+      <li><a href="https://www.youtube.com/watch?v=HZGCoVF3YvM" target="_blank" rel="noopener">Bayes theorem, the geometry of changing beliefs</a> <span class="muted">· 3Blue1Brown</span></li>
+    </ul>
+  </section>
+
+  <section class="thanks">
+    <h2>Спасибо, что прочли!</h2>
+    <p>Если нашли ошибку или хотите оставить комментарий, пишите мне в телеграм: <a href="https://t.me/art_oshk" target="_blank" rel="noopener">t.me/art_oshk</a>.</p>
+  </section>
+
+  <footer>&copy; Ламопад &mdash; все права защищены</footer>
+</main>
+
+<script type="module">
+  import { posterior, stepInputs, seenShare, baseRate } from './js/bayes-math.js';
+  import { mosaicParts, placeLabel } from './js/mosaic-layout.js';
+  import { howOften, asSeen, verdictScale } from './js/anxiety-words.js';
+
+  const $ = (id) => document.getElementById(id);
+  const counts = ['hit', 'falseAlarm', 'calm'];
+
+  // 1,6 и 61,5, но 0,38 - у малых долей нужны лишние знаки
+  const num = (x) => x.toLocaleString('ru-RU', { maximumFractionDigits: x > 0 && x < 1 ? 2 : 1 });
+  const pct = (x) => num(x * 100) + '%';
+  const shown = (p) => (p === null ? '?' : pct(p));
+  // Для стилей нужна точка: «4,5%» CSS молча отбрасывает
+  const cssPct = (x) => x * 100 + '%';
+
+  // Шаги 2 и 3 - та же формула, что у паники, но с учётом всего, что выше
+  const FORMULAS = {
+    2: ({ hit: h, falseAlarm: f }) => `${num(h * 100)} / (${num(h * 100)} + ${num(f * 100)}) =`,
+    3: ({ hit: h, falseAlarm: f, prior: pr }) =>
+      `${num(h * 100)} × ${num(pr * 100)} / (${num(h * 100)} × ${num(pr * 100)} + ${num(f * 100)} × ${num(100 - pr * 100)}) =`,
+  };
+
+  const PART_TEXT = {
+    firedCalled: 'уволили,\nзвали тревожно',
+    firedQuiet: 'уволили,\nзвали спокойно',
+    calmCalled: 'вышли норм,\nа звали тревожно',
+    calmQuiet: 'вышли норм,\nзвали спокойно',
+  };
+
+  const mosaic = $('mosaic');
+  const partEls = Object.fromEntries(Object.keys(PART_TEXT).map((key) => {
+    const el = mosaic.appendChild(document.createElement('div'));
+    el.className = 'part ' + key;
+    el.appendChild(document.createElement('span')).className = 'part-label';
+    return [key, el];
+  }));
+
+  // Подпись влезает в часть - пишем прямо на ней, иначе выносим плашкой с хвостиком
+  function drawMosaic(values) {
+    const W = mosaic.clientWidth, H = mosaic.clientHeight;
+    for (const part of mosaicParts(values)) {
+      const el = partEls[part.key], label = el.firstChild;
+      Object.assign(el.style, { left: cssPct(part.x), width: cssPct(part.w), bottom: cssPct(part.y), height: cssPct(part.h) });
+      el.classList.toggle('l', part.left);
+      label.innerHTML = `<b>${num(part.w * part.h * 100)}</b>${PART_TEXT[part.key]}`;
+      label.className = 'part-label';
+      const where = placeLabel({ w: part.w * W, h: part.h * H }, { w: label.offsetWidth, h: label.offsetHeight }, part);
+      label.className = 'part-label ' + where + (where === 'in' || where === 'none' ? '' : ' out');
+    }
+  }
+
+  // Пояснение к сработавшему Лапласу: [k, n] - что ввели в шаге
+  const LAPLACE_WHY = {
+    2: ([, n]) => (n === 0
+      ? '<p><b>Откуда 50%?</b> Раньше вас не звали ни разу, значит, данных нет. Правило Лапласа: (0 + 1) / (0 + 2) = 50%, то есть «не знаю - 50 на 50». '
+        + 'Неизвестность - тоже знание: она честнее, чем «так зовут, только когда увольняют».</p>'
+      : `<p><b>Откуда ${pct(1 / (n + 2))}?</b> Правило Лапласа: (0 + 1) / (${n} + 2). К увиденному добавляем по одному воображаемому вызову каждого вида, тревожному и спокойному.</p>`
+        + `<p>${n} вызовов - ещё не вся жизнь: «ни разу не звали так» не значит «без увольнения так не зовут никогда». Без поправки любой тревожный вызов означал бы увольнение наверняка.</p>`),
+    3: ([k, n]) => (k === n
+      ? `<p><b>Откуда (0 + 1) / (${n} + 2)?</b> Правило Лапласа: к ${n} зашедшим добавляем по одному воображаемому уволенному и не уволенному.</p>`
+        + `<p>«Из ${n} никого не уволили» не значит «не увольняют никогда». Без поправки шанс был бы ровно 0, что бы ни говорили шаги 1 и 2.</p>`
+      : `<p><b>Откуда (${n} + 1) / (${n} + 2)?</b> Правило Лапласа: к ${n} зашедшим добавляем по одному воображаемому уволенному и не уволенному.</p>`
+        + `<p>«Из ${n} никто не вышел нормально» не значит «увольняют всех». Без поправки шанс был бы ровно 100%, что бы ни говорили шаги 1 и 2.</p>`),
+  };
+  const LAPLACE_ALWAYS = '<p>Вообще-то правило Лапласа лучше применять всегда: и 3 из 20 честнее считать как (3 + 1) / (20 + 2) ≈ 18%, а не 15%. '
+    + 'Здесь для простоты иллюстрации идеи оно включается, только когда введён ноль.</p>'
+    + '<p>Подробнее: <a href="https://en.wikipedia.org/wiki/Rule_of_succession" target="_blank" rel="noopener">Rule of succession</a>. '
+    + 'Его обобщение на любую добавку и любое число исходов - <a href="https://en.wikipedia.org/wiki/Additive_smoothing" target="_blank" rel="noopener">additive smoothing</a>.</p>';
+
+  // Кнопка (?) и пояснение про Лапласа есть, только пока поправка реально сработала
+  function showLaplace(step, smoothed, counted) {
+    const q = $('q-' + step), why = $('why-' + step);
+    q.hidden = !smoothed;
+    why.hidden = !smoothed || q.getAttribute('aria-expanded') !== 'true';
+    if (smoothed) why.innerHTML = LAPLACE_WHY[step](counted) + LAPLACE_ALWAYS;
+  }
+
+  let last = null;
+
+  function render() {
+    const panic = Number($('hit').value);
+    // Шаги 2-3 - счёт «k из n»
+    const seen = ['falseAlarm', 'calm'].map((c) => {
+      const whole = $(c + '-of');
+      return [Number($(c).value), Number(whole ? whole.value : $(c + '-range').max)];
+    });
+    // Лаплас включается только там, где край обнулил бы ответ
+    const estimates = [seenShare(...seen[0]), baseRate(...seen[1])];
+    estimates.forEach(({ smoothed }, i) => showLaplace(i + 2, smoothed, seen[i]));
+    const [falseAlarm, prior] = estimates.map((e) => e.p);
+    const hit = panic / 100;
+    const values = last = { hit, falseAlarm, prior };
+
+    const [anxious, called] = seen[0];
+    $('how-often').textContent = `(${howOften(anxious, called)})`;
+    $('tip-anxious').hidden = !(anxious > called / 2);
+
+    const steps = [1, 2, 3].map((s) => posterior(stepInputs(s, values)).p);
+
+    // 50 на 50 успокаивает, только пока паника говорит больше 50%
+    $('tip-first').hidden = !(called === 0 && steps[1] < steps[0]);
+    $('tip-first-drop').textContent = `с ${shown(steps[0])} до ${shown(steps[1])}`;
+    for (const step of [2, 3]) {
+      $('res-' + step).innerHTML = `<span class="f">${FORMULAS[step](values)}</span> <b>${shown(steps[step - 1])}${step === 2 ? '*' : ''}</b>`;
+    }
+    $('explain-1').textContent = 'Эта эмоциональная оценка может быть основана на фактах: например, вы видели, '
+      + `что ${asSeen(panic)} увольнений начинались именно так. Но из этого не следует, что вас уволят с такой же вероятностью. Давайте учтём ещё кое-что.`;
+
+    drawMosaic(values);
+
+    const { fired, calm: calmCalled, p } = posterior(values);
+    $('glued-fired').style.width = p === null ? '0' : cssPct(p);
+    $('glued-f').textContent = `уволили: ${num(fired * 100)}`;
+    $('glued-c').textContent = `вышли норм: ${num(calmCalled * 100)}`;
+
+    $('verdict').className = 'verdict ' + (p === null ? '' : p >= 0.5 ? 'high' : 'low');
+    $('verdict-word').textContent = shown(p);
+    $('verdict-scale').textContent = verdictScale(p);
+    $('verdict-why').textContent = p === null
+      ? 'так не зовут ни при каком исходе: этого сообщения не могло быть'
+      : `${num(fired * 100)} из ${num((fired + calmCalled) * 100)} тревожных вызовов. А паника говорила ${shown(steps[0])}`;
+  }
+
+  window.addEventListener('resize', () => { if (last) drawMosaic(last); });
+  // Размер подписей зависит от шрифта: после его загрузки раскладываем заново
+  document.fonts.ready.then(() => { if (last) drawMosaic(last); });
+
+  for (const q of document.querySelectorAll('.q')) {
+    q.addEventListener('click', () => {
+      const open = q.getAttribute('aria-expanded') !== 'true';
+      q.setAttribute('aria-expanded', open);
+      $(q.getAttribute('aria-controls')).hidden = !open;
+    });
+  }
+
+  const clampInput = (input) => {
+    const v = Math.min(Number(input.max), Math.max(Number(input.min), Math.round(Number(input.value)) || 0));
+    if (Number(input.value) !== v) input.value = v;
+    return v;
+  };
+
+  // «X из Y»: ползунок и поле X - два входа для одного числа, Y задаёт их потолок
+  function bindCount(c) {
+    const part = $(c), range = $(c + '-range'), whole = $(c + '-of');  // whole есть, только если «из N» вводится
+    range.addEventListener('input', () => { part.value = range.value; render(); });
+    part.addEventListener('input', () => {
+      if (part.value === '') return;  // даём стереть и набрать заново
+      range.value = clampInput(part);
+      render();
+    });
+    if (whole) whole.addEventListener('input', () => {
+      if (whole.value === '') return;
+      const max = clampInput(whole);
+      part.max = range.max = max;
+      range.value = clampInput(part);
+      render();
+    });
+    for (const input of [part, whole].filter(Boolean)) input.addEventListener('change', () => { if (input.value === '') input.value = input === part ? range.value : range.max; });
+  }
+  counts.forEach(bindCount);
+
+  render();
+</script>
+
+<script src="/js/lamopad-fall.js"></script>
+</body>
+</html>

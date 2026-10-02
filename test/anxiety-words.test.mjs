@@ -1,6 +1,6 @@
 import test from 'node:test';
 import assert from 'node:assert/strict';
-import { howOften, asSeen, verdictScale } from '../strategy/bayess-rule-basic/js/anxiety-words.js';
+import { howOften, asSeen, verdictScale } from '../strategy/bayes-rule-basic/js/anxiety-words.js';
 
 test('howOften: «тревожился k из n» in words', () => {
   const cases = [

@@ -1,6 +1,6 @@
 import test from 'node:test';
 import assert from 'node:assert/strict';
-import { posterior, stepInputs, share, laplace, seenShare, baseRate } from '../strategy/bayess-rule-basic/js/bayes-math.js';
+import { posterior, stepInputs, share, laplace, seenShare, baseRate } from '../strategy/bayes-rule-basic/js/bayes-math.js';
 
 const near = (got, want, tol = 1e-9) =>
   assert.ok(Math.abs(got - want) <= tol, `expected ~${want}, got ${got}`);

@@ -1,6 +1,6 @@
 import test from 'node:test';
 import assert from 'node:assert/strict';
-import { mosaicParts, placeLabel } from '../strategy/bayess-rule-basic/js/mosaic-layout.js';
+import { mosaicParts, placeLabel } from '../strategy/bayes-rule-basic/js/mosaic-layout.js';
 
 test('mosaicParts: four parts tile the unit square', () => {
   const parts = mosaicParts({ hit: 0.8, falseAlarm: 0.5, prior: 0.01 });

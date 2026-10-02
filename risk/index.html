@@ -756,24 +756,7 @@
   </section>
 
   <section>
-    <h2>2. Мини-квиз</h2>
-    <p>Проверьте себя без ползунков. Ответ - число, можно дробное. Если ответ не круглый, засчитывается всё, что отличается от точного меньше чем на 0,1.</p>
-
-    <div class="calc quiz" aria-live="polite">
-      <div class="quiz-step" id="quiz-step"></div>
-      <p class="quiz-q" id="quiz-q"></p>
-      <form class="quiz-form" id="quiz-form">
-        <input id="quiz-input" type="text" inputmode="decimal" autocomplete="off" aria-label="Ваш ответ">
-        <span class="quiz-unit" id="quiz-unit"></span>
-        <button class="btn" type="submit">Проверить</button>
-      </form>
-      <p class="quiz-feedback" id="quiz-feedback" hidden></p>
-      <button class="btn btn-ghost" type="button" id="quiz-next" hidden></button>
-    </div>
-  </section>
-
-  <section>
-    <h2>3. Rule of thumb: потолок ставки</h2>
+    <h2>2. Rule of thumb: потолок ставки</h2>
     <p>Банк и шанс победы известны, нужно понять, больше какой ставки платить не стоит. Ожидание прибыли зависит от ставки <i>x</i> по прямой:</p>
     <p class="formula">EV(x) = p · банк − (1 − p) · x</p>
     <p>Вместе с осями она отсекает треугольник. Всё, что внутри него, - выгодные ставки. Там, где прямая пересекает ноль, ставка становится убыточной.</p>
@@ -850,6 +833,21 @@
     <p>Шанс 20%: 0,2 / 0,8 = 0,25, значит, ставка меньше четверти банка в плюс. Шанс 50%: 0,5 / 0,5 = 1, в плюс всё, что меньше банка. Ровно на пороге - в ноль, выше - в минус.</p>
     <p class="note">Это упрощённая базовая модель для новичков: вы платите последнюю ставку и идёте до вскрытия, дальше никто не ставит и никто не сбрасывает карты. В настоящей игре соперник может сбросить карты под вашей ставкой, и это добавляет ей ценности. Для более глубокой игры изучите <b>fold equity</b>.</p>
     <p class="note">И ещё одно упрощение: модель считает, что вы последний, кто ходит в этом круге ставок. Если после вас ещё кто-то ходит, соперники могут заколлировать и увеличить банк, тогда ваша ставка выгоднее, чем по формуле. А могут зарейзить: вырастут и банк, и ваши затраты, потому что придётся доплачивать. Как это учитывать, здесь пока не разбираем.</p>
+
+    <h3>Мини-квиз</h3>
+    <p>Проверьте себя без ползунков. Ответ - число, можно дробное. Если ответ не круглый, засчитывается всё, что отличается от точного меньше чем на 0,1.</p>
+
+    <div class="calc quiz" aria-live="polite">
+      <div class="quiz-step" id="quiz-step"></div>
+      <p class="quiz-q" id="quiz-q"></p>
+      <form class="quiz-form" id="quiz-form">
+        <input id="quiz-input" type="text" inputmode="decimal" autocomplete="off" aria-label="Ваш ответ">
+        <span class="quiz-unit" id="quiz-unit"></span>
+        <button class="btn" type="submit">Проверить</button>
+      </form>
+      <p class="quiz-feedback" id="quiz-feedback" hidden></p>
+      <button class="btn btn-ghost" type="button" id="quiz-next" hidden></button>
+    </div>
 
     <details class="nerd">
       <summary>Для нёрдов-математиков</summary>

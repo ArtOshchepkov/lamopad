@@ -71,8 +71,8 @@
       background: var(--bg);
       color: var(--ink);
       font-family: 'Nunito', sans-serif;
-      font-size: clamp(16px, 3.2vw, 19px);
-      line-height: 1.7;
+      font-size: clamp(17px, 3.4vw, 21px);
+      line-height: 1.6;
       min-height: 100vh;
       cursor: url('/img/lamopad_cursor_48px.png') 0 0, auto;
     }
@@ -80,7 +80,7 @@
     .page {
       position: relative;
       z-index: 1;
-      max-width: 960px;
+      max-width: 880px;
       margin: 0 auto;
       padding: clamp(48px, 10vw, 96px) 24px clamp(64px, 12vw, 120px);
     }
@@ -105,7 +105,8 @@
 
     .hero {
       display: block;
-      width: 100%;
+      width: 450px;
+      max-width: 100%;
       height: auto;
       margin-top: 28px;
       border-radius: 6px;
@@ -152,6 +153,12 @@
     }
 
     p { margin-bottom: 1em; }
+
+    /* Основной текст по ширине; переносы не дают строкам расползтись дырами */
+    section > p:not(.formula, .msg, .thought, .why-big), .rules li, .note {
+      text-align: justify;
+      hyphens: auto;
+    }
 
     .muted { color: var(--faded); font-size: .9em; }
     .nw { white-space: nowrap; }

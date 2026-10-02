@@ -46,3 +46,19 @@ function pick(pool, n, rand) {
 export function makeQuiz(rand = Math.random, perKind = 3) {
   return [...pick(MAX_CALL_POOL, perKind, rand), ...pick(MIN_CHANCE_POOL, perKind, rand)];
 }
+
+/**
+ * Ответ того, кто забыл, что при победе ставка возвращается, и сравнил
+ * ставку со всем куском банка: p · банк вместо p · банк / (1 − p),
+ * ставка / банк вместо ставка / (банк + ставка).
+ */
+export function naiveAnswer(q) {
+  return q.kind === 'maxCall' ? (q.chance * q.pot) / 100 : (100 * q.call) / q.pot;
+}
+
+/** 'stakeBack', если ответ похож на naiveAnswer (до 1 ниже него, с учётом округления), иначе null. */
+export function diagnose(q, answer) {
+  if (judge(answer, q.answer).ok) return null;
+  const naive = naiveAnswer(q);
+  return answer >= naive - 1 - 1e-9 && answer < naive + TOLERANCE ? 'stakeBack' : null;
+}

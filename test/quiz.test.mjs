@@ -1,6 +1,6 @@
 import test from 'node:test';
 import assert from 'node:assert/strict';
-import { parseAnswer, judge, makeQuiz, MAX_CALL_POOL, MIN_CHANCE_POOL } from '../risk/js/quiz.js';
+import { parseAnswer, judge, makeQuiz, diagnose, MAX_CALL_POOL, MIN_CHANCE_POOL } from '../risk/js/quiz.js';
 
 test('parseAnswer accepts free-form numbers', () => {
   assert.equal(parseAnswer('25'), 25);
@@ -42,4 +42,27 @@ test('makeQuiz asks max-call questions first, then min-chance ones, without repe
   assert.equal(quiz.length, 6);
   assert.deepEqual(quiz.map((q) => q.kind), ['maxCall', 'maxCall', 'maxCall', 'minChance', 'minChance', 'minChance']);
   assert.equal(new Set(quiz).size, 6);
+});
+
+test('diagnose spots the "forgot the call comes back" mistake', async (t) => {
+  const maxQ = MAX_CALL_POOL.find((q) => q.pot === 100 && q.chance === 20);   // ответ 25
+  const minQ = MIN_CHANCE_POOL.find((q) => q.pot === 150);                    // ответ 25%
+
+  await t.test('max call: answers from p · pot − 1 to p · pot', () => {
+    assert.equal(diagnose(maxQ, 20), 'stakeBack');
+    assert.equal(diagnose(maxQ, 19), 'stakeBack');
+    assert.equal(diagnose(maxQ, 19.5), 'stakeBack');
+    assert.equal(diagnose(maxQ, 18.9), null);
+    assert.equal(diagnose(maxQ, 22), null);
+  });
+
+  await t.test('min chance: answers around call / pot', () => {
+    assert.equal(diagnose(minQ, 33.3), 'stakeBack');
+    assert.equal(diagnose(minQ, 33), 'stakeBack');
+    assert.equal(diagnose(minQ, 30), null);
+  });
+
+  await t.test('never fires on a correct answer', () => {
+    for (const q of [...MAX_CALL_POOL, ...MIN_CHANCE_POOL]) assert.equal(diagnose(q, q.answer), null);
+  });
 });

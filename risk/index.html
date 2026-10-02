@@ -11,7 +11,7 @@
   <link rel="icon" href="/img/slon_96px.png" type="image/png" sizes="96x96">
 
   <link rel="preconnect" href="https://fonts.googleapis.com">
-  <link href="https://fonts.googleapis.com/css2?family=Nunito:ital,wght@0,400;0,600;0,700;1,400&family=Unbounded:wght@900&display=swap" rel="stylesheet">
+  <link href="https://fonts.googleapis.com/css2?family=Nunito:ital,wght@0,400;0,600;0,700;1,400&family=STIX+Two+Text:ital@0;1&family=Unbounded:wght@900&display=swap" rel="stylesheet">
 
   <style>
     *, *::before, *::after { margin: 0; padding: 0; box-sizing: border-box; }
@@ -38,7 +38,7 @@
     .page {
       position: relative;
       z-index: 1;
-      max-width: 600px;
+      max-width: 780px;
       margin: 0 auto;
       padding: clamp(48px, 10vw, 96px) 24px clamp(64px, 12vw, 120px);
     }
@@ -415,6 +415,128 @@
       border-top-color: var(--ink);
     }
 
+    /* ── rule of thumb ── */
+    h3 {
+      font-family: 'Unbounded', sans-serif;
+      font-size: clamp(15px, 3.6vw, 18px);
+      font-weight: 900;
+      line-height: 1.3;
+      margin: 36px 0 12px;
+    }
+
+    .note {
+      padding: 12px 16px;
+      border-left: 3px solid var(--faded);
+      background: rgba(0,0,0,0.03);
+      font-size: .95em;
+    }
+
+    .nerd { margin: 4px 0 1em; }
+    .nerd summary { cursor: pointer; font-weight: 700; color: var(--red); margin-bottom: 12px; }
+    .nerd-list { padding-left: 1.3em; margin-bottom: 1em; }
+    .err-table { width: auto; margin: 0 0 1.2em; }
+    .ceil-table.err-table td { font-weight: 400; color: inherit; font-size: 14px; padding-right: 14px; }
+    .ceil-table.err-table td:first-child { font-family: 'STIX Two Text', serif; font-style: italic; font-size: 16px; }
+
+    .seg {
+      display: flex;
+      flex-wrap: wrap;
+      gap: 6px;
+      margin-top: 16px;
+    }
+
+    .seg label {
+      font-family: 'STIX Two Text', serif;
+      font-style: italic;
+      font-size: 16px;
+      padding: 4px 12px;
+      border: 1px solid rgba(0,0,0,0.15);
+      border-radius: 999px;
+      cursor: pointer;
+    }
+
+    .seg input { position: absolute; opacity: 0; pointer-events: none; }
+    .seg label:has(input:checked) { background: var(--ink); border-color: var(--ink); color: #FFFF00; }
+    .seg label:has(input:focus-visible) { outline: 2px solid var(--red); outline-offset: 2px; }
+
+    .badge {
+      display: inline-block;
+      margin: 16px 0 0;
+      padding: 4px 12px;
+      border-radius: 999px;
+      background: var(--green);
+      color: #fff;
+      font-size: 14px;
+      font-weight: 700;
+      line-height: 1.4;
+    }
+
+    .say { margin: 12px 0 4px; line-height: 1.5; }
+    .say b { color: var(--green); }
+
+    .manim {
+      display: block;
+      width: 100%;
+      margin-top: 20px;
+      border-radius: 6px;
+      background: #1C1C1C;
+    }
+
+    .readout {
+      display: flex;
+      flex-wrap: wrap;
+      gap: 6px 18px;
+      margin: 12px 0 6px;
+      font-variant-numeric: tabular-nums;
+    }
+
+    .readout dt { font-size: 12px; color: var(--faded); line-height: 1.2; }
+    .readout dd { font-weight: 700; }
+
+    .ceil { margin-top: 14px; }
+
+    .ceil summary {
+      cursor: pointer;
+      font-weight: 700;
+      color: var(--red);
+    }
+
+    .ceil-table {
+      width: 100%;
+      margin: 10px 0;
+      border-collapse: collapse;
+      font-size: 14px;
+      line-height: 1.35;
+      font-variant-numeric: tabular-nums;
+    }
+
+    .ceil-table th {
+      text-align: left;
+      font-size: 12px;
+      color: var(--faded);
+      font-weight: 700;
+      padding: 0 8px 6px 0;
+    }
+
+    .ceil-table td {
+      padding: 5px 8px 5px 0;
+      border-top: 1px solid rgba(0,0,0,0.07);
+      vertical-align: top;
+    }
+
+    .ceil-table td:nth-child(-n+3) { white-space: nowrap; }
+    .ceil-table td:nth-child(3) { font-weight: 700; }
+    .ceil-table td:nth-child(4) { color: var(--faded); font-size: 13px; }
+
+    .rules { padding-left: 1.3em; margin-bottom: 1.6em; }
+    .rules li + li { margin-top: .7em; }
+    .nw { white-space: nowrap; }
+
+    .odds { margin: 6px 0 2px; border-collapse: collapse; font-variant-numeric: tabular-nums; }
+    .odds td { padding: 1px 18px 1px 0; }
+    .odds td:first-child { font-weight: 700; }
+    .odds td:nth-child(2) { color: var(--faded); }
+
     /* ── quiz ── */
     .quiz-step {
       font-size: 13px;
@@ -462,6 +584,17 @@
 
     .quiz-feedback { margin: 14px 0 0; line-height: 1.5; }
     .quiz-feedback b { display: block; }
+    .quiz-mistake {
+      display: block;
+      margin: 8px 0;
+      padding: 10px 14px;
+      border-radius: 6px;
+      background: var(--ink);
+      color: var(--bg);
+      font-size: 14px;
+      line-height: 1.45;
+    }
+
     .quiz-feedback small { color: var(--faded); font-size: 14px; }
     #quiz-next { margin-top: 14px; }
 
@@ -640,6 +773,134 @@
   </section>
 
   <section>
+    <h2>3. Rule of thumb: потолок ставки</h2>
+    <p>Банк и шанс победы известны, нужно понять, больше какой ставки платить не стоит. Ожидание прибыли зависит от ставки <i>x</i> по прямой:</p>
+    <p class="formula">EV(x) = p · банк − (1 − p) · x</p>
+    <p>Вместе с осями она отсекает треугольник. Всё, что внутри него, - выгодные ставки. Там, где прямая пересекает ноль, ставка становится убыточной.</p>
+
+    <div class="calc">
+      <div class="field">
+        <div class="field-head">
+          <label for="t-pot-range">Банк</label>
+          <span class="num"><input id="t-pot" type="number" min="10" max="1000" step="10" value="100" inputmode="numeric" aria-label="Банк, монет"><span>мон.</span></span>
+        </div>
+        <input id="t-pot-range" type="range" min="10" max="1000" step="10" value="100">
+      </div>
+      <div class="field">
+        <div class="field-head">
+          <label for="t-chance-range">Шанс победы</label>
+          <span class="num"><input id="t-chance" type="number" min="0.1" max="90" step="0.1" value="20" inputmode="decimal" aria-label="Шанс победы, процентов"><span>%</span></span>
+        </div>
+        <input id="t-chance-range" type="range" min="0.1" max="90" step="0.1" value="20">
+      </div>
+
+      <canvas class="manim" id="thumb-plot" role="img" aria-label="График ожидания прибыли в зависимости от ставки"></canvas>
+
+      <dl class="readout">
+        <div><dt>наклон</dt><dd id="t-slope"></dd></div>
+        <div><dt>шансы против</dt><dd id="t-odds"></dd></div>
+        <div><dt>потолок</dt><dd id="t-cap"></dd></div>
+      </dl>
+      <p class="muted">Подвигайте банк: треугольник не меняется, меняются только подписи осей. Форму задаёт один шанс победы.</p>
+    </div>
+
+    <ol class="rules">
+      <li><b>Наклон = шанс проигрыша.</b> Каждая монета ставки отнимает <span class="nw">1 − p</span> монеты ожидания: это жёлтая ступенька. Серый пунктир - наклон 45°, то есть −1. При малом шансе прямая почти лежит на пунктире, при 50% она вдвое положе, при 75% вчетверо.</li>
+      <li><b>Потолок = банк ÷ шансы против.</b> Шансы против - во сколько раз проигрыш вероятнее победы.
+        <table class="odds">
+          <tr><td>20%</td><td>4 : 1</td><td>банк / 4</td></tr>
+          <tr><td>25%</td><td>3 : 1</td><td>банк / 3</td></tr>
+          <tr><td>33%</td><td>2 : 1</td><td>банк / 2</td></tr>
+          <tr><td>50%</td><td>1 : 1</td><td>весь банк</td></tr>
+        </table>
+      </li>
+      <li><b>Пунктир - это ловушка.</b> Он пересекает ноль в p · банк: так выглядит ответ «ставка меньше моего куска банка». Настоящая прямая положе и уходит дальше, в <span class="nw">1 / (1 − p)</span> раз. При 20% это +25%, при 50% уже вдвое.</li>
+    </ol>
+
+    <p>Раз банк только масштаб, его можно сократить. Потолок ставки в долях банка зависит от одного шанса победы:</p>
+    <p class="formula">порог / банк = p / (1 − p)</p>
+
+    <div class="calc">
+      <div class="field">
+        <div class="field-head">
+          <label for="r-chance-range">Шанс победы<span class="hint">тот же, что у треугольника выше</span></label>
+          <span class="num"><input id="r-chance" type="number" min="0.1" max="90" step="0.1" value="20" inputmode="decimal" aria-label="Шанс победы, процентов"><span>%</span></span>
+        </div>
+        <input id="r-chance-range" type="range" min="0.1" max="90" step="0.1" value="20">
+      </div>
+
+      <p class="badge" id="r-badge" hidden>Шанс выше 50%: выгодно ставить больше банка</p>
+      <canvas class="manim" id="ratio-plot" role="img" aria-label="Потолок ставки в долях банка в зависимости от шанса победы"></canvas>
+      <p class="say"><span id="r-say"></span> <button class="q" type="button" aria-controls="why-ceil" aria-expanded="false" aria-label="Почему больше нельзя">?</button></p>
+      <p class="callout why" id="why-ceil" hidden>Меньше можно: любая ставка ниже порога в плюс, просто прибыль скромнее. Больше нет: выше порога колл в среднем теряет, и чем дальше, тем больше. Исключение - fold equity и блеф: если ваша ставка может заставить соперника сбросить карты, вы иногда забираете банк без вскрытия, и порог выше. Здесь этого нет: считаем, что вы платите и идёте до вскрытия.</p>
+      <p class="muted">Жёлтая точка - текущий шанс. Под синей кривой ставки в плюс, над ней в минус. Пунктир - ловушка «ставка = p · банк»: при любом шансе он ниже кривой.</p>
+
+      <details class="ceil">
+        <summary>Таблица потолков</summary>
+        <table class="ceil-table">
+          <thead><tr><th>Шанс</th><th>Против</th><th>Потолок</th><th>Когда бывает</th></tr></thead>
+          <tbody id="ceil-body"></tbody>
+        </table>
+        <p class="muted">Потолок - в процентах от банка. Дро на одну карту посчитаны по 46 неизвестным картам (тёрн → ривер), на две - с флопа до ривера. «Монетка» и пара против пары - округлённые шансы до флопа.</p>
+      </details>
+    </div>
+
+    <h3>Выводы</h3>
+    <p>Делите вероятность победы на вероятность поражения: <b>p / (1 − p)</b>. Ставьте меньшую долю банка, чем получился коэффициент.</p>
+    <p>Шанс 20%: 0,2 / 0,8 = 0,25, значит, ставка меньше четверти банка в плюс. Шанс 50%: 0,5 / 0,5 = 1, в плюс всё, что меньше банка. Ровно на пороге - в ноль, выше - в минус.</p>
+    <p class="note">Это упрощённая базовая модель для новичков: вы платите последнюю ставку и идёте до вскрытия, дальше никто не ставит и никто не сбрасывает карты. В настоящей игре соперник может сбросить карты под вашей ставкой, и это добавляет ей ценности. Для более глубокой игры изучите <b>fold equity</b>.</p>
+    <p class="note">И ещё одно упрощение: модель считает, что вы последний, кто ходит в этом круге ставок. Если после вас ещё кто-то ходит, соперники могут заколлировать и увеличить банк, тогда ваша ставка выгоднее, чем по формуле. А могут зарейзить: вырастут и банк, и ваши затраты, потому что придётся доплачивать. Как это учитывать, здесь пока не разбираем.</p>
+
+    <details class="nerd">
+      <summary>Для нёрдов-математиков</summary>
+
+      <p><b>Сразу вывод: ряд Тейлора не нужен, хотя прикольно.</b> Он неплохо аппроксимирует порог примерно до 20% шанса победы, а дальше проще разделить p на 1 − p.</p>
+      <p>Если всё же хочется без деления: <b>потолок ≈ (p + p²) × банк</b>. При шансе 20%: 0,2 + 0,04 = 0,24 банка вместо точных 0,25. Приближение всегда чуть меньше настоящего порога, так что лишнего вы не поставите.</p>
+
+      <p>Потолок в долях банка раскладывается в ряд Тейлора в нуле. Это обычная геометрическая прогрессия, она сходится при любом p &lt; 1:</p>
+      <p class="formula">p / (1 − p) = p + p² + p³ + p⁴ + …</p>
+      <p>Если оборвать ряд после n членов, получится ровно <span class="nw">точное значение × (1 − pⁿ)</span>. Отсюда два вывода:</p>
+      <ul class="nerd-list">
+        <li>ошибка всегда вниз: приближение никогда не советует ставку выше порога;</li>
+        <li>относительная ошибка ровно <b>pⁿ</b>.</li>
+      </ul>
+
+      <table class="ceil-table err-table">
+        <thead><tr><th>Ошибка</th><th>10%</th><th>20%</th><th>30%</th><th>50%</th></tr></thead>
+        <tbody>
+          <tr><td>p</td><td>10%</td><td>20%</td><td>30%</td><td>50%</td></tr>
+          <tr><td>p + p²</td><td>1%</td><td>4%</td><td>9%</td><td>25%</td></tr>
+          <tr><td>p + p² + p³</td><td>0,1%</td><td>0,8%</td><td>2,7%</td><td>12,5%</td></tr>
+        </tbody>
+      </table>
+
+      <p><b>Есть ли смысл считать дальше?</b> Сравните с тем, насколько точно вы знаете сам шанс. Если ошиблись в нём всего на 2 процентных пункта, потолок «поплывёт» на <span class="nw">0,02 / (p · (1 − p))</span>: при 20% это 12,5%, при 30% около 9,5%.</p>
+      <p>При 20% ошибка p + p² (4%) втрое меньше неточности самого шанса (12,5%), так что точнее считать бессмысленно. При 30% они уже сравнялись (9% и 9,5%), а после 50% ряд сходится медленно. Член p³ спасает немного, а больше p³ смысла нет совсем: проще честно поделить p на 1 − p.</p>
+
+      <div class="calc">
+        <div class="field">
+          <div class="field-head">
+            <label for="n-chance-range">Шанс победы<span class="hint">тот же, что у графиков выше</span></label>
+            <span class="num"><input id="n-chance" type="number" min="0.1" max="90" step="0.1" value="20" inputmode="decimal" aria-label="Шанс победы, процентов"><span>%</span></span>
+          </div>
+          <input id="n-chance-range" type="range" min="0.1" max="90" step="0.1" value="20">
+        </div>
+
+        <div class="seg" role="radiogroup" aria-label="Сколько членов ряда">
+          <label><input type="radio" name="terms" value="1"> p</label>
+          <label><input type="radio" name="terms" value="2" checked> p + p²</label>
+          <label><input type="radio" name="terms" value="3"> p + p² + p³</label>
+        </div>
+
+        <canvas class="manim" id="taylor-plot" role="img" aria-label="Ряд Тейлора для потолка ставки на фоне точной кривой"></canvas>
+        <p class="say" id="n-say"></p>
+        <p class="muted">Голубая кривая - точный потолок, жёлтая - приближение, жёлтая полоса между ними - ошибка.</p>
+      </div>
+    </details>
+
+  </section>
+
+  <section>
     <h2>Доп. материалы</h2>
     <ul class="links">
       <li><a href="https://pekarstas.com/veroyatnosti-v-pokere/" target="_blank" rel="noopener">Вероятность в покере</a> <span class="muted">· pekarstas.com</span></li>
@@ -650,9 +911,13 @@
 </main>
 
 <script type="module">
-  import { assessCall } from '/risk/js/bet-math.js';
+  import { assessCall, evLine, ceilingSeries } from '/risk/js/bet-math.js';
+  import { createTaylorPlot } from '/risk/js/taylor-plot.js';
+  import { createThumbPlot } from '/risk/js/thumb-plot.js';
+  import { createRatioPlot, isFar } from '/risk/js/ratio-plot.js';
+  import { fmt, sig } from '/risk/js/manim.js';
   import { pickUnit, cells, pileCols, cutHeight } from '/risk/js/coin-grid.js';
-  import { makeQuiz, parseAnswer, judge } from '/risk/js/quiz.js';
+  import { makeQuiz, parseAnswer, judge, diagnose, naiveAnswer } from '/risk/js/quiz.js';
 
   const $ = (id) => document.getElementById(id);
   const fields = ['pot', 'call', 'chance'];
@@ -776,18 +1041,19 @@
   }
 
   // Ползунок и числовое поле - два входа для одного значения
-  for (const f of fields) {
+  function bindField(f, onChange) {
     const num = $(f), range = $(f + '-range');
-    range.addEventListener('input', () => { num.value = range.value; render(); });
+    range.addEventListener('input', () => { num.value = range.value; onChange(); });
     num.addEventListener('input', () => {
       if (num.value === '') return;  // даём стереть и набрать заново
-      const v = Math.min(Number(num.max), Math.max(0, Number(num.value) || 0));
+      const v = Math.min(Number(num.max), Math.max(Number(num.min), Number(num.value) || 0));
       if (Number(num.value) !== v) num.value = v;
       range.value = v;
-      render();
+      onChange();
     });
     num.addEventListener('change', () => { num.value = range.value; });
   }
+  fields.forEach((f) => bindField(f, render));
 
   render();
 
@@ -803,6 +1069,16 @@
   const WHY = {
     maxCall: (q) => `Ставка в ноль: ${q.chance}% × ${q.pot} / ${100 - q.chance}% = ${answerText(q)} Всё, что меньше, - в плюс.`,
     minChance: (q) => `Порог: ${q.call} / (${q.pot} + ${q.call}) = ${answerText(q)}. Всё, что выше, - в плюс.`,
+  };
+
+  // Разбор типичной ошибки: ставку сравнили со всем куском банка, забыв, что при победе она возвращается
+  const MISTAKE = {
+    maxCall: (q) => `Похоже, вы сравнили ставку с куском банка: ${q.chance}% × ${q.pot} = ${exactNum(naiveAnswer(q))}. `
+      + `Но ставку вы теряете только в ${100 - q.chance}% раздач: при победе она возвращается вместе с банком. `
+      + `В среднем она обходится дешевле, поэтому ставить можно больше: ${exactNum(naiveAnswer(q))} / ${100 - q.chance}% = ${answerText(q)}`,
+    minChance: (q) => `Похоже, вы посчитали ставка / банк = ${q.call} / ${q.pot} = ${exactNum(naiveAnswer(q))}%. `
+      + `Но при победе вы забираете банк и возвращаете свою ставку, так что на кону ${q.pot + q.call}, а не ${q.pot}: `
+      + `${q.call} / ${q.pot + q.call} = ${answerText(q)}.`,
   };
 
   function startQuiz() {
@@ -841,7 +1117,8 @@
     const head = ok
       ? (exact ? `✓ Верно: ${answerText(q)}` : `✓ Засчитано. Точно: ${answerText(q)}`)
       : `✗ Нет, ответ: ${answerText(q)}`;
-    feedback(`<b>${head}</b><small>${WHY[q.kind](q)}</small>`, ok ? 'pos' : 'neg');
+    const mistake = diagnose(q, answer) ? `<span class="quiz-mistake">${MISTAKE[q.kind](q)}</span>` : '';
+    feedback(`<b>${head}</b>${mistake}<small>${WHY[q.kind](q)}</small>`, ok ? 'pos' : 'neg');
     $('quiz-form').hidden = true;
     $('quiz-next').textContent = step + 1 < quiz.length ? 'Дальше' : 'Итог';
     $('quiz-next').hidden = false;
@@ -860,6 +1137,83 @@
   });
 
   startQuiz();
+
+  // ── rule of thumb: треугольник EV(ставка) и потолок в долях банка ──
+  const plot = createThumbPlot($('thumb-plot'));
+  const ratioPlot = createRatioPlot($('ratio-plot'));
+
+  // Шансы дро: на одну карту из 46 неизвестных, на две - с флопа (47, потом 46)
+  const oneCard = (outs) => outs / 46;
+  const twoCards = (outs) => 1 - ((47 - outs) / 47) * ((46 - outs) / 46);
+  const CEIL_ROWS = [
+    [0.05],
+    [oneCard(4), 'гатшот (4 аута) на ривер'],
+    [0.10],
+    [0.15],
+    [twoCards(4), 'гатшот с флопа до ривера'],
+    [oneCard(8), 'двусторонний стрит-дро (8 аутов) на ривер'],
+    [oneCard(9), 'флеш-дро (9 аутов) на ривер'],
+    [0.25],
+    [0.30],
+    [twoCards(8), 'двусторонний стрит-дро с флопа до ривера'],
+    [1 / 3],
+    [twoCards(9), 'флеш-дро с флопа до ривера'],
+    [0.40],
+    [0.45],
+    [0.50, '«монетка»: пара против двух старших карт'],
+    [0.60],
+    [2 / 3],
+    [0.75],
+    [0.80, 'старшая пара против младшей до флопа'],
+    [0.90],
+  ];
+  $('ceil-body').replaceChildren(...CEIL_ROWS.map(([p, note = '']) => {
+    const l = evLine(1, p), cap = l.zero * 100;
+    const tr = document.createElement('tr');
+    for (const text of [fmt(p * 100) + '%', fmt(l.oddsAgainst, 2) + ' : 1', fmt(cap, cap < 10 ? 1 : 0) + '%', note]) {
+      tr.appendChild(document.createElement('td')).textContent = text;
+    }
+    return tr;
+  }));
+  const odds = (x) => x.toLocaleString('ru-RU', { maximumFractionDigits: 2 });
+
+  // Два ползунка шанса (у треугольника и у кривой) держат одно значение
+  const CHANCE_PAIRS = ['t-chance', 'r-chance', 'n-chance'];
+  function syncChance(from) {
+    const v = $(from + '-range').value;
+    for (const f of CHANCE_PAIRS) if (f !== from) { $(f).value = v; $(f + '-range').value = v; }
+    renderThumb();
+  }
+
+  function renderThumb() {
+    const pot = Number($('t-pot').value), chance = Number($('t-chance').value);
+    const l = evLine(pot, chance / 100);
+    plot.set({ pot, p: chance / 100 });
+    ratioPlot.set({ p: chance / 100 });
+    $('r-badge').hidden = !isFar(chance / 100);
+    renderTaylor();
+    $('r-say').innerHTML = `При шансе <b>${fmt(chance)}%</b> максимально осмысленная ставка = <b>${sig(l.zero / pot)} × банк</b>. Меньше можно, больше нет.`;
+    $('t-slope').textContent = signed(l.slope, odds);
+    $('t-odds').textContent = `${odds(l.oddsAgainst)} : 1`;
+    $('t-cap').textContent = `${coins(pot)} ÷ ${odds(l.oddsAgainst)} = ${sig(l.zero)} мон.`;
+  }
+  // ── ряд Тейлора для ленивых ──
+  const taylorPlot = createTaylorPlot($('taylor-plot'));
+  const TERM_NAMES = ['p', 'p²', 'p³'];
+
+  function renderTaylor() {
+    const p = Number($('t-chance').value) / 100;
+    const n = Number(document.querySelector('input[name=terms]:checked').value);
+    const exact = evLine(1, p).zero, approx = ceilingSeries(p, n);
+    taylorPlot.set({ p, n });
+    $('n-say').innerHTML = `При ${fmt(p * 100)}%: приближение <b>${sig(approx)} банка</b>, точно ${sig(exact)}. `
+      + `Ошибка ${sig(p ** n * 100)}% = ${TERM_NAMES[n - 1]}.`;
+  }
+  document.querySelectorAll('input[name=terms]').forEach((r) => r.addEventListener('change', renderTaylor));
+
+  bindField('t-pot', renderThumb);
+  CHANCE_PAIRS.forEach((f) => bindField(f, () => syncChance(f)));
+  renderThumb();
 </script>
 
 <script src="/js/lamopad-fall.js"></script>

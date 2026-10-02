@@ -1,0 +1,867 @@
+<!DOCTYPE html>
+<html lang="ru">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>Риск и стратегия | Ламопад</title>
+  <meta name="description" content="Калькулятор матожидания колла в покере: банк, ставка, вероятность победы - и честный ответ, стоит ли платить.">
+  <meta name="author" content="Ламопад">
+  <meta name="robots" content="noindex, follow">
+  <link rel="canonical" href="https://lamopad.ru/risk/">
+  <link rel="icon" href="/img/slon_96px.png" type="image/png" sizes="96x96">
+
+  <link rel="preconnect" href="https://fonts.googleapis.com">
+  <link href="https://fonts.googleapis.com/css2?family=Nunito:ital,wght@0,400;0,600;0,700;1,400&family=Unbounded:wght@900&display=swap" rel="stylesheet">
+
+  <style>
+    *, *::before, *::after { margin: 0; padding: 0; box-sizing: border-box; }
+    [hidden] { display: none !important; }
+
+    :root {
+      --bg:    #f8f4ed;
+      --ink:   #1e1810;
+      --faded: #7a6e62;
+      --red:   #c8281e;
+      --green: #2f7d3a;
+    }
+
+    body {
+      background: var(--bg);
+      color: var(--ink);
+      font-family: 'Nunito', sans-serif;
+      font-size: clamp(16px, 3.2vw, 19px);
+      line-height: 1.7;
+      min-height: 100vh;
+      cursor: url('/img/lamopad_cursor_48px.png') 0 0, auto;
+    }
+
+    .page {
+      position: relative;
+      z-index: 1;
+      max-width: 600px;
+      margin: 0 auto;
+      padding: clamp(48px, 10vw, 96px) 24px clamp(64px, 12vw, 120px);
+    }
+
+    h1 {
+      font-family: 'Unbounded', sans-serif;
+      font-size: clamp(30px, 9vw, 54px);
+      font-weight: 900;
+      line-height: 1.05;
+      color: var(--red);
+      letter-spacing: .01em;
+    }
+
+    .tagline {
+      margin-top: 12px;
+      font-size: clamp(11px, 2vw, 13px);
+      letter-spacing: .28em;
+      text-transform: uppercase;
+      color: var(--faded);
+      font-weight: 700;
+    }
+
+    h2 {
+      font-family: 'Unbounded', sans-serif;
+      font-size: clamp(17px, 4.2vw, 22px);
+      font-weight: 900;
+      line-height: 1.25;
+      margin: 56px 0 16px;
+    }
+
+    p { margin-bottom: 1em; }
+
+    .muted { color: var(--faded); font-size: .9em; }
+
+    /* ── calculator card ── */
+    .calc {
+      background: #fff;
+      border: 1px solid rgba(0,0,0,0.08);
+      border-radius: 6px;
+      box-shadow: 3px 3px 0 rgba(0,0,0,0.07);
+      padding: 22px 20px;
+      margin: 24px 0;
+    }
+
+    .field + .field { margin-top: 18px; }
+
+    .field-head {
+      display: flex;
+      justify-content: space-between;
+      align-items: baseline;
+      gap: 12px;
+    }
+
+    .field label { font-weight: 700; }
+    .field .hint { display: block; font-weight: 400; font-size: 13px; color: var(--faded); line-height: 1.35; }
+
+    .num {
+      display: flex;
+      align-items: baseline;
+      gap: 4px;
+      flex-shrink: 0;
+    }
+
+    .num input {
+      width: calc(4ch + 14px);
+      font: inherit;
+      -moz-appearance: textfield;
+      font-weight: 700;
+      text-align: right;
+      color: var(--ink);
+      background: var(--bg);
+      border: 1px solid rgba(0,0,0,0.12);
+      border-radius: 4px;
+      padding: 0 6px;
+    }
+
+    .num input::-webkit-inner-spin-button { -webkit-appearance: none; }
+
+    .num span { color: var(--faded); font-size: .85em; }
+
+    input[type=range] {
+      width: 100%;
+      margin-top: 8px;
+      accent-color: var(--red);
+    }
+
+    /* ── chance bar: моя вероятность против точки безубыточности ── */
+    .bar {
+      position: relative;
+      height: 10px;
+      margin: 26px 0 6px;
+      background: rgba(0,0,0,0.07);
+      border-radius: 5px;
+    }
+
+    .bar-fill {
+      position: absolute;
+      inset: 0 auto 0 0;
+      border-radius: 5px;
+      background: var(--red);
+      transition: width .15s, background .15s;
+    }
+
+    .bar-mark {
+      position: absolute;
+      top: -6px;
+      bottom: -6px;
+      width: 2px;
+      background: var(--ink);
+      transform: translateX(-1px);
+      transition: left .15s;
+    }
+
+    .bar-legend {
+      display: flex;
+      justify-content: space-between;
+      gap: 12px;
+      font-size: 13px;
+      color: var(--faded);
+      line-height: 1.35;
+    }
+
+    /* ── piles of coins: кучки квадратиков ── */
+    .eq {
+      --sq: 9px;
+      --gap: 2px;
+      margin-top: 26px;
+      padding-top: 18px;
+      border-top: 1px dashed rgba(0,0,0,0.12);
+    }
+
+    .eq-title {
+      font-size: 14px;
+      font-weight: 700;
+      color: var(--faded);
+      text-align: center;
+      line-height: 1.35;
+    }
+
+    .eq-row {
+      display: flex;
+      justify-content: center;
+      align-items: flex-end;
+      gap: 6px;
+      margin: 12px 0 22px;
+    }
+
+    .pile-box {
+      display: flex;
+      flex-direction: column;
+      align-items: center;
+      gap: 6px;
+      min-width: 0;
+    }
+
+    /* wrap-reverse: кучка растёт снизу вверх, закрашенная часть лежит внизу */
+    .pile {
+      display: flex;
+      flex-wrap: wrap-reverse;
+      gap: var(--gap);
+    }
+
+    .pile:empty {
+      width: var(--sq);
+      height: var(--sq);
+      outline: 1px dashed rgba(0,0,0,0.25);
+      border-radius: 2px;
+    }
+
+    .sq {
+      height: var(--sq);
+      border-radius: 2px;
+      transition: background .15s;
+    }
+
+    .pile-cap {
+      font-size: 12px;
+      line-height: 1.3;
+      color: var(--faded);
+      text-align: center;
+      white-space: nowrap;
+      font-variant-numeric: tabular-nums;
+    }
+
+    .pile-cap b { display: block; font-size: 14px; color: var(--ink); }
+    .pile-cap b.pos { color: var(--green); }
+    .pile-cap b.neg { color: var(--red); }
+
+    .eq-op {
+      align-self: center;
+      font-family: 'Unbounded', sans-serif;
+      font-weight: 900;
+      font-size: 20px;
+      line-height: 1;
+      color: var(--faded);
+      text-align: center;
+    }
+
+    .eq-to { padding: 0 8px; }
+
+    .eq-op small {
+      display: block;
+      font-family: 'Nunito', sans-serif;
+      font-size: 12px;
+      font-weight: 700;
+      margin-bottom: 2px;
+    }
+
+    /* Срезы кучек: банк режется на высоте p, ставка на высоте 1 − p.
+       Подпись висит снаружи кучки на уровне линии, под неё оставлено поле */
+    .cut-right { margin-right: 76px; }
+    .cut-left  { margin-left: 76px; }
+    .pile-wrap { position: relative; }
+
+    .cut {
+      position: absolute;
+      left: -5px;
+      right: -5px;
+      border-top: 2px solid var(--ink);
+      transition: bottom .15s;
+    }
+
+    .cut-hint {
+      position: absolute;
+      top: 0;
+      transform: translateY(-50%);
+      width: 72px;
+      font-size: 12px;
+      font-weight: 700;
+      line-height: 1.3;
+      white-space: pre;
+    }
+
+    .cut-right .cut-hint { left: calc(100% + 6px); color: var(--green); }
+    .cut-left  .cut-hint { right: calc(100% + 6px); text-align: right; color: var(--red); }
+
+    .cmp {
+      margin: -8px 0 22px;
+      font-size: 14px;
+      font-weight: 700;
+      text-align: center;
+      font-variant-numeric: tabular-nums;
+    }
+
+    /* Кнопка (?) раскрывает пояснение */
+    .q {
+      display: inline-grid;
+      place-items: center;
+      width: 17px;
+      height: 17px;
+      margin-left: 2px;
+      vertical-align: 1px;
+      border: 1px solid currentColor;
+      border-radius: 50%;
+      background: none;
+      color: inherit;
+      font: 700 11px/1 'Nunito', sans-serif;
+      cursor: pointer;
+    }
+
+    .q[aria-expanded="true"] { background: var(--ink); border-color: var(--ink); color: var(--bg); }
+
+    .why { margin: 0 0 18px; }
+
+    .eq-legend {
+      font-size: 13px;
+      color: var(--faded);
+      line-height: 1.35;
+    }
+
+    .eq-legend i {
+      display: inline-block;
+      width: 11px;
+      height: 11px;
+      border-radius: 2px;
+      vertical-align: -1px;
+    }
+
+    @media (min-width: 480px) {
+      .eq { --sq: 12px; --gap: 3px; }
+      .eq-row { gap: 12px; }
+      .cut-right { margin-right: 100px; }
+      .cut-left  { margin-left: 100px; }
+      .cut-hint { width: 96px; font-size: 13px; }
+    }
+
+    /* ── results ── */
+    .results {
+      display: grid;
+      grid-template-columns: 1fr 1fr;
+      gap: 10px;
+      margin-top: 22px;
+    }
+
+    .stat {
+      border: 1px solid rgba(0,0,0,0.08);
+      border-radius: 6px;
+      padding: 12px 14px;
+    }
+
+    .stat-label { font-size: 13px; color: var(--faded); line-height: 1.3; }
+
+    .stat-value {
+      font-family: 'Unbounded', sans-serif;
+      font-weight: 900;
+      font-size: clamp(18px, 4.5vw, 24px);
+      line-height: 1.3;
+      font-variant-numeric: tabular-nums;
+    }
+
+    .pos { color: var(--green); }
+    .neg { color: var(--red); }
+
+    .verdict {
+      grid-column: 1 / -1;
+      text-align: center;
+      padding: 16px 14px;
+      border-radius: 6px;
+      color: #fff;
+      background: var(--faded);
+      transition: background .15s;
+    }
+
+    .verdict.yes { background: var(--green); }
+    .verdict.no  { background: var(--red); }
+
+    .verdict-word {
+      font-family: 'Unbounded', sans-serif;
+      font-weight: 900;
+      font-size: clamp(28px, 8vw, 40px);
+      line-height: 1.1;
+    }
+
+    .verdict-why { font-size: 14px; opacity: .9; margin-top: 4px; }
+
+    .formula {
+      font-family: ui-monospace, monospace;
+      font-size: .9em;
+      line-height: 1.4;
+      background: #fff;
+      border-left: 3px solid var(--red);
+      padding: 12px 14px;
+      margin: 0 0 1em;
+    }
+
+    /* Подсказка-облачко над частью формулы, хвостик указывает на (1 − p) */
+    .callout {
+      background: var(--ink);
+      color: var(--bg);
+      font-size: 14px;
+      line-height: 1.45;
+      border-radius: 6px;
+      padding: 10px 14px;
+      margin: 0 0 12px;
+    }
+
+    .hinted {
+      position: relative;
+      color: var(--red);
+      font-weight: 700;
+      border-bottom: 2px dotted var(--red);
+    }
+
+    .callout[hidden] + .formula .hinted::before { display: none; }
+
+    .hinted::before {
+      content: '';
+      position: absolute;
+      left: 50%;
+      bottom: 100%;
+      margin-bottom: 12px;
+      transform: translateX(-50%);
+      border: 8px solid transparent;
+      border-top-color: var(--ink);
+    }
+
+    /* ── quiz ── */
+    .quiz-step {
+      font-size: 13px;
+      font-weight: 700;
+      letter-spacing: .08em;
+      text-transform: uppercase;
+      color: var(--faded);
+    }
+
+    .quiz-q { margin: 6px 0 14px; }
+
+    .quiz-form {
+      display: flex;
+      flex-wrap: wrap;
+      align-items: baseline;
+      gap: 8px;
+    }
+
+    .quiz-form input {
+      width: 8ch;
+      font: inherit;
+      font-weight: 700;
+      color: var(--ink);
+      background: var(--bg);
+      border: 1px solid rgba(0,0,0,0.15);
+      border-radius: 4px;
+      padding: 2px 8px;
+    }
+
+    .quiz-unit { color: var(--faded); }
+
+    .btn {
+      font: 700 15px/1 'Nunito', sans-serif;
+      color: #fff;
+      background: var(--red);
+      border: none;
+      border-radius: 6px;
+      padding: 9px 16px;
+      cursor: pointer;
+      box-shadow: 2px 2px 0 rgba(0,0,0,0.12);
+    }
+
+    .btn:hover { box-shadow: 3px 3px 0 rgba(200,40,30,0.25); }
+    .btn-ghost { color: var(--ink); background: none; border: 1px solid rgba(0,0,0,0.15); box-shadow: none; }
+
+    .quiz-feedback { margin: 14px 0 0; line-height: 1.5; }
+    .quiz-feedback b { display: block; }
+    .quiz-feedback small { color: var(--faded); font-size: 14px; }
+    #quiz-next { margin-top: 14px; }
+
+    .links { list-style: none; }
+    .links li + li { margin-top: .4em; }
+    .links a {
+      color: var(--ink);
+      text-decoration: underline;
+      text-decoration-color: rgba(200, 40, 30, 0.35);
+      text-underline-offset: 3px;
+    }
+    .links a:hover { color: var(--red); text-decoration-color: var(--red); }
+
+    footer {
+      margin-top: 72px;
+      padding-top: 20px;
+      border-top: 1px solid rgba(0,0,0,0.10);
+      font-size: 11px;
+      letter-spacing: .10em;
+      color: rgba(0,0,0,0.2);
+    }
+
+    .back {
+      display: inline-block;
+      margin-bottom: 32px;
+      color: var(--faded);
+      text-decoration: none;
+      font-weight: 600;
+    }
+    .back:hover { color: var(--red); }
+
+    @media (max-width: 400px) {
+      .page { padding: 40px 16px 60px; }
+      .calc { padding: 18px 14px; }
+      .results { grid-template-columns: 1fr; }
+    }
+  </style>
+  <script data-goatcounter="https://lamopad.goatcounter.com/count"
+          async src="//gc.zgo.at/count.js"></script>
+</head>
+<body>
+
+<main class="page">
+  <a class="back" href="/">&larr; Ламопад</a>
+
+  <header>
+    <h1>Риск и стратегия</h1>
+    <p class="tagline">матожидание</p>
+  </header>
+
+  <section>
+    <h2>1. Стоит ли делать ставку в покере?</h2>
+
+    <p>Соперник поставил, в банке лежат деньги, вам нужно доплатить. Платить или сбросить карты? Двигайте ползунки.</p>
+
+    <div class="calc" id="calc">
+      <div class="field">
+        <div class="field-head">
+          <label for="pot-range">Банк<span class="hint">всё, что уже лежит на столе, вместе со ставкой соперника</span></label>
+          <span class="num"><input id="pot" type="number" min="0" max="1000" step="1" value="100" inputmode="numeric" aria-label="Банк, монет"><span>мон.</span></span>
+        </div>
+        <input id="pot-range" type="range" min="0" max="1000" step="1" value="100">
+      </div>
+
+      <div class="field">
+        <div class="field-head">
+          <label for="call-range">Моя ставка<span class="hint">сколько нужно доплатить, чтобы остаться в игре</span></label>
+          <span class="num"><input id="call" type="number" min="0" max="1000" step="1" value="50" inputmode="numeric" aria-label="Моя ставка, монет"><span>мон.</span></span>
+        </div>
+        <input id="call-range" type="range" min="0" max="1000" step="1" value="50">
+      </div>
+
+      <div class="field">
+        <div class="field-head">
+          <label for="chance-range">Вероятность победы<span class="hint">ваше эквити: доля раскладов, где банк ваш</span></label>
+          <span class="num"><input id="chance" type="number" min="0" max="100" step="1" value="20" inputmode="numeric" aria-label="Вероятность победы, процентов"><span>%</span></span>
+        </div>
+        <input id="chance-range" type="range" min="0" max="100" step="1" value="20">
+      </div>
+
+      <div class="bar" aria-hidden="true">
+        <div class="bar-fill" id="bar-fill"></div>
+        <div class="bar-mark" id="bar-mark"></div>
+      </div>
+      <div class="bar-legend">
+        <span>заливка - ваш шанс</span>
+        <span id="even-label"></span>
+      </div>
+
+      <div class="eq" aria-label="Кучки монет: ставка, банк и ожидание">
+        <div class="eq-title">Ставлю такую кучку, чтобы забрать такую</div>
+        <div class="eq-row">
+          <div class="pile-box cut-left">
+            <div class="pile-wrap">
+              <div class="pile" id="pile-bet"></div>
+              <div class="cut" id="cut-bet"><span class="cut-hint"><span id="cut-bet-share"></span> <button class="q" type="button" aria-controls="why-loss" aria-expanded="false" aria-label="Почему 1 − p">?</button></span></div>
+            </div>
+            <div class="pile-cap">моя ставка<b id="cap-bet"></b></div>
+          </div>
+          <div class="eq-op eq-to">→</div>
+          <div class="pile-box cut-right">
+            <div class="pile-wrap">
+              <div class="pile" id="pile-prize"></div>
+              <div class="cut" id="cut-prize"><span class="cut-hint"><span id="cut-prize-share"></span> <button class="q" type="button" aria-controls="why-win" aria-expanded="false" aria-label="Почему p">?</button></span></div>
+            </div>
+            <div class="pile-cap">банк<b id="cap-prize"></b></div>
+          </div>
+        </div>
+        <p class="cmp" id="cmp"></p>
+        <p class="callout why" id="why-win" hidden>Шанс победы - это кусок банка, который в среднем ваш за раздачу: <b class="win-avg"></b> В одной раздаче вы забираете весь банк или ничего, но на длинной дистанции выходит именно столько.</p>
+        <p class="callout why why-loss" id="why-loss" hidden>При победе вы забираете банк <b>и возвращаете свою ставку</b>, поэтому теряете её только когда проигрываете. То есть в среднем вы платите <b class="loss-avg"></b></p>
+
+        <div class="eq-title">Что это даёт в среднем за игру</div>
+        <div class="eq-row">
+          <div class="pile-box">
+            <div class="pile" id="pile-win"></div>
+            <div class="pile-cap" id="cap-win-k"></div>
+            <div class="pile-cap"><b id="cap-win" class="pos"></b></div>
+          </div>
+          <div class="eq-op">−</div>
+          <div class="pile-box">
+            <div class="pile" id="pile-loss"></div>
+            <div class="pile-cap" id="cap-loss-k"></div>
+            <div class="pile-cap"><b id="cap-loss" class="neg"></b></div>
+          </div>
+          <div class="eq-op">=</div>
+          <div class="pile-box">
+            <div class="pile" id="pile-ev"></div>
+            <div class="pile-cap">прибыль</div>
+            <div class="pile-cap"><b id="cap-ev"></b></div>
+          </div>
+        </div>
+
+        <p class="eq-legend"><i id="unit-sq"></i> = <span id="unit"></span> мон. Яркие квадратики - то, что в среднем забираете (зелёные) или теряете (красные). Бледные - остаток банка или ставки.</p>
+      </div>
+
+      <div class="results" aria-live="polite">
+        <div class="stat">
+          <div class="stat-label">Матожидание прибыли</div>
+          <div class="stat-value" id="ev"></div>
+        </div>
+        <div class="stat">
+          <div class="stat-label">На каждую поставленную монету</div>
+          <div class="stat-value" id="ratio"></div>
+        </div>
+        <div class="verdict" id="verdict">
+          <div class="verdict-word" id="verdict-word"></div>
+          <div class="verdict-why" id="verdict-why"></div>
+        </div>
+      </div>
+    </div>
+
+    <p>Как считается:</p>
+    <p class="callout why-loss" id="why-formula" hidden></p>
+    <p class="formula">EV = p · банк − <span class="hinted">(1 − p)</span><button class="q" type="button" aria-controls="why-formula" aria-expanded="false" aria-label="Почему 1 − p">?</button> · ставка</p>
+    <p>Отсюда точка безубыточности:</p>
+    <p class="formula">p &gt; ставка / (банк + ставка)</p>
+    <p class="muted">Упрощение: это последняя ставка, дальше никто не доплачивает. В живой игре на результат ещё влияют будущие ставки на следующих улицах (implied odds) и шанс, что соперник сбросит карты.</p>
+  </section>
+
+  <section>
+    <h2>2. Мини-квиз</h2>
+    <p>Проверьте себя без ползунков. Ответ - число, можно дробное. Если ответ не круглый, засчитывается всё, что отличается от точного меньше чем на 0,1.</p>
+
+    <div class="calc quiz" aria-live="polite">
+      <div class="quiz-step" id="quiz-step"></div>
+      <p class="quiz-q" id="quiz-q"></p>
+      <form class="quiz-form" id="quiz-form">
+        <input id="quiz-input" type="text" inputmode="decimal" autocomplete="off" aria-label="Ваш ответ">
+        <span class="quiz-unit" id="quiz-unit"></span>
+        <button class="btn" type="submit">Проверить</button>
+      </form>
+      <p class="quiz-feedback" id="quiz-feedback" hidden></p>
+      <button class="btn btn-ghost" type="button" id="quiz-next" hidden></button>
+    </div>
+  </section>
+
+  <section>
+    <h2>Доп. материалы</h2>
+    <ul class="links">
+      <li><a href="https://pekarstas.com/veroyatnosti-v-pokere/" target="_blank" rel="noopener">Вероятность в покере</a> <span class="muted">· pekarstas.com</span></li>
+    </ul>
+  </section>
+
+  <footer>&copy; Ламопад &mdash; все права защищены</footer>
+</main>
+
+<script type="module">
+  import { assessCall } from '/risk/js/bet-math.js';
+  import { pickUnit, cells, pileCols, cutHeight } from '/risk/js/coin-grid.js';
+  import { makeQuiz, parseAnswer, judge } from '/risk/js/quiz.js';
+
+  const $ = (id) => document.getElementById(id);
+  const fields = ['pot', 'call', 'chance'];
+
+  const coins = (x) => x.toLocaleString('ru-RU', { maximumFractionDigits: 1 });
+  const signed = (x, fmt) => (x > 0 ? '+' : x < 0 ? '−' : '') + fmt(Math.abs(x));
+  const tone = (el, x) => {
+    el.classList.toggle('pos', x > 0);
+    el.classList.toggle('neg', x < 0);
+  };
+
+  const COLORS = {
+    green: ['#2f7d3a', 'rgba(47,125,58,0.18)'],
+    red:   ['#c8281e', 'rgba(200,40,30,0.18)'],
+  };
+
+  // Последний квадрат уже, если сумма не кратна номиналу: площадь = монеты
+  // cut - высота горизонтального среза в рядах: тогда закраска идёт снизу до среза,
+  // иначе закрашены первые filled монет по порядку укладки
+  function drawPile(el, amount, filled, unit, color, cut = null) {
+    const [bright, pale] = COLORS[color];
+    const squares = cells(amount, filled, unit);
+    const cols = pileCols(squares.length);
+    el.style.width = squares.length ? `calc(${cols} * (var(--sq) + var(--gap)) - var(--gap))` : '';
+    el.replaceChildren(...squares.map(({ part, fill }, i) => {
+      const sq = document.createElement('span');
+      const [dir, edge] = cut === null
+        ? ['to right', (fill / part) * 100]
+        : ['to top', Math.min(1, Math.max(0, cut - Math.floor(i / cols))) * 100];
+      sq.className = 'sq';
+      sq.style.width = `calc(var(--sq) * ${part})`;
+      sq.style.background = `linear-gradient(${dir}, ${bright} ${edge}%, ${pale} ${edge}%)`;
+      return sq;
+    }));
+  }
+
+  // Линия на высоте cut рядов; ровно на границе рядов - посередине зазора
+  function placeCut(line, cut) {
+    const row = Math.floor(cut), frac = cut - row;
+    line.style.bottom = frac === 0 && row > 0
+      ? `calc(${row} * (var(--sq) + var(--gap)) - var(--gap) / 2)`
+      : `calc(${row} * (var(--sq) + var(--gap)) + ${frac} * var(--sq))`;
+  }
+
+  // Кучка с горизонтальным срезом: под линией ровно area монет
+  function drawCutPile(name, amount, area, unit, color) {
+    const parts = cells(amount, 0, unit).map((c) => c.part);
+    const cut = cutHeight(parts, pileCols(parts.length), area / unit);
+    drawPile($('pile-' + name), amount, area, unit, color, cut);
+    placeCut($('cut-' + name), cut);
+  }
+
+  function render() {
+    const [pot, call, chance] = fields.map((f) => Number($(f).value));
+    const r = assessCall({ pot, call, winChance: chance / 100 });
+
+    $('ev').textContent = signed(r.ev, coins) + ' мон.';
+    tone($('ev'), r.ev);
+
+    if (r.evPerCoin === null) {
+      $('ratio').textContent = 'без затрат';
+      $('ratio').classList.remove('pos', 'neg');
+    } else {
+      $('ratio').textContent = signed(r.evPerCoin * 100, (x) => x.toFixed(0)) + '%';
+      tone($('ratio'), r.evPerCoin);
+    }
+
+    const p = chance / 100;
+    const win = p * pot, loss = (1 - p) * call;
+    const unit = pickUnit(Math.max(pot, call));
+    drawCutPile('bet', call, loss, unit, 'red');
+    drawCutPile('prize', pot, win, unit, 'green');
+    $('cut-bet-share').textContent = `${100 - chance}% ставки\n= ${coins(loss)} мон.`;
+    $('cut-prize-share').textContent = `шанс ${chance}%\n= ${coins(win)} мон.`;
+    const fillAll = (cls, text) => document.querySelectorAll(cls).forEach((el) => { el.textContent = text; });
+    fillAll('.win-avg', `${chance}% × ${coins(pot)} = ${coins(win)} мон.`);
+    fillAll('.loss-avg', `${100 - chance}% × ${coins(call)} = ${coins(loss)} мон.`);
+    const sign = r.verdict === 'yes' ? '>' : r.verdict === 'no' ? '<' : '=';
+    $('cmp').textContent = `${coins(win)} ${sign} ${coins(loss)}: ${r.verdict === 'yes' ? 'в плюс' : r.verdict === 'no' ? 'в минус' : 'в ноль'}`;
+    $('cmp').className = 'cmp ' + { yes: 'pos', no: 'neg', even: '' }[r.verdict];
+    drawPile($('pile-win'), pot, win, unit, 'green');
+    drawPile($('pile-loss'), call, loss, unit, 'red');
+    drawPile($('pile-ev'), Math.abs(r.ev), Math.abs(r.ev), unit, r.ev >= 0 ? 'green' : 'red');
+    $('cap-bet').textContent = coins(call);
+    $('cap-prize').textContent = coins(pot);
+    $('cap-win-k').textContent = `${chance}% банка`;
+    $('cap-win').textContent = '+' + coins(win);
+    $('cap-loss-k').textContent = `${100 - chance}% ставки`;
+    $('cap-loss').textContent = signed(-loss, coins);
+    $('cap-ev').textContent = signed(r.ev, coins);
+    tone($('cap-ev'), r.ev);
+    $('unit').textContent = unit;
+    $('unit-sq').style.background = COLORS.green[0];
+
+    const evenPct = r.breakEvenChance * 100;
+    $('bar-fill').style.width = chance + '%';
+    $('bar-fill').style.background = chance > evenPct ? 'var(--green)' : 'var(--red)';
+    $('bar-mark').style.left = evenPct + '%';
+    $('even-label').textContent = '| нужно больше ' + evenPct.toFixed(1) + '%';
+
+    const limit = r.maxCall === Infinity ? 'любая ставка' : 'ставка до ' + coins(r.maxCall) + ' мон.';
+    const verdicts = {
+      yes:  ['Да, платить', 'в долгую это плюс. При таком шансе выгодна ' + limit],
+      no:   ['Нет, сбросить', 'в долгую это минус. При таком шансе выгодна ' + limit],
+      even: ['В ноль', 'ни плюса, ни минуса: дальше решает вкус к риску'],
+    };
+    const [word, why] = verdicts[r.verdict];
+    $('verdict').className = 'verdict ' + r.verdict;
+    $('verdict-word').textContent = word;
+    $('verdict-why').textContent = why;
+  }
+
+  // Одно пояснение про 1 − p на две кнопки (?): у кучки ставки и в формуле
+  $('why-formula').innerHTML = $('why-loss').innerHTML;
+  for (const q of document.querySelectorAll('.q')) {
+    q.addEventListener('click', () => {
+      const open = q.getAttribute('aria-expanded') !== 'true';
+      q.setAttribute('aria-expanded', open);
+      $(q.getAttribute('aria-controls')).hidden = !open;
+    });
+  }
+
+  // Ползунок и числовое поле - два входа для одного значения
+  for (const f of fields) {
+    const num = $(f), range = $(f + '-range');
+    range.addEventListener('input', () => { num.value = range.value; render(); });
+    num.addEventListener('input', () => {
+      if (num.value === '') return;  // даём стереть и набрать заново
+      const v = Math.min(Number(num.max), Math.max(0, Number(num.value) || 0));
+      if (Number(num.value) !== v) num.value = v;
+      range.value = v;
+      render();
+    });
+    num.addEventListener('change', () => { num.value = range.value; });
+  }
+
+  render();
+
+  // ── квиз ──
+  let quiz, step, score;
+
+  const QUESTIONS = {
+    maxCall: (q) => [`В банке ${q.pot} мон., вероятность забрать его ${q.chance}%. Какая максимальная ставка имеет смысл?`, 'мон.'],
+    minChance: (q) => [`Вы хотите поставить ровно ${q.call} мон. при банке ${q.pot} мон. С какой минимальной вероятностью победы это имеет смысл?`, '%'],
+  };
+  const exactNum = (x) => x.toLocaleString('ru-RU', { maximumFractionDigits: 2 });
+  const answerText = (q) => exactNum(q.answer) + (q.kind === 'maxCall' ? ' мон.' : '%');
+  const WHY = {
+    maxCall: (q) => `Ставка в ноль: ${q.chance}% × ${q.pot} / ${100 - q.chance}% = ${answerText(q)} Всё, что меньше, - в плюс.`,
+    minChance: (q) => `Порог: ${q.call} / (${q.pot} + ${q.call}) = ${answerText(q)}. Всё, что выше, - в плюс.`,
+  };
+
+  function startQuiz() {
+    quiz = makeQuiz();
+    step = 0;
+    score = 0;
+    showQuestion();
+  }
+
+  function showQuestion() {
+    const q = quiz[step];
+    const [text, unit] = QUESTIONS[q.kind](q);
+    $('quiz-step').textContent = `Вопрос ${step + 1} из ${quiz.length}`;
+    $('quiz-q').textContent = text;
+    $('quiz-unit').textContent = unit;
+    $('quiz-form').hidden = false;
+    $('quiz-feedback').hidden = true;
+    $('quiz-next').hidden = true;
+    $('quiz-input').value = '';
+  }
+
+  function feedback(html, cls) {
+    $('quiz-feedback').innerHTML = html;
+    $('quiz-feedback').className = 'quiz-feedback ' + cls;
+    $('quiz-feedback').hidden = false;
+  }
+
+  $('quiz-form').addEventListener('submit', (e) => {
+    e.preventDefault();
+    const q = quiz[step];
+    const answer = parseAnswer($('quiz-input').value);
+    if (Number.isNaN(answer)) return feedback('Введите число.', '');
+
+    const { ok, exact } = judge(answer, q.answer);
+    if (ok) score++;
+    const head = ok
+      ? (exact ? `✓ Верно: ${answerText(q)}` : `✓ Засчитано. Точно: ${answerText(q)}`)
+      : `✗ Нет, ответ: ${answerText(q)}`;
+    feedback(`<b>${head}</b><small>${WHY[q.kind](q)}</small>`, ok ? 'pos' : 'neg');
+    $('quiz-form').hidden = true;
+    $('quiz-next').textContent = step + 1 < quiz.length ? 'Дальше' : 'Итог';
+    $('quiz-next').hidden = false;
+    $('quiz-next').focus();
+  });
+
+  $('quiz-next').addEventListener('click', () => {
+    if (step === null) return startQuiz();
+    if (++step < quiz.length) return showQuestion();
+    $('quiz-step').textContent = 'Итог';
+    $('quiz-q').textContent = `Правильно ${score} из ${quiz.length}.` + (score === quiz.length ? ' Можно садиться за стол.' : '');
+    $('quiz-form').hidden = true;
+    $('quiz-feedback').hidden = true;
+    $('quiz-next').textContent = 'Ещё раз';
+    step = null;
+  });
+
+  startQuiz();
+</script>
+
+<script src="/js/lamopad-fall.js"></script>
+</body>
+</html>

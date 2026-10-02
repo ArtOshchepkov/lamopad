@@ -650,6 +650,37 @@
     .quiz-feedback small { color: var(--faded); font-size: 14px; }
     #quiz-next { margin-top: 14px; }
 
+    .thanks {
+      display: flex;
+      align-items: center;
+      gap: 24px;
+      margin-top: 64px;
+    }
+
+    .thanks img {
+      width: 200px;
+      height: auto;
+      flex-shrink: 0;
+      border-radius: 6px;
+      box-shadow: 3px 3px 0 rgba(0,0,0,0.07);
+    }
+
+    .thanks h2 { margin-top: 0; }
+    .thanks p { margin: 0; }
+
+    .thanks a {
+      color: var(--ink);
+      text-decoration: underline;
+      text-decoration-color: rgba(200, 40, 30, 0.35);
+      text-underline-offset: 3px;
+    }
+    .thanks a:hover { color: var(--red); text-decoration-color: var(--red); }
+
+    @media (max-width: 560px) {
+      .thanks { flex-direction: column; align-items: flex-start; }
+      .thanks img { width: 100%; max-width: 360px; }
+    }
+
     .links { list-style: none; }
     .links li + li { margin-top: .4em; }
     .links a {
@@ -956,6 +987,14 @@
     <ul class="links">
       <li><a href="https://pekarstas.com/veroyatnosti-v-pokere/" target="_blank" rel="noopener">Вероятность в покере</a> <span class="muted">· pekarstas.com</span></li>
     </ul>
+  </section>
+
+  <section class="thanks">
+    <img src="./img/author-poker.jpg" width="720" height="765" alt="Артём Ощепков за покерным столом с фишками в руках" loading="lazy">
+    <div>
+      <h2>Спасибо, что прочли!</h2>
+      <p>Если нашли ошибку или хотите оставить комментарий, пишите мне в телеграм: <a href="https://t.me/art_oshk" target="_blank" rel="noopener">t.me/art_oshk</a>.</p>
+    </div>
   </section>
 
   <footer>&copy; Ламопад &mdash; все права защищены</footer>

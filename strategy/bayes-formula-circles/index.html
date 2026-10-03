@@ -236,10 +236,9 @@
     .hl.on { background: rgba(200,40,30,0.12); }
     .hl:focus-visible { outline: 2px solid var(--red); outline-offset: 2px; }
 
-    /* На телефоне схема прилипает к верху, пока читаешь вывод под ней */
-    @media (max-width: 560px) {
-      .venn-live { position: sticky; top: 0; z-index: 2; margin: 0 -24px 20px; padding: 8px 24px 6px; background: var(--bg); box-shadow: 0 6px 8px -6px rgba(0,0,0,0.15); }
-    }
+    /* Схема прилипает к верху, пока читаешь вывод под ней; на широком экране ужата, чтобы оставить место тексту */
+    .venn-live { position: sticky; top: 0; z-index: 2; margin: 0 -24px 20px; padding: 8px 24px 6px; background: var(--bg); box-shadow: 0 6px 8px -6px rgba(0,0,0,0.15); }
+    .venn-live svg { max-width: 480px; margin-inline: auto; }
 
     figure { margin: 24px 0 28px; }
     figure svg { display: block; width: 100%; height: auto; }

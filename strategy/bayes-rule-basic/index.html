@@ -589,6 +589,58 @@
     /* Длинная формула не переносится, на узком экране прокручивается внутри плашки */
     .formula.wide { white-space: nowrap; overflow-x: auto; }
 
+    /* ── карточки искажений: корешок шага как в калькуляторе ── */
+    .divider.curious { margin: 64px 0 0; }
+
+    .bias {
+      --c: var(--red);
+      display: grid;
+      grid-template-columns: 56px 1fr;
+      background: #fff;
+      border: 1px solid rgba(0,0,0,0.08);
+      border-radius: 6px;
+      box-shadow: 3px 3px 0 rgba(0,0,0,0.07);
+      overflow: hidden;
+      margin-bottom: 18px;
+    }
+    .bias.calm-blue  { --c: var(--blue); }
+    .bias.calm-green { --c: var(--green); }
+
+    .bias-side {
+      display: flex;
+      flex-direction: column;
+      align-items: center;
+      gap: 10px;
+      padding: 18px 0;
+      background: var(--c);
+      color: #fff;
+      font-family: 'Unbounded', sans-serif;
+      font-weight: 900;
+    }
+    .bias-side b { font-size: 24px; line-height: 1; }
+    .bias-side span { writing-mode: vertical-rl; transform: rotate(180deg); font-size: 12px; letter-spacing: .18em; text-transform: uppercase; }
+
+    .bias-body { padding: 18px 20px; min-width: 0; }
+    .bias-body p { margin: 0; }
+    .bias .bias-name { margin: 0; color: var(--c); font-size: clamp(17px, 4vw, 21px); line-height: 1.2; }
+    .bias-en { font-size: 14px; font-style: italic; color: var(--faded); }
+    .bias-what { margin: 8px 0 12px !important; color: var(--faded); font-size: .92em; }
+    .bias-what a { color: inherit; text-decoration: underline; text-decoration-color: rgba(200,40,30,0.35); text-underline-offset: 3px; }
+    .bias-what a:hover { color: var(--red); }
+
+    .bias-row { display: grid; grid-template-columns: 110px 1fr; gap: 12px; padding: 10px 0; border-top: 1px dashed rgba(0,0,0,0.12); }
+    .bias-tag { padding-top: 5px; font: 900 11px/1.2 'Unbounded', sans-serif; letter-spacing: .14em; text-transform: uppercase; }
+    .bias-row.shield .bias-tag { color: var(--green); }
+    .bias-row.doom { background: rgba(200,40,30,0.06); margin: 0 -20px -18px; padding: 12px 20px 16px; }
+    .bias-row.doom .bias-tag { color: var(--red); }
+
+    @media (max-width: 560px) {
+      .bias { grid-template-columns: 40px 1fr; }
+      .bias-body { padding: 16px 14px; }
+      .bias-row { grid-template-columns: 1fr; gap: 2px; }
+      .bias-row.doom { margin: 0 -14px -16px; padding: 12px 14px 14px; }
+    }
+
     .thanks { margin-top: 64px; }
     .thanks h2 { margin-top: 0; }
 
@@ -765,7 +817,55 @@
   </section>
 
   <section>
-    <h2>3. Это и есть теорема Байеса</h2>
+    <h2>3. Выводы</h2>
+    <p>Когда что-то пугает, задайте три вопроса:</p>
+    <ol class="rules">
+      <li><b>Не перевернул ли я фразу?</b> «Если увольняют, то зовут» не значит «если зовут, то увольняют».</li>
+      <li><b>А бывает так же без беды?</b> Если да и почти так же часто, сам знак почти ничего не значит.</li>
+      <li><b>Как часто беда случается вообще?</b> Редкое событие остаётся редким. Не всегда пугающий знак это меняет, особенно если вы привыкли тревожиться.</li>
+    </ol>
+    <p>Работает не только с начальником: страшный анализ, шорох ночью в палатке, «нам надо поговорить» от близкого человека.</p>
+  </section>
+
+  <p class="divider curious">а дальше для любопытных</p>
+
+  <section>
+    <h2>4. Три шага - три когнитивных искажения</h2>
+    <p>Каждый шаг калькулятора чинит одну конкретную ошибку мышления. У них даже есть научные названия.</p>
+    <article class="bias ">
+      <div class="bias-side"><b>1</b><span>Паника</span></div>
+      <div class="bias-body">
+        <h3 class="bias-name">Ошибка прокурора</h3>
+        <p class="bias-en">prosecutor's fallacy</p>
+        <p class="bias-what">Путаем «если огонь, то дым» и «если дым, то огонь». <a href="https://ruxpert.ru/%D0%9C%D0%B0%D0%BD%D0%B8%D0%BF%D1%83%D0%BB%D1%8F%D1%86%D0%B8%D1%8F_%D1%81%D1%82%D0%B0%D1%82%D0%B8%D1%81%D1%82%D0%B8%D0%BA%D0%BE%D0%B9#%D0%A0%D0%B0%D0%B7%D0%BD%D0%BE%D0%B2%D0%B8%D0%B4%D0%BD%D0%BE%D1%81%D1%82%D1%8C:_%D0%BE%D1%88%D0%B8%D0%B1%D0%BA%D0%B0_%D0%BF%D1%80%D0%BE%D0%BA%D1%83%D1%80%D0%BE%D1%80%D0%B0" target="_blank" rel="noopener">Подробнее</a></p>
+        <div class="bias-row shield"><span class="bias-tag">Защита</span><p>Спросите себя: я сейчас про «если увольняют, то зовут» или «если зовут, то увольняют»?</p></div>
+        <div class="bias-row doom"><span class="bias-tag">Если забить</span><p>Все уволенные получали сообщения от начальника. Значит, каждое «ок 👍» от шефа - прощальное. Вы увольняетесь сами под гнётом неизбежности.</p></div>
+      </div>
+    </article>
+    <article class="bias calm-blue">
+      <div class="bias-side"><b>2</b><span>Опыт</span></div>
+      <div class="bias-body">
+        <h3 class="bias-name">Предвзятость подтверждения</h3>
+        <p class="bias-en">confirmation bias</p>
+        <p class="bias-what">Помним раз, когда тревога сбылась, и забываем двадцать, когда нет. <a href="https://ru.wikipedia.org/wiki/%D0%9F%D1%80%D0%B5%D0%B4%D0%B2%D0%B7%D1%8F%D1%82%D0%BE%D1%81%D1%82%D1%8C_%D0%BF%D0%BE%D0%B4%D1%82%D0%B2%D0%B5%D1%80%D0%B6%D0%B4%D0%B5%D0%BD%D0%B8%D1%8F" target="_blank" rel="noopener">Подробнее</a></p>
+        <div class="bias-row shield"><span class="bias-tag">Защита</span><p>А бывало так же, но без беды? Посчитайте честно, сколько раз.</p></div>
+        <div class="bias-row doom"><span class="bias-tag">Если забить</span><p>Мама звонит - значит, что-то случилось. Триста звонков просто так забываются. Итог: паникуешь от каждого пропущенного звонка.</p></div>
+      </div>
+    </article>
+    <article class="bias calm-green">
+      <div class="bias-side"><b>3</b><span>Другие</span></div>
+      <div class="bias-body">
+        <h3 class="bias-name">Ошибка базового процента</h3>
+        <p class="bias-en">base rate fallacy</p>
+        <p class="bias-what">Забываем, насколько беда редкая сама по себе. <a href="https://ru.wikipedia.org/wiki/%D0%9E%D1%88%D0%B8%D0%B1%D0%BA%D0%B0_%D0%B1%D0%B0%D0%B7%D0%BE%D0%B2%D0%BE%D0%B3%D0%BE_%D0%BF%D1%80%D0%BE%D1%86%D0%B5%D0%BD%D1%82%D0%B0" target="_blank" rel="noopener">Подробнее</a></p>
+        <div class="bias-row shield"><span class="bias-tag">Защита</span><p>Как часто это вообще бывает, у всех?</p></div>
+        <div class="bias-row doom"><span class="bias-tag">Если забить</span><p>Увидели в новостях, что футболиста прям на стадионе ударила молния. Больше не выходите на улицу в пасмурную погоду. А на футбол и тем более!</p></div>
+      </div>
+    </article>
+  </section>
+
+  <section>
+    <h2>5. Это и есть теорема Байеса</h2>
     <p>Три шага выше - это три числа, из которых она собирается:</p>
     <ol class="rules">
       <li><b>«Если увольняют, то так»</b> - <span class="math"><i>P</i>(позвали | уволят)</span>. Шаг 1, по-научному правдоподобие <span class="en">(likelihood)</span>.</li>
@@ -780,15 +880,6 @@
       &nbsp;&nbsp;&nbsp;&nbsp;+ P(позвали | не уволят) · P(не уволят) )</p>
     <p>Знаменатель - все способы, которыми вас могли так позвать <span class="en">(evidence)</span>. Обычно его коротко пишут как <span class="math"><i>P</i>(позвали)</span>, и получается каноничная запись:</p>
     <p class="formula">P(A | B) = P(B | A) · P(A) / P(B)</p>
-
-    <h3>Выводы</h3>
-    <p>Когда что-то пугает, задайте три вопроса:</p>
-    <ol class="rules">
-      <li><b>Не перевернул ли я фразу?</b> «Если увольняют, то зовут» не значит «если зовут, то увольняют».</li>
-      <li><b>А бывает так же без беды?</b> Если да и почти так же часто, сам знак почти ничего не значит.</li>
-      <li><b>Как часто беда случается вообще?</b> Редкое событие остаётся редким. Не всегда пугающий знак это меняет, особенно если вы привыкли тревожиться.</li>
-    </ol>
-    <p>Работает не только с начальником: страшный анализ, шорох ночью в палатке, «нам надо поговорить» от близкого человека.</p>
   </section>
 
   <section>

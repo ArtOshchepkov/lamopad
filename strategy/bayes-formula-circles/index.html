@@ -1,0 +1,509 @@
+<!DOCTYPE html>
+<html lang="ru">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>Как просто вывести формулу Байеса | Ламопад</title>
+  <meta name="description" content="Нарисуй две окружности - и формула Байеса выводится сама. Плюс пример: что значат тучи на небе в Питере и на Кипре.">
+  <meta name="keywords" content="формула Байеса, теорема Байеса, вывод формулы Байеса, условная вероятность, круги Эйлера, вероятность дождя">
+  <meta name="author" content="Артём Ощепков">
+  <meta name="robots" content="index, follow">
+  <link rel="canonical" href="https://lamopad.ru/strategy/bayes-formula-circles/">
+  <link rel="icon" href="/img/slon_96px.png" type="image/png" sizes="96x96">
+
+  <meta property="og:type" content="article">
+  <meta property="og:title" content="Как просто вывести формулу Байеса">
+  <meta property="og:description" content="Нарисуй две окружности - и формула Байеса выводится сама. Плюс пример: что значат тучи на небе в Питере и на Кипре.">
+  <meta property="og:url" content="https://lamopad.ru/strategy/bayes-formula-circles/">
+  <meta property="og:locale" content="ru_RU">
+  <meta property="og:site_name" content="Ламопад">
+  <meta name="twitter:card" content="summary">
+  <meta name="twitter:title" content="Как просто вывести формулу Байеса">
+  <meta name="twitter:description" content="Нарисуй две окружности - и формула Байеса выводится сама. Плюс пример: что значат тучи на небе в Питере и на Кипре.">
+  <meta property="article:published_time" content="2026-10-03">
+  <meta property="article:author" content="https://github.com/ArtOshchepkov">
+  <meta property="article:section" content="Вероятность">
+  <meta property="article:tag" content="формула Байеса">
+
+  <script type="application/ld+json">
+  {
+    "@context": "https://schema.org",
+    "@type": "Article",
+    "headline": "Как просто вывести формулу Байеса",
+    "description": "Нарисуй две окружности - и формула Байеса выводится сама. Плюс пример: что значат тучи на небе в Питере и на Кипре.",
+    "inLanguage": "ru",
+    "datePublished": "2026-10-03",
+    "dateModified": "2026-10-03",
+    "author": { "@type": "Person", "name": "Артём Ощепков", "url": "https://github.com/ArtOshchepkov" },
+    "publisher": { "@type": "Organization", "name": "Ламопад", "url": "https://lamopad.ru/", "logo": { "@type": "ImageObject", "url": "https://lamopad.ru/img/slon_1024px.jpg" } },
+    "mainEntityOfPage": "https://lamopad.ru/strategy/bayes-formula-circles/",
+    "about": ["Теорема Байеса", "Условная вероятность"],
+    "keywords": "формула Байеса, вывод формулы Байеса, условная вероятность"
+  }
+  </script>
+
+  <link rel="preconnect" href="https://fonts.googleapis.com">
+  <link href="https://fonts.googleapis.com/css2?family=Nunito:ital,wght@0,400;0,600;0,700;1,400&family=STIX+Two+Text:ital@0;1&family=Unbounded:wght@900&display=swap" rel="stylesheet">
+
+  <style>
+    *, *::before, *::after { margin: 0; padding: 0; box-sizing: border-box; }
+
+    :root {
+      --bg:    #f8f4ed;
+      --ink:   #1e1810;
+      --faded: #7a6e62;
+      --red:   #c8281e;
+      --blue:  #2a62b8;
+      --green: #2f7d3a;
+    }
+
+    body {
+      background: var(--bg);
+      color: var(--ink);
+      font-family: 'Nunito', sans-serif;
+      font-size: clamp(17px, 3.4vw, 21px);
+      line-height: 1.6;
+      min-height: 100vh;
+      cursor: url('/img/lamopad_cursor_48px.png') 0 0, auto;
+    }
+
+    .page {
+      position: relative;
+      z-index: 1;
+      max-width: 880px;
+      margin: 0 auto;
+      padding: clamp(48px, 10vw, 96px) 24px clamp(64px, 12vw, 120px);
+    }
+
+    h1 {
+      font-family: 'Unbounded', sans-serif;
+      font-size: clamp(26px, 7vw, 44px);
+      font-weight: 900;
+      line-height: 1.05;
+      color: var(--red);
+      letter-spacing: .01em;
+    }
+
+    .h1-key { color: var(--blue); }
+
+    .byline {
+      margin-top: 10px;
+      font-size: 14px;
+      color: var(--faded);
+    }
+
+    .byline a, .links a, .thanks a, section p a {
+      color: var(--ink);
+      text-decoration: underline;
+      text-decoration-color: rgba(200, 40, 30, 0.35);
+      text-underline-offset: 3px;
+    }
+    .byline a:hover, .links a:hover, .thanks a:hover, section p a:hover { color: var(--red); text-decoration-color: var(--red); }
+
+    .tagline {
+      margin-top: 12px;
+      font-size: clamp(11px, 2vw, 13px);
+      letter-spacing: .28em;
+      text-transform: uppercase;
+      color: var(--faded);
+      font-weight: 700;
+    }
+
+    h2 {
+      font-family: 'Unbounded', sans-serif;
+      font-size: clamp(17px, 4.2vw, 22px);
+      font-weight: 900;
+      line-height: 1.25;
+      margin: 56px 0 16px;
+    }
+
+    p { margin-bottom: 1em; }
+
+    /* Неразрывные формулы в строке растягивают пробелы при выравнивании по ширине */
+    section > p:not(.formula, :has(code)), details p:not(:has(code)) {
+      text-align: justify;
+      hyphens: auto;
+    }
+
+    .muted { color: var(--faded); font-size: .9em; }
+
+    /* Формула посреди фразы: не рвём её переносом строки */
+    code {
+      font-family: ui-monospace, monospace;
+      font-size: .85em;
+      white-space: nowrap;
+      background: #fff;
+      border-radius: 3px;
+      padding: 1px 5px;
+    }
+
+    /* Символы формулы подписаны над словами, которые они обозначают */
+    .glossed ruby { ruby-position: over; }
+    /* У каждого символа свой цвет: им же окрашены слово под ним и символ в P(H | E); H и E как на кругах */
+    .glossed .p   { color: var(--red); }
+    .glossed .h   { color: var(--blue); }
+    .glossed .bar { color: var(--green); }
+    .glossed .e   { color: var(--faded); }
+    .glossed rt {
+      font: 900 .72em/1 'Unbounded', sans-serif;
+      padding-bottom: 2px;
+    }
+    .glossed code span { font-weight: 700; }
+    /* Расшифровка буквы - мелко над ней (внешний ruby поверх внутреннего) */
+    .glossed rt.gloss {
+      font: italic 600 .55em/1.2 'Nunito', sans-serif;
+      letter-spacing: .02em;
+    }
+
+    .formula {
+      font-family: ui-monospace, monospace;
+      font-size: .9em;
+      line-height: 1.5;
+      background: #fff;
+      border-left: 3px solid var(--red);
+      padding: 12px 14px;
+      margin: 0 0 1em;
+      font-variant-numeric: tabular-nums;
+      white-space: nowrap;
+      overflow-x: auto;
+    }
+
+    .formula b { font-family: 'Unbounded', sans-serif; font-weight: 900; color: var(--red); }
+
+    /* Каноничная формула: акцент синим, как ключ в заголовке */
+    .formula.key { border-left-color: var(--blue); font-size: 1.05em; }
+    .formula.key b { color: var(--blue); }
+
+    /* ── живая схема вывода ── */
+    .venn-live .v-frame { fill: transparent; stroke: rgba(0,0,0,0.15); stroke-dasharray: 5 5; }
+    .venn-live .v-h    { fill: rgba(42,98,184,0.14); stroke: var(--blue); stroke-width: 2.5; }
+    .venn-live .v-e    { fill: rgba(122,110,98,0.16); stroke: var(--faded); stroke-width: 2.5; }
+    .venn-live .v-lens { fill: rgba(200,40,30,0.30); }
+    .venn-live :is(.v-frame, .v-h, .v-e, .v-lens, .v-labels) { transition: fill .25s, opacity .25s, stroke-width .25s; }
+    .venn-live .v-readout { fill: var(--red); }
+
+    /* Что подсвечено, то ярко; остальное притушено */
+    #venn[data-show="frame"] .v-frame { fill: rgba(200,40,30,0.07); stroke: var(--red); stroke-dasharray: none; stroke-width: 2.5; }
+
+    #venn[data-show="h"] .v-h { fill: rgba(42,98,184,0.42); stroke-width: 5; }
+    #venn[data-show="h"] .v-e { opacity: .25; }
+    #venn[data-show="h"] .v-lens { fill: transparent; }
+
+    #venn[data-show="e"] .v-e { fill: rgba(122,110,98,0.45); stroke-width: 5; }
+    #venn[data-show="e"] .v-h { opacity: .25; }
+    #venn[data-show="e"] .v-lens { fill: transparent; }
+
+    /* Доля: свой круг обведён жирно, его часть в пересечении - ярко-красная */
+    /* Доля - это отношение, а не площадь: свой круг показан целиком как «целое», красное - «часть», чужой круг почти убран */
+    #venn[data-show="eh"] .v-h { fill: rgba(42,98,184,0.30); stroke-width: 5; }
+    #venn[data-show="eh"] .v-e { fill: transparent; opacity: .3; }
+    #venn[data-show="he"] .v-e { fill: rgba(122,110,98,0.36); stroke-width: 5; }
+    #venn[data-show="he"] .v-h { fill: transparent; opacity: .3; }
+    #venn:is([data-show="eh"], [data-show="he"], [data-show^="lens"]) .v-lens { fill: rgba(200,40,30,0.7); }
+    #venn[data-show^="lens"] :is(.v-h, .v-e) { opacity: .45; }
+
+    /* Термин в тексте: пунктир-подсказка, активный - с подложкой */
+    .hl, .hl-demo {
+      text-decoration: underline dashed rgba(200,40,30,0.6);
+      text-underline-offset: 4px;
+      text-decoration-thickness: 1.5px;
+    }
+    .hl { cursor: pointer; border-radius: 3px; transition: background .2s; }
+    .hl.on { background: rgba(200,40,30,0.12); }
+    .hl:focus-visible { outline: 2px solid var(--red); outline-offset: 2px; }
+
+    /* На телефоне схема прилипает к верху, пока читаешь вывод под ней */
+    @media (max-width: 560px) {
+      .venn-live { position: sticky; top: 0; z-index: 2; margin: 0 -24px 20px; padding: 8px 24px 6px; background: var(--bg); box-shadow: 0 6px 8px -6px rgba(0,0,0,0.15); }
+    }
+
+    figure { margin: 24px 0 28px; }
+    figure svg { display: block; width: 100%; height: auto; }
+
+    figcaption {
+      margin-top: 8px;
+      font-size: 14px;
+      font-weight: 700;
+      color: var(--faded);
+      text-align: center;
+      line-height: 1.35;
+    }
+
+    .venn text { font-family: 'Nunito', sans-serif; font-weight: 700; fill: var(--ink); }
+    .venn .big { font-family: 'Unbounded', sans-serif; font-weight: 900; }
+    .venn .faded { fill: var(--faded); }
+
+    /* Питер и Кипр рядом, на телефоне друг под другом */
+    .pair {
+      display: grid;
+      grid-template-columns: 1fr 1fr;
+      gap: 16px;
+      background: #fff;
+      border: 1px solid rgba(0,0,0,0.08);
+      border-radius: 6px;
+      box-shadow: 3px 3px 0 rgba(0,0,0,0.07);
+      padding: 18px 16px 14px;
+    }
+
+    .city { text-align: center; font-size: 14px; line-height: 1.4; font-variant-numeric: tabular-nums; }
+    .city h3 { font: 900 16px/1.2 'Unbounded', sans-serif; margin-bottom: 4px; }
+    .city .res { font-family: ui-monospace, monospace; }
+    .city .res b { font: 900 1.4em 'Unbounded', sans-serif; color: var(--red); }
+
+    @media (max-width: 560px) { .pair { grid-template-columns: 1fr; } }
+
+    details {
+      margin: 0 0 1em;
+      padding: 10px 16px;
+      border-left: 3px solid var(--faded);
+      background: rgba(0,0,0,0.03);
+      font-size: .95em;
+    }
+
+    summary { cursor: pointer; font-weight: 700; color: var(--faded); }
+    details[open] summary { margin-bottom: 8px; }
+    details p { margin: 0; }
+    details p + p { margin-top: .6em; }
+
+    .links { list-style: none; }
+    .links li + li { margin-top: .4em; }
+
+    .thanks { margin-top: 64px; }
+    .thanks h2 { margin-top: 0; }
+
+    footer {
+      margin-top: 72px;
+      padding-top: 20px;
+      border-top: 1px solid rgba(0,0,0,0.10);
+      font-size: 11px;
+      letter-spacing: .10em;
+      color: rgba(0,0,0,0.2);
+    }
+
+    .back {
+      display: inline-block;
+      margin-bottom: 32px;
+      color: var(--faded);
+      text-decoration: none;
+      font-weight: 600;
+    }
+    .back:hover { color: var(--red); }
+
+    @media (max-width: 400px) {
+      .page { padding: 40px 16px 60px; }
+      .venn-live { margin-inline: -16px; padding-inline: 16px; }
+    }
+  </style>
+  <script data-goatcounter="https://lamopad.goatcounter.com/count"
+          async src="//gc.zgo.at/count.js"></script>
+</head>
+<body>
+
+<main class="page">
+  <a class="back" href="/">&larr; Ламопад</a>
+
+  <header>
+    <h1>Как <span class="h1-key">просто</span> вывести формулу Байеса</h1>
+    <p class="tagline">Две окружности &nbsp;·&nbsp; Тучи &nbsp;·&nbsp; Зонтик</p>
+    <p class="byline">Автор: <a href="https://github.com/ArtOshchepkov" target="_blank" rel="noopener">Артём Ощепков</a> · <time datetime="2026-10-03">3 октября 2026</time></p>
+  </header>
+
+  <section>
+    <h2>Нарисуй две окружности</h2>
+    <p>Окружность слева будет гипотезой, справа - наблюдением.</p>
+    <p>Для примера: наблюдение = тучи на небе. Гипотеза = сегодня будет дождь.</p>
+
+    <!-- Термины в тексте ниже подсвечивают свою часть кругов: data-show у термина = состояние схемы -->
+    <div class="derive">
+      <figure class="venn-live">
+        <svg class="venn" id="venn" viewBox="0 0 520 300" role="img" aria-label="Две пересекающиеся окружности: слева H - дождь, справа E - тучи, в середине их пересечение">
+          <defs>
+            <clipPath id="clip-h"><circle cx="200" cy="160" r="105"/></clipPath>
+          </defs>
+          <rect class="v-frame" x="6" y="6" width="508" height="288" rx="10"/>
+          <text x="22" y="32" font-size="14" class="faded">все дни года</text>
+          <text class="v-readout big" id="venn-readout" x="498" y="34" font-size="16" text-anchor="end"></text>
+          <circle class="v-h" cx="200" cy="160" r="105"/>
+          <circle class="v-e" cx="320" cy="160" r="105"/>
+          <circle class="v-lens" cx="320" cy="160" r="105" clip-path="url(#clip-h)"/>
+          <g class="v-labels">
+            <text x="148" y="158" font-size="34" text-anchor="middle" class="big" style="fill:#2a62b8">H</text>
+            <text x="148" y="184" font-size="16" text-anchor="middle">дождь</text>
+            <text x="372" y="158" font-size="34" text-anchor="middle" class="big" style="fill:#7a6e62">E</text>
+            <text x="372" y="184" font-size="16" text-anchor="middle">тучи</text>
+            <text x="260" y="156" font-size="15" text-anchor="middle">дождь</text>
+            <text x="260" y="175" font-size="15" text-anchor="middle">и тучи</text>
+          </g>
+        </svg>
+        <figcaption>Наведи или нажми на <span class="hl-demo">подчёркнутое</span> в тексте - круги покажут, о чём речь</figcaption>
+      </figure>
+
+      <p>Пусть <span class="hl" data-show="frame">вся рамка - это все дни года, её площадь = 1</span>. Тогда площадь любого куска = его вероятность.</p>
+      <p>Посмотри на <span class="hl" data-show="lens">пересечение кругов</span>. Давай прикинем его площадь.</p>
+      <p>Сначала со стороны левого круга (H). <span class="hl" data-show="h">Весь круг H - это <code>P(H)</code></span>. Какая его доля попала в пересечение? Та, где при дожде на небе ещё и тучи, то есть <span class="hl" data-show="eh"><code>P(E | H)</code></span>. Это не площадь, а доля: какая часть круга H покраснела. Значит, <span class="hl" data-show="lens-h">площадь пересечения = <code>P(H) · P(E | H)</code></span>.</p>
+      <details>
+        <summary>Почему умножаем, а не складываем?</summary>
+        <p>Здесь умножаются не две площади, а площадь на долю. <code>P(E | H)</code> - это не кусок картинки, а отношение: красное ÷ весь круг H. Взять долю от чего-то - это умножить: половина от 200 дождливых дней = 200 · ½ = 100 дней. На числах Питера: из 200 дождливых дней с тучами 99%, то есть 200 · 0,99 = 198 дней.</p>
+        <p>Сложение здесь дало бы ерунду. Для Питера 0,55 + 0,99 = 1,54: кусок больше всего года, а он внутри рамки площадью 1. Умножение на долю (она не больше 1) всегда даёт кусок не больше самого круга H, как и должно быть.</p>
+        <p>Складывать можно куски, которые не пересекаются. Например, круг H = дождь с тучами + дождь без туч: <code>P(H) = P(H и E) + P(H и не E)</code>.</p>
+      </details>
+      <p>Теперь со стороны правого круга (E). <span class="hl" data-show="e">Весь круг E - это <code>P(E)</code></span>, а в пересечение попала доля <span class="hl" data-show="he"><code>P(H | E)</code></span>: те дни с тучами, когда всё-таки пошёл дождь. Тоже доля, только теперь от круга E. <span class="hl" data-show="lens-e">Площадь пересечения = <code>P(E) · P(H | E)</code></span>.</p>
+    </div>
+
+    <figure>
+      <div class="pair">
+        <div class="city">
+          <h3>Со стороны H</h3>
+          <svg class="venn" viewBox="0 0 240 170" role="img" aria-label="Пересечение со стороны круга H">
+            <defs><clipPath id="clip-view-h"><circle cx="145" cy="85" r="62"/></clipPath></defs>
+            <circle cx="95" cy="85" r="62" fill="rgba(42,98,184,0.14)" stroke="#2a62b8" stroke-width="2.5"/>
+            <circle cx="95" cy="85" r="62" fill="rgba(200,40,30,0.38)" clip-path="url(#clip-view-h)"/>
+            <circle cx="145" cy="85" r="62" fill="none" stroke="#7a6e62" stroke-width="1.5" stroke-dasharray="5 4"/>
+            <text x="65" y="96" font-size="30" text-anchor="middle" class="big" style="fill:#2a62b8">H</text>
+          </svg>
+          <p>круг H = P(H), в пересечении его доля P(E | H)</p>
+          <p class="res"><b>P(H) · P(E | H)</b></p>
+        </div>
+        <div class="city">
+          <h3>Со стороны E</h3>
+          <svg class="venn" viewBox="0 0 240 170" role="img" aria-label="Пересечение со стороны круга E">
+            <defs><clipPath id="clip-view-e"><circle cx="95" cy="85" r="62"/></clipPath></defs>
+            <circle cx="145" cy="85" r="62" fill="rgba(122,110,98,0.16)" stroke="#7a6e62" stroke-width="2.5"/>
+            <circle cx="145" cy="85" r="62" fill="rgba(200,40,30,0.38)" clip-path="url(#clip-view-e)"/>
+            <circle cx="95" cy="85" r="62" fill="none" stroke="#2a62b8" stroke-width="1.5" stroke-dasharray="5 4"/>
+            <text x="175" y="96" font-size="30" text-anchor="middle" class="big" style="fill:#7a6e62">E</text>
+          </svg>
+          <p>круг E = P(E), в пересечении его доля P(H | E)</p>
+          <p class="res"><b>P(E) · P(H | E)</b></p>
+        </div>
+      </div>
+      <figcaption>Одно и то же красное пересечение, посчитанное с двух сторон</figcaption>
+    </figure>
+
+    <p>Площадь та же, значит, можно приравнять и получить</p>
+    <p class="formula">P(E) · P(H | E) = P(H) · P(E | H)</p>
+    <p>Это уже и есть формула Байеса, только в не очень удобном виде.</p>
+
+    <p>А теперь приведём формулу в полезный вид.</p>
+    <p class="glossed">Нас интересует <ruby class="p"><b>вероятность</b><rt>P</rt></ruby> <ruby class="h"><ruby>дождя<rt>H</rt></ruby><rt class="gloss">hypothesis</rt></ruby>, <ruby class="bar"><ruby>так как<rt>|</rt></ruby><rt class="gloss">при условии</rt></ruby> на небе собрались <ruby class="e"><ruby>тучи<rt>E</rt></ruby><rt class="gloss">evidence</rt></ruby>. То есть нам нужен <code><span class="p">P</span>(<span class="h">H</span> <span class="bar">|</span> <span class="e">E</span>)</code>.</p>
+    <p>Поделим на P(E), получим</p>
+    <p class="formula key"><b>P(H | E) = P(H) · P(E | H) / P(E)</b></p>
+    <p>Вот и готов каноничный вид формулы Байеса.</p>
+  </section>
+
+  <section>
+    <h2>Пример с дождём в Питере</h2>
+    <p>Посмотрим, что там с дождём. P(H) в формуле - вероятность дождя в принципе. В Питере льёт <a href="https://peterburg.center/otvet/kakoy-klimat-v-sankt-peterburge#:~:text=%D0%9E%D0%BD%D0%B8%20%D0%B8%D0%B4%D1%83%D1%82%20%D0%B2%D0%B5%D1%81%D0%BD%D0%BE%D0%B9%20%D0%B8%20%D0%BB%D0%B5%D1%82%D0%BE%D0%BC%2C%20%D0%B7%D0%B8%D0%BC%D0%BE%D0%B9%20%D0%B8,%D1%81%D1%80%D0%B5%D0%B4%D0%BD%D0%B5%D0%BC%20%D0%B1%D1%8B%D0%B2%D0%B0%D0%B5%D1%82%20%D0%BD%D0%B5%20%D0%B1%D0%BE%D0%BB%D0%B5%D0%B5%2030%20%D0%B1%D0%B5%D0%B7%D0%BE%D0%B1%D0%BB%D0%B0%D1%87%D0%BD%D1%8B%D1%85%20%D0%B4%D0%BD%D0%B5%D0%B9." target="_blank" rel="noopener">200 дней</a> из 365 в год, то есть <code>P(H) = 200 / 365 ~ 55%</code>.</p>
+    <p>P(E) - это вероятность туч самих по себе. Не каждый раз же после туч начинается дождь. Пасмурных дней в Питере примерно 330 из 365. Значит, <code>P(E) = 330 / 365 ~ 90%</code>.</p>
+    <p>А как часто дождь идёт с тучами на небе? Да почти всегда. <code>P(E | H) ~ 99%</code> (исключение на грибной дождь).</p>
+    <p>Подставим в формулу:</p>
+    <p class="formula">P(H | E) = (200 / 365) · 99% / (330 / 365)<br>= 200 · 99% / 330 = <b>60%</b></p>
+    <p>То есть тучка в Питере предвещает дождь лишь в ~60% случаев. Логично? Тучи почти всегда, поэтому само их наличие - слабый индикатор. Сам факт тучки лишь чуток повысил до 60% от среднего 55%.</p>
+
+    <p>Давай сравним с Кипром. Там солнце до ужаса постоянно: дней с тучками около 50 из 365, то есть <code>P(E) = 50 / 365 ~ 14%</code>. А дождь бывает 45 дней в год, <code>P(H) = 45 / 365 ~ 12%</code>.</p>
+    <p>Итого для Кипра:</p>
+    <p class="formula">P(H | E) = (45 / 365) · 99% / (50 / 365)<br>= 45 · 99% / 50 ≈ <b>89%</b></p>
+    <p>Получается, тучи на Кипре с вероятностью ~89% предвещают дождь. Наличие тучки повысило вероятность дождя на 77% по отношению к среднему 12%!</p>
+
+    <figure>
+      <div class="pair">
+        <!-- Площади кругов пропорциональны числу дней, масштаб общий; расстояние между центрами подобрано под площадь пересечения -->
+        <div class="city">
+          <h3>Питер</h3>
+          <svg class="venn" viewBox="0 0 240 200" role="img" aria-label="Питер: круг дождя почти целиком внутри большого круга туч">
+            <defs><clipPath id="clip-spb"><circle cx="99" cy="100" r="70.1"/></clipPath></defs>
+            <circle cx="99" cy="100" r="70.1" fill="rgba(42,98,184,0.14)" stroke="#2a62b8" stroke-width="2"/>
+            <circle cx="121.8" cy="100" r="90" fill="rgba(122,110,98,0.16)" stroke="#7a6e62" stroke-width="2"/>
+            <circle cx="121.8" cy="100" r="90" fill="rgba(200,40,30,0.30)" clip-path="url(#clip-spb)"/>
+            <text x="96" y="106" font-size="18" text-anchor="middle" class="big">198</text>
+            <text x="190" y="106" font-size="15" text-anchor="middle" class="faded">132</text>
+          </svg>
+          <p>тучи 330 дней, из них с дождём 198</p>
+          <p class="res">198 / 330 = <b>60%</b></p>
+        </div>
+        <div class="city">
+          <h3>Кипр</h3>
+          <svg class="venn" viewBox="0 0 240 200" role="img" aria-label="Кипр: маленькие круги дождя и туч почти совпадают">
+            <defs><clipPath id="clip-cy"><circle cx="118.6" cy="100" r="33.2"/></clipPath></defs>
+            <circle cx="118.6" cy="100" r="33.2" fill="rgba(42,98,184,0.14)" stroke="#2a62b8" stroke-width="2"/>
+            <circle cx="121.4" cy="100" r="35" fill="rgba(122,110,98,0.16)" stroke="#7a6e62" stroke-width="2"/>
+            <circle cx="121.4" cy="100" r="35" fill="rgba(200,40,30,0.30)" clip-path="url(#clip-cy)"/>
+            <text x="120" y="106" font-size="16" text-anchor="middle" class="big">44,5</text>
+          </svg>
+          <p>тучи 50 дней, из них с дождём 44,5</p>
+          <p class="res">44,5 / 50 = <b>89%</b></p>
+        </div>
+      </div>
+      <figcaption>Один масштаб: площадь круга - число дней в году. <span style="color:#2a62b8">Синий</span> - дождь, серый - тучи, красное - и то и другое</figcaption>
+    </figure>
+
+    <details>
+      <summary>Живущим на Кипре</summary>
+      <p>По некоторым источникам, пасмурных дней меньше, чем дождливых, потому что пасмурный день определяют как день, когда туч много и долго. Такое случается реже, чем дождь от слабых облаков, поэтому взял +- разумные величины «наличия тучек», а не «пасмурных дней» для иллюстрации мысли.</p>
+    </details>
+
+    <p>Итого, если вы увидели тучи на Кипре, бегите за зонтиком. Тучка в Питере ничего особого не значит, дождь будет скоро в любом случае.</p>
+  </section>
+
+  <section>
+    <h2>Выводы</h2>
+    <p>Чтобы просто получить формулу Байеса, нарисуй две окружности. Выпиши формулу пересечения с левой и правой стороны. Формула уже будет готова, перетасуй формулы для поиска нужной величины (обычно это P(H | E)).</p>
+  </section>
+
+  <section>
+    <h2>Доп. материалы</h2>
+    <ul class="links">
+      <li><a href="/strategy/bayes-rule-basic/">Как перестать бояться теоремы Байеса</a> <span class="muted">· с калькулятором спокойствия</span></li>
+      <li><a href="https://www.youtube.com/watch?v=HZGCoVF3YvM" target="_blank" rel="noopener">Bayes theorem, the geometry of changing beliefs</a> <span class="muted">· 3Blue1Brown</span></li>
+    </ul>
+  </section>
+
+  <section class="thanks">
+    <h2>Спасибо, что прочли!</h2>
+    <p>Если нашли ошибку или хотите оставить комментарий, пишите мне в телеграм: <a href="https://t.me/art_oshk" target="_blank" rel="noopener">t.me/art_oshk</a>.</p>
+  </section>
+
+  <footer>&copy; Ламопад &mdash; все права защищены</footer>
+</main>
+
+<script>
+  // Наведение мышью показывает часть кругов временно, нажатие закрепляет (на телефоне только оно)
+  (() => {
+    const venn = document.getElementById('venn');
+    const readout = document.getElementById('venn-readout');
+    const READOUT = {
+      frame: 'площадь = 1',
+      h: 'P(H)',
+      e: 'P(E)',
+      eh: 'P(E | H) = красное ÷ весь круг H',
+      he: 'P(H | E) = красное ÷ весь круг E',
+      'lens-h': 'P(H) · P(E | H)',
+      'lens-e': 'P(E) · P(H | E)',
+      lens: 'пересечение',
+    };
+    const terms = [...document.querySelectorAll('.hl')];
+    let pinned = null;
+
+    function show(term) {
+      const key = term ? term.dataset.show : '';
+      if (key) venn.dataset.show = key; else delete venn.dataset.show;
+      readout.textContent = READOUT[key] || '';
+      terms.forEach((t) => t.classList.toggle('on', t === term));
+    }
+
+    for (const term of terms) {
+      term.tabIndex = 0;
+      term.setAttribute('role', 'button');
+      term.addEventListener('pointerenter', (e) => { if (e.pointerType === 'mouse') show(term); });
+      term.addEventListener('pointerleave', (e) => { if (e.pointerType === 'mouse') show(pinned); });
+      term.addEventListener('click', () => { pinned = pinned === term ? null : term; show(pinned); });
+      term.addEventListener('keydown', (e) => {
+        if (e.key === 'Enter' || e.key === ' ') { e.preventDefault(); term.click(); }
+      });
+    }
+  })();
+</script>
+
+<script src="/js/lamopad-fall.js"></script>
+</body>
+</html>

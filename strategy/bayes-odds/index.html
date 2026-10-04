@@ -3,8 +3,8 @@
 <head>
   <meta charset="UTF-8">
   <meta name="viewport" content="width=device-width, initial-scale=1.0">
-  <title>Как быстро посчитать формулу Байеса через шансы | Ламопад</title>
-  <meta name="description" content="Шансовая форма теоремы Байеса: умножь редкость события на удивительность наблюдения. Считаем в уме дождь в Питере и на Кипре, пожар по дыму и блеф по олл-ину.">
+  <title>Как быстро вычислить байесовскую вероятность: шансы | Ламопад</title>
+  <meta name="description" content="Шансовая форма теоремы Байеса: умножь редкость события на удивительность наблюдения. Продолжение статьи про штуки: считаем в уме дождь в Питере и на Кипре, пожар по дыму и блеф по олл-ину.">
   <meta name="keywords" content="формула Байеса, теорема Байеса, шансы, odds, байесовский вывод в уме, отношение правдоподобия, вероятность дождя">
   <meta name="author" content="Артём Ощепков">
   <meta name="robots" content="index, follow">
@@ -12,14 +12,19 @@
   <link rel="icon" href="/img/slon_96px.png" type="image/png" sizes="96x96">
 
   <meta property="og:type" content="article">
-  <meta property="og:title" content="Как быстро посчитать формулу Байеса через шансы">
+  <meta property="og:title" content="Как быстро вычислить байесовскую вероятность: шансы">
   <meta property="og:description" content="Умножь редкость события на удивительность наблюдения - и Байес считается в уме. Дождь, пожар, олл-ин и кошка, которая умывается.">
   <meta property="og:url" content="https://lamopad.ru/strategy/bayes-odds/">
+  <meta property="og:image" content="https://lamopad.ru/strategy/bayes-odds/img/hero-odds.jpg">
+  <meta property="og:image:width" content="1132">
+  <meta property="og:image:height" content="584">
+  <meta property="og:image:alt" content="Морская черепаха плывёт над песчаным дном">
   <meta property="og:locale" content="ru_RU">
   <meta property="og:site_name" content="Ламопад">
-  <meta name="twitter:card" content="summary">
-  <meta name="twitter:title" content="Как быстро посчитать формулу Байеса через шансы">
+  <meta name="twitter:card" content="summary_large_image">
+  <meta name="twitter:title" content="Как быстро вычислить байесовскую вероятность: шансы">
   <meta name="twitter:description" content="Умножь редкость события на удивительность наблюдения - и Байес считается в уме.">
+  <meta name="twitter:image" content="https://lamopad.ru/strategy/bayes-odds/img/hero-odds.jpg">
   <meta property="article:published_time" content="2026-10-04">
   <meta property="article:author" content="https://github.com/ArtOshchepkov">
   <meta property="article:section" content="Вероятность">
@@ -29,13 +34,14 @@
   {
     "@context": "https://schema.org",
     "@type": "Article",
-    "headline": "Как быстро посчитать формулу Байеса через шансы",
-    "description": "Шансовая форма теоремы Байеса: умножь редкость события на удивительность наблюдения. Считаем в уме дождь в Питере и на Кипре, пожар по дыму и блеф по олл-ину.",
+    "headline": "Как быстро вычислить байесовскую вероятность: шансы",
+    "description": "Шансовая форма теоремы Байеса: умножь редкость события на удивительность наблюдения. Продолжение статьи про штуки: считаем в уме дождь в Питере и на Кипре, пожар по дыму и блеф по олл-ину.",
     "inLanguage": "ru",
     "datePublished": "2026-10-04",
     "dateModified": "2026-10-04",
     "author": { "@type": "Person", "name": "Артём Ощепков", "url": "https://github.com/ArtOshchepkov" },
     "publisher": { "@type": "Organization", "name": "Ламопад", "url": "https://lamopad.ru/", "logo": { "@type": "ImageObject", "url": "https://lamopad.ru/img/slon_1024px.jpg" } },
+    "image": "https://lamopad.ru/strategy/bayes-odds/img/hero-odds.jpg",
     "mainEntityOfPage": "https://lamopad.ru/strategy/bayes-odds/",
     "about": ["Теорема Байеса", "Шансы", "Отношение правдоподобия"],
     "keywords": "формула Байеса, шансы, теорема Байеса в уме"
@@ -56,6 +62,7 @@
       --red:   #c8281e;
       --blue:  #2a62b8;
       --green: #2f7d3a;
+      --faded-strong: #4f453b;
     }
 
     body {
@@ -86,6 +93,15 @@
     }
 
     .h1-key { color: var(--blue); }
+
+    .hero {
+      display: block;
+      width: 100%;
+      height: auto;
+      margin-top: 28px;
+      border-radius: 6px;
+      box-shadow: 3px 3px 0 rgba(0,0,0,0.07);
+    }
 
     .byline {
       margin-top: 10px;
@@ -119,6 +135,7 @@
     }
 
     h3 { font: 900 16px/1.3 'Unbounded', sans-serif; margin: 32px 0 12px; }
+
 
     p { margin-bottom: 1em; }
     p:has(.frac) { line-height: 2; }
@@ -180,6 +197,8 @@
     .tldr .say { font-weight: 700; font-size: .95em; }
     .tldr .say em { font-style: normal; color: var(--blue); }
     .tldr .say strong { color: var(--red); }
+    .tldr .say-k { color: var(--faded); }
+    .tldr .say + .formula { margin-top: .8em; }
 
     /* Кнопка-подсказка с каноничной формулой */
     .qmark {
@@ -296,9 +315,9 @@
     }
     .grid th, .grid td { padding: 8px 10px; vertical-align: top; text-align: left; border-radius: 4px; }
     .grid thead th { font: 900 12px/1.25 'Unbounded', sans-serif; color: var(--blue); }
-    .grid thead th span { display: block; font: 700 13px 'Nunito', sans-serif; color: #4f453b; margin-top: 2px; }
+    .grid thead th span { display: block; font: 700 13px 'Nunito', sans-serif; color: var(--faded-strong); margin-top: 2px; }
     .grid tbody th { font: 900 12px/1.25 'Unbounded', sans-serif; color: var(--ink); width: 18%; }
-    .grid tbody th span { display: block; font: 700 13px/1.3 'Nunito', sans-serif; color: #4f453b; margin-top: 3px; }
+    .grid tbody th span { display: block; font: 700 13px/1.3 'Nunito', sans-serif; color: var(--faded-strong); margin-top: 3px; }
     .grid td { background: #fff; }
     .grid td b { display: block; margin-bottom: 2px; }
     /* Цвет клетки - итоговая вероятность гипотезы */
@@ -434,19 +453,20 @@
   <a class="back" href="/">&larr; Ламопад</a>
 
   <header>
-    <h1>Как <span class="h1-key">быстро</span> посчитать формулу Байеса через шансы</h1>
+    <h1>Как <span class="h1-key">быстро</span> вычислить байесовскую вероятность: шансы</h1>
     <p class="tagline">Шансы &nbsp;·&nbsp; Редкость &nbsp;·&nbsp; Удивительность</p>
     <p class="byline">Автор: <a href="https://github.com/ArtOshchepkov" target="_blank" rel="noopener">Артём Ощепков</a> · <time datetime="2026-10-04">4 октября 2026</time></p>
+    <img class="hero" src="./img/hero-odds.jpg" width="1132" height="584" alt="Морская черепаха плывёт над песчаным дном">
   </header>
 
   <div class="tldr">
     <p class="formula key"><b><span class="o">O</span>(<span class="h">H</span> | <span class="e">E</span>) = <span class="o">O</span>(<span class="h">H</span>) · <span class="frac"><span>P(<span class="e">E</span> | <span class="h">H</span>)</span><span>P(<span class="e">E</span> | не <span class="h">H</span>)</span></span></b></p>
-    <p class="say">TLDR: умножь <em>редкость события</em> на <strong>удивительность наблюдения без события</strong>.</p>
+    <p class="say"><span class="say-k">TLDR:</span> умножь <em>редкость события</em> на <strong>удивительность наблюдения без события</strong>.</p>
   </div>
 
   <section>
     <p>Формула Байеса в <a href="/strategy/bayes-formula-circles/">каноничном виде</a> <button class="qmark" type="button" popovertarget="canon-pop" aria-label="Показать каноничную формулу">?</button> слишком запарная. Без листочка не посчитаешь, и это мощнейшее орудие мышления непригодно для бытового использования: в общении, покере, противостоянии инфоцыганам, пропагандистам Коварного Запада.</p>
-    <p>Как же кастовать эту ИМБУ прямиком из мозга? Выкупить шансовую формулировку.</p>
+    <p>В <a href="/strategy/bayes-natural-frequencies/">прошлой статье</a> мы считали штуки на дереве. Это наглядно, но для редких событий и цепочек улик неудобно. Как же кастовать эту ИМБУ прямиком из мозга? Выкупить шансовую формулировку.</p>
 
     <div id="canon-pop" popover>
       <p class="formula key"><b>P(<span class="h">H</span> | <span class="e">E</span>) = <span class="frac"><span>P(<span class="h">H</span>) · P(<span class="e">E</span> | <span class="h">H</span>)</span><span>P(<span class="e">E</span>)</span></span></b></p>
@@ -511,9 +531,9 @@
     <p class="formula"><span class="o">O</span>(<span class="h">H</span> | <span class="e">E</span>) = <span class="frac"><span>1</span><span>1</span></span> · <span class="frac"><span>2</span><span>1</span></span> = <b>2 : 1</b></p>
     <p>Прелесть такой формулы: ответ в шансах получаешь сразу. Сама запись уже содержит ответ дробью, её есть смысл только сократить для простоты интерпретации. Делить нужно, только если нужны проценты.</p>
     <p>Итого мы просто <strong>прикинули</strong> вероятности, ничего не считали и получили ответ 2 к 1, или ~67%. При этом точный ответ - 60%. Расхождение 60% и 67% - ничтожная плата за возможность вычисления в уме.</p>
-    <p>Теперь пример с Кипром. По статистике дней с дождём 50 из 365, шанс ~ 1 : 6. В сухой день тучи бывают сильно реже, чем в дождливый: в 60 раз.</p>
-    <p class="formula"><span class="o">O</span>(<span class="h">H</span> | <span class="e">E</span>) = <span class="frac"><span>1</span><span>6</span></span> · <span class="frac"><span>60</span><span>1</span></span> = <b>10 : 1</b></p>
-    <p>Итого шанс дождя при тучах на Кипре 10 к 1, это ~91%. Близко к правильным 89%.</p>
+    <p>Теперь пример с Кипром. По статистике дней с дождём 45 из 365, шанс ~ 1 : 7. В сухой день тучи бывают сильно реже, чем в дождливый: в 60 раз.</p>
+    <p class="formula"><span class="o">O</span>(<span class="h">H</span> | <span class="e">E</span>) = <span class="frac"><span>1</span><span>7</span></span> · <span class="frac"><span>60</span><span>1</span></span> ≈ <b>8,6 : 1</b></p>
+    <p>Итого шанс дождя при тучах на Кипре 8,6 к 1, это ~90%. Почти точно попали в правильные 89%.</p>
 
     <figure>
       <div class="pair">
@@ -525,9 +545,9 @@
         </div>
         <div class="city">
           <h3>Кипр</h3>
-          <p>редкость 1 : 6, тучи без дождя в 60 раз реже</p>
-          <p class="res">1 : 6 · 60 = <b>10 : 1</b></p>
-          <p class="muted">≈ 91%, точно 89%</p>
+          <p>редкость 1 : 7, тучи без дождя в 60 раз реже</p>
+          <p class="res">1 : 7 · 60 ≈ <b>8,6 : 1</b></p>
+          <p class="muted">≈ 90%, точно 89%</p>
         </div>
       </div>
       <figcaption>Одно умножение в уме вместо деления процентов на проценты</figcaption>
@@ -537,8 +557,9 @@
       <summary>Частая ошибка: считать тучи среди туч <span class="ai-badge">AI-квиз</span></summary>
       <p>Удивительность сравнивает две разные группы дней: дождливые и сухие. «Из дождливых дней тучи во всех, из сухих - в половине» - это удивительность ×2.</p>
       <p>Ошибка - взять одну группу, тучные дни, и сказать: «два тучных дня с дождём на один без». Это уже готовый ответ <code><span class="o">O</span>(<span class="h">H</span> | <span class="e">E</span>)</code>, и редкость дождя в нём уже сидит. Если умножить его на <code><span class="o">O</span>(<span class="h">H</span>)</code>, редкость посчитается дважды.</p>
-      <p>В Питере ошибку не видно: редкость там 1 : 1, а умножение на неё ничего не меняет. На Кипре она сразу вылезет: <code>1 : 6 · 10 : 1</code> даст ~62% вместо 91%.</p>
+      <p>В Питере ошибку не видно: редкость там 1 : 1, а умножение на неё ничего не меняет. На Кипре она сразу вылезет: <code>1 : 7 · 8,6 : 1</code> даст ~55% вместо 90%.</p>
       <p>Проверка простая: кто стоит после «из»? Из дождливых и из сухих - удивительность. Из тучных - готовый ответ.</p>
+      <p>В <a href="/strategy/bayes-natural-frequencies/">штуках</a> считать среди туч как раз правильно: там мы начали со всего года, и редкость уже вошла в счёт. Ошибка - перенести эту привычку в шансы.</p>
 
       <!-- Год погоды: все числа выводятся из целых счётчиков дней, поэтому клетки и расчёт всегда сходятся -->
       <div class="tq">
@@ -585,12 +606,12 @@
           <p class="tq-note" id="tq-note"></p>
         </div>
 
-        <div class="tq-row ok">
+        <div class="tq-row">
           <span class="tq-tag">Правильно</span>
           <span class="tq-expr" id="tq-right"></span>
           <span class="tq-verdict" id="tq-v-right"></span>
         </div>
-        <div class="tq-row bad" id="tq-row-trap">
+        <div class="tq-row bad">
           <span class="tq-tag">Ловушка</span>
           <span class="tq-expr" id="tq-trap"></span>
           <span class="tq-verdict" id="tq-v-trap"></span>
@@ -679,11 +700,11 @@
             <td class="v5"><b>Почти наверняка</b>по окну стучат капли</td>
           </tr>
           <tr>
-            <th scope="row">Нечастое<span>1 из 10 · тебя уволят</span></th>
-            <td class="v2"><b>Маловероятно</b>начальник поздоровался</td>
-            <td class="v2"><b>Скорее нет</b>начальник хмурится</td>
-            <td class="v3"><b>Монетка</b>вызвали в пятницу вечером, а там HR</td>
-            <td class="v5"><b>Почти наверняка</b>пропуск перестал работать</td>
+            <th scope="row">Нечастое<span>1 из 10 · попутка остановится</span></th>
+            <td class="v2"><b>Маловероятно</b>машина красная</td>
+            <td class="v2"><b>Скорее нет</b>водитель притормозил</td>
+            <td class="v3"><b>Монетка</b>моргнул поворотником и съезжает на обочину</td>
+            <td class="v5"><b>Почти наверняка</b>остановился и открыл дверь</td>
           </tr>
           <tr>
             <th scope="row">Редкое<span>1 из 100 · в доме пожар</span></th>
@@ -721,6 +742,7 @@
       <li>Каков шанс события в принципе?</li>
       <li>Во сколько раз реже было бы наблюдение без события?</li>
     </ol>
+    <p>Если без события наблюдение бывает чаще, шанс падает: так олл-ин снижает шанс блефа.</p>
     <p>Перемножь:</p>
     <p class="formula key"><b><span class="o">O</span>(<span class="h">H</span> | <span class="e">E</span>) = <span class="o">O</span>(<span class="h">H</span>) · <span class="frac"><span>P(<span class="e">E</span> | <span class="h">H</span>)</span><span>P(<span class="e">E</span> | не <span class="h">H</span>)</span></span></b></p>
   </section>
@@ -728,8 +750,10 @@
   <section>
     <h2>Доп. материалы</h2>
     <ul class="links">
+      <li><a href="/strategy/bayes-natural-frequencies/">Как просто вычислить байесовскую вероятность: штуки</a> <span class="muted">· подготовка к этой статье</span></li>
       <li><a href="/strategy/bayes-formula-circles/">Как просто вывести формулу Байеса</a> <span class="muted">· две окружности и тучи над Питером</span></li>
       <li><a href="/strategy/bayes-rule-basic/">Как перестать бояться теоремы Байеса</a> <span class="muted">· с калькулятором спокойствия</span></li>
+      <li><a href="https://www.lesswrong.com/w/bayes-rule?lens=high-speed-intro-to-bayes-s-rule" target="_blank" rel="noopener">Bayes' rule: high-speed intro</a> <span class="muted">· LessWrong</span></li>
       <li><a href="https://www.youtube.com/watch?v=lG4VkPoG3ko" target="_blank" rel="noopener">The medical test paradox, and redesigning Bayes' rule</a> <span class="muted">· 3Blue1Brown, про ту же шансовую форму</span></li>
       <li><a href="https://www.youtube.com/watch?v=kVkEkBQAIxk&amp;t=228s" target="_blank" rel="noopener">Лайфхак по теореме Байеса</a> <span class="muted">· Аналитический джаз</span></li>
     </ul>
@@ -743,93 +767,52 @@
   <footer>&copy; <span id="year">2026</span> Ламопад · какие-то права, вероятно, защищены</footer>
 </main>
 
+<script src="/strategy/js/bayes.js"></script>
+
 <script>
-  // Заповедь на примерах: чип подставляет наблюдение, гипотезу и прикидки в четыре строки
+  // Заповедь на примерах: чип подставляет наблюдение, гипотезу и посчитанные из тех же данных числа
   (() => {
-    const EXAMPLES = [
-      { chip: 'дым → пожар', e: 'дым', h: 'это пожар', notH: 'пожара не было',
-        prior: '1 : 200', priorNote: 'пожары нечасты, раз в полгода',
-        lr: 'в 50 раз', lrNote: 'без пожара дымит лишь один дом из полста',
-        res: '1 : 4', resNote: 'около 20%' },
-      { chip: 'вызов в кабинет → увольнение', e: 'начальник вызвал в кабинет', h: 'меня уволят', notH: 'увольнять не собирались',
-        prior: '1 : 99', priorNote: 'увольняют одного из сотни',
-        lr: 'в 1,6 раза', lrNote: 'перед увольнением так зовут в 80% случаев, а просто так в 50%',
-        res: '1 : 62', resNote: 'около 1,6%, как и в статье про спокойствие' },
-      { chip: 'олл-ин → блеф', e: 'соперник пошёл олл-ин', h: 'у него мусор и он блефует', notH: 'у него была сильная рука',
-        prior: '3 : 1', priorNote: 'в раздачах мусор приходит чаще сильных рук',
-        lr: 'наоборот, в 10 раз чаще', lrNote: 'с мусором обычно сбрасывают, а с сильной рукой охотно идут олл-ин',
-        res: '3 : 10', resNote: 'около 23%: олл-ин снизил шанс блефа с 75%' },
-      { chip: 'СМС «вы выиграли миллиард» → развод', e: 'СМС «вы выиграли миллиард»', h: 'это развод', notH: 'выигрыш был честным',
-        prior: '1 : 10', priorNote: 'среди всех СМС мошеннических немного',
-        lr: 'в 10 000 раз', lrNote: 'о честных выигрышах так не сообщают',
-        res: '1000 : 1', resNote: 'больше 99,9%' },
-      { chip: 'подозрительный тип в метро → террорист', e: 'подозрительный тип в метро', h: 'он террорист', notH: 'он был обычным пассажиром',
-        prior: '1 : 1 000 000', priorNote: 'террористов исчезающе мало',
-        lr: 'в 10 раз', lrNote: 'странно выглядит куча обычных людей',
-        res: '1 : 100 000', resNote: 'около 0,001%' },
-      { chip: 'самолёт трясёт → катастрофа', e: 'самолёт потряхивает', h: 'самолёт разобьётся', notH: 'рейсу ничего не грозило',
-        prior: '1 : 5 000 000', priorNote: 'катастрофы реже одной на миллионы рейсов',
-        lr: 'в 3 раза', lrNote: 'трясёт почти в каждом полёте',
-        res: '1 : 1 700 000', resNote: 'около 0,00006%' },
-      { chip: 'не ответила → обиделась', e: 'она не ответила на сообщение', h: 'она обиделась', notH: 'всё было в порядке',
-        prior: '1 : 10', priorNote: 'обижаются нечасто',
-        lr: 'в 2 раза', lrNote: 'люди и так часто отвечают не сразу',
-        res: '1 : 5', resNote: 'около 17%' },
-      { chip: 'свистит в доме → денег не будет', e: 'он свистит в доме', h: 'денег не будет', notH: 'с деньгами всё было бы в порядке',
-        prior: '1 : 5', priorNote: 'безденежье бывает',
-        lr: 'ни во сколько', lrNote: 'свистят одинаково и при деньгах, и без',
-        res: '1 : 5', resNote: 'около 17%, как и без свиста' },
-      { chip: 'кошка умывается → гости придут', e: 'кошка умывается', h: 'придут гости', notH: 'гостей не ждали',
-        prior: '1 : 7', priorNote: 'гости раз в неделю',
-        lr: 'ни во сколько', lrNote: 'кошка умывается каждый день',
-        res: '1 : 7', resNote: 'около 13%, как и без кошки' },
-    ];
-
-    const chipsBox = document.getElementById('creed-chips');
+    const { EXAMPLES, solve, odds, oddsToPct, pct, times, chips } = window.Bayes;
     const slots = [...document.querySelectorAll('.creed [data-slot]')];
-    const chips = EXAMPLES.map((ex, i) => {
-      const b = document.createElement('button');
-      b.type = 'button';
-      b.className = 'chip';
-      b.textContent = ex.chip;
-      b.addEventListener('click', () => pick(i));
-      chipsBox.appendChild(b);
-      return b;
-    });
+    const keys = Object.keys(EXAMPLES).filter((k) => EXAMPLES[k].e);
 
-    function pick(i) {
-      const ex = EXAMPLES[i];
+    function lrText(lr) {
+      if (Math.abs(lr - 1) < 1e-9) return 'ни во сколько';
+      return lr > 1 ? times(lr) : 'наоборот, ' + times(1 / lr) + ' чаще';
+    }
+
+    const pick = chips(document.getElementById('creed-chips'), keys, (ex) => {
+      const r = solve(ex);
+      const text = {
+        e: ex.e, h: ex.h, notH: ex.notH,
+        prior: odds(r.prior), priorNote: `(${ex.priorNote})`,
+        lr: lrText(r.lr), lrNote: `(${ex.lrNote})`,
+        res: odds(r.post),
+        resNote: `(около ${pct(oddsToPct(r.post))}${ex.resExtra ? ', ' + ex.resExtra : ''})`,
+      };
       for (const s of slots) {
-        const v = ex[s.dataset.slot];
-        s.textContent = s.classList.contains('note') ? `(${v})` : v;
+        s.textContent = text[s.dataset.slot];
         s.classList.add('flash');
       }
       setTimeout(() => slots.forEach((s) => s.classList.remove('flash')), 350);
-      chips.forEach((c, j) => c.setAttribute('aria-pressed', String(i === j)));
-    }
-
-    pick(0);
+    });
+    pick('fire');
   })();
 </script>
 
 <script>
   // AI-квиз: год погоды и сортировка фраз «удивительность или готовый ответ»
   (() => {
+    const { sig2, odds, oddsToPct, pct } = window.Bayes;
     const DAYS = 365;
     const PRESETS = {
       spb:    { p: 50,   a: 100, b: 50 },
-      cy:     { p: 13.5, a: 90,  b: 1.5 },
+      cy:     { p: 12.5, a: 99,  b: 1.5 },
       desert: { p: 5,    a: 100, b: 10 },
     };
     const $ = (id) => document.getElementById(id);
     const sP = $('tq-p'), sA = $('tq-a'), sB = $('tq-b');
     let lens = 'groups';
-
-    const nf = new Intl.NumberFormat('ru-RU', { maximumFractionDigits: 1 });
-    const short = (x) => x >= 10 ? String(Math.round(x)) : nf.format(Math.round(x * 10) / 10);
-    const odds = (o) => !isFinite(o) ? '∞ : 1' : o === 0 ? '0 : 1' : o >= 1 ? short(o) + ' : 1' : '1 : ' + short(1 / o);
-    const pct = (o) => isFinite(o) ? o / (1 + o) * 100 : 100;
-    const pctText = (p) => (p < 1 || p > 99 ? nf.format(Math.round(p * 10) / 10) : Math.round(p)) + '%';
 
     function fill(el, total, marked, markedCls, restCls) {
       const frag = document.createDocumentFragment();
@@ -843,14 +826,15 @@
     }
 
     function render() {
-      $('tq-op').textContent = nf.format(+sP.value) + '%';
+      $('tq-op').textContent = sig2(+sP.value) + '%';
       $('tq-oa').textContent = sA.value + '%';
-      $('tq-ob').textContent = nf.format(+sB.value) + '%';
+      $('tq-ob').textContent = sig2(+sB.value) + '%';
       document.querySelectorAll('.tq [data-preset]').forEach((btn) => {
         const pr = PRESETS[btn.dataset.preset];
         btn.setAttribute('aria-pressed', String(+sP.value === pr.p && +sA.value === pr.a && +sB.value === pr.b));
       });
 
+      // Всё выводится из целых счётчиков дней, поэтому клетки и расчёт всегда сходятся
       const R = Math.round(DAYS * sP.value / 100), D = DAYS - R;
       const A = Math.round(R * sA.value / 100), B = Math.round(D * sB.value / 100);
       fill($('tq-cells-rain'), R, A, 'rc', 'rn');
@@ -870,7 +854,7 @@
         note.className = 'tq-note ok';
         note.textContent = B === 0
           ? 'Без дождя туч не бывает вовсе, значит тучи означают дождь наверняка.'
-          : `Каждую группу считаем отдельно: тучи в ${pctText(A / R * 100)} дождливых и в ${pctText(B / D * 100)} сухих дней. В сухой день тучи в ${short(lr)} раз реже. Это удивительность.`;
+          : `Каждую группу считаем отдельно: тучи в ${pct(A / R * 100)} дождливых и в ${pct(B / D * 100)} сухих дней. В сухой день тучи в ${sig2(lr)} раз реже. Это удивительность.`;
       } else {
         $('tq-g-rain').textContent = `тучных: ${A}`;
         $('tq-g-dry').textContent = `тучных: ${B}`;
@@ -880,7 +864,7 @@
 
       $('tq-right').textContent = B === 0
         ? `${odds(prior)} × ∞ = дождь наверняка`
-        : `редкость ${odds(prior)} × удивительность ×${short(lr)} = ${odds(right)} · ${pctText(pct(right))}`;
+        : `редкость ${odds(prior)} × удивительность ×${sig2(lr)} = ${odds(right)} · ${pct(oddsToPct(right))}`;
       $('tq-v-right').textContent = `Проверка подсчётом: среди тучных дней ${A} с дождём и ${B} без, это те же ${odds(right)}.`;
 
       const vTrap = $('tq-v-trap');
@@ -889,8 +873,8 @@
         vTrap.textContent = '';
         return;
       }
-      $('tq-trap').textContent = `редкость ${odds(prior)} × «среди туч» ${A} : ${B} = ${odds(wrong)} · ${pctText(pct(wrong))}`;
-      const gap = Math.abs(pct(wrong) - pct(right));
+      $('tq-trap').textContent = `редкость ${odds(prior)} × «среди туч» ${A} : ${B} = ${odds(wrong)} · ${pct(oddsToPct(wrong))}`;
+      const gap = Math.abs(oddsToPct(wrong) - oddsToPct(right));
       vTrap.textContent = gap < 2
         ? 'Совпало случайно: редкость около 1 : 1, и умножение на неё ничего не меняет. Поэтому в Питере ошибку не видно. Попробуйте Кипр или Пустыню.'
         : `Мимо на ${Math.round(gap)} п.п. Редкость дождя посчитана дважды: она уже сидела внутри пропорции ${A} : ${B}.`;

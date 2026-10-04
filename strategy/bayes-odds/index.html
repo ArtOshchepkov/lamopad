@@ -1,0 +1,966 @@
+<!DOCTYPE html>
+<html lang="ru">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>Как быстро вычислить вероятность по Байесу: шансы | Ламопад</title>
+  <meta name="description" content="Шансовая форма теоремы Байеса: умножь редкость события на удивительность наблюдения. Продолжение статьи про штуки: считаем в уме дождь в Питере и на Кипре, пожар по дыму и блеф по олл-ину.">
+  <meta name="keywords" content="формула Байеса, теорема Байеса, шансы, odds, байесовский вывод в уме, отношение правдоподобия, вероятность дождя">
+  <meta name="author" content="Артём Ощепков">
+  <meta name="robots" content="index, follow">
+  <link rel="canonical" href="https://lamopad.ru/strategy/bayes-odds/">
+  <link rel="icon" href="/img/slon_96px.png" type="image/png" sizes="96x96">
+
+  <meta property="og:type" content="article">
+  <meta property="og:title" content="Как быстро вычислить вероятность по Байесу: шансы">
+  <meta property="og:description" content="Умножь редкость события на удивительность наблюдения - и Байес считается в уме. Дождь, пожар, олл-ин и кошка, которая умывается.">
+  <meta property="og:url" content="https://lamopad.ru/strategy/bayes-odds/">
+  <meta property="og:image" content="https://lamopad.ru/strategy/bayes-odds/img/hero-odds.jpg">
+  <meta property="og:image:width" content="1132">
+  <meta property="og:image:height" content="584">
+  <meta property="og:image:alt" content="Морская черепаха плывёт над песчаным дном">
+  <meta property="og:locale" content="ru_RU">
+  <meta property="og:site_name" content="Ламопад">
+  <meta name="twitter:card" content="summary_large_image">
+  <meta name="twitter:title" content="Как быстро вычислить вероятность по Байесу: шансы">
+  <meta name="twitter:description" content="Умножь редкость события на удивительность наблюдения - и Байес считается в уме.">
+  <meta name="twitter:image" content="https://lamopad.ru/strategy/bayes-odds/img/hero-odds.jpg">
+  <meta property="article:published_time" content="2026-10-04">
+  <meta property="article:author" content="https://github.com/ArtOshchepkov">
+  <meta property="article:section" content="Вероятность">
+  <meta property="article:tag" content="формула Байеса">
+
+  <script type="application/ld+json">
+  {
+    "@context": "https://schema.org",
+    "@type": "Article",
+    "headline": "Как быстро вычислить вероятность по Байесу: шансы",
+    "description": "Шансовая форма теоремы Байеса: умножь редкость события на удивительность наблюдения. Продолжение статьи про штуки: считаем в уме дождь в Питере и на Кипре, пожар по дыму и блеф по олл-ину.",
+    "inLanguage": "ru",
+    "datePublished": "2026-10-04",
+    "dateModified": "2026-10-04",
+    "author": { "@type": "Person", "name": "Артём Ощепков", "url": "https://github.com/ArtOshchepkov" },
+    "publisher": { "@type": "Organization", "name": "Ламопад", "url": "https://lamopad.ru/", "logo": { "@type": "ImageObject", "url": "https://lamopad.ru/img/slon_1024px.jpg" } },
+    "image": "https://lamopad.ru/strategy/bayes-odds/img/hero-odds.jpg",
+    "mainEntityOfPage": "https://lamopad.ru/strategy/bayes-odds/",
+    "about": ["Теорема Байеса", "Шансы", "Отношение правдоподобия"],
+    "keywords": "формула Байеса, шансы, теорема Байеса в уме"
+  }
+  </script>
+
+  <link rel="preconnect" href="https://fonts.googleapis.com">
+  <link href="https://fonts.googleapis.com/css2?family=Nunito:ital,wght@0,400;0,600;0,700;1,400&family=Unbounded:wght@900&display=swap" rel="stylesheet">
+
+  <style>
+    *, *::before, *::after { margin: 0; padding: 0; box-sizing: border-box; }
+
+    :root {
+      --bg:    #f8f4ed;
+      --ink:   #1e1810;
+      --faded: #7a6e62;
+      --cloud: #7a6e62;
+      --red:   #c8281e;
+      --blue:  #2a62b8;
+      --green: #2f7d3a;
+      --faded-strong: #4f453b;
+    }
+
+    body {
+      background: var(--bg);
+      color: var(--ink);
+      font-family: 'Nunito', sans-serif;
+      font-size: clamp(17px, 3.4vw, 21px);
+      line-height: 1.6;
+      min-height: 100vh;
+      cursor: url('/img/lamopad_cursor_48px.png') 0 0, auto;
+    }
+
+    .page {
+      position: relative;
+      z-index: 1;
+      max-width: 880px;
+      margin: 0 auto;
+      padding: clamp(48px, 10vw, 96px) 24px clamp(64px, 12vw, 120px);
+    }
+
+    h1 {
+      font-family: 'Unbounded', sans-serif;
+      font-size: clamp(26px, 7vw, 44px);
+      font-weight: 900;
+      line-height: 1.05;
+      color: var(--red);
+      letter-spacing: .01em;
+    }
+
+    .h1-key { color: var(--blue); }
+
+    .hero {
+      display: block;
+      width: 100%;
+      height: auto;
+      margin-top: 28px;
+      border-radius: 6px;
+      box-shadow: 3px 3px 0 rgba(0,0,0,0.07);
+    }
+
+    .byline {
+      margin-top: 10px;
+      font-size: 14px;
+      color: var(--faded);
+    }
+
+    .byline a, .links a, .thanks a, section p a {
+      color: var(--ink);
+      text-decoration: underline;
+      text-decoration-color: rgba(200, 40, 30, 0.35);
+      text-underline-offset: 3px;
+    }
+    .byline a:hover, .links a:hover, .thanks a:hover, section p a:hover { color: var(--red); text-decoration-color: var(--red); }
+
+    .tagline {
+      margin-top: 12px;
+      font-size: clamp(11px, 2vw, 13px);
+      letter-spacing: .28em;
+      text-transform: uppercase;
+      color: var(--faded);
+      font-weight: 700;
+    }
+
+    h2 {
+      font-family: 'Unbounded', sans-serif;
+      font-size: clamp(17px, 4.2vw, 22px);
+      font-weight: 900;
+      line-height: 1.25;
+      margin: 56px 0 16px;
+    }
+
+    h3 { font: 900 16px/1.3 'Unbounded', sans-serif; margin: 32px 0 12px; }
+
+
+    p { margin-bottom: 1em; }
+    p:has(.frac) { line-height: 2; }
+    .formula:has(.frac) { display: flex; flex-wrap: wrap; align-items: center; gap: .2em .45em; white-space: normal; line-height: 1.6; }
+
+    /* Неразрывные формулы в строке растягивают пробелы при выравнивании по ширине */
+    section > p:not(.formula, :has(code)), details p:not(:has(code)) {
+      text-align: justify;
+      hyphens: auto;
+    }
+
+    .muted { color: var(--faded); font-size: .9em; }
+
+    code {
+      font-family: ui-monospace, monospace;
+      font-size: .85em;
+      white-space: nowrap;
+      background: #fff;
+      border-radius: 3px;
+      padding: 1px 5px;
+    }
+
+    .h { color: var(--blue); }
+    .e { color: var(--cloud); }
+    .o { color: var(--red); }
+
+    .formula {
+      font-family: ui-monospace, monospace;
+      font-size: .9em;
+      line-height: 1.5;
+      background: #fff;
+      border-left: 3px solid var(--red);
+      padding: 12px 14px;
+      margin: 0 0 1em;
+      font-variant-numeric: tabular-nums;
+      white-space: nowrap;
+      overflow-x: auto;
+    }
+
+    .frac {
+      display: inline-flex;
+      flex-direction: column;
+      vertical-align: middle;
+      text-align: center;
+      line-height: 1.25;
+      margin: 0 .1em;
+    }
+    .frac > span { padding: 0 .2em; }
+    .frac > span + span { border-top: 1.5px solid currentColor; }
+    .formula .frac { margin: .15em .1em; }
+
+    .formula b { font-family: 'Unbounded', sans-serif; font-weight: 900; color: var(--red); }
+    .formula.key { border-left-color: var(--blue); font-size: 1.05em; }
+    .formula.key b { color: var(--ink); }
+
+    /* TLDR: формула и её перевод на человеческий */
+    .tldr { margin-top: 28px; }
+    .tldr .formula { margin-bottom: .4em; }
+    .tldr .say { font-weight: 700; font-size: .95em; }
+    .tldr .say em { font-style: normal; color: var(--blue); }
+    .tldr .say strong { color: var(--red); }
+    .tldr .say-k { color: var(--faded); }
+    .tldr .say + .formula { margin-top: .8em; }
+
+    /* Кнопка-подсказка с каноничной формулой */
+    .qmark {
+      font: 700 .7em/1 'Nunito', sans-serif;
+      width: 1.6em; height: 1.6em;
+      border-radius: 50%;
+      border: 1.5px solid var(--red);
+      background: #fff;
+      color: var(--red);
+      cursor: pointer;
+      vertical-align: .15em;
+    }
+    .qmark:hover { background: var(--red); color: #fff; }
+    .qmark:focus-visible { outline: 2px solid var(--red); outline-offset: 2px; }
+    [popover] {
+      margin: auto;
+      max-width: min(92vw, 460px);
+      padding: 20px 22px 18px;
+      border: 1px solid rgba(0,0,0,0.12);
+      border-radius: 6px;
+      background: var(--bg);
+      color: var(--ink);
+      box-shadow: 6px 6px 0 rgba(0,0,0,0.10);
+      font-size: 17px;
+      line-height: 1.5;
+    }
+    [popover]::backdrop { background: rgba(30, 24, 16, 0.25); }
+    [popover] p { margin-bottom: .7em; }
+    [popover] p:last-of-type { margin-bottom: 0; }
+    [popover] .formula { white-space: normal; }
+    .pop-close {
+      display: block;
+      margin: 14px 0 0 auto;
+      font: 700 14px 'Nunito', sans-serif;
+      background: none; border: 0;
+      color: var(--faded);
+      cursor: pointer;
+    }
+    .pop-close:hover { color: var(--red); }
+
+    figure { margin: 24px 0 28px; }
+    figure svg { display: block; width: 100%; height: auto; }
+    figcaption {
+      margin-top: 8px;
+      font-size: 14px;
+      font-weight: 700;
+      color: var(--faded);
+      text-align: center;
+      line-height: 1.35;
+    }
+
+    .pair {
+      display: grid;
+      grid-template-columns: 1fr 1fr;
+      gap: 16px;
+      background: #fff;
+      border: 1px solid rgba(0,0,0,0.08);
+      border-radius: 6px;
+      box-shadow: 3px 3px 0 rgba(0,0,0,0.07);
+      padding: 18px 16px 14px;
+    }
+    .city { text-align: center; font-size: 14px; line-height: 1.4; font-variant-numeric: tabular-nums; }
+    .city h3 { font: 900 16px/1.2 'Unbounded', sans-serif; margin: 0 0 6px; }
+    .city p { margin-bottom: .4em; }
+    .city .res { font-family: ui-monospace, monospace; }
+    .city .res b { font: 900 1.4em 'Unbounded', sans-serif; color: var(--red); }
+    .city svg { max-width: 200px; margin: 4px auto 8px; }
+    @media (max-width: 560px) { .pair { grid-template-columns: 1fr; } }
+
+    /* Шансы точками: синие - сбылось, серые - нет */
+    .dot-yes { fill: var(--blue); }
+    .dot-no  { fill: var(--cloud); fill-opacity: .35; }
+
+    /* ── Заповедь на примерах ── */
+    .creed {
+      background: #fff;
+      border: 1px solid rgba(0,0,0,0.08);
+      border-radius: 6px;
+      box-shadow: 3px 3px 0 rgba(0,0,0,0.07);
+      padding: 18px 20px 16px;
+      margin-bottom: 1.2em;
+    }
+    .creed ol { list-style: none; display: grid; gap: .55em; }
+    .creed li { line-height: 1.5; }
+    .creed .slot { font-weight: 700; border-radius: 3px; padding: 0 3px; transition: background .25s; }
+    .creed .slot.e { color: var(--cloud); background: rgba(122,110,98,0.10); }
+    .creed .slot.h { color: var(--blue); background: rgba(42,98,184,0.08); }
+    .creed .num { font-family: ui-monospace, monospace; font-weight: 700; color: var(--red); white-space: nowrap; }
+    .creed .note { color: var(--faded); font-size: .9em; }
+    .creed .flash { background: rgba(200,40,30,0.15); }
+
+    .chips { display: flex; flex-wrap: wrap; gap: 8px; margin-bottom: 1em; }
+    .chip {
+      font: 600 14px/1.2 'Nunito', sans-serif;
+      padding: 7px 12px;
+      border: 1px solid rgba(0,0,0,0.15);
+      border-radius: 999px;
+      background: #fff;
+      color: var(--ink);
+      cursor: pointer;
+    }
+    .chip:hover { border-color: var(--red); }
+    .chip[aria-pressed="true"] { background: var(--ink); color: var(--bg); border-color: var(--ink); }
+    .chip:focus-visible { outline: 2px solid var(--red); outline-offset: 2px; }
+
+    /* ── таблица редкости и удивительности ── */
+    .grid-wrap { overflow-x: auto; margin: 0 0 1em; }
+    .grid {
+      border-collapse: separate;
+      border-spacing: 4px;
+      font-size: 14px;
+      line-height: 1.35;
+      min-width: 640px;
+    }
+    .grid th, .grid td { padding: 8px 10px; vertical-align: top; text-align: left; border-radius: 4px; }
+    .grid thead th { font: 900 12px/1.25 'Unbounded', sans-serif; color: var(--blue); }
+    .grid thead th span { display: block; font: 700 13px 'Nunito', sans-serif; color: var(--faded-strong); margin-top: 2px; }
+    .grid tbody th { font: 900 12px/1.25 'Unbounded', sans-serif; color: var(--ink); width: 18%; }
+    .grid tbody th span { display: block; font: 700 13px/1.3 'Nunito', sans-serif; color: var(--faded-strong); margin-top: 3px; }
+    .grid td { background: #fff; }
+    .grid td b { display: block; margin-bottom: 2px; }
+    /* Цвет клетки - итоговая вероятность гипотезы */
+    .grid .v5 { background: rgba(200,40,30,0.20); }
+    .grid .v4 { background: rgba(200,40,30,0.11); }
+    .grid .v3 { background: rgba(122,110,98,0.14); }
+    .grid .v2 { background: rgba(42,98,184,0.07); }
+    .grid .v1 { background: rgba(42,98,184,0.14); }
+
+    details {
+      margin: 0 0 1em;
+      padding: 10px 16px;
+      border-left: 3px solid var(--faded);
+      background: rgba(0,0,0,0.03);
+      font-size: .95em;
+    }
+    summary { cursor: pointer; font-weight: 700; color: var(--faded); list-style: none; }
+    summary::-webkit-details-marker { display: none; }
+    summary::before {
+      content: '';
+      display: inline-block;
+      width: .45em;
+      height: .45em;
+      margin: 0 .55em .12em .1em;
+      border-right: 2px solid currentColor;
+      border-bottom: 2px solid currentColor;
+      transform: rotate(-45deg);
+      transition: transform .2s;
+    }
+    details[open] > summary::before { transform: rotate(45deg); }
+    details[open] summary { margin-bottom: 8px; }
+    details p { margin: 0; }
+    details p + p, details p + .formula, details .formula + p { margin-top: .6em; }
+
+    /* Хокку: строфы, без выравнивания по ширине */
+    .haiku p { text-align: left !important; font-style: italic; }
+    .haiku p + p { margin-top: .9em; }
+
+    /* ── AI-квиз «тучи среди туч» ── */
+    .ai-badge {
+      display: inline-block;
+      margin-left: .4em;
+      padding: 3px 8px;
+      border-radius: 999px;
+      background: var(--blue);
+      color: #fff;
+      font: 700 11px/1.2 'Nunito', sans-serif;
+      letter-spacing: .08em;
+      text-transform: uppercase;
+      vertical-align: .15em;
+    }
+    .tq { display: grid; gap: 14px; margin-top: 1.2em; }
+    .tq h3 { margin: 12px 0 0; }
+    .tq-presets, .tq-lens { display: flex; flex-wrap: wrap; gap: 8px; align-items: center; }
+    .tq-lens span { color: var(--faded); font-size: 14px; font-weight: 700; }
+    .tq-slider { display: grid; grid-template-columns: 1fr auto; gap: 0 12px; align-items: center; font-size: 15px; }
+    .tq-slider output { font-family: ui-monospace, monospace; font-variant-numeric: tabular-nums; }
+    .tq-slider input { grid-column: 1 / -1; width: 100%; accent-color: var(--blue); }
+    .tq-year { display: grid; gap: 14px; }
+    .tq-group { display: grid; gap: 6px; }
+    .tq-head { display: flex; justify-content: space-between; flex-wrap: wrap; gap: 8px; font-size: 15px; }
+    .tq-head span { font-family: ui-monospace, monospace; font-variant-numeric: tabular-nums; }
+    .tq-cells { display: grid; grid-template-columns: repeat(auto-fill, 10px); gap: 3px; }
+    .tq-cells i, .tq-legend i { display: block; width: 10px; height: 10px; border-radius: 2px; background: #e4ddd2; transition: opacity .2s; }
+    .tq .rc { background: var(--blue); }
+    .tq .rn { background: rgba(42,98,184,0.35); }
+    .tq .dc { background: var(--cloud); }
+    /* Взгляд «среди туч»: гасим всё, где туч не было */
+    .tq-year.trap .tq-cells i:not(.rc, .dc) { opacity: .15; }
+    .tq-legend { display: flex; flex-wrap: wrap; gap: 4px 16px; font-size: 13px; color: var(--faded); }
+    .tq-legend i { display: inline-block; margin-right: 6px; vertical-align: -1px; }
+    .tq-note { padding: 10px 12px; border-radius: 4px; font-size: 15px; }
+    .tq-note.ok { background: rgba(47,125,58,0.10); }
+    .tq-note.bad { background: rgba(200,40,30,0.10); }
+    .tq-row { display: grid; gap: 4px; background: #fff; border-left: 3px solid var(--green); padding: 10px 14px; font-size: 15px; }
+    .tq-row.bad { border-left-color: var(--red); }
+    .tq-tag { font: 900 11px/1.2 'Unbounded', sans-serif; letter-spacing: .06em; text-transform: uppercase; color: var(--green); }
+    .tq-row.bad .tq-tag { color: var(--red); }
+    .tq-expr { font-family: ui-monospace, monospace; font-variant-numeric: tabular-nums; overflow-wrap: anywhere; }
+    .tq-verdict { color: var(--faded); }
+    .tq-score { font-family: ui-monospace, monospace; color: var(--faded); }
+    .tq-cards { display: grid; gap: 10px; }
+    .tq-card { display: grid; gap: 10px; background: #fff; border: 1px solid rgba(0,0,0,0.08); border-radius: 6px; padding: 12px 14px; }
+    .tq-card q { quotes: "«" "»"; }
+    .tq-card .tq-choices { display: flex; flex-wrap: wrap; gap: 8px; }
+    .tq-card .chip { border-radius: 6px; text-align: left; }
+    .tq-card .tq-why { padding: 8px 10px; border-radius: 4px; font-size: 15px; }
+    .tq-card.right { border-color: var(--green); }
+    .tq-card.right .tq-why { background: rgba(47,125,58,0.10); }
+    .tq-card.wrong { border-color: var(--red); }
+    .tq-card.wrong .tq-why { background: rgba(200,40,30,0.10); }
+
+    .steps { padding-left: 1.4em; margin-bottom: 1em; }
+    .steps li + li { margin-top: .3em; }
+
+    .links { list-style: none; }
+    .links li + li { margin-top: .4em; }
+
+    .thanks { margin-top: 64px; }
+    .thanks h2 { margin-top: 0; }
+
+    footer {
+      margin-top: 72px;
+      padding-top: 20px;
+      border-top: 1px solid rgba(0,0,0,0.10);
+      font-size: 14px;
+      letter-spacing: .06em;
+      color: rgba(0,0,0,0.35);
+    }
+
+    .back {
+      display: inline-block;
+      margin-bottom: 32px;
+      color: var(--faded);
+      text-decoration: none;
+      font-weight: 600;
+    }
+    .back:hover { color: var(--red); }
+
+    @media (max-width: 400px) {
+      .page { padding: 40px 16px 60px; }
+    }
+    @media (prefers-reduced-motion: reduce) {
+      .creed .slot, summary::before, .tq-cells i { transition: none; }
+    }
+  </style>
+  <script data-goatcounter="https://lamopad.goatcounter.com/count"
+          async src="//gc.zgo.at/count.js"></script>
+</head>
+<body>
+
+<main class="page">
+  <a class="back" href="/">&larr; Ламопад</a>
+
+  <header>
+    <h1>Как <span class="h1-key">быстро</span> вычислить вероятность по Байесу: шансы</h1>
+    <p class="tagline">Шансы &nbsp;·&nbsp; Редкость &nbsp;·&nbsp; Удивительность</p>
+    <p class="byline">Автор: <a href="https://github.com/ArtOshchepkov" target="_blank" rel="noopener">Артём Ощепков</a> · <time datetime="2026-10-04">4 октября 2026</time></p>
+    <img class="hero" src="./img/hero-odds.jpg" width="1132" height="584" alt="Морская черепаха плывёт над песчаным дном">
+  </header>
+
+  <div class="tldr">
+    <p class="formula key"><b><span class="o">O</span>(<span class="h">H</span> | <span class="e">E</span>) = <span class="o">O</span>(<span class="h">H</span>) · <span class="frac"><span>P(<span class="e">E</span> | <span class="h">H</span>)</span><span>P(<span class="e">E</span> | не <span class="h">H</span>)</span></span></b></p>
+    <p class="say"><span class="say-k">TLDR:</span> умножь <em>редкость события</em> на <strong>удивительность наблюдения без события</strong>.</p>
+  </div>
+
+  <section>
+    <p>Формула Байеса в <a href="/strategy/bayes-formula-circles/">каноничном виде</a> <button class="qmark" type="button" popovertarget="canon-pop" aria-label="Показать каноничную формулу">?</button> слишком запарная. Без листочка не посчитаешь, и это мощнейшее орудие мышления непригодно для бытового использования: в общении, покере, противостоянии инфоцыганам, пропагандистам Коварного Запада.</p>
+    <p>В <a href="/strategy/bayes-natural-frequencies/">прошлой статье</a> мы считали штуки на дереве. Это наглядно, но для редких событий и цепочек улик неудобно. Как же кастовать эту ИМБУ прямиком из мозга? Выкупить шансовую формулировку.</p>
+
+    <div id="canon-pop" popover>
+      <p class="formula key"><b>P(<span class="h">H</span> | <span class="e">E</span>) = <span class="frac"><span>P(<span class="h">H</span>) · P(<span class="e">E</span> | <span class="h">H</span>)</span><span>P(<span class="e">E</span>)</span></span></b></p>
+      <p>Чтобы посчитать её, нужно знать <code>P(<span class="e">E</span>)</code>: как часто наблюдение бывает вообще, при любом раскладе. Оценить это на глаз тяжело, а потом ещё и делить проценты на проценты.</p>
+      <p><a href="/strategy/bayes-formula-circles/">Как вывести её из двух окружностей</a></p>
+      <button class="pop-close" type="button" popovertarget="canon-pop" popovertargetaction="hide">Закрыть</button>
+    </div>
+  </section>
+
+  <section>
+    <h2>Освежим шансы</h2>
+    <p>В быту мы часто оцениваем будущее дробью: три к одному, один к пяти. Вот это и есть настоящий математический шанс. Он обозначается буквой <span class="o">O</span> (odds).</p>
+    <p>Произнося «один к двум», мы имеем в виду пропорцию удачный : неудачный исход.</p>
+
+    <figure>
+      <div class="pair">
+        <div class="city">
+          <h3>1 : 2</h3>
+          <svg viewBox="0 0 120 40" role="img" aria-label="Один синий кружок и два серых">
+            <circle class="dot-yes" cx="24" cy="20" r="13"/>
+            <circle class="dot-no" cx="60" cy="20" r="13"/>
+            <circle class="dot-no" cx="96" cy="20" r="13"/>
+          </svg>
+          <p>одна удача на две неудачи, всего 3 исхода</p>
+          <p class="res"><span class="frac"><span>1</span><span>3</span></span> <span>≈ <b>33%</b></span></p>
+        </div>
+        <div class="city">
+          <h3>3 : 1</h3>
+          <svg viewBox="0 0 160 40" role="img" aria-label="Три синих кружка и один серый">
+            <circle class="dot-yes" cx="24" cy="20" r="13"/>
+            <circle class="dot-yes" cx="61" cy="20" r="13"/>
+            <circle class="dot-yes" cx="98" cy="20" r="13"/>
+            <circle class="dot-no" cx="135" cy="20" r="13"/>
+          </svg>
+          <p>три раза случилось, один раз нет, всего 4 исхода</p>
+          <p class="res"><span class="frac"><span>3</span><span>4</span></span> <span>= <b>75%</b></span></p>
+        </div>
+      </div>
+      <figcaption>Шансы: <span style="color:var(--blue)">синие</span> к серым. Вероятность: синие ко всем</figcaption>
+    </figure>
+
+    <p>Математически это записывается как <code><span class="o">O</span>(A) = P(A) : P(не A)</code>. Это равенство упростит нам жизнь через пару ходов.</p>
+    <p>Байеса проще считать шансами, чем вероятностями.</p>
+  </section>
+
+  <section>
+    <h2>Упростим формулу</h2>
+    <p>Шансы - это успех к неуспеху. Для гипотезы <span class="h">H</span> при наблюдении <span class="e">E</span> это <code>P(<span class="h">H</span> | <span class="e">E</span>) : P(не <span class="h">H</span> | <span class="e">E</span>)</code>, то есть «сбудется» к «не сбудется».</p>
+    <p>Подставим классическую формулу в деление. Внизу везде перед <span class="h">H</span> добавляем «не»:</p>
+    <p class="formula"><span class="frac"><span>P(<span class="h">H</span>) · P(<span class="e">E</span> | <span class="h">H</span>) / P(<span class="e">E</span>)</span><span>P(не <span class="h">H</span>) · P(<span class="e">E</span> | не <span class="h">H</span>) / P(<span class="e">E</span>)</span></span></p>
+    <p>Сокращаем лишнее <code>P(<span class="e">E</span>)</code>. Вспоминаем, что <code>P(<span class="h">H</span>) : P(не <span class="h">H</span>)</code> - это и есть шанс <code><span class="o">O</span>(<span class="h">H</span>)</code>, и записываем готовую формулу:</p>
+    <p class="formula key"><b><span class="o">O</span>(<span class="h">H</span> | <span class="e">E</span>) = <span class="o">O</span>(<span class="h">H</span>) · <span class="frac"><span>P(<span class="e">E</span> | <span class="h">H</span>)</span><span>P(<span class="e">E</span> | не <span class="h">H</span>)</span></span></b></p>
+    <p>Это шансовая формулировка теоремы Байеса.</p>
+    <p>Было справа три кирпича, и осталось три кирпича... Чем же эта формула проще? А тем, что мы выкинули самый тяжёлый кирпич <code>P(<span class="e">E</span>)</code>, который обычно тяжело считать!</p>
+  </section>
+
+  <section>
+    <h2>Считаем Байеса в уме, быстро и легко</h2>
+    <p>Давай прикинем вероятность дождя в Питере, как уже считали <a href="/strategy/bayes-formula-circles/">через круги</a>.</p>
+    <p><code><span class="o">O</span>(<span class="h">H</span>)</code> - это шанс дождя в принципе. По моим <em>ощущениям</em> льёт раз через раз, то есть <code><span class="o">O</span>(<span class="h">H</span>) = 1 : 1</code>.</p>
+    <p>Вторая часть выражения спрашивает: насколько реже ты видишь тучи, если дождя нет? Допустим, в 2 раза.</p>
+    <p class="formula"><span class="o">O</span>(<span class="h">H</span> | <span class="e">E</span>) = <span class="frac"><span>1</span><span>1</span></span> · <span class="frac"><span>2</span><span>1</span></span> = <b>2 : 1</b></p>
+    <p>Прелесть такой формулы: ответ в шансах получаешь сразу. Сама запись уже содержит ответ дробью, её есть смысл только сократить для простоты интерпретации. Делить нужно, только если нужны проценты.</p>
+    <p>Итого мы просто <strong>прикинули</strong> вероятности, ничего не считали и получили ответ 2 к 1, или ~67%. При этом точный ответ - 60%. Расхождение 60% и 67% - ничтожная плата за возможность вычисления в уме.</p>
+    <p>Теперь пример с Кипром. По статистике дней с дождём 45 из 365, шанс ~ 1 : 7. В сухой день тучи бывают сильно реже, чем в дождливый: в 60 раз.</p>
+    <p class="formula"><span class="o">O</span>(<span class="h">H</span> | <span class="e">E</span>) = <span class="frac"><span>1</span><span>7</span></span> · <span class="frac"><span>60</span><span>1</span></span> ≈ <b>8,6 : 1</b></p>
+    <p>Итого шанс дождя при тучах на Кипре 8,6 к 1, это ~90%. Почти точно попали в правильные 89%.</p>
+
+    <figure>
+      <div class="pair">
+        <div class="city">
+          <h3>Питер</h3>
+          <p>редкость 1 : 1, тучи без дождя в 2 раза реже</p>
+          <p class="res">1 : 1 · 2 = <b>2 : 1</b></p>
+          <p class="muted">≈ 67%, точно 60%</p>
+        </div>
+        <div class="city">
+          <h3>Кипр</h3>
+          <p>редкость 1 : 7, тучи без дождя в 60 раз реже</p>
+          <p class="res">1 : 7 · 60 ≈ <b>8,6 : 1</b></p>
+          <p class="muted">≈ 90%, точно 89%</p>
+        </div>
+      </div>
+      <figcaption>Одно умножение в уме вместо деления процентов на проценты</figcaption>
+    </figure>
+
+    <details>
+      <summary>Частая ошибка: считать тучи среди туч <span class="ai-badge">AI-квиз</span></summary>
+      <p>Удивительность сравнивает две разные группы дней: дождливые и сухие. «Из дождливых дней тучи во всех, из сухих - в половине» - это удивительность ×2.</p>
+      <p>Ошибка - взять одну группу, тучные дни, и сказать: «два тучных дня с дождём на один без». Это уже готовый ответ <code><span class="o">O</span>(<span class="h">H</span> | <span class="e">E</span>)</code>, и редкость дождя в нём уже сидит. Если умножить его на <code><span class="o">O</span>(<span class="h">H</span>)</code>, редкость посчитается дважды.</p>
+      <p>В Питере ошибку не видно: редкость там 1 : 1, а умножение на неё ничего не меняет. На Кипре она сразу вылезет: <code>1 : 7 · 8,6 : 1</code> даст ~55% вместо 90%.</p>
+      <p>Проверка простая: кто стоит после «из»? Из дождливых и из сухих - удивительность. Из тучных - готовый ответ.</p>
+      <p>В <a href="/strategy/bayes-natural-frequencies/">штуках</a> считать среди туч как раз правильно: там мы начали со всего года, и редкость уже вошла в счёт. Ошибка - перенести эту привычку в шансы.</p>
+
+      <!-- Год погоды: все числа выводятся из целых счётчиков дней, поэтому клетки и расчёт всегда сходятся -->
+      <div class="tq">
+        <h3>Год погоды</h3>
+        <div class="tq-presets" role="group" aria-label="Готовые примеры">
+          <button type="button" class="chip" data-preset="spb">Питер</button>
+          <button type="button" class="chip" data-preset="cy">Кипр</button>
+          <button type="button" class="chip" data-preset="desert">Пустыня</button>
+        </div>
+        <div class="tq-slider">
+          <label for="tq-p">Дождливых дней в году (редкость)</label><output id="tq-op" for="tq-p"></output>
+          <input type="range" id="tq-p" min="1" max="90" step="0.5">
+        </div>
+        <div class="tq-slider">
+          <label for="tq-a">Тучи в дождливый день</label><output id="tq-oa" for="tq-a"></output>
+          <input type="range" id="tq-a" min="5" max="100" step="1">
+        </div>
+        <div class="tq-slider">
+          <label for="tq-b">Тучи в сухой день</label><output id="tq-ob" for="tq-b"></output>
+          <input type="range" id="tq-b" min="0.5" max="100" step="0.5">
+        </div>
+
+        <div class="tq-lens" role="group" aria-label="Как смотреть на год">
+          <span>Смотрю:</span>
+          <button type="button" class="chip" id="tq-lens-groups" aria-pressed="true">внутри групп</button>
+          <button type="button" class="chip" id="tq-lens-trap" aria-pressed="false">среди тучных дней</button>
+        </div>
+
+        <div class="tq-year" id="tq-year">
+          <div class="tq-group">
+            <div class="tq-head"><strong>Дождливые дни</strong><span id="tq-g-rain"></span></div>
+            <div class="tq-cells" id="tq-cells-rain"></div>
+          </div>
+          <div class="tq-group">
+            <div class="tq-head"><strong>Сухие дни</strong><span id="tq-g-dry"></span></div>
+            <div class="tq-cells" id="tq-cells-dry"></div>
+          </div>
+          <div class="tq-legend">
+            <span><i class="rc"></i>дождь, тучи</span>
+            <span><i class="rn"></i>дождь без туч</span>
+            <span><i class="dc"></i>сухо, тучи</span>
+            <span><i></i>сухо, ясно</span>
+          </div>
+          <p class="tq-note" id="tq-note"></p>
+        </div>
+
+        <div class="tq-row">
+          <span class="tq-tag">Правильно</span>
+          <span class="tq-expr" id="tq-right"></span>
+          <span class="tq-verdict" id="tq-v-right"></span>
+        </div>
+        <div class="tq-row bad">
+          <span class="tq-tag">Ловушка</span>
+          <span class="tq-expr" id="tq-trap"></span>
+          <span class="tq-verdict" id="tq-v-trap"></span>
+        </div>
+
+        <h3>Удивительность или готовый ответ?</h3>
+        <p>Удивительность ещё надо умножить на редкость, а готовый ответ уже содержит её внутри. <span class="tq-score" id="tq-score"></span></p>
+        <div class="tq-cards" id="tq-cards"></div>
+      </div>
+    </details>
+  </section>
+
+  <section>
+    <h2>Про расхождение с правильным ответом</h2>
+    <p>Формула в виде шансов точно такая же точная, как и классическая. Расхождение вызвано только тем, что я вставлял в дроби упрощённые величины.</p>
+    <details>
+      <summary>Точный расчёт по тем же числам, что и в статье про круги</summary>
+      <p>Питер: дождь 200 дней из 365, тучи 330 дней, с дождём и тучами 198 дней. Сухих тучных дней 132 из 165 сухих, то есть 80%. При дожде тучи в 99% дней.</p>
+      <p class="formula"><span class="frac"><span>200</span><span>165</span></span> · <span class="frac"><span>99%</span><span>80%</span></span> ≈ 1,21 · 1,24 = <b>1,5 : 1</b> = 60%</p>
+      <p>Кипр: дождь 45 дней из 365, тучи 50 дней, с дождём и тучами 44,5 дня. Сухих тучных дней 5,5 из 320 сухих, то есть 1,7%.</p>
+      <p class="formula"><span class="frac"><span>45</span><span>320</span></span> · <span class="frac"><span>99%</span><span>1,7%</span></span> ≈ 0,14 · 58 = <b>8,2 : 1</b> ≈ 89%</p>
+      <p>Ответы совпали с каноничной формулой до процента. Мои прикидки «раз через раз» и «в 2 раза» были грубее реальности, отсюда и 67% вместо 60%.</p>
+    </details>
+    <p>Цель наша сейчас - научиться <strong>быстро</strong> считать вероятность по Байесу в уме. В практических ситуациях (покере, переговорах) у нас не будет времени задуматься, не будет калькулятора и не будет статистики под рукой.</p>
+    <p>Кроме того, даже найденная в интернете статистика неизбежно содержит неточности, неучтённые факторы и тонкости в формулировках, которые легко пропустить.</p>
+    <p>Грубая оценка в таких условиях много лучше интуитивного угадывания.</p>
+  </section>
+
+  <section>
+    <h2>Примеры: текстом по формуле шансов</h2>
+    <p>Зажгите благовония и помедитируйте, принимая в себя текст этой Заповеди.</p>
+    <p class="formula key"><b><span class="o">O</span>(<span class="h">H</span> | <span class="e">E</span>) = <span class="o">O</span>(<span class="h">H</span>) · <span class="frac"><span>P(<span class="e">E</span> | <span class="h">H</span>)</span><span>P(<span class="e">E</span> | не <span class="h">H</span>)</span></span></b></p>
+    <p>Прочтём на русском. Выбери, что заметил:</p>
+
+    <div class="chips" id="creed-chips" role="group" aria-label="Примеры наблюдений"></div>
+
+    <div class="creed" aria-live="polite">
+      <ol>
+        <li>Я заметил: <span class="slot e" data-slot="e"></span>. Каков шанс, что <span class="slot h" data-slot="h"></span>?</li>
+        <li>Учту шанс в принципе: <span class="num" data-slot="prior"></span> <span class="note" data-slot="priorNote"></span></li>
+        <li>Прикину, во сколько раз реже я замечал бы такое, если бы <span class="slot h" data-slot="notH"></span>: <span class="num" data-slot="lr"></span> <span class="note" data-slot="lrNote"></span></li>
+        <li>Перемножу и узнаю шанс: <span class="num" data-slot="res"></span> <span class="note" data-slot="resNote"></span></li>
+      </ol>
+    </div>
+
+    <p class="muted">Числа - прикидки на глаз, как и предлагает метод.</p>
+
+    <details class="haiku">
+      <summary>Хокку про пожар</summary>
+      <p>Шанс пожара, ибо я вижу дым?</p>
+      <p>Без пожара во сколько раз реже дым?<br>И часто ль пожары пылают вообще?</p>
+      <p>Пожары нечасты, один раз в полгода.<br>Чтобы проще делить, 1 да к <strong>двумстам</strong>.</p>
+      <p>Где пожар, там дым всегда,<br>А из негорящих домов дымит один из полста.</p>
+      <p>Пожар предвещаю полтинник к двумстам.<br>Пожарный ответ 1 : 4, или 20%.</p>
+    </details>
+  </section>
+
+  <section>
+    <h2>Вообще без вычислений: таблица редкости и удивительности</h2>
+    <p>Если и умножать лень, хватит слов. Строка - насколько редка гипотеза. Столбец - во сколько раз реже было бы наблюдение без неё. В клетке - итоговая вероятность и пример.</p>
+
+    <div class="grid-wrap">
+      <table class="grid">
+        <thead>
+          <tr>
+            <th scope="col"></th>
+            <th scope="col">Ни о чём<span>×1</span></th>
+            <th scope="col">Намёк<span>×3</span></th>
+            <th scope="col">Улика<span>×10</span></th>
+            <th scope="col">Почти доказательство<span>×100</span></th>
+          </tr>
+        </thead>
+        <tbody>
+          <tr>
+            <th scope="row">Частое<span>3 из 4 · друг опоздает</span></th>
+            <td class="v4"><b>Скорее да</b>«выхожу»</td>
+            <td class="v5"><b>Почти наверняка</b>«почти выхожу»</td>
+            <td class="v5"><b>Почти наверняка</b>«я в душе, скоро буду»</td>
+            <td class="v5"><b>Почти наверняка</b>«а мы во сколько договаривались?»</td>
+          </tr>
+          <tr>
+            <th scope="row">Через раз<span>1 из 2 · в Питере дождь</span></th>
+            <td class="v3"><b>Монетка</b>прохожий с зонтом</td>
+            <td class="v4"><b>Скорее да</b>тучи</td>
+            <td class="v5"><b>Почти наверняка</b>мокрый асфальт</td>
+            <td class="v5"><b>Почти наверняка</b>по окну стучат капли</td>
+          </tr>
+          <tr>
+            <th scope="row">Нечастое<span>1 из 10 · попутка остановится</span></th>
+            <td class="v2"><b>Маловероятно</b>машина красная</td>
+            <td class="v2"><b>Скорее нет</b>водитель притормозил</td>
+            <td class="v3"><b>Монетка</b>моргнул поворотником и съезжает на обочину</td>
+            <td class="v5"><b>Почти наверняка</b>остановился и открыл дверь</td>
+          </tr>
+          <tr>
+            <th scope="row">Редкое<span>1 из 100 · в доме пожар</span></th>
+            <td class="v1"><b>Почти исключено</b>где-то воет сирена</td>
+            <td class="v1"><b>Почти исключено</b>пахнет гарью</td>
+            <td class="v2"><b>Маловероятно</b>дым в подъезде</td>
+            <td class="v3"><b>Монетка</b>из окна соседей валит дым</td>
+          </tr>
+          <tr>
+            <th scope="row">Очень редкое<span>1 из 1000 · мотор автодома умрёт сегодня</span></th>
+            <td class="v1"><b>Почти исключено</b>сосед по кемпингу: «старая у тебя машина»</td>
+            <td class="v1"><b>Почти исключено</b>мотор стучит</td>
+            <td class="v1"><b>Почти исключено</b>загорелся чек двигателя</td>
+            <td class="v2"><b>Маловероятно</b>из-под капота валит пар и пахнет горелым</td>
+          </tr>
+          <tr>
+            <th scope="row">Почти никогда<span>1 из миллиона и реже · самолёт разобьётся</span></th>
+            <td class="v1"><b>Почти исключено</b>сосед крестится</td>
+            <td class="v1"><b>Почти исключено</b>трясёт</td>
+            <td class="v1"><b>Почти исключено</b>резкий провал, в салоне кричат</td>
+            <td class="v1"><b>Почти исключено</b>выпали кислородные маски</td>
+          </tr>
+        </tbody>
+      </table>
+    </div>
+
+    <p>Столбец «ни о чём» всегда повторяет исходную редкость: это зона примет. «Выхожу» стоит там, потому что этот друг пишет «выхожу» в любом случае.</p>
+    <p>Монетка выпадает там, где удивительность ровно перебивает редкость. Очень редкое событие не вытащить ни намёком, ни уликой. А то, что почти никогда не случается, не вытаскивает даже почти доказательство: поэтому страшные наблюдения в самолёте почти всегда ложная тревога.</p>
+  </section>
+
+  <section>
+    <h2>Выводы</h2>
+    <p>Чтобы прикинуть вероятность события при наличии факта, вспомни две вещи:</p>
+    <ol class="steps">
+      <li>Каков шанс события в принципе?</li>
+      <li>Во сколько раз реже было бы наблюдение без события?</li>
+    </ol>
+    <p>Если без события наблюдение бывает чаще, шанс падает: так олл-ин снижает шанс блефа.</p>
+    <p>Перемножь:</p>
+    <p class="formula key"><b><span class="o">O</span>(<span class="h">H</span> | <span class="e">E</span>) = <span class="o">O</span>(<span class="h">H</span>) · <span class="frac"><span>P(<span class="e">E</span> | <span class="h">H</span>)</span><span>P(<span class="e">E</span> | не <span class="h">H</span>)</span></span></b></p>
+  </section>
+
+  <section>
+    <h2>Доп. материалы</h2>
+    <ul class="links">
+      <li><a href="/strategy/bayes-natural-frequencies/">Как просто вычислить вероятность по Байесу: штуки</a> <span class="muted">· подготовка к этой статье</span></li>
+      <li><a href="/strategy/bayes-formula-circles/">Как просто вывести формулу Байеса</a> <span class="muted">· две окружности и тучи над Питером</span></li>
+      <li><a href="/strategy/bayes-rule-basic/">Ключ к спокойствию: как перестать тревожиться с помощью математики</a> <span class="muted">· с калькулятором спокойствия</span></li>
+      <li><a href="https://www.lesswrong.com/w/bayes-rule?lens=high-speed-intro-to-bayes-s-rule" target="_blank" rel="noopener">Bayes' rule: high-speed intro</a> <span class="muted">· LessWrong</span></li>
+      <li><a href="https://www.youtube.com/watch?v=lG4VkPoG3ko" target="_blank" rel="noopener">The medical test paradox, and redesigning Bayes' rule</a> <span class="muted">· 3Blue1Brown, про ту же шансовую форму</span></li>
+      <li><a href="https://www.youtube.com/watch?v=kVkEkBQAIxk&amp;t=228s" target="_blank" rel="noopener">Лайфхак по теореме Байеса</a> <span class="muted">· Аналитический джаз</span></li>
+    </ul>
+  </section>
+
+  <section class="thanks">
+    <h2>Спасибо, что прочли!</h2>
+    <p>Если нашли ошибку или хотите оставить комментарий, пишите мне в телеграм: <a href="https://t.me/art_oshk" target="_blank" rel="noopener">t.me/art_oshk</a>.</p>
+  </section>
+
+  <footer>&copy; <span id="year">2026</span> Ламопад · какие-то права, вероятно, защищены</footer>
+</main>
+
+<script src="/strategy/js/bayes.js"></script>
+
+<script>
+  // Заповедь на примерах: чип подставляет наблюдение, гипотезу и посчитанные из тех же данных числа
+  (() => {
+    const { EXAMPLES, solve, odds, oddsToPct, pct, times, chips } = window.Bayes;
+    const slots = [...document.querySelectorAll('.creed [data-slot]')];
+    const keys = Object.keys(EXAMPLES).filter((k) => EXAMPLES[k].e);
+
+    function lrText(lr) {
+      if (Math.abs(lr - 1) < 1e-9) return 'ни во сколько';
+      return lr > 1 ? times(lr) : 'наоборот, ' + times(1 / lr) + ' чаще';
+    }
+
+    const pick = chips(document.getElementById('creed-chips'), keys, (ex) => {
+      const r = solve(ex);
+      const text = {
+        e: ex.e, h: ex.h, notH: ex.notH,
+        prior: odds(r.prior), priorNote: `(${ex.priorNote})`,
+        lr: lrText(r.lr), lrNote: `(${ex.lrNote})`,
+        res: odds(r.post),
+        resNote: `(около ${pct(oddsToPct(r.post))}${ex.resExtra ? ', ' + ex.resExtra : ''})`,
+      };
+      for (const s of slots) {
+        s.textContent = text[s.dataset.slot];
+        s.classList.add('flash');
+      }
+      setTimeout(() => slots.forEach((s) => s.classList.remove('flash')), 350);
+    });
+    pick('fire');
+  })();
+</script>
+
+<script>
+  // AI-квиз: год погоды и сортировка фраз «удивительность или готовый ответ»
+  (() => {
+    const { sig2, odds, oddsToPct, pct } = window.Bayes;
+    const DAYS = 365;
+    const PRESETS = {
+      spb:    { p: 50,   a: 100, b: 50 },
+      cy:     { p: 12.5, a: 99,  b: 1.5 },
+      desert: { p: 5,    a: 100, b: 10 },
+    };
+    const $ = (id) => document.getElementById(id);
+    const sP = $('tq-p'), sA = $('tq-a'), sB = $('tq-b');
+    let lens = 'groups';
+
+    function fill(el, total, marked, markedCls, restCls) {
+      const frag = document.createDocumentFragment();
+      for (let i = 0; i < total; i++) {
+        const c = document.createElement('i');
+        const cls = i < marked ? markedCls : restCls;
+        if (cls) c.className = cls;
+        frag.appendChild(c);
+      }
+      el.replaceChildren(frag);
+    }
+
+    function render() {
+      $('tq-op').textContent = sig2(+sP.value) + '%';
+      $('tq-oa').textContent = sA.value + '%';
+      $('tq-ob').textContent = sig2(+sB.value) + '%';
+      document.querySelectorAll('.tq [data-preset]').forEach((btn) => {
+        const pr = PRESETS[btn.dataset.preset];
+        btn.setAttribute('aria-pressed', String(+sP.value === pr.p && +sA.value === pr.a && +sB.value === pr.b));
+      });
+
+      // Всё выводится из целых счётчиков дней, поэтому клетки и расчёт всегда сходятся
+      const R = Math.round(DAYS * sP.value / 100), D = DAYS - R;
+      const A = Math.round(R * sA.value / 100), B = Math.round(D * sB.value / 100);
+      fill($('tq-cells-rain'), R, A, 'rc', 'rn');
+      fill($('tq-cells-dry'), D, B, 'dc', '');
+
+      const prior = R / D;
+      const lr = B === 0 ? Infinity : (A / R) / (B / D);
+      // prior × удивительность сокращается ровно в A : B - это и есть проверка подсчётом
+      const right = B === 0 ? Infinity : A / B;
+      const wrong = prior * right;
+
+      $('tq-year').classList.toggle('trap', lens === 'trap');
+      const note = $('tq-note');
+      if (lens === 'groups') {
+        $('tq-g-rain').textContent = `тучи в ${A} из ${R}`;
+        $('tq-g-dry').textContent = `тучи в ${B} из ${D}`;
+        note.className = 'tq-note ok';
+        note.textContent = B === 0
+          ? 'Без дождя туч не бывает вовсе, значит тучи означают дождь наверняка.'
+          : `Каждую группу считаем отдельно: тучи в ${pct(A / R * 100)} дождливых и в ${pct(B / D * 100)} сухих дней. В сухой день тучи в ${sig2(lr)} раз реже. Это удивительность.`;
+      } else {
+        $('tq-g-rain').textContent = `тучных: ${A}`;
+        $('tq-g-dry').textContent = `тучных: ${B}`;
+        note.className = 'tq-note bad';
+        note.textContent = `Взяли только тучные дни: ${A} с дождём против ${B} без. Это ${A} : ${B}, то есть уже шанс дождя при тучах. Редкость дождя сидит внутри: сухих дней ${D}, поэтому и сухих тучных набралось столько.`;
+      }
+
+      $('tq-right').textContent = B === 0
+        ? `${odds(prior)} × ∞ = дождь наверняка`
+        : `редкость ${odds(prior)} × удивительность ×${sig2(lr)} = ${odds(right)} · ${pct(oddsToPct(right))}`;
+      $('tq-v-right').textContent = `Проверка подсчётом: среди тучных дней ${A} с дождём и ${B} без, это те же ${odds(right)}.`;
+
+      const vTrap = $('tq-v-trap');
+      if (B === 0) {
+        $('tq-trap').textContent = 'среди тучных дней сухих нет, ловушка не сработает';
+        vTrap.textContent = '';
+        return;
+      }
+      $('tq-trap').textContent = `редкость ${odds(prior)} × «среди туч» ${A} : ${B} = ${odds(wrong)} · ${pct(oddsToPct(wrong))}`;
+      const gap = Math.abs(oddsToPct(wrong) - oddsToPct(right));
+      vTrap.textContent = gap < 2
+        ? 'Совпало случайно: редкость около 1 : 1, и умножение на неё ничего не меняет. Поэтому в Питере ошибку не видно. Попробуйте Кипр или Пустыню.'
+        : `Мимо на ${Math.round(gap)} п.п. Редкость дождя посчитана дважды: она уже сидела внутри пропорции ${A} : ${B}.`;
+    }
+
+    function setPreset(key) {
+      const pr = PRESETS[key];
+      sP.value = pr.p; sA.value = pr.a; sB.value = pr.b;
+      render();
+    }
+    function setLens(l) {
+      lens = l;
+      $('tq-lens-groups').setAttribute('aria-pressed', String(l === 'groups'));
+      $('tq-lens-trap').setAttribute('aria-pressed', String(l === 'trap'));
+      render();
+    }
+    document.querySelectorAll('.tq [data-preset]').forEach((b) => b.addEventListener('click', () => setPreset(b.dataset.preset)));
+    [sP, sA, sB].forEach((s) => s.addEventListener('input', render));
+    $('tq-lens-groups').addEventListener('click', () => setLens('groups'));
+    $('tq-lens-trap').addEventListener('click', () => setLens('trap'));
+
+    const DRILL = [
+      ['Из 100 дождливых дней тучи были в 90.', 'lr',
+       'После «из» стоят дождливые дни, то есть группа с гипотезой. Это половинка удивительности.'],
+      ['Из 100 тучных дней дождь был в 60.', 'ans',
+       'После «из» стоят тучные дни, то есть само наблюдение. Это уже шанс дождя при тучах.'],
+      ['Два дня тучи с дождём, один день тучи без дождя.', 'ans',
+       'Обе кучки состоят из тучных дней. Это пропорция среди наблюдения, ответ 2 : 1 сразу. В пустыне та же фраза звучала бы наоборот, потому что редкость уже внутри.'],
+      ['В сухой день тучи бывают вдвое реже, чем в дождливый.', 'lr',
+       'Сравниваем две разные группы: сухие дни и дождливые. Удивительность ×2, её умножаем на редкость.'],
+      ['Полста человек дымят ветками, и только один бедолага горит.', 'ans',
+       'Все 51 человек дымят, то есть все они из группы наблюдения. Это ответ: пожар 1 : 50.'],
+      ['Где пожар, там дым всегда, а из негорящих домов дымит один из полста.', 'lr',
+       'Горящие дома и негорящие считаем отдельно. Удивительность ×50, её умножаем на редкость пожаров.'],
+      ['Из тех, кто шёл олл-ин, блефовали трое из десяти.', 'ans',
+       'После «из» стоят те, кто шёл олл-ин, то есть наблюдение. Шанс блефа уже готов: 3 : 7.'],
+      ['С мусором он идёт олл-ин в 10 раз реже, чем с сильной рукой.', 'lr',
+       'Сравниваем раздачи с мусором и раздачи с сильной рукой. Удивительность 1 : 10, её умножаем на редкость.'],
+      ['Из всех СМС про выигрыш миллиарда развод в 9 999 из 10 000.', 'ans',
+       'После «из» стоят СМС про миллиард, то есть наблюдение. Это уже ответ.'],
+      ['Если бы это был не развод, такая СМС пришла бы в тысячи раз реже.', 'lr',
+       '«Если бы не развод» - это группа без гипотезы. Удивительность в тысячи раз.'],
+    ];
+    const LABEL = { lr: 'Удивительность: умножаю на редкость', ans: 'Готовый ответ: редкость уже внутри' };
+    const answered = new Map();
+
+    function renderScore() {
+      const ok = [...answered.values()].filter(Boolean).length;
+      $('tq-score').textContent = answered.size ? `Верно ${ok} из ${answered.size}, всего ${DRILL.length}.` : '';
+    }
+
+    DRILL.forEach(([text, kind, why], i) => {
+      const card = document.createElement('div');
+      card.className = 'tq-card';
+      const q = document.createElement('q');
+      q.textContent = text;
+      const choices = document.createElement('div');
+      choices.className = 'tq-choices';
+      const whyEl = document.createElement('p');
+      whyEl.className = 'tq-why';
+      whyEl.hidden = true;
+      for (const k of ['lr', 'ans']) {
+        const b = document.createElement('button');
+        b.type = 'button';
+        b.className = 'chip';
+        b.textContent = LABEL[k];
+        b.addEventListener('click', () => {
+          const ok = k === kind;
+          answered.set(i, ok);
+          choices.querySelectorAll('button').forEach((x) => x.setAttribute('aria-pressed', String(x === b)));
+          card.className = 'tq-card ' + (ok ? 'right' : 'wrong');
+          whyEl.hidden = false;
+          whyEl.textContent = (ok ? 'Да. ' : 'Нет. ') + why;
+          renderScore();
+        });
+        choices.appendChild(b);
+      }
+      card.append(q, choices, whyEl);
+      $('tq-cards').appendChild(card);
+    });
+
+    setPreset('cy');
+  })();
+</script>
+
+<script>document.getElementById('year').textContent = new Date().getFullYear();</script>
+<script src="/js/lamopad-fall.js"></script>
+</body>
+</html>

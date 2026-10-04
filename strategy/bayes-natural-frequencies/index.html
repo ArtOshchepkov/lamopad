@@ -1,0 +1,585 @@
+<!DOCTYPE html>
+<html lang="ru">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>Как просто вычислить вероятность по Байесу: штуки | Ламопад</title>
+  <meta name="description" content="Естественные частоты: разложи 365 дней или 1000 сотрудников по веткам дерева и посчитай штуки - так Байес считается без формул. Дождь в Питере и на Кипре, вызов к начальнику и другие примеры.">
+  <meta name="keywords" content="формула Байеса, теорема Байеса, естественные частоты, дерево вероятностей, условная вероятность, вероятность дождя">
+  <meta name="author" content="Артём Ощепков">
+  <meta name="robots" content="index, follow">
+  <link rel="canonical" href="https://lamopad.ru/strategy/bayes-natural-frequencies/">
+  <link rel="icon" href="/img/slon_96px.png" type="image/png" sizes="96x96">
+
+  <meta property="og:type" content="article">
+  <meta property="og:title" content="Как просто вычислить вероятность по Байесу: штуки">
+  <meta property="og:description" content="Разложи случаи по веткам дерева и посчитай штуки - так Байес считается без формул.">
+  <meta property="og:url" content="https://lamopad.ru/strategy/bayes-natural-frequencies/">
+  <meta property="og:image" content="https://lamopad.ru/strategy/bayes-natural-frequencies/img/hero-count.jpg">
+  <meta property="og:image:width" content="1200">
+  <meta property="og:image:height" content="900">
+  <meta property="og:image:alt" content="Стая голубей на площади, среди них затесалась обезьяна">
+  <meta property="og:locale" content="ru_RU">
+  <meta property="og:site_name" content="Ламопад">
+  <meta name="twitter:card" content="summary_large_image">
+  <meta name="twitter:title" content="Как просто вычислить вероятность по Байесу: штуки">
+  <meta name="twitter:description" content="Разложи случаи по веткам дерева и посчитай штуки - так Байес считается без формул.">
+  <meta name="twitter:image" content="https://lamopad.ru/strategy/bayes-natural-frequencies/img/hero-count.jpg">
+  <meta property="article:published_time" content="2026-10-04">
+  <meta property="article:author" content="https://github.com/ArtOshchepkov">
+  <meta property="article:section" content="Вероятность">
+  <meta property="article:tag" content="формула Байеса">
+
+  <script type="application/ld+json">
+  {
+    "@context": "https://schema.org",
+    "@type": "Article",
+    "headline": "Как просто вычислить вероятность по Байесу: штуки",
+    "description": "Естественные частоты: разложи 365 дней или 1000 сотрудников по веткам дерева и посчитай штуки - так Байес считается без формул. Дождь в Питере и на Кипре, вызов к начальнику и другие примеры.",
+    "inLanguage": "ru",
+    "datePublished": "2026-10-04",
+    "dateModified": "2026-10-04",
+    "author": { "@type": "Person", "name": "Артём Ощепков", "url": "https://github.com/ArtOshchepkov" },
+    "publisher": { "@type": "Organization", "name": "Ламопад", "url": "https://lamopad.ru/", "logo": { "@type": "ImageObject", "url": "https://lamopad.ru/img/slon_1024px.jpg" } },
+    "image": "https://lamopad.ru/strategy/bayes-natural-frequencies/img/hero-count.jpg",
+    "mainEntityOfPage": "https://lamopad.ru/strategy/bayes-natural-frequencies/",
+    "about": ["Теорема Байеса", "Естественные частоты", "Условная вероятность"],
+    "keywords": "формула Байеса, естественные частоты, дерево вероятностей"
+  }
+  </script>
+
+  <link rel="preconnect" href="https://fonts.googleapis.com">
+  <link href="https://fonts.googleapis.com/css2?family=Nunito:ital,wght@0,400;0,600;0,700;1,400&family=Unbounded:wght@900&display=swap" rel="stylesheet">
+
+  <style>
+    *, *::before, *::after { margin: 0; padding: 0; box-sizing: border-box; }
+
+    :root {
+      --bg:    #f8f4ed;
+      --ink:   #1e1810;
+      --faded: #7a6e62;
+      --cloud: #7a6e62;
+      --red:   #c8281e;
+      --blue:  #2a62b8;
+      --green: #2f7d3a;
+      --faded-strong: #4f453b;
+    }
+
+    body {
+      background: var(--bg);
+      color: var(--ink);
+      font-family: 'Nunito', sans-serif;
+      font-size: clamp(17px, 3.4vw, 21px);
+      line-height: 1.6;
+      min-height: 100vh;
+      cursor: url('/img/lamopad_cursor_48px.png') 0 0, auto;
+    }
+
+    .page {
+      position: relative;
+      z-index: 1;
+      max-width: 880px;
+      margin: 0 auto;
+      padding: clamp(48px, 10vw, 96px) 24px clamp(64px, 12vw, 120px);
+    }
+
+    h1 {
+      font-family: 'Unbounded', sans-serif;
+      font-size: clamp(26px, 7vw, 44px);
+      font-weight: 900;
+      line-height: 1.05;
+      color: var(--red);
+      letter-spacing: .01em;
+    }
+
+    .h1-key { color: var(--blue); }
+
+    .hero {
+      display: block;
+      width: 100%;
+      max-width: 750px;
+      height: auto;
+      margin-top: 28px;
+      border-radius: 6px;
+    }
+
+    .byline {
+      margin-top: 10px;
+      font-size: 14px;
+      color: var(--faded);
+    }
+
+    .byline a, .links a, .thanks a, section p a, .steps a {
+      color: var(--ink);
+      text-decoration: underline;
+      text-decoration-color: rgba(200, 40, 30, 0.35);
+      text-underline-offset: 3px;
+    }
+    .byline a:hover, .links a:hover, .thanks a:hover, section p a:hover, .steps a:hover { color: var(--red); text-decoration-color: var(--red); }
+
+    .tagline {
+      margin-top: 12px;
+      font-size: clamp(11px, 2vw, 13px);
+      letter-spacing: .28em;
+      text-transform: uppercase;
+      color: var(--faded);
+      font-weight: 700;
+    }
+
+    h2 {
+      font-family: 'Unbounded', sans-serif;
+      font-size: clamp(17px, 4.2vw, 22px);
+      font-weight: 900;
+      line-height: 1.25;
+      margin: 56px 0 16px;
+    }
+
+    h3 { font: 900 16px/1.3 'Unbounded', sans-serif; margin: 32px 0 12px; }
+
+    section > p.sources { font-size: 14px; color: var(--faded); text-align: left; }
+
+    /* ── дерево штук: корень → сбылось / нет → наблюдение было / нет ── */
+    .ft {
+      display: grid;
+      grid-template-columns: repeat(4, minmax(0, 1fr));
+      align-items: center;
+      background: #fff;
+      border: 1px solid rgba(0,0,0,0.08);
+      border-radius: 6px;
+      box-shadow: 3px 3px 0 rgba(0,0,0,0.07);
+      padding: 14px 8px;
+      font-variant-numeric: tabular-nums;
+    }
+    .ft-node { justify-self: center; text-align: center; padding: 4px 6px; border-radius: 4px; line-height: 1.2; min-width: 0; }
+    .ft-node b { display: block; font: 900 clamp(13px, 3.4vw, 18px)/1.2 'Unbounded', sans-serif; overflow-wrap: anywhere; }
+    .ft-node span { display: block; font-size: 13px; color: var(--faded); }
+    .ft-node.root { grid-column: 1 / -1; }
+    .ft-node.h, .ft-node.nh { grid-column: span 2; }
+    .ft-node.h b { color: var(--blue); }
+    .ft-node.leaf b { font-size: clamp(12px, 3vw, 16px); color: var(--faded); }
+    .ft-node.hit { background: rgba(200,40,30,0.12); }
+    .ft-node.hit b { color: var(--red); }
+    .ft-lines { grid-column: 1 / -1; width: 100%; height: 22px; display: block; }
+    .ft-leaves { grid-column: 1 / -1; display: grid; grid-template-columns: repeat(4, minmax(0, 1fr)); align-items: center; position: relative; }
+    /* Двоеточие шансов встаёт между листьями с наблюдением (центр второй колонки) */
+    .ft-ratio {
+      position: absolute;
+      left: 37.5%; top: 50%;
+      transform: translate(-50%, -55%);
+      font: 900 clamp(32px, 8vw, 48px)/1 'Unbounded', sans-serif;
+      color: var(--red);
+      opacity: 0;
+      pointer-events: none;
+      transition: opacity .2s;
+    }
+    .ft.ratio .ft-ratio { opacity: 1; }
+    .ft.focus.ratio .ft-node[data-k="h-ne"] { opacity: 0; }
+    .ft-lines path { stroke: rgba(0,0,0,0.22); stroke-width: 1.5; fill: none; transition: opacity .2s, stroke-width .2s; }
+    /* Путь к листьям с наблюдением - жирный: только его и сравниваем */
+    .ft-lines path.hit { stroke: var(--red); stroke-opacity: .55; stroke-width: 3.5; }
+    .ft-node { transition: opacity .2s, box-shadow .2s; }
+    .ft.focus .ft-node:not(.lit), .ft.focus .ft-lines path:not(.lit) { opacity: .25; }
+    .ft-node.lit { box-shadow: 0 0 0 2px var(--red); background: rgba(200,40,30,0.12); }
+    .ft-lines path.lit { stroke: var(--red); stroke-opacity: 1; stroke-width: 5; }
+
+    /* Подчёркнутое в тексте подсвечивает свою часть дерева */
+    .hl, .hl-demo {
+      text-decoration: underline dashed rgba(200,40,30,0.6);
+      text-underline-offset: 4px;
+      text-decoration-thickness: 1.5px;
+    }
+    .hl { cursor: pointer; border-radius: 3px; transition: background .2s; }
+    .hl.on { background: rgba(200,40,30,0.12); }
+    .hl:focus-visible { outline: 2px solid var(--red); outline-offset: 2px; }
+    .ftree { margin-bottom: 1em; }
+    .ftree .ft-answer { margin: 10px 0 0; font-size: .9em; text-align: left; }
+    figure .ftree { margin-bottom: 0; }
+
+    p { margin-bottom: 1em; }
+    p:has(.frac) { line-height: 2; }
+    .formula:has(.frac) { display: flex; flex-wrap: wrap; align-items: center; gap: .2em .45em; white-space: normal; line-height: 1.6; }
+
+    /* Неразрывные формулы в строке растягивают пробелы при выравнивании по ширине */
+    section > p:not(.formula, :has(code)), details p:not(:has(code)) {
+      text-align: justify;
+      hyphens: auto;
+    }
+
+    .muted { color: var(--faded); font-size: .9em; }
+
+    code {
+      font-family: ui-monospace, monospace;
+      font-size: .85em;
+      white-space: nowrap;
+      background: #fff;
+      border-radius: 3px;
+      padding: 1px 5px;
+    }
+
+    .h { color: var(--blue); }
+    .e { color: var(--cloud); }
+    .o { color: var(--red); }
+
+    .formula {
+      font-family: ui-monospace, monospace;
+      font-size: .9em;
+      line-height: 1.5;
+      background: #fff;
+      border-left: 3px solid var(--red);
+      padding: 12px 14px;
+      margin: 0 0 1em;
+      font-variant-numeric: tabular-nums;
+      white-space: nowrap;
+      overflow-x: auto;
+    }
+
+    .frac {
+      display: inline-flex;
+      flex-direction: column;
+      vertical-align: middle;
+      text-align: center;
+      line-height: 1.25;
+      margin: 0 .1em;
+    }
+    .frac > span { padding: 0 .2em; }
+    .frac > span + span { border-top: 1.5px solid currentColor; }
+    .formula .frac { margin: .15em .1em; }
+
+    .formula b { font-family: 'Unbounded', sans-serif; font-weight: 900; color: var(--red); }
+    .formula.key { border-left-color: var(--blue); font-size: 1.05em; }
+    .formula.key b { color: var(--ink); }
+
+    /* TLDR: формула и её перевод на человеческий */
+    .tldr { margin-top: 28px; }
+    .tldr .say { font-weight: 700; font-size: .95em; }
+    .tldr .say em { font-style: normal; color: var(--blue); }
+    .tldr .say strong { color: var(--red); }
+    .tldr .say-k { color: var(--faded); }
+
+    figure { margin: 24px 0 28px; }
+    figure svg { display: block; width: 100%; height: auto; }
+    figcaption {
+      margin-top: 8px;
+      font-size: 14px;
+      font-weight: 700;
+      color: var(--faded);
+      text-align: center;
+      line-height: 1.35;
+    }
+
+    .chips { display: flex; flex-wrap: wrap; gap: 8px; margin-bottom: 1em; }
+    .chip {
+      font: 600 14px/1.2 'Nunito', sans-serif;
+      padding: 7px 12px;
+      border: 1px solid rgba(0,0,0,0.15);
+      border-radius: 999px;
+      background: #fff;
+      color: var(--ink);
+      cursor: pointer;
+    }
+    .chip:hover { border-color: var(--red); }
+    .chip[aria-pressed="true"] { background: var(--ink); color: var(--bg); border-color: var(--ink); }
+    .chip:focus-visible { outline: 2px solid var(--red); outline-offset: 2px; }
+
+    details {
+      margin: 0 0 1em;
+      padding: 10px 16px;
+      border-left: 3px solid var(--faded);
+      background: rgba(0,0,0,0.03);
+      font-size: .95em;
+    }
+    summary { cursor: pointer; font-weight: 700; color: var(--faded); list-style: none; }
+    summary::-webkit-details-marker { display: none; }
+    summary::before {
+      content: '';
+      display: inline-block;
+      width: .45em;
+      height: .45em;
+      margin: 0 .55em .12em .1em;
+      border-right: 2px solid currentColor;
+      border-bottom: 2px solid currentColor;
+      transform: rotate(-45deg);
+      transition: transform .2s;
+    }
+    details[open] > summary::before { transform: rotate(45deg); }
+    details[open] summary { margin-bottom: 8px; }
+    details p { margin: 0; }
+    details p + p, details p + .formula, details .formula + p { margin-top: .6em; }
+
+    .steps { padding-left: 1.4em; margin-bottom: 1em; }
+    .steps li + li { margin-top: .3em; }
+
+    .links { list-style: none; }
+    .links li + li { margin-top: .4em; }
+
+    .thanks { margin-top: 64px; }
+    .thanks h2 { margin-top: 0; }
+
+    footer {
+      margin-top: 72px;
+      padding-top: 20px;
+      border-top: 1px solid rgba(0,0,0,0.10);
+      font-size: 14px;
+      letter-spacing: .06em;
+      color: rgba(0,0,0,0.35);
+    }
+
+    .back {
+      display: inline-block;
+      margin-bottom: 32px;
+      color: var(--faded);
+      text-decoration: none;
+      font-weight: 600;
+    }
+    .back:hover { color: var(--red); }
+
+    @media (max-width: 400px) {
+      .page { padding: 40px 16px 60px; }
+    }
+    @media (prefers-reduced-motion: reduce) {
+      summary::before, .ft-node, .ft-lines path, .hl, .ft-ratio { transition: none; }
+    }
+  </style>
+  <script data-goatcounter="https://lamopad.goatcounter.com/count"
+          async src="//gc.zgo.at/count.js"></script>
+</head>
+<body>
+
+<main class="page">
+  <a class="back" href="/">&larr; Ламопад</a>
+
+  <header>
+    <h1>Как <span class="h1-key">просто</span> вычислить вероятность по Байесу: штуки</h1>
+    <p class="tagline">Штуки &nbsp;·&nbsp; Дерево &nbsp;·&nbsp; Тучи</p>
+    <p class="byline">Автор: <a href="https://github.com/ArtOshchepkov" target="_blank" rel="noopener">Артём Ощепков</a> · <time datetime="2026-10-04">4 октября 2026</time></p>
+    <img class="hero" src="./img/hero-count.jpg" width="1200" height="900" alt="Голуби и обезьяна: попробуй посчитать штуки">
+  </header>
+
+  <div class="tldr">
+    <p class="say"><span class="say-k">TLDR:</span> представь 1000 таких же случаев, раздели на «сбылось» и «нет» и посчитай, где было наблюдение.</p>
+  </div>
+
+  <section>
+    <h2>Посчитаем штуки</h2>
+    <p class="sources">Источники: <a href="https://baguzin.ru/wp/estestvennaya-chastota-protiv-bajesov/" target="_blank" rel="noopener">Естественная частота против байесовского подхода</a> <span class="muted">· Сергей Багузин</span>, <a href="https://www.lesswrong.com/w/bayes-rule?lens=high-speed-intro-to-bayes-s-rule" target="_blank" rel="noopener">Bayes' rule: high-speed intro</a> <span class="muted">· LessWrong</span></p>
+    <p>Простейший способ посчитать Байеса: разбить события по штукам. Возьмём любимый пример с Питером и дождём.</p>
+    <p>Вопрос: какова вероятность дождя сегодня, если на небе тучи?</p>
+    <div class="hl-scope">
+    <p>В году <span class="hl" data-hl="root">365 дней</span>. Из них <span class="hl" data-hl="h">дождь идёт 200 дней</span>, <span class="hl" data-hl="nh">сухо 165</span>.</p>
+    <p>При этом из 200 дождливых дней <span class="hl" data-hl="h-e">в 198 будут тучи</span>, <span class="hl" data-hl="h-ne">пару дней оставим на грибной дождь</span>. Всего в Питере <a href="https://peterburg.center/otvet/kakoy-klimat-v-sankt-peterburge#:~:text=%D0%9E%D0%BD%D0%B8%20%D0%B8%D0%B4%D1%83%D1%82%20%D0%B2%D0%B5%D1%81%D0%BD%D0%BE%D0%B9%20%D0%B8%20%D0%BB%D0%B5%D1%82%D0%BE%D0%BC%2C%20%D0%B7%D0%B8%D0%BC%D0%BE%D0%B9%20%D0%B8,%D1%81%D1%80%D0%B5%D0%B4%D0%BD%D0%B5%D0%BC%20%D0%B1%D1%8B%D0%B2%D0%B0%D0%B5%D1%82%20%D0%BD%D0%B5%20%D0%B1%D0%BE%D0%BB%D0%B5%D0%B5%2030%20%D0%B1%D0%B5%D0%B7%D0%BE%D0%B1%D0%BB%D0%B0%D1%87%D0%BD%D1%8B%D1%85%20%D0%B4%D0%BD%D0%B5%D0%B9." target="_blank" rel="noopener">30 солнечных дней</a>, <span class="hl" data-hl="nh-ne">28 из них при сухой погоде</span>. Значит, <span class="hl" data-hl="nh-e">сухих дней с тучами 165 − 28 = 137</span>.</p>
+
+    <figure>
+      <div class="ftree" data-tree="spb"></div>
+      <figcaption>Красным - ветки, где были тучи. Только их и сравниваем. Наведи или нажми на <span class="hl-demo">подчёркнутое</span> в тексте - дерево покажет, о чём речь</figcaption>
+    </figure>
+
+    <p>Как же часто тучи будут предвещать дождь? <span class="hl" data-hl="h-e nh-e">Тучи были 198 + 137 = 335 дней</span>, и <span class="hl" data-hl="h-e">дождь шёл в 198 из них</span>:</p>
+    <p class="formula">P(<span class="h">дождь</span> | <span class="e">тучи</span>) = <span class="frac"><span><span class="hl" data-hl="h-e">198</span></span><span><span class="hl" data-hl="h-e">198</span> + <span class="hl" data-hl="nh-e">137</span></span></span> ≈ <b>59%</b></p>
+    </div>
+    <p>Почти те же 60%, что вышли <a href="/strategy/bayes-formula-circles/">через круги</a>. Ни одной формулы, только штуки.</p>
+
+    <details>
+      <summary>Сравним с Кипром</summary>
+      <div class="ftree" data-tree="cy"></div>
+      <p>Итого для Кипра тучи предвещают дождь с вероятностью 44 / (44 + 6) = 88%.</p>
+    </details>
+
+    <p>А если речь не про день, а про событие? Например, начальник написал «Зайди в кабинет. Надо поговорить», и ты ожидаешь увольнения.</p>
+    <p>Представь 1000 таких же сотрудников. Не 1000 вызовов, а именно сотрудников: начинать надо до наблюдения, иначе редкость увольнений потеряется. Дерево с теми же числами, что и в <a href="/strategy/bayes-rule-basic/">статье про спокойствие</a>, ниже.</p>
+
+  </section>
+
+  <section>
+    <h2>Примеры</h2>
+    <p>Выбери пример. Красные листья сравниваем между собой: это и есть ответ.</p>
+    <div class="chips" id="ftree-chips" role="group" aria-label="Примеры деревьев"></div>
+    <div class="ftree" id="ftree-live" aria-live="polite"></div>
+
+  </section>
+
+  <section>
+    <h2>Пошаговый алгоритм</h2>
+    <ol class="steps">
+      <li>Представь много таких же случаев <strong>до</strong> наблюдения: 365 дней, 1000 сотрудников, миллион авиаперелётов. С миллионом, правда, уже неудобно, тогда смотри <a href="/strategy/bayes-odds/">шансы</a>.</li>
+      <li>Раздели их на те, где гипотеза сбылась, и те, где нет: 200 дождливых и 165 сухих дней, 1 аварийный и 999 999 безопасных перелётов.</li>
+      <li>В каждой части найди, сколько раз было наблюдение.</li>
+      <li>«Гипотеза сбылась и наблюдение было» : «не сбылась, но наблюдение всё равно было» - это и есть искомый шанс. 198 : 137 - шансы, 198 из 335 - вероятность.</li>
+    </ol>
+
+  </section>
+
+  <section>
+    <h2>Выводы</h2>
+    <p>Для простейшего вычисления формулы Байеса нарисуй дерево вариантов и посчитай пропорцию штук в подходящих веточках.</p>
+    <p>Если этот способ неудобен для твоего случая - событие очень редкое, улик несколько подряд или некогда считать, - читай <a href="/strategy/bayes-odds/">продолжение про шансы</a>.</p>
+  </section>
+
+
+  <section>
+    <h2>Доп. материалы</h2>
+    <ul class="links">
+      <li><a href="/strategy/bayes-odds/">Как быстро вычислить вероятность по Байесу: шансы</a> <span class="muted">· продолжение этой статьи</span></li>
+      <li><a href="/strategy/bayes-formula-circles/">Как просто вывести формулу Байеса</a> <span class="muted">· две окружности и тучи над Питером</span></li>
+      <li><a href="/strategy/bayes-rule-basic/">Ключ к спокойствию: как перестать тревожиться с помощью математики</a> <span class="muted">· с калькулятором спокойствия</span></li>
+      <li><a href="https://baguzin.ru/wp/estestvennaya-chastota-protiv-bajesov/" target="_blank" rel="noopener">Естественная частота против байесовского подхода</a> <span class="muted">· Сергей Багузин</span></li>
+      <li><a href="https://www.lesswrong.com/w/bayes-rule?lens=high-speed-intro-to-bayes-s-rule" target="_blank" rel="noopener">Bayes' rule: high-speed intro</a> <span class="muted">· LessWrong</span></li>
+    </ul>
+  </section>
+
+  <section class="thanks">
+    <h2>Спасибо, что прочли!</h2>
+    <p>Если нашли ошибку или хотите оставить комментарий, пишите мне в телеграм: <a href="https://t.me/art_oshk" target="_blank" rel="noopener">t.me/art_oshk</a>.</p>
+  </section>
+
+  <footer>&copy; <span id="year">2026</span> Ламопад · какие-то права, вероятно, защищены</footer>
+</main>
+
+<script src="/strategy/js/bayes.js"></script>
+
+<script>
+  // Деревья штук: корень → сбылось / нет → было наблюдение / не было.
+  // Подчёркнутое в тексте (.hl с data-hl = ключи узлов) подсвечивает свои узлы и ветки в дереве своего блока;
+  // ключ ratio ещё и ставит двоеточие шансов между листьями с наблюдением.
+  (() => {
+    const { EXAMPLES, solve, count, odds, oddsToPct, pct, chips } = window.Bayes;
+    const SVG = 'http://www.w3.org/2000/svg';
+
+    function node(key, cls, num, label) {
+      const d = document.createElement('div');
+      d.className = 'ft-node ' + cls;
+      d.dataset.k = key;
+      const b = document.createElement('b');
+      b.textContent = num;
+      const s = document.createElement('span');
+      s.textContent = label;
+      d.append(b, s);
+      return d;
+    }
+    // Ветка подписана ключом узла, в который ведёт: так подсветка узла зажигает и путь к нему
+    function edges(list) {
+      const svg = document.createElementNS(SVG, 'svg');
+      svg.setAttribute('class', 'ft-lines');
+      svg.setAttribute('viewBox', '0 0 400 24');
+      svg.setAttribute('preserveAspectRatio', 'none');
+      svg.setAttribute('aria-hidden', 'true');
+      for (const [key, d, hit] of list) {
+        const path = document.createElementNS(SVG, 'path');
+        path.setAttribute('d', d);
+        path.setAttribute('vector-effect', 'non-scaling-stroke');
+        path.dataset.k = key;
+        if (hit) path.classList.add('hit');
+        svg.appendChild(path);
+      }
+      return svg;
+    }
+    function leaves(...nodes) {
+      const row = document.createElement('div');
+      row.className = 'ft-leaves';
+      const colon = document.createElement('span');
+      colon.className = 'ft-ratio';
+      colon.setAttribute('aria-hidden', 'true');
+      colon.textContent = ':';
+      row.append(...nodes, colon);
+      return row;
+    }
+    function hl(keys, text) {
+      const s = document.createElement('span');
+      s.className = 'hl';
+      s.dataset.hl = keys;
+      s.textContent = text;
+      return s;
+    }
+    function line(...parts) {
+      const p = document.createElement('p');
+      p.className = 'ft-answer';
+      p.append(...parts);
+      return p;
+    }
+
+    function render(el, ex) {
+      const r = solve(ex);
+      const tree = document.createElement('div');
+      tree.className = 'ft';
+      tree.setAttribute('role', 'img');
+      tree.setAttribute('aria-label', `${count(ex.N)} ${ex.unit}: ${ex.hName} ${count(ex.nH)}, из них ${ex.eName} ${count(r.eH)}; ${ex.nhName} ${count(r.nNH)}, из них ${ex.eName} ${count(r.eNH)}`);
+      tree.append(
+        node('root', 'root', count(ex.N), ex.unit),
+        edges([['h', 'M200 0 L100 24', true], ['nh', 'M200 0 L300 24', true]]),
+        node('h', 'h', count(ex.nH), ex.hName),
+        node('nh', 'nh', count(r.nNH), ex.nhName),
+        edges([['h-e', 'M100 0 L50 24', true], ['h-ne', 'M100 0 L150 24', false],
+               ['nh-e', 'M300 0 L250 24', true], ['nh-ne', 'M300 0 L350 24', false]]),
+        leaves(
+          node('h-e', 'leaf hit', count(r.eH), ex.eName),
+          node('h-ne', 'leaf', count(ex.nH - r.eH), ex.neName),
+          node('nh-e', 'leaf hit', count(r.eNH), ex.eName),
+          node('nh-ne', 'leaf', count(r.nNH - r.eNH), ex.neName),
+        ),
+      );
+      const story = line(
+        hl('root', `${count(ex.N)} ${ex.unit}`), ': ',
+        hl('h', `«${ex.hName}» ${count(ex.nH)}`), ', ',
+        hl('nh', `«${ex.nhName}» ${count(r.nNH)}`), `. Наблюдение «${ex.eName}» `,
+        hl('h-e', `при «${ex.hName}» ${count(r.eH)}`), ', ',
+        hl('nh-e', `при «${ex.nhName}» ${count(r.eNH)}`), '.',
+      );
+      const answer = line(
+        'Шанс ', hl('h-e nh-e ratio', `${count(r.eH)} : ${count(r.eNH)} ≈ ${odds(r.post)}`), ', вероятность ',
+        hl('h-e', count(r.eH)), ' из ', hl('h-e nh-e', count(r.eH + r.eNH)), ` ≈ ${pct(oddsToPct(r.post))}.`,
+      );
+      el.replaceChildren(tree, story, answer);
+      prepare(el);
+    }
+
+    function prepare(root) {
+      root.querySelectorAll('.hl').forEach((t) => { t.tabIndex = 0; t.setAttribute('role', 'button'); });
+    }
+
+    // Наведение мышью показывает часть дерева временно, нажатие закрепляет (на телефоне только оно)
+    function bindScope(scope) {
+      let pinned = null;
+      function show(term) {
+        if (term && !term.isConnected) term = null;
+        const keys = new Set(term ? term.dataset.hl.split(' ') : []);
+        const tree = scope.querySelector('.ft');
+        if (tree) {
+          tree.classList.toggle('focus', keys.size > 0);
+          tree.classList.toggle('ratio', keys.has('ratio'));
+          tree.querySelectorAll('[data-k]').forEach((n) => n.classList.toggle('lit', keys.has(n.dataset.k)));
+        }
+        scope.querySelectorAll('.hl').forEach((t) => t.classList.toggle('on', t === term));
+      }
+      const termOf = (e) => e.target.closest?.('.hl');
+      scope.addEventListener('pointerover', (e) => { const t = termOf(e); if (t && e.pointerType === 'mouse') show(t); });
+      scope.addEventListener('pointerout', (e) => {
+        const t = termOf(e);
+        if (t && e.pointerType === 'mouse' && !t.contains(e.relatedTarget)) show(pinned);
+      });
+      scope.addEventListener('click', (e) => {
+        const t = termOf(e);
+        if (!t) return;
+        pinned = pinned === t ? null : t;
+        show(pinned);
+      });
+      scope.addEventListener('keydown', (e) => {
+        const t = termOf(e);
+        if (t && (e.key === 'Enter' || e.key === ' ')) { e.preventDefault(); t.click(); }
+      });
+    }
+
+    document.querySelectorAll('.ftree[data-tree]').forEach((el) => render(el, EXAMPLES[el.dataset.tree]));
+    const live = document.getElementById('ftree-live');
+    const pick = chips(document.getElementById('ftree-chips'), Object.keys(EXAMPLES), (ex) => render(live, ex));
+    pick('boss');
+
+    prepare(document);
+    // Блок с текстом и деревом - одна область подсветки; дерево без такого блока само себе область
+    document.querySelectorAll('.hl-scope').forEach(bindScope);
+    document.querySelectorAll('.ftree').forEach((el) => { if (!el.closest('.hl-scope')) bindScope(el); });
+  })();
+</script>
+
+<script>document.getElementById('year').textContent = new Date().getFullYear();</script>
+<script src="/js/lamopad-fall.js"></script>
+</body>
+</html>

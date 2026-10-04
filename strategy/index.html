@@ -1,0 +1,177 @@
+<!DOCTYPE html>
+<html lang="ru">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>Думалки — Ламопад</title>
+  <meta name="description" content="Думалки Ламопада: теорема Байеса на пальцах, штуками и шансами, и покерная математика.">
+  <meta name="author" content="Ламопад">
+  <meta name="robots" content="index, follow">
+  <link rel="canonical" href="https://lamopad.ru/strategy/">
+  <link rel="icon" href="/img/slon_96px.png" type="image/png" sizes="96x96">
+
+  <meta property="og:type" content="website">
+  <meta property="og:title" content="Думалки — Ламопад">
+  <meta property="og:description" content="Теорема Байеса на пальцах, штуками и шансами, и покерная математика.">
+  <meta property="og:url" content="https://lamopad.ru/strategy/">
+  <meta property="og:image" content="https://lamopad.ru/img/slon_1024px.jpg">
+  <meta property="og:image:width" content="1024">
+  <meta property="og:image:height" content="1024">
+  <meta property="og:locale" content="ru_RU">
+  <meta property="og:site_name" content="Ламопад">
+
+  <link rel="preconnect" href="https://fonts.googleapis.com">
+  <link href="https://fonts.googleapis.com/css2?family=Nunito:ital,wght@0,400;0,600;0,700;1,400&family=Unbounded:wght@900&display=swap" rel="stylesheet">
+
+  <style>
+    *, *::before, *::after { box-sizing: border-box; margin: 0; padding: 0; }
+
+    :root {
+      --bg:    #f8f4ed;
+      --ink:   #1e1810;
+      --faded: #7a6e62;
+      --red:   #c8281e;
+      --blue:  #2a62b8;
+    }
+
+    body {
+      background: var(--bg);
+      color: var(--ink);
+      font-family: 'Nunito', sans-serif;
+      font-size: clamp(15px, 3vw, 18px);
+      line-height: 1.6;
+      min-height: 100vh;
+      cursor: url('/img/lamopad_cursor_48px.png'), auto;
+    }
+
+    .page {
+      position: relative;
+      z-index: 1;
+      max-width: 600px;
+      margin: 0 auto;
+      padding: clamp(40px, 8vw, 80px) 24px clamp(60px, 10vw, 100px);
+    }
+
+    /* ── breadcrumbs ── */
+    .crumbs {
+      padding: 0.9rem 1.5rem 0;
+      font-size: 0.7rem;
+      letter-spacing: 0.1em;
+      text-transform: uppercase;
+      color: var(--faded);
+      font-weight: 600;
+    }
+    .crumbs a { color: inherit; text-decoration: none; transition: color 0.15s; }
+    .crumbs a:hover { color: var(--red); }
+    .crumbs .sep { margin: 0 0.5ch; opacity: 0.35; }
+
+    /* ── header ── */
+    .header { margin-bottom: 40px; }
+
+    h1 {
+      font-family: 'Unbounded', sans-serif;
+      font-size: clamp(32px, 10vw, 56px);
+      font-weight: 900;
+      color: var(--red);
+      line-height: 1;
+      letter-spacing: .01em;
+    }
+
+    .header-sub {
+      margin-top: 10px;
+      font-size: 13px;
+      letter-spacing: .22em;
+      text-transform: uppercase;
+      color: var(--faded);
+      font-weight: 700;
+    }
+
+    /* ── topic cards ── */
+    .topics { display: grid; gap: 20px; }
+
+    .topic {
+      background: #fff;
+      border: 1px solid rgba(0,0,0,0.08);
+      border-radius: 6px;
+      box-shadow: 3px 3px 0 rgba(0,0,0,0.07);
+      padding: 20px 22px 18px;
+    }
+
+    .topic h2 {
+      font-family: 'Unbounded', sans-serif;
+      font-size: clamp(18px, 4.5vw, 24px);
+      font-weight: 900;
+      line-height: 1.2;
+      margin-bottom: 12px;
+      color: var(--blue);
+    }
+
+    .topic ul { list-style: none; display: grid; gap: 8px; }
+
+    .topic a {
+      color: var(--ink);
+      font-weight: 700;
+      text-decoration: underline;
+      text-decoration-color: rgba(200, 40, 30, 0.35);
+      text-underline-offset: 3px;
+      transition: color 0.15s;
+    }
+    .topic a:hover { color: var(--red); text-decoration-color: var(--red); }
+    .topic a:focus-visible { outline: 2px solid var(--red); outline-offset: 2px; }
+
+    /* ── footer ── */
+    footer {
+      margin-top: 64px;
+      padding-top: 20px;
+      border-top: 1px solid rgba(0,0,0,0.10);
+      font-size: 12px;
+      letter-spacing: .08em;
+      color: #bbb;
+    }
+  </style>
+  <script data-goatcounter="https://lamopad.goatcounter.com/count"
+          async src="//gc.zgo.at/count.js"></script>
+</head>
+<body>
+
+  <nav class="crumbs" aria-label="Навигация">
+    <a href="/">Ламопад</a>
+    <span class="sep">/</span>
+    <span>Думалки</span>
+  </nav>
+
+  <main class="page">
+
+    <div class="header">
+      <h1>Думалки</h1>
+      <p class="header-sub">Вероятности&nbsp;·&nbsp; Ламопад</p>
+    </div>
+
+    <div class="topics">
+
+      <section class="topic">
+        <h2>Теорема Байеса</h2>
+        <ul>
+          <li><a href="/strategy/bayes-rule-basic/">Как перестать бояться теоремы Байеса</a></li>
+          <li><a href="/strategy/bayes-formula-circles/">Как просто вывести формулу Байеса</a></li>
+          <li><a href="/strategy/bayes-natural-frequencies/">Как просто вычислить байесовскую вероятность: штуки</a></li>
+          <li><a href="/strategy/bayes-odds/">Как быстро вычислить байесовскую вероятность: шансы</a></li>
+        </ul>
+      </section>
+
+      <section class="topic">
+        <h2>Покер</h2>
+        <ul>
+          <li><a href="/strategy/poker/pot-threshold-basics/">Покер: сколько можно ставить?</a></li>
+        </ul>
+      </section>
+
+    </div>
+
+    <footer>&copy; Ламопад &mdash; все права защищены</footer>
+
+  </main>
+
+<script src="/js/lamopad-fall.js"></script>
+</body>
+</html>

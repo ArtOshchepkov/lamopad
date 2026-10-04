@@ -117,7 +117,7 @@
   </url>
   <url>
     <loc>https://lamopad.ru/news/</loc>
-    <lastmod>2026-10-03</lastmod>
+    <lastmod>2026-10-04</lastmod>
     <priority>0.6</priority>
   </url>
   <url>
@@ -128,6 +128,11 @@
   <url>
     <loc>https://lamopad.ru/strategy/bayes-formula-circles/</loc>
     <lastmod>2026-10-03</lastmod>
+    <priority>0.7</priority>
+  </url>
+  <url>
+    <loc>https://lamopad.ru/strategy/bayes-odds/</loc>
+    <lastmod>2026-10-04</lastmod>
     <priority>0.7</priority>
   </url>
   <url>

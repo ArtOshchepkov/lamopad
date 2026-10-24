@@ -1,0 +1,827 @@
+<!DOCTYPE html>
+<html lang="ru">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>Сказка о трёх поросятах как модель оценки риска | Ламопад</title>
+  <meta name="description" content="Ниф-Ниф, Нуф-Нуф и Наф-Наф - три стратегии защиты от риска. Сказка и математическая модель параллельно: зима как неизбежная угроза, волк как редкая, и почему 0,5% в день за 10 лет - это почти наверняка.">
+  <meta name="keywords" content="три поросёнка, оценка риска, модель риска, маловероятные события, редкие события, управление рисками, вероятность выживания, сказка">
+  <meta name="author" content="Артём Ощепков">
+  <meta name="robots" content="index, follow">
+  <link rel="canonical" href="https://lamopad.ru/strategy/three-pigs-risk/">
+  <link rel="icon" href="/img/slon_96px.png" type="image/png" sizes="96x96">
+
+  <meta property="og:type" content="article">
+  <meta property="og:title" content="Сказка о трёх P(оросятах) A, B, C как стратегия работы с риском">
+  <meta property="og:description" content="Строчка сказки, строчка модели: почему дом из веток выдержит зиму, но не выдержит 10 лет с волком.">
+  <meta property="og:url" content="https://lamopad.ru/strategy/three-pigs-risk/">
+  <meta property="og:image" content="https://lamopad.ru/strategy/three-pigs-risk/img/og-pig.jpg">
+  <meta property="og:image:width" content="800">
+  <meta property="og:image:height" content="420">
+  <meta property="og:image:alt" content="Довольный чёрный поросёнок спит, прижавшись пятачком к полу">
+  <meta property="og:locale" content="ru_RU">
+  <meta property="og:site_name" content="Ламопад">
+  <meta name="twitter:card" content="summary_large_image">
+  <meta name="twitter:title" content="Сказка о трёх P(оросятах) A, B, C как стратегия работы с риском">
+  <meta name="twitter:description" content="Строчка сказки, строчка модели: почему дом из веток выдержит зиму, но не выдержит 10 лет с волком.">
+  <meta name="twitter:image" content="https://lamopad.ru/strategy/three-pigs-risk/img/og-pig.jpg">
+  <meta property="article:published_time" content="2026-10-24">
+  <meta property="article:author" content="https://github.com/ArtOshchepkov">
+  <meta property="article:section" content="Вероятность">
+  <meta property="article:tag" content="оценка риска">
+  <meta property="article:tag" content="редкие события">
+
+  <script type="application/ld+json">
+  {
+    "@context": "https://schema.org",
+    "@type": "Article",
+    "headline": "Сказка о трёх P(оросятах) A, B, C как стратегия работы с риском",
+    "description": "Ниф-Ниф, Нуф-Нуф и Наф-Наф - три стратегии защиты от риска. Сказка и математическая модель параллельно: зима как неизбежная угроза, волк как редкая, и почему 0,5% в день за 10 лет - это почти наверняка.",
+    "inLanguage": "ru",
+    "datePublished": "2026-10-24",
+    "dateModified": "2026-10-24",
+    "author": { "@type": "Person", "name": "Артём Ощепков", "url": "https://github.com/ArtOshchepkov" },
+    "publisher": { "@type": "Organization", "name": "Ламопад", "url": "https://lamopad.ru/", "logo": { "@type": "ImageObject", "url": "https://lamopad.ru/img/slon_1024px.jpg" } },
+    "image": "https://lamopad.ru/strategy/three-pigs-risk/img/og-pig.jpg",
+    "mainEntityOfPage": "https://lamopad.ru/strategy/three-pigs-risk/",
+    "about": ["Оценка риска", "Редкие события", "Три поросёнка"],
+    "keywords": "три поросёнка, оценка риска, маловероятные события, вероятность выживания"
+  }
+  </script>
+
+  <link rel="preconnect" href="https://fonts.googleapis.com">
+  <link href="https://fonts.googleapis.com/css2?family=JetBrains+Mono:wght@400;700&family=Nunito:ital,wght@0,400;0,600;0,700;1,400&family=PT+Serif:ital,wght@0,400;0,700;1,400&family=Unbounded:wght@900&display=swap" rel="stylesheet">
+
+  <style>
+    *, *::before, *::after { margin: 0; padding: 0; box-sizing: border-box; }
+
+    :root {
+      --bg:    #f8f4ed;
+      --ink:   #1e1810;
+      --faded: #7a6e62;
+      --faded-strong: #4f453b;
+      --red:   #c8281e;
+      --blue:  #2a62b8;
+      --green: #2f7d3a;
+      --straw: #b8860b;
+      --sticks: #8b5a2b;
+    }
+
+    body {
+      background: var(--bg);
+      color: var(--ink);
+      font-family: 'Nunito', sans-serif;
+      font-size: clamp(17px, 3.4vw, 21px);
+      line-height: 1.6;
+      min-height: 100vh;
+      cursor: url('/img/lamopad_cursor_48px.png') 0 0, auto;
+    }
+
+    .page {
+      position: relative;
+      z-index: 1;
+      max-width: 880px;
+      margin: 0 auto;
+      padding: clamp(48px, 10vw, 96px) 24px clamp(64px, 12vw, 120px);
+    }
+
+    h1 {
+      font-family: 'Unbounded', sans-serif;
+      font-size: clamp(26px, 7vw, 44px);
+      font-weight: 900;
+      line-height: 1.05;
+      color: var(--red);
+      letter-spacing: .01em;
+    }
+
+    .h1-key { color: var(--blue); }
+
+    .hero {
+      display: block;
+      width: 320px;
+      max-width: 100%;
+      height: auto;
+      margin-top: 28px;
+      border-radius: 6px;
+      box-shadow: 3px 3px 0 rgba(0,0,0,0.07);
+    }
+
+    .byline {
+      margin-top: 10px;
+      font-size: 14px;
+      color: var(--faded);
+    }
+
+    .byline a, .links a, .thanks a, section p a, .morals a {
+      color: var(--ink);
+      text-decoration: underline;
+      text-decoration-color: rgba(200, 40, 30, 0.35);
+      text-underline-offset: 3px;
+    }
+    .byline a:hover, .links a:hover, .thanks a:hover, section p a:hover, .morals a:hover { color: var(--red); text-decoration-color: var(--red); }
+
+    .tagline {
+      margin-top: 12px;
+      font-size: clamp(11px, 2vw, 13px);
+      letter-spacing: .28em;
+      text-transform: uppercase;
+      color: var(--faded);
+      font-weight: 700;
+    }
+
+    h2 {
+      font-family: 'Unbounded', sans-serif;
+      font-size: clamp(17px, 4.2vw, 22px);
+      font-weight: 900;
+      line-height: 1.25;
+      margin: 56px 0 16px;
+    }
+
+    p { margin-bottom: 1em; }
+
+    /* Неразрывные формулы в строке растягивают пробелы при выравнивании по ширине */
+    section > p:not(.formula, .signoff, .aside-tale, :has(code)) {
+      text-align: justify;
+      hyphens: auto;
+    }
+
+    .muted { color: var(--faded); font-size: .9em; }
+
+    /* ── две истории: сказка книжным шрифтом, модель - на листе в клетку ── */
+    .intro { margin: 28px 0 0; }
+    .story-intro { display: flex; flex-wrap: wrap; align-items: center; gap: 10px 16px; margin: 28px 0 24px; }
+    .story-intro .muted { font-size: 14px; }
+
+    .chips { display: flex; flex-wrap: wrap; gap: 8px; }
+    .chip {
+      font: 600 14px/1.2 'Nunito', sans-serif;
+      padding: 7px 12px;
+      border: 1px solid rgba(0,0,0,0.15);
+      border-radius: 999px;
+      background: #fff;
+      color: var(--ink);
+      cursor: pointer;
+    }
+    .chip:hover { border-color: var(--red); }
+    .chip[aria-pressed="true"] { background: var(--ink); color: var(--bg); border-color: var(--ink); }
+    .chip:focus-visible { outline: 2px solid var(--red); outline-offset: 2px; }
+
+    .beat { margin-bottom: 26px; }
+
+    .tale {
+      margin: 0;
+      font-family: 'PT Serif', serif;
+      font-size: 1.04em;
+      line-height: 1.65;
+      text-align: justify;
+      hyphens: auto;
+    }
+    /* Поднятая буквица: строка стоит на её базовой линии */
+    .beat:first-child .tale::first-letter {
+      margin-right: .04em;
+      font: 700 3.3em/.85 'PT Serif', serif;
+      color: var(--red);
+    }
+
+    .model {
+      position: relative;
+      margin: 10px 0 0 clamp(14px, 6vw, 56px);
+      padding: 12px 14px 12px 16px;
+      border-left: 3px solid var(--blue);
+      background-color: #fff;
+      background-image:
+        linear-gradient(rgba(42,98,184,0.07) 1px, transparent 1px),
+        linear-gradient(90deg, rgba(42,98,184,0.07) 1px, transparent 1px);
+      background-size: 14px 14px;
+      font: 400 .8em/1.65 'JetBrains Mono', ui-monospace, monospace;
+      color: var(--faded-strong);
+    }
+    .model p { margin: 0; }
+    .model p + p { margin-top: .5em; }
+    .model .note { font-size: .9em; color: var(--faded); }
+
+    .story.only-tale .model, .story.only-model .tale { display: none; }
+    .story.only-model .model { margin-left: 0; }
+    .story.only-model .beat { margin-bottom: 12px; }
+
+    .aside-tale {
+      margin: 36px 0 0;
+      font: italic 1em/1.6 'PT Serif', serif;
+      color: var(--faded);
+      text-align: center;
+    }
+    .aside-tale::before { content: '* * *'; display: block; margin-bottom: 8px; letter-spacing: .4em; font-style: normal; }
+
+    /* Переменные модели: урон красный, защита зелёная, вероятность синяя */
+    var { font-style: normal; font-weight: 700; white-space: nowrap; }
+    .a { color: var(--red); }
+    .d { color: var(--green); }
+    .p { color: var(--blue); }
+    .w { color: var(--faded-strong); }
+
+    .formula {
+      font-family: 'JetBrains Mono', ui-monospace, monospace;
+      font-size: .85em;
+      line-height: 1.5;
+      background: #fff;
+      border-left: 3px solid var(--red);
+      padding: 12px 14px;
+      margin: 0 0 1em;
+      overflow-x: auto;
+    }
+    .formula.key { border-left-color: var(--blue); font-size: .95em; }
+    .formula.good { border-left-color: var(--green); }
+    /* Итоговая формула крупно, цвета как на схеме года: холод синий, волк красный, защита зелёная */
+    .formula.final { padding: 22px 16px 14px; font-size: 1.1em; color: var(--faded-strong); }
+    .formula.final var { font-family: 'Unbounded', sans-serif; font-weight: 900; }
+    .formula.final ruby { ruby-position: over; }
+    .formula.final rt { font: italic 600 .55em/1.3 'Nunito', sans-serif; letter-spacing: .02em; }
+    .cold { color: var(--blue); }
+
+    .glossary {
+      list-style: none;
+      display: grid;
+      grid-template-columns: repeat(auto-fit, minmax(220px, 1fr));
+      gap: 6px 20px;
+      margin: 0 0 1.4em;
+      font-size: .9em;
+    }
+    .glossary var { font-family: 'JetBrains Mono', ui-monospace, monospace; }
+
+    /* ── графики ── */
+    figure { margin: 24px 0 28px; }
+    figure svg { display: block; width: 100%; height: auto; overflow: visible; }
+    figcaption {
+      margin-top: 8px;
+      font-size: 14px;
+      font-weight: 700;
+      color: var(--faded);
+      text-align: center;
+      line-height: 1.35;
+    }
+    .card {
+      background: #fff;
+      border: 1px solid rgba(0,0,0,0.08);
+      border-radius: 6px;
+      box-shadow: 3px 3px 0 rgba(0,0,0,0.07);
+      padding: 16px 14px 12px;
+    }
+
+    .chart text { font-family: 'Nunito', sans-serif; font-size: 13px; fill: var(--faded-strong); }
+    .chart .lbl { font-weight: 700; fill: var(--ink); }
+    .chart .tick { font-size: 12px; fill: var(--faded); }
+    .chart .grid { stroke: rgba(0,0,0,0.07); stroke-width: 1; }
+    .chart .axis { stroke: rgba(0,0,0,0.25); stroke-width: 1; }
+    .chart .threat { fill: none; stroke: var(--blue); stroke-width: 2.5; stroke-linecap: round; }
+    .chart .threat-fill { fill: rgba(42,98,184,0.08); }
+    .chart .wolf { stroke: var(--red); stroke-width: 2.5; stroke-linecap: round; }
+    .chart .house { --c: var(--straw); }
+    .chart .house.sticks { --c: var(--sticks); }
+    .chart .house.stone { --c: var(--green); }
+    .chart .house line { stroke: var(--c); stroke-width: 2.5; stroke-linecap: round; }
+    .chart .house circle { fill: var(--c); }
+    /* Точка поверх линии: белое кольцо отделяет её от линии под ней */
+    .chart .dot { stroke: #fff; stroke-width: 2; }
+    .chart .dot.red { fill: var(--red); }
+    .chart .dot.green { fill: var(--green); }
+    .chart .skin { stroke: var(--faded); stroke-width: 1.5; stroke-dasharray: 3 4; }
+
+    .legend { display: flex; flex-wrap: wrap; gap: 4px 18px; margin: 0 0 10px; font-size: 13px; color: var(--faded-strong); }
+    .legend i { display: inline-block; width: 18px; height: 0; margin-right: 6px; vertical-align: 4px; border-top: 2.5px solid currentColor; }
+    .legend i.dash { border-top-style: dashed; }
+
+    .surv-controls { display: grid; gap: 10px; margin-bottom: 12px; }
+    .surv-slider { display: grid; grid-template-columns: 1fr auto; gap: 0 12px; align-items: center; font-size: 15px; }
+    .surv-slider output { font: 700 15px 'JetBrains Mono', ui-monospace, monospace; color: var(--red); }
+    .surv-slider input { grid-column: 1 / -1; width: 100%; accent-color: var(--red); }
+
+    .surv-wrap { position: relative; }
+    #surv:focus-visible { outline: 2px solid var(--red); outline-offset: 4px; border-radius: 4px; }
+    #surv .s-sticks { fill: none; stroke: var(--red); stroke-width: 2.5; stroke-linejoin: round; }
+    #surv .s-stone { stroke: var(--green); stroke-width: 2.5; stroke-dasharray: 7 5; }
+    #surv .mark-lbl { font-weight: 700; fill: var(--ink); font-size: 12px; }
+    #surv .cross { stroke: rgba(0,0,0,0.35); stroke-width: 1; }
+    #surv .hit { fill: transparent; cursor: crosshair; }
+
+    .tip {
+      position: absolute;
+      z-index: 3;
+      min-width: 170px;
+      padding: 8px 10px;
+      border-radius: 6px;
+      background: var(--ink);
+      color: var(--bg);
+      font-size: 13px;
+      line-height: 1.45;
+      pointer-events: none;
+      white-space: nowrap;
+    }
+    .tip-day { color: rgba(248,244,237,0.7); margin-bottom: 2px; }
+    .tip-row i { display: inline-block; width: 14px; height: 0; margin-right: 6px; vertical-align: 4px; border-top: 2.5px solid; }
+    .tip-row b { font-family: 'JetBrains Mono', ui-monospace, monospace; margin-right: 6px; }
+
+    .surv-read { margin: 12px 0 0; font-size: .9em; }
+
+    /* ── итог по братьям ── */
+    .verdicts { display: grid; gap: 12px; margin: 0 0 1.4em; }
+    .verdict {
+      --c: var(--straw);
+      display: grid;
+      grid-template-columns: 6px 1fr;
+      background: #fff;
+      border: 1px solid rgba(0,0,0,0.08);
+      border-radius: 6px;
+      box-shadow: 3px 3px 0 rgba(0,0,0,0.07);
+      overflow: hidden;
+    }
+    .verdict::before { content: ''; background: var(--c); }
+    .verdict.sticks { --c: var(--sticks); }
+    .verdict.stone { --c: var(--green); }
+    .verdict-body { padding: 12px 16px; }
+    .verdict h3 { font: 900 15px/1.3 'Unbounded', sans-serif; color: var(--c); margin-bottom: 4px; }
+    .verdict code { font: 700 .85em 'JetBrains Mono', ui-monospace, monospace; }
+    .verdict p { margin: 4px 0 0; font-size: .92em; }
+
+    .morals { padding-left: 1.4em; margin-bottom: 1.4em; }
+    .morals li { text-align: justify; hyphens: auto; }
+    .morals li + li { margin-top: .7em; }
+
+    .signoff { font: italic 1.1em/1.5 'PT Serif', serif; color: var(--red); }
+
+    .links { list-style: none; }
+    .links li + li { margin-top: .4em; }
+
+    .thanks { margin-top: 64px; }
+    .thanks h2 { margin-top: 0; }
+
+    footer {
+      margin-top: 72px;
+      padding-top: 20px;
+      border-top: 1px solid rgba(0,0,0,0.10);
+      font-size: 14px;
+      letter-spacing: .06em;
+      color: rgba(0,0,0,0.35);
+    }
+
+    .back {
+      display: inline-block;
+      margin-bottom: 32px;
+      color: var(--faded);
+      text-decoration: none;
+      font-weight: 600;
+    }
+    .back:hover { color: var(--red); }
+
+    /* SVG ужимается вдвое: подписи крупнее в единицах схемы, лишние прячем */
+    @media (max-width: 560px) {
+      .chart text { font-size: 24px; }
+      .chart .tick, #surv .mark-lbl { font-size: 21px; }
+      .chart .mob-hide { display: none; }
+    }
+
+    @media (max-width: 400px) {
+      .page { padding: 40px 16px 60px; }
+      .card { padding: 12px 8px 10px; }
+    }
+  </style>
+  <script data-goatcounter="https://lamopad.goatcounter.com/count"
+          async src="//gc.zgo.at/count.js"></script>
+</head>
+<body>
+
+<main class="page">
+  <a class="back" href="/strategy/">&larr; Думалки</a>
+
+  <header>
+    <h1>Сказка о трёх <span class="h1-key">P(оросятах)</span> A, B, C как стратегия работы с риском</h1>
+    <p class="tagline">Сказка &nbsp;·&nbsp; Модель &nbsp;·&nbsp; Волк</p>
+    <p class="byline">Автор: <a href="https://github.com/ArtOshchepkov" target="_blank" rel="noopener">Артём Ощепков</a> · <time datetime="2026-10-24">24 октября 2026</time></p>
+    <img class="hero" src="./img/hero-pig.jpg" width="480" height="640" alt="Наф-Наф спит спокойно: его D больше любого A">
+  </header>
+
+  <section>
+    <p class="intro">Привет! Вольно пересказываю «Трёх поросят» и математически интерпретирую сказку как стратегии выживания.</p>
+    <div class="story-intro">
+      <div class="chips" id="story-mode" role="group" aria-label="Что читать">
+        <button type="button" class="chip" data-mode="both" aria-pressed="true">Обе истории</button>
+        <button type="button" class="chip" data-mode="tale" aria-pressed="false">Только сказка</button>
+        <button type="button" class="chip" data-mode="model" aria-pressed="false">Только модель</button>
+      </div>
+      <span class="muted">Строчка сказки, под ней строчка модели</span>
+    </div>
+
+    <div class="story" id="story">
+      <div class="beat">
+        <p class="tale">Жили-были три поросёнка: Ниф-Ниф, Нуф-Нуф, Наф-Наф.</p>
+        <div class="model"><p>Рассмотрим три стратегии выживания A, B, C.</p></div>
+      </div>
+
+      <div class="beat">
+        <p class="tale">Наступили холода.</p>
+        <div class="model"><p>Рассмотрим угрозу <var class="w">W<sub>1</sub></var> (winter) с потенциальным ущербом <var class="a">A<sub>1</sub></var> (attack).</p></div>
+      </div>
+
+      <div class="beat">
+        <p class="tale">Старший поросёнок предложил построить тёплый крепкий дом, пока не холодно.</p>
+        <div class="model"><p>Стратегия C предполагает максимизировать <var class="d">D</var> (defence) &gt; экстраполяции <var class="a">f(A<sub>1</sub>)</var>.</p></div>
+      </div>
+
+      <div class="beat">
+        <p class="tale">Другие поросята хотели ещё насладиться солнышком: «Сейчас не хотим, успеется, до зимы ещё далеко!»</p>
+        <div class="model"><p>Стратегии A, B предполагают оставлять значение <var class="d">D</var> статичным до тех пор, пока <var class="a">A<sub>1</sub></var> &lt; <var class="d">D<sub>natural</sub></var> (врождённая защита кожи поросёнка).</p></div>
+      </div>
+
+      <div class="beat">
+        <p class="tale">И только когда лужи на дорогах начали мёрзнуть, младшие поросята взялись за дело. Ниф-Ниф за день построил себе домик из соломы.</p>
+        <div class="model">
+          <p>Стратегия A повысила <var class="d">D</var> ≈ <var class="a">A<sub>1</sub></var>.</p>
+          <p class="note"><var class="a">A<sub>1</sub></var> ≈ сегодняшняя угроза от холодов</p>
+        </div>
+      </div>
+
+      <div class="beat">
+        <p class="tale">Нуф-Нуф тоже хотел побыстрее закончить скучную работу и построить простой домик. Сначала тоже решил сделать из соломы, но решил, что зимой в таком домике будет очень холодно, поэтому решил построить домик из веток.</p>
+        <div class="model"><p>Стратегия B повысила <var class="d">D</var> до ≈ <var class="a">max(A<sub>1</sub>(t))</var> с учётом экстраполяции.</p></div>
+      </div>
+
+      <div class="beat">
+        <p class="tale">Братья пришли в гости к Наф-Нафу и увидели большой каменный дом. «Что за крепость ты строишь?» - закричали удивлённые поросята. «Никакой на свете зверь не ворвётся в эту дверь! Эдакий домик защитит меня и от холода, и от волка».</p>
+        <div class="model">
+          <p>Существует вторая угроза <var class="w">W<sub>2</sub></var> (Wolk) с уроном <var class="a">A<sub>2</sub></var>.</p>
+          <p>Стратегия C максимизировала <var class="d">D</var> &gt; <var class="a">max(max(A<sub>2</sub>), max(A<sub>1</sub>(t)))</var>.</p>
+        </div>
+      </div>
+
+      <div class="beat">
+        <p class="tale">Братья засмеялись в ответ Наф-Нафу: «Ну какие в нашем лесу могут быть волки?»</p>
+        <div class="model"><p>Стратегии A и B оценивают вероятность угрозы <var class="p">p(W<sub>2</sub>)</var> = 0, тогда как C оценивает <var class="p">p(W<sub>2</sub>)</var> &gt; 0.</p></div>
+      </div>
+
+      <div class="beat">
+        <p class="tale">Младшие братья пошли гулять дальше. Они так громко пели у опушки леса, что умудрились разбудить волка! «Кто так шумит?» - проворчал волк недовольно и побежал за поросятами.</p>
+        <div class="model"><p>Событие <var class="w">W<sub>2</sub></var> с низкой вероятностью <var class="p">p(W<sub>2</sub>)</var> всё-таки случилось.</p></div>
+      </div>
+
+      <div class="beat">
+        <p class="tale">До своего соломенного домика добежал Ниф-Ниф и захлопнул дверь. Волк стал дуть на домик. Дунул раз, дунул два, дунул три, и домик разлетелся!</p>
+        <div class="model"><p><var class="a">A<sub>2</sub></var> &gt;&gt; <var class="d">D<sub>1</sub></var>. Стратегия A игнорирования низковероятного события принесла ущерб.</p></div>
+      </div>
+
+      <div class="beat">
+        <p class="tale">Ниф-Ниф едва удрал от страшного волка и спрятался у среднего брата в доме из веток. «Ну, съем вас обоих!» - закричал волк и принялся дуть. Дунул трижды - дом стоит! Набрал воздуха, опёрся на траву у дома и дунул ещё три раза! Тогда-то дом и развалился.</p>
+        <div class="model"><p><var class="a">A<sub>2</sub></var> ≳ <var class="d">D<sub>2</sub></var>. Стратегия B учитывала урон <var class="a">A<sub>1</sub></var> (зимы), однако урон неучтённой угрозы <var class="a">A<sub>2</sub></var> оказался больше <var class="d">D<sub>2</sub></var>, в результате стратегия оказалась проигрышной.</p></div>
+      </div>
+
+      <div class="beat">
+        <p class="tale">Дали дёру поросята! Только светятся копятки, визжат-бегут к старшему брату! Едва успели укрыться в каменном домике. Наф-Наф впустил их, закрыл дубовую дверь и стал ждать. «Открывай сейчас же!» - подбежав к двери, зарычал волк. «Хрен тебе с маслом, скотина!» - ответил НАФ НАФ по произвичу НАФ СЛОН.</p>
+      </div>
+
+      <div class="beat">
+        <p class="tale">Волк втянул побольше воздуха и ДУНУЛ ТАК СИЛЬНО, как только мог - едва сам не улетел с места! А дом стоит. Волк дул, и дул, и дул, да всё без толку.</p>
+        <div class="model"><p>Стратегия C с <var class="d">D<sub>3</sub></var> &gt; <var class="a">max(A<sub>1</sub>, A<sub>2</sub>)</var> оказалась беспроигрышной.</p></div>
+      </div>
+    </div>
+
+    <p class="aside-tale">Там ещё волк в кипятке варился, но это мы сейчас опустим для простоты.</p>
+  </section>
+
+  <section>
+    <h2>Упростим сказку в целом</h2>
+    <ul class="glossary">
+      <li><var class="a">A(t)</var>, <var class="a">A<sub>1</sub></var> - урон от зимы</li>
+      <li><var class="a">A<sub>wolk</sub></var>, <var class="a">A<sub>2</sub></var> - урон от волка</li>
+      <li><var class="p">p(Wolk)</var> - вероятность волка</li>
+      <li><var class="d">D</var> - защита, <var class="d">D<sub>1..3</sub></var> - три домика</li>
+    </ul>
+    <p>Существуют две угрозы: Winter и Wolk. Угроза Winter неизбежна и меняется во времени, то есть её урон описывается функцией <var class="a">A(t)</var> с максимумом зимой.</p>
+    <p>Угроза Wolk же представляет большой урон (<var class="a">A<sub>2</sub></var> &gt; <var class="a">A(t)</var>), но носит вероятностный характер. Вероятность волка очень низкая (иначе бы и маленькие поросята не были так беспечны), и уровень неприятности от волка описывается как <var class="p">p(Wolk)</var> × <var class="a">A<sub>wolk</sub></var>, где <var class="p">p</var> &lt;&lt; 1, <var class="a">A<sub>wolk</sub></var> &gt;&gt; <var class="d">D<sub>natural</sub></var>.</p>
+    <p>Таким образом, дневной уровень угрозы поросёнку:</p>
+    <p class="formula key"><var class="a">A<sub>total</sub></var> = <var class="a">A(t)</var> + <var class="p">p(Wolk)</var> × <var class="a">A<sub>wolk</sub></var></p>
+    <p>Выживание обеспечивается при условии <var class="d">D</var> &gt; <var class="a">A<sub>total</sub></var>.</p>
+
+    <figure>
+      <div class="card">
+        <div class="legend" aria-hidden="true">
+          <span><i style="color:var(--blue)"></i>холод A(t)</span>
+          <span><i style="color:var(--red)"></i>волк A₂</span>
+          <span><i style="color:var(--straw)"></i>солома D₁</span>
+          <span><i style="color:var(--sticks)"></i>ветки D₂</span>
+          <span><i style="color:var(--green)"></i>камень D₃</span>
+        </div>
+        <svg class="chart" viewBox="0 0 640 300" role="img" aria-label="Схема года: холод растёт к январю и спадает к лету. Соломенный дом защищает только от ноябрьского холода, дом из веток - от январского, но не от волка. Каменный дом выше и холода, и волка.">
+          <line class="axis" x1="40" y1="280" x2="520" y2="280"/>
+          <line class="axis" x1="40" y1="20" x2="40" y2="280"/>
+          <text class="tick mob-hide" x="34" y="24" text-anchor="end" transform="rotate(-90 34 24)" dy="-4">урон / защита</text>
+          <text class="tick" x="60" y="296" text-anchor="middle">сен</text>
+          <text class="tick" x="140" y="296" text-anchor="middle">ноя</text>
+          <text class="tick" x="220" y="296" text-anchor="middle">янв</text>
+          <text class="tick" x="300" y="296" text-anchor="middle">мар</text>
+          <text class="tick" x="380" y="296" text-anchor="middle">май</text>
+          <text class="tick" x="460" y="296" text-anchor="middle">июл</text>
+
+          <!-- Холод: пик в январе -->
+          <path class="threat-fill" d="M40,262 C130,252 160,122 220,122 C280,122 310,252 400,262 L520,266 L520,280 L40,280 Z"/>
+          <path class="threat" d="M40,262 C130,252 160,122 220,122 C280,122 310,252 400,262 L520,266"/>
+          <text class="lbl" x="528" y="270">холод A(t)</text>
+
+          <line class="skin" x1="40" y1="248" x2="520" y2="248"/>
+          <text class="mob-hide" x="528" y="252">кожа</text>
+
+          <!-- Дома: линия начинается, когда дом построен -->
+          <g class="house straw"><line x1="140" y1="214" x2="520" y2="214"/><circle cx="140" cy="214" r="4"/></g>
+          <text class="lbl" x="528" y="218">солома D₁</text>
+
+          <g class="house sticks"><line x1="146" y1="114" x2="520" y2="114"/><circle cx="146" cy="114" r="4"/></g>
+          <text class="lbl" x="528" y="118">ветки D₂</text>
+
+          <g class="house stone"><line x1="56" y1="36" x2="520" y2="36"/><circle cx="56" cy="36" r="4"/></g>
+          <text class="lbl" x="528" y="40">камень D₃</text>
+
+          <!-- Волк: редкий, но высокий всплеск -->
+          <line class="wolf" x1="250" y1="280" x2="250" y2="62"/>
+          <circle class="dot red" cx="250" cy="62" r="5"/>
+          <text class="lbl" x="258" y="66">волк A₂</text>
+        </svg>
+      </div>
+      <figcaption>Схема без масштаба: защита выше линии угрозы - поросёнок цел. Ветки выше пика зимы, но ниже волка</figcaption>
+    </figure>
+
+    <p>Все три поросёнка функционально одинаковые - они выбрали такую же структурно стратегию максимизации <var class="d">D</var>, но неверно оценили уровень угрозы.</p>
+    <p>Младший пренебрёг и экстраполяцией урона от зимы, и вероятностью волка, то есть его модель <var class="d">D</var> = <var class="a">A(winter_today)</var>, что критически неверно.</p>
+    <p>Ошибка среднего брата интереснее. Нуф-Нуф понимает, что будет намного холоднее, но пренебрегает волком. Его <var class="d">D</var> = <var class="a">max(A(t))</var>. Такая стратегия могла бы работать, если <var class="a">A<sub>wolk</sub></var> &lt;&lt; <var class="a">max(A(t))</var>. Например, если бы зима была как в Антарктиде и пришлось бы строить дом из нанотрубок, чтобы встретить Новый год.</p>
+    <p>Также такая стратегия работает с определённой вероятностью. Допустим, волка замечают всего раза три в год, а нападает он и того реже (когда очень голодный). Предположим, вероятность реальной угрозы от волка в каждый отдельно взятый день ~0,5%. То есть день на 99,5% безопасный. Тогда вероятность прожить три месяца в доме Нуф-Нуфа = <code>0,995<sup>90</sup> ≈ 64%</code>. То есть одну зиму он скорее проживёт, чем станет обэдом. Однако прожить полгода получится лишь с вероятностью 40%, а целый год - 16%. Звучит не так плохо. Но продолжительность жизни свинки - примерно 10 лет. Вероятность, что Нуф-Нуф не доживёт до своей старости, составит уже ~99,999999%.</p>
+
+    <figure>
+      <div class="card">
+        <div class="surv-controls">
+          <div class="surv-slider">
+            <label for="surv-p">Шанс встретить волка в отдельно взятый день</label><output id="surv-p-out" for="surv-p"></output>
+            <input type="range" id="surv-p" min="1" max="30" step="1" value="5">
+          </div>
+          <div class="chips" id="surv-horizon" role="group" aria-label="Срок">
+            <button type="button" class="chip" data-h="winter">Зима</button>
+            <button type="button" class="chip" data-h="year">Год</button>
+            <button type="button" class="chip" data-h="life">10 лет, вся жизнь</button>
+          </div>
+        </div>
+        <div class="legend" aria-hidden="true">
+          <span><i style="color:var(--red)"></i>Нуф-Нуф, дом из веток</span>
+          <span><i class="dash" style="color:var(--green)"></i>Наф-Наф, каменный дом</span>
+        </div>
+        <div class="surv-wrap">
+          <svg class="chart" id="surv" viewBox="0 0 640 300" tabindex="0" role="img" aria-label="Вероятность дожить до каждого дня: дом из веток против каменного дома. Стрелки влево и вправо двигают курсор"></svg>
+          <div class="tip" id="surv-tip" hidden></div>
+        </div>
+        <p class="surv-read" id="surv-read" aria-live="polite"></p>
+      </div>
+      <figcaption>Каждый день безопасен на 99,5%, но дни перемножаются: <code>(1 − p)<sup>дней</sup></code></figcaption>
+    </figure>
+
+    <p>Старший брат всё посчитал правильно, его <var class="d">D</var> &gt; <var class="a">max(A(t), A<sub>wolk</sub>)</var>, и он может рассчитывать увидеть свои седины в отражении лужицы.</p>
+  </section>
+
+  <section>
+    <h2>Модель сказки</h2>
+    <p class="formula good final">минимальный <ruby class="d"><var>D</var><rt>защита</rt></ruby> = max(<ruby class="cold"><var>A<sub>1</sub>(t)</var><rt>холод</rt></ruby>, <ruby class="a"><var>A<sub>2</sub></var><rt>волк</rt></ruby>)</p>
+    <div class="verdicts">
+      <article class="verdict">
+        <div class="verdict-body">
+          <h3>Ниф-Ниф · солома · A</h3>
+          <code><span class="d">D</span> = <span class="cold">A(сегодня)</span></code>
+          <p>Допустил, что холод почти не вырастет, и проигнорировал маловероятного волка.</p>
+        </div>
+      </article>
+      <article class="verdict sticks">
+        <div class="verdict-body">
+          <h3>Нуф-Нуф · ветки · B</h3>
+          <code><span class="d">D</span> = max(<span class="cold">A(t)</span>)</code>
+          <p>Учёл рост холода, но проигнорировал маловероятного волка.</p>
+        </div>
+      </article>
+      <article class="verdict stone">
+        <div class="verdict-body">
+          <h3>Наф-Наф · камень · C</h3>
+          <code><span class="d">D</span> &gt; max(<span class="cold">A(t)</span>, <span class="a">A<sub>wolk</sub></span>)</code>
+          <p>Учёл и рост холода, и волка.</p>
+        </div>
+      </article>
+    </div>
+  </section>
+
+  <section>
+    <h2>Мораль сказки</h2>
+    <ol class="morals">
+      <li>Нельзя игнорировать событие с большим уроном, даже если его вероятность относительно низкая. На практике: надевать ремень безопасности, делать прививку от бешенства после укуса собак, дополнительно проверяться при подозрении на тяжёлые болезни.</li>
+      <li>Стоит учитывать изменение силы урона в будущем с учётом истории событий и текущего тренда, а не только сегодняшнего показателя. На практике: стирать одежду до того, как она провоняла, выплыть на берег до того, как огромное грозовое облако выльет ливень на тебя.</li>
+      <li>Более общее: выстраивать защиту на основе адекватной оценки степени угрозы.</li>
+    </ol>
+    <p>Мне интересно, как совместить вывод 1 с <a href="/strategy/bayes-rule-basic/">байесовским подходом</a> (не защищать же дом от метеорита?). Подумаю об этом в следующий приступ рандомного анализа.</p>
+    <p class="signoff">Желаю душевного Нуф-Нуфа!</p>
+  </section>
+
+  <section>
+    <h2>Доп. материалы</h2>
+    <ul class="links">
+      <li><a href="/strategy/bayes-rule-basic/">Ключ к спокойствию: как перестать тревожиться с помощью математики</a> <span class="muted">· обратная сторона: когда редкая беда не стоит паники</span></li>
+      <li><a href="/strategy/bayes-odds/">Как быстро вычислить вероятность по Байесу: шансы</a> <span class="muted">· редкость × удивительность, в уме</span></li>
+      <li><a href="/strategy/poker/pot-threshold-basics/">Покер: сколько можно ставить?</a> <span class="muted">· риск и выигрыш за столом</span></li>
+      <li><a href="https://ru.wikipedia.org/wiki/%D0%A2%D0%B5%D0%BE%D1%80%D0%B8%D1%8F_%D1%87%D1%91%D1%80%D0%BD%D0%BE%D0%B3%D0%BE_%D0%BB%D0%B5%D0%B1%D0%B5%D0%B4%D1%8F" target="_blank" rel="noopener">Теория чёрного лебедя</a> <span class="muted">· Википедия, про редкие события с большим уроном</span></li>
+    </ul>
+  </section>
+
+  <section class="thanks">
+    <h2>Спасибо, что прочли!</h2>
+    <p>Если нашли ошибку или хотите оставить комментарий, пишите мне в телеграм: <a href="https://t.me/art_oshk" target="_blank" rel="noopener">t.me/art_oshk</a>.</p>
+  </section>
+
+  <footer>&copy; <span id="year">2026</span> Ламопад · какие-то права, вероятно, защищены</footer>
+</main>
+
+<script>
+  // Переключатель «обе истории / только сказка / только модель»
+  (() => {
+    const story = document.getElementById('story');
+    const buttons = [...document.querySelectorAll('#story-mode [data-mode]')];
+    for (const b of buttons) {
+      b.addEventListener('click', () => {
+        const mode = b.dataset.mode;
+        story.classList.toggle('only-tale', mode === 'tale');
+        story.classList.toggle('only-model', mode === 'model');
+        buttons.forEach((x) => x.setAttribute('aria-pressed', String(x === b)));
+      });
+    }
+  })();
+</script>
+
+<script>
+  // Выживание в доме из веток: каждый день волк приходит с вероятностью p, дни независимы → (1 − p)^n
+  (() => {
+    const $ = (id) => document.getElementById(id);
+    const svg = $('surv'), tip = $('surv-tip'), range = $('surv-p');
+    const NS = 'http://www.w3.org/2000/svg';
+    const W = 640, H = 300, L = 44, R = 150, T = 22, B = 34;
+    const pw = W - L - R, ph = H - T - B;
+    const HORIZON = { winter: 90, year: 365, life: 3650 };
+    const TICKS = {
+      winter: [[0, '0'], [30, '30'], [60, '60'], [90, '90 дней']],
+      year: [[0, '0'], [90, '90'], [180, '180'], [270, '270'], [365, '365 дней']],
+      life: [0, 2, 4, 6, 8, 10].map((k) => [k * 365, k === 10 ? '10 лет' : String(k)]),
+    };
+    const MILESTONES = [90, 180, 365, 3650];
+    let horizon = 'year', cursor = null, cross = null, narrow = false;
+
+    function el(tag, attrs, text) {
+      const n = document.createElementNS(NS, tag);
+      for (const k in attrs) n.setAttribute(k, attrs[k]);
+      if (text != null) n.textContent = text;
+      return n;
+    }
+    const fmt = (opts) => new Intl.NumberFormat('ru-RU', opts);
+
+    // Около 100% показываем столько девяток, сколько нужно, чтобы не округлить в «100%»
+    function pct(x) {
+      const v = x * 100;
+      if (v >= 99.5 && v < 100) {
+        const d = Math.min(9, Math.ceil(-Math.log10(100 - v)));
+        const k = 10 ** d;
+        return fmt({ maximumFractionDigits: d }).format(Math.min(Math.round(v * k), 100 * k - 1) / k) + '%';
+      }
+      if (v >= 10 || v === 0) return Math.round(v) + '%';
+      if (v >= 1) return fmt({ maximumFractionDigits: 1 }).format(v) + '%';
+      return fmt({ maximumSignificantDigits: 2 }).format(v) + '%';
+    }
+
+    const p = () => Number(range.value) / 1000;
+    const alive = (n) => (1 - p()) ** n;
+    const N = () => HORIZON[horizon];
+    const x = (n) => L + n / N() * pw;
+    const y = (s) => T + (1 - s) * ph;
+
+    function render() {
+      $('surv-p-out').textContent = fmt({ maximumFractionDigits: 1 }).format(range.value / 10) + '%';
+      document.querySelectorAll('#surv-horizon [data-h]').forEach((b) => b.setAttribute('aria-pressed', String(b.dataset.h === horizon)));
+
+      const n = N();
+      // На узком экране имена есть в легенде, справа только числа; у осей без единиц
+      narrow = svg.clientWidth < 500;
+      svg.replaceChildren();
+      for (const s of [0, 0.25, 0.5, 0.75, 1]) {
+        svg.append(el('line', { class: 'grid', x1: L, x2: L + pw, y1: y(s), y2: y(s) }));
+        svg.append(el('text', { class: 'tick', x: L - 8, y: y(s) + 4, 'text-anchor': 'end' }, Math.round(s * 100) + '%'));
+      }
+      svg.append(el('line', { class: 'axis', x1: L, x2: L + pw, y1: y(0), y2: y(0) }));
+      for (const [d, label] of TICKS[horizon]) {
+        svg.append(el('text', { class: 'tick', x: x(d), y: H - 10, 'text-anchor': d === n ? 'end' : 'middle' }, narrow ? label.replace(/ \D+$/, '') : label));
+      }
+
+      svg.append(el('line', { class: 's-stone', x1: L, x2: L + pw, y1: y(1), y2: y(1) }));
+      const steps = 400;
+      let d = '';
+      for (let i = 0; i <= steps; i++) {
+        const day = n * i / steps;
+        d += (i ? 'L' : 'M') + x(day).toFixed(1) + ',' + y(alive(day)).toFixed(1);
+      }
+      svg.append(el('path', { class: 's-sticks', d }));
+
+      // Подписи линий справа; если концы рядом, ветки уходят ниже камня
+      const endY = Math.max(y(alive(n)), y(1) + 18);
+      svg.append(el('text', { class: 'lbl', x: L + pw + 10, y: y(1) + 6 }, (narrow ? '' : 'Наф-Наф · ') + '100%'));
+      svg.append(el('text', { class: 'lbl', x: L + pw + 10, y: endY + 6 }, (narrow ? '' : 'Нуф-Нуф · ') + pct(alive(n))));
+
+      for (const m of MILESTONES.filter((m) => m <= n && m !== n)) {
+        const cx = x(m), cy = y(alive(m));
+        svg.append(el('circle', { class: 'dot red', cx, cy, r: 5 }));
+        svg.append(el('text', { class: 'mark-lbl', x: cx + 8, y: cy - 8 }, pct(alive(m))));
+      }
+
+      // Курсор и область наведения поверх всего
+      cross = {
+        line: el('line', { class: 'cross', y1: T, y2: y(0) }),
+        sticks: el('circle', { class: 'dot red', r: 5 }),
+        stone: el('circle', { class: 'dot green', r: 5 }),
+      };
+      const g = el('g', { 'aria-hidden': 'true' });
+      g.append(cross.line, cross.sticks, cross.stone);
+      svg.append(g, el('rect', { class: 'hit', x: L, y: 0, width: pw, height: H }));
+      moveCursor(cursor);
+
+      $('surv-read').textContent = `Зиму (90 дней) Нуф-Нуф переживёт с вероятностью ${pct(alive(90))}, полгода - ${pct(alive(180))}, год - ${pct(alive(365))}. `
+        + `До старости, 10 лет, не доживёт с вероятностью ${pct(1 - alive(3650))}. Наф-Наф в каменном доме цел на любом сроке.`;
+    }
+
+    function dayLabel(n) {
+      if (horizon !== 'life') return `день ${n}`;
+      return `день ${fmt({}).format(n)} · ${fmt({ maximumFractionDigits: 1 }).format(n / 365)} г.`;
+    }
+
+    function tipRow(color, value, name) {
+      const row = document.createElement('div');
+      row.className = 'tip-row';
+      const key = document.createElement('i');
+      key.style.borderColor = color;
+      const b = document.createElement('b');
+      b.textContent = value;
+      row.append(key, b, document.createTextNode(name));
+      return row;
+    }
+
+    function moveCursor(n) {
+      cursor = n;
+      const shown = n != null;
+      [cross.line, cross.sticks, cross.stone].forEach((e) => e.style.display = shown ? '' : 'none');
+      tip.hidden = !shown;
+      if (!shown) return;
+      const cx = x(n);
+      cross.line.setAttribute('x1', cx);
+      cross.line.setAttribute('x2', cx);
+      cross.sticks.setAttribute('cx', cx);
+      cross.sticks.setAttribute('cy', y(alive(n)));
+      cross.stone.setAttribute('cx', cx);
+      cross.stone.setAttribute('cy', y(1));
+
+      const day = document.createElement('div');
+      day.className = 'tip-day';
+      day.textContent = dayLabel(n);
+      tip.replaceChildren(day, tipRow('var(--red)', pct(alive(n)), 'Нуф-Нуф жив'), tipRow('var(--green)', '100%', 'Наф-Наф жив'));
+      // Подсказка сбоку от курсора, со стороны свободного места, чтобы не закрывать кнопки над графиком
+      const box = svg.getBoundingClientRect(), k = box.width / W;
+      const onLeft = cx * k > box.width / 2;
+      tip.style.left = cx * k + (onLeft ? -12 : 12) + 'px';
+      tip.style.top = (T + 12) * k + 'px';
+      tip.style.transform = onLeft ? 'translateX(-100%)' : '';
+    }
+
+    function dayAt(clientX) {
+      const box = svg.getBoundingClientRect();
+      const sx = (clientX - box.left) * W / box.width;
+      return Math.round(Math.min(Math.max((sx - L) / pw, 0), 1) * N());
+    }
+
+    svg.addEventListener('pointermove', (e) => moveCursor(dayAt(e.clientX)));
+    svg.addEventListener('pointerdown', (e) => moveCursor(dayAt(e.clientX)));
+    svg.addEventListener('pointerleave', (e) => { if (e.pointerType === 'mouse') moveCursor(null); });
+    svg.addEventListener('focus', () => moveCursor(cursor ?? Math.min(90, N())));
+    svg.addEventListener('blur', () => moveCursor(null));
+    svg.addEventListener('keydown', (e) => {
+      const step = Math.max(1, Math.round(N() / 60)) * (e.shiftKey ? 5 : 1);
+      if (e.key === 'ArrowRight') moveCursor(Math.min(N(), (cursor ?? 0) + step));
+      else if (e.key === 'ArrowLeft') moveCursor(Math.max(0, (cursor ?? 0) - step));
+      else return;
+      e.preventDefault();
+    });
+
+    range.addEventListener('input', render);
+    document.querySelectorAll('#surv-horizon [data-h]').forEach((b) => b.addEventListener('click', () => {
+      horizon = b.dataset.h;
+      cursor = null;
+      render();
+    }));
+    window.addEventListener('resize', () => { if ((svg.clientWidth < 500) !== narrow) render(); else moveCursor(cursor); });
+    render();
+  })();
+</script>
+
+<script>document.getElementById('year').textContent = new Date().getFullYear();</script>
+<script src="/js/lamopad-fall.js"></script>
+</body>
+</html>
